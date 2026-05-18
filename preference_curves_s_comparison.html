@@ -1,0 +1,114 @@
+
+<style>
+  .ctrl { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:1rem; font-size:13px; color:var(--color-text-secondary); }
+  .ctrl label { font-size:13px; }
+  .toggle-btn { padding:4px 12px; border:0.5px solid var(--color-border-secondary); border-radius:var(--border-radius-md); background:transparent; cursor:pointer; font-size:12px; color:var(--color-text-secondary); }
+  .toggle-btn.active { background:var(--color-background-secondary); color:var(--color-text-primary); font-weight:500; }
+  .legend { display:flex; flex-wrap:wrap; gap:12px; margin-top:8px; font-size:12px; color:var(--color-text-secondary); }
+  .legend span { display:flex; align-items:center; gap:5px; }
+  .legend-dot { width:12px; height:3px; border-radius:2px; }
+</style>
+
+<h2 class="sr-only">Curvas de probabilidade de cópula para 4 tipos de seleção, comparando choosiness s=0.2 e s=2.0</h2>
+
+<div class="ctrl">
+  <label>Choosiness (s):</label>
+  <button class="toggle-btn" id="btn02" onclick="setS(0.2)">s = 0.2</button>
+  <button class="toggle-btn active" id="btn2" onclick="setS(2.0)">s = 2.0</button>
+  <label style="margin-left:12px;">Preferência feminina (p):</label>
+  <input type="range" min="3" max="7" step="0.1" value="5" id="pSlider" style="width:100px;" oninput="updateP(this.value)">
+  <span id="pVal" style="font-weight:500; min-width:28px; color:var(--color-text-primary);">5.0</span>
+</div>
+
+<div style="position:relative; width:100%; height:320px;">
+  <canvas id="prefChart" role="img" aria-label="Curvas de probabilidade de cópula para os 4 regimes de seleção"></canvas>
+</div>
+
+<div class="legend">
+  <span><span class="legend-dot" style="background:#888780;"></span>Uniform (P=0.5)</span>
+  <span><span class="legend-dot" style="background:#E6B800;"></span>Gaussiana (estabilizadora)</span>
+  <span><span class="legend-dot" style="background:#3BA273;"></span>Sigmoide (direcional)</span>
+  <span><span class="legend-dot" style="background:#9932CC;"></span>U-shaped (disruptiva)</span>
+</div>
+
+<div id="interpretation" style="margin-top:1rem; font-size:13px; color:var(--color-text-secondary); padding:10px 14px; background:var(--color-background-secondary); border-radius:var(--border-radius-md); border-left:3px solid var(--color-border-secondary);"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+let currentS = 2.0, currentP = 5.0;
+const N = 200;
+const zVals = Array.from({length:N}, (_,i) => 0 + i * (10/(N-1)));
+
+function calcCurves(s, p) {
+  return {
+    uniform:   zVals.map(() => 0.5),
+    gaussian:  zVals.map(z => Math.exp(-s * (z - p)**2)),
+    sigmoid:   zVals.map(z => 1 / (1 + Math.exp(-s * (z - p)))),
+    ushaped:   zVals.map(z => 1 - Math.exp(-s * (z - p)**2))
+  };
+}
+
+const ctx = document.getElementById('prefChart').getContext('2d');
+let curves = calcCurves(currentS, currentP);
+
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: zVals.map(v => v.toFixed(1)),
+    datasets: [
+      { label: 'Uniform',   data: curves.uniform,  borderColor:'#888780', borderDash:[6,3], borderWidth:2, pointRadius:0, tension:0.3 },
+      { label: 'Gaussiana', data: curves.gaussian, borderColor:'#E6B800', borderWidth:2.5, pointRadius:0, tension:0.3 },
+      { label: 'Sigmoide',  data: curves.sigmoid,  borderColor:'#3BA273', borderWidth:2.5, pointRadius:0, tension:0.3 },
+      { label: 'U-shaped',  data: curves.ushaped,  borderColor:'#9932CC', borderWidth:2.5, pointRadius:0, tension:0.3 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      annotation: { annotations: {} }
+    },
+    scales: {
+      x: { title:{ display:true, text:'Traço masculino z', color:'#888' }, ticks:{ maxTicksLimit:11, color:'#888' }, grid:{ color:'rgba(128,128,128,0.15)' } },
+      y: { title:{ display:true, text:'P(cópula | encontro)', color:'#888' }, min:0, max:1.05, ticks:{ color:'#888' }, grid:{ color:'rgba(128,128,128,0.15)' } }
+    }
+  }
+});
+
+function redraw() {
+  curves = calcCurves(currentS, currentP);
+  chart.data.datasets[0].data = curves.uniform;
+  chart.data.datasets[1].data = curves.gaussian;
+  chart.data.datasets[2].data = curves.sigmoid;
+  chart.data.datasets[3].data = curves.ushaped;
+  chart.update('none');
+  updateInterpretation();
+}
+
+function setS(val) {
+  currentS = val;
+  document.getElementById('btn02').classList.toggle('active', val === 0.2);
+  document.getElementById('btn2').classList.toggle('active', val === 2.0);
+  redraw();
+}
+
+function updateP(val) {
+  currentP = parseFloat(val);
+  document.getElementById('pVal').textContent = parseFloat(val).toFixed(1);
+  redraw();
+}
+
+function updateInterpretation() {
+  const el = document.getElementById('interpretation');
+  const s = currentS;
+  const p = currentP;
+  let msg = '';
+  if (s === 0.2) {
+    msg = `<b>s = 0.2 (choosiness baixa):</b> As curvas são <b>muito largas e sobrepostas</b>. A Gaussiana aceita quase todos os machos com P > 0.5, e a U-shaped é quase plana em ~0.5. <b>Praticamente não há diferença entre os 4 regimes</b> — o tipo de seleção perde poder para estruturar a rede. A modularity e o aninhamento serão muito similares entre cenários.`;
+  } else {
+    msg = `<b>s = 2.0 (choosiness alta):</b> As curvas são <b>estreitas e bem separadas</b>. A Gaussiana só aceita machos próximos de p=${p.toFixed(1)}, a U-shaped só rejeita esses mesmos machos. A Sigmoide cria uma "rampa" a partir de p=${p.toFixed(1)}. <b>Os 4 regimes geram topologias de rede muito diferentes</b> — maximizando o poder do experimento para detectar diferenças entre seleções.`;
+  }
+  el.innerHTML = msg;
+}
+
+updateInterpretation();
+</script>
