@@ -212,27 +212,62 @@ cat("\nPreparando dados para os Modelos..\n")
 
 # 1. Preparamos os dados (Focamos na Geração 50, que é o destino evolutivo)
 # Escalamos as variáveis contínuas (Z-score) para que os coeficientes sejam comparáveis
+# Nota: o Z-score é calculado dentro de cada subconjunto para que seja comparável internamente.
 
-df_stats <- df_gen50 %>%  #(Usa os dados filtrados da Gen 50 que já criamos)
+df_stats_low <- df_gen50 %>%  # Subconjunto: sigma_p <= 1.0 (regime abaixo do limiar ecológico)
+  filter(sigma_p <= 1.0) %>%
   drop_na(Modularity, Nestedness, Centralization, I_s, varz_males, zbar_males) %>%
   mutate(
     z_Modularity     = scale(Modularity),
     z_Nestedness     = scale(Nestedness),
     z_Centralization = scale(Centralization),
     z_SigmaP         = scale(sigma_p),
-    f_encounters     = factor(encounters_n) # Bug 2 corrigido!
+    f_encounters     = factor(encounters_n)
   )
 
-cat("\n--- MODELO 1: A Topologia resgatando a Diversidade Genética ---\n")
-# Bug 1 Corrigido: Usamos 'lm' porque a Gen 50 tem amostras independentes.
-mod1 <- lm(varz_males ~ z_Modularity + z_SigmaP + tipo_selecao + f_encounters, data = df_stats)
-print(summary(mod1))
+df_stats_high <- df_gen50 %>%  # Subconjunto: sigma_p >= 1.0 (regime acima do limiar ecológico)
+  filter(sigma_p >= 1.0) %>%
+  drop_na(Modularity, Nestedness, Centralization, I_s, varz_males, zbar_males) %>%
+  mutate(
+    z_Modularity     = scale(Modularity),
+    z_Nestedness     = scale(Nestedness),
+    z_Centralization = scale(Centralization),
+    z_SigmaP         = scale(sigma_p),
+    f_encounters     = factor(encounters_n)
+  )
 
-cat("\n--- MODELO 2: A Topologia gerando o Exagero do Traço ---\n")
-mod2 <- lm(zbar_males ~ z_Nestedness + z_SigmaP + tipo_selecao + f_encounters, data = df_stats)
-print(summary(mod2))
+# -----------------------------------------------------------------------
+# MODELO 1: A Topologia resgatando a Diversidade Genética
+# Interação z_Modularity * tipo_selecao: captura que Gaussiana e Disruptiva
+# respondem de forma distinta à modularidade
+# -----------------------------------------------------------------------
+cat("\n--- MODELO 1a (sigma_p <= 1.0): Modularidade e Diversidade Genética ---\n")
+mod1a <- lm(varz_males ~ z_Modularity * tipo_selecao + z_SigmaP + f_encounters, data = df_stats_low)
+print(summary(mod1a))
 
-cat("\n--- MODELO 3: A Origem da Oportunidade de Seleção (Is) ---\n")
-mod3 <- lm(I_s ~ z_Centralization + z_Modularity + z_SigmaP + tipo_selecao + f_encounters, data = df_stats)
-print(summary(mod3))
+cat("\n--- MODELO 1b (sigma_p >= 1.0): Modularidade e Diversidade Genética ---\n")
+mod1b <- lm(varz_males ~ z_Modularity * tipo_selecao + z_SigmaP + f_encounters, data = df_stats_high)
+print(summary(mod1b))
+
+# -----------------------------------------------------------------------
+# MODELO 2: A Topologia gerando o Exagero do Traço
+# -----------------------------------------------------------------------
+cat("\n--- MODELO 2a (sigma_p <= 1.0): Aninhamento e Exagero do Traço ---\n")
+mod2a <- lm(zbar_males ~ z_Nestedness * tipo_selecao + z_SigmaP + f_encounters, data = df_stats_low)
+print(summary(mod2a))
+
+cat("\n--- MODELO 2b (sigma_p >= 1.0): Aninhamento e Exagero do Traço ---\n")
+mod2b <- lm(zbar_males ~ z_Nestedness * tipo_selecao + z_SigmaP + f_encounters, data = df_stats_high)
+print(summary(mod2b))
+
+# -----------------------------------------------------------------------
+# MODELO 3: A Origem da Oportunidade de Seleção (Is)
+# -----------------------------------------------------------------------
+cat("\n--- MODELO 3a (sigma_p <= 1.0): Is ~ Centralização + Modularidade ---\n")
+mod3a <- lm(I_s ~ z_Centralization + z_Modularity + z_SigmaP + tipo_selecao + f_encounters, data = df_stats_low)
+print(summary(mod3a))
+
+cat("\n--- MODELO 3b (sigma_p >= 1.0): Is ~ Centralização + Modularidade ---\n")
+mod3b <- lm(I_s ~ z_Centralization + z_Modularity + z_SigmaP + tipo_selecao + f_encounters, data = df_stats_high)
+print(summary(mod3b))
 
