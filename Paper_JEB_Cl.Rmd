@@ -1,3 +1,4 @@
+
 ---
 title: "The Architecture of Choice: Network Topology Mediates the Eco-Evolutionary Dynamics of Sexual Selection"
 author: "Solimary"
@@ -226,7 +227,7 @@ While modularity captures fragmentation into *multiple* local centres, centraliz
 
 We ran a fully crossed design tracking evolutionary trajectories across 100 independent replicates per scenario over 50 generations.
 
-- **Phase 1 (Baseline Topologies):** Contrasted Uniform vs. Gaussian preferences under equal phenotypic variance ($\sigma_p = \sigma_{z,\text{init}} = 1.0$) and optimal sampling ($A_{max} = 200$).
+- **Phase 1 (Baseline Topologies):** Contrasted Uniform vs. Gaussian preferences under equal phenotypic variance ($\sigma_p = \sigma_{z,init} = 1.0$) and optimal sampling ($A_{max} = 200$).
 
 - **Phase 2 (Preference Variation and Tipping Points):** Evaluated a continuous gradient of female preference variation ($\sigma_p \in \{0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0\}$) across Uniform and Gaussian regimes to detect the threshold at which assortative modularity rescues genetic variance.
 
@@ -244,7 +245,31 @@ Because each simulation at Generation 50 constitutes an independent observation,
 We built three primary models: (1) predicting genetic variance ($\text{Var}(z)$) as a function of Modularity, (2) predicting trait exaggeration ($\bar{z}$) as a function of Nestedness, and (3) predicting the Opportunity for Sexual Selection ($I_s$) as a function of both Degree Centralization and Modularity, to untangle whether reproductive skew is driven by global monopolisation or network fragmentation.
 To control for confounding effects, preference function type, preference variation ($\sigma_p$), and sampling capacity ($A_{max}$) were included as fixed covariates in all models.
 All continuous predictors were Z-scored prior to modelling to facilitate direct effect-size comparison.
-All analyses were conducted in R version 4.x using the packages `dplyr`, `ggplot2`, `igraph`, and `bipartite`.
+All analyses were conducted in R version 4.x using the packages `lme4`, `dplyr`, `ggplot2`, `igraph`, and `bipartite`.
+
+## 2.8. Parameterization and Model Overview
+
+Table 1 summarizes the parameters, variables, and probabilistic distributions used throughout our simulations. The simulation framework operates across two distinct temporal scales: (i) an ecological time scale, which resolves the sequential mate assessment and the formation of the static bipartite mating network within a single breeding season, and (ii) an evolutionary time scale, which dictates viability selection, genetic inheritance, and density-dependent juvenile mortality across 50 non-overlapping generations.
+
+**Table 1. List of symbols and parameters used in the individual-based simulations.** *(Values are fixed within each simulation replicate but may vary across different experimental scenarios).*
+
+| Symbol | Description | Values / Distribution |
+| :---: | :--- | :--- |
+| **Ecological Time (Mating Dynamics & Network Formation)** | | |
+| $z$ | Male trait under sexual selection | Truncated Gaussian distribution; initial mean $\phi=5$, initial standard deviation $\sigma_{z\_init}=1.0$; minimum zero. |
+| $p$ | Individual female preference (preferred trait value) | Truncated Gaussian distribution; mean $p_{mean}=5$, standard deviation $\sigma_p \in \{0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0\}$; minimum zero. |
+| $s$ | Individual female choosiness | Truncated Gaussian distribution; population mean $s_{mean}=2.0$, standard deviation $\sigma_s=0.2$; minimum zero. |
+| $P_{ij}$ | Probability of copulation between female $i$ and male $j$ | Governed by Uniform, Gaussian, Sigmoid, or U-shaped preference functions. |
+| $A_{max}$ | Maximum number of male assessments per female | Default $200$; varied proportionally $\in \{20, 100, 200\}$ in Phases 3 and 4. |
+| $C$ | Female polyandry limit (number of actual copulations) | Randomly sampled from a uniform discrete distribution: $U(1, 3)$ matings per female. |
+| **Evolutionary Time (Survival & Genetic Inheritance)** | | |
+| $V_j$ | Viability (survival probability) of male $j$ before mating | Given by $\exp(-\gamma(z_j - \phi)^2)$. |
+| $\phi$ | Optimal male trait value under natural selection | $5.0$ (also serves as the initial population mean for $z$ and $p$). |
+| $\gamma$ | Intensity of stabilizing natural selection acting on $z$ | $0.2$ |
+| $F_{base}$ | Base fecundity reward per copulation event | $10$ offspring per successful network edge (mating). |
+| $\epsilon$ | Segregation variance (mutation/recombination noise) | Normal distribution with mean $0$ and standard deviation $\sigma_\epsilon = 0.2$. |
+| $N$ | Adult carrying capacity (population size per sex) | $200$ adult males and $200$ adult females per generation. |
+| $t_{max}$ | Total number of discrete generations simulated | $50$ generations per replicate. |
 
 ---
 
