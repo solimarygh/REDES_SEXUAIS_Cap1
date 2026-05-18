@@ -9,12 +9,12 @@ author: |
   | ^\*^ Corresponding author: teu_email@usp.br
 date: "Manuscript prepared for the *Journal of Evolutionary Biology*"
 output:
+  word_document:
+    reference_docx: null
   html_document:
     toc: true
     toc_float: true
     theme: flatly
-  word_document:
-    reference_docx: null
 editor_options:
   markdown:
     wrap: sentence
