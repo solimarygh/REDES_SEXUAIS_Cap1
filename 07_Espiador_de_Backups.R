@@ -6,7 +6,7 @@ library(tidyr)
 library(ggplot2)
 
 # Ajuste o caminho se necessário (ex: "Resultados_Artigo/Fase4_TodasAsCurvas/Dados/backup_lista_fase4.rds")
-arquivo <- "Resultados_Artigo/Fase4_TodasAsCurvas/Dados/backup_lista_fase4.rds"
+arquivo <- "Resultados_Artigo/Fase4_TodasAsCurvas/Dados/backup_lista_fase4_final.rds"
 
 if(file.exists(arquivo)) {
   lista_parcial <- readRDS(arquivo)
