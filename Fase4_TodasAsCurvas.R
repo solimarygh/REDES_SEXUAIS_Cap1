@@ -11,7 +11,7 @@
 #    Sigmoide maximiza o Aninhamento (gerando o Fisherian Runaway) e a U-shaped 
 #    maximiza a Modularidade por desassortatividade, resgatando a variância.
 # 2. Para testar o "Ruído Ecológico": Avaliaremos essas 4 curvas sob 3 
-#    restrições de amostragem (A_max = 200, 100 e 20) para demonstrar que o 
+#    restrições de amostragem proporcional (A_max = 500, 100 e 25) para demonstrar que o 
 #    ruído destrói as assinaturas topológicas e neutraliza a evolução.
 # 3. Para fazer a "Prova Causal": Congelaremos a genética (fixando sigma_p = 2.0)
 #    e faremos regressões lineares diretas (Topologia vs Evolução) para provar 
@@ -27,10 +27,13 @@
 # 1) CARREGAMOS O MOTOR MESTRE E CONFIGURAMOS AS PASTAS
 source("01_metricas_e_utilitarios.R")
 
+#install.packeages("segmented")
+#
 suppressPackageStartupMessages({
   library(dplyr)
   library(tidyr)
   library(ggplot2)
+  library(segmented)
 })
 
 diretorios <- configurar_diretorios("Fase4_TodasAsCurvas")
@@ -46,7 +49,7 @@ n_replicas <- 100
 cenarios_fase4 <- expand.grid(
   tipo_selecao = c("uniform", "gaussian", "sigmoid", "u-shaped"),
   sigma_p = valores_sigma_p,
-  encounters_n = c(200, 100, 20), 
+  encounters_n = c(500, 100, 25), # 100%, 20% e 5% de N=500
   replica = 1:n_replicas
 )
 
@@ -76,6 +79,7 @@ if (file.exists(arquivo_backup)) {
   lista_fase4 <- vector("list", nrow(cenarios_fase4))
   cat("Nenhum backup encontrado. Iniciando do zero.\n")
 }
+
 # =====================================================================
 # 3) LOOP DE SIMULAÇÃO (Pode pausar e retomar quando quiser)
 # =====================================================================
@@ -88,6 +92,8 @@ for (i in 1:nrow(cenarios_fase4)) {
   res <- tryCatch({
     simulate_evolution(
       generations = 50,
+      N_machos = 500,  # <-- N atualizado para 500
+      N_femeas = 500,  # <-- N atualizado para 500
       tipo_selecao = cenarios_fase4$tipo_selecao[i],
       sigma_p = cenarios_fase4$sigma_p[i],
       encounters_n = cenarios_fase4$encounters_n[i],
@@ -120,10 +126,10 @@ df_gen50 <- df_fase4 %>% filter(generation == 50) %>% drop_na()
 
 val_gens <- max(df_fase4$generation)
 val_reps <- length(unique(df_fase4$replica))
-subtitulo_base <- sprintf("Parâmetros: %d Gerações | Réplicas: %d", val_gens, val_reps)
+subtitulo_base <- sprintf("Parâmetros: %d Gerações | População: 1000 | Réplicas: %d", val_gens, val_reps)
 
 tema_master <- theme_light(base_size = 14) +
-  theme(legend.position = "bottom",
+  theme(legend.position = "bottom", 
         strip.background = element_rect(fill = "gray10"),
         strip.text = element_text(color = "white", face = "bold"))
 
@@ -131,9 +137,9 @@ cores_4 <- c("uniform" = "gray60", "gaussian" = "#E6B800", "sigmoid" = "#3BA273"
 labels_4 <- c("uniform" = "Aleatória", "gaussian" = "Gaussiana", "sigmoid" = "Sigmoide", "u-shaped" = "Disruptiva")
 
 # ---------------------------------------------------------------------
-# PLOT A: ASSINATURA TOPOLÓGICA (Apenas cenário ideal: A_max = 200)
+# PLOT A: ASSINATURA TOPOLÓGICA (Apenas cenário ideal: A_max = 500)
 # ---------------------------------------------------------------------
-p_fase4_topo <- df_gen50 %>% filter(encounters_n == 200) %>%
+p_fase4_topo <- df_gen50 %>% filter(encounters_n == 500) %>%
   pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization), names_to = "Metrica", values_to = "Valor") %>%
   mutate(Metrica = case_when(Metrica == "Modularity" ~ "1. Modularidade", Metrica == "Nestedness" ~ "2. Aninhamento",
                              Metrica == "I_s" ~ "3. Is", Metrica == "Centralization" ~ "4. Centralidade")) %>%
@@ -143,20 +149,21 @@ p_fase4_topo <- df_gen50 %>% filter(encounters_n == 200) %>%
   geom_jitter(alpha = 0.2, width = 0.05, size = 1.2) +
   facet_wrap(~Metrica, scales = "free_y", ncol=2) +
   scale_color_manual(values = cores_4, labels = labels_4) + scale_fill_manual(values = cores_4, labels = labels_4) +
-  labs(title = "Fase 4: A Assinatura Topológica Suprema (A_max = 200)", subtitle = subtitulo_base,
+  labs(title = "Fase 4: A Assinatura Topológica Suprema (A_max = 500)", subtitle = subtitulo_base,
        x = expression(paste("Variação da Preferência (", sigma[p], ")")), y = "Valor da Métrica", color = "", fill="") +
   guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) + tema_master
 
 # ---------------------------------------------------------------------
-# PLOT B: RUÍDO ECOLÓGICO - A Queda da Evolução (A_max: 200, 100, 20)
+# PLOT B: RUÍDO ECOLÓGICO - A Queda da Evolução (A_max: 500, 100, 25)
 # ---------------------------------------------------------------------
 df_ruido <- df_gen50 %>% mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n), 
-                                                      levels = c("A_max: 200", "A_max: 100", "A_max: 20"))) %>%
+                                                      levels = c("A_max: 500", "A_max: 100", "A_max: 25"))) %>%
   pivot_longer(cols = c(zbar_males, varz_males), names_to = "Variavel", values_to = "Valor") %>%
   mutate(Variavel = ifelse(Variavel == "zbar_males", "1. Média (Exagero)", "2. Diversidade Genética (Var z)"))
 
 p_fase4_ruido <- ggplot(df_ruido, aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
-  geom_hline(data = filter(df_ruido, Variavel == "1. Média (Exagero)"), aes(yintercept = 5.0), linetype = "dashed", alpha = 0.6) + #5.0 ES la variable \phi de nuestro modelo ecológico! 
+  # 5.0 ES la variable \phi de nuestro modelo ecológico! 
+  geom_hline(data = filter(df_ruido, Variavel == "1. Média (Exagero)"), aes(yintercept = 5.0), linetype = "dashed", alpha = 0.6) + 
   geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
   geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2, show.legend = FALSE) +
   geom_jitter(alpha = 0.2, width = 0.05, size = 1) +
@@ -167,9 +174,9 @@ p_fase4_ruido <- ggplot(df_ruido, aes(x = sigma_p, y = Valor, color = tipo_selec
   guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) + tema_master
 
 # ---------------------------------------------------------------------
-# PLOT C: A PROVA CAUSAL (A_max = 200, sigma_p fixo em 2.0)
+# PLOT C: A PROVA CAUSAL (A_max = 500, sigma_p fixo em 2.0)
 # ---------------------------------------------------------------------
-df_causal <- df_gen50 %>% filter(encounters_n == 200, sigma_p == 2.0) %>%
+df_causal <- df_gen50 %>% filter(encounters_n == 500, sigma_p == 2.0) %>%
   pivot_longer(cols = c(Modularity, Nestedness), names_to = "Topologia", values_to = "EixoX") %>%
   mutate(Topologia = ifelse(Topologia == "Modularity", "1. Modularidade (vs Var z)", "2. Aninhamento (vs Média z)"),
          EixoY = ifelse(Topologia == "1. Modularidade (vs Var z)", varz_males, zbar_males))
@@ -179,7 +186,8 @@ p_fase4_causal <- ggplot(df_causal, aes(x = EixoX, y = EixoY, color = tipo_selec
   geom_smooth(method = "lm", formula = y~x, se = TRUE, linewidth = 1.2, alpha = 0.15, show.legend = FALSE) +
   facet_wrap(~Topologia, scales = "free", ncol=2) +
   scale_color_manual(values = cores_4, labels = labels_4) + scale_fill_manual(values = cores_4, labels = labels_4) +
-  labs(title = "Fase 4: Evidência Correlacional entre Topologia e Evolução (σp = 2.0)", subtitle = "Regressões lineares indicam forte associação entre a estrutura da rede e o fenótipo",
+  labs(title = "Fase 4: Evidência Correlacional entre Topologia e Evolução (σp = 2.0)", 
+       subtitle = "Regressões lineares indicam forte associação entre a estrutura da rede e o fenótipo",
        x = "Valor Topológico da Rede", y = "Valor Evolutivo (Média ou Variância)", color="", fill="") +
   guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) + tema_master
 
@@ -198,54 +206,47 @@ cat("\nGráficos salvos com sucesso na pasta:", diretorios$graficos, "\n")
 
 
 # =====================================================================
-# BLOCO E: MODELOS lineares (LMs) - Antes eram mixtos, mas nao preciso
+# BLOCO E: MODELOS LINEARES (LMs) - A ESTATÍSTICA OFICIAL
 # =====================================================================
-# 
-# había un error gravísimo que cometimos en la estadística: al usar (1 | replica), le estábamos diciendo a R que la "réplica 1" de la selección Sigmoide era la misma población que la "réplica 1" de la selección Gaussiana. ¡Eso es falso, son poblaciones distintas!
-# Carregamos os pacotes mistos 
-# suppressPackageStartupMessages({
-#   library(lme4)
-#   library(lmerTest) 
-# })  Como estamos analizando solo la Generación 50, cada red es un punto de datos 100% independiente. Por lo tanto, no necesitamos un modelo mixto (lmer)! Un modelo lineal normal (lm) es la herramienta estadísticamente correcta y perfecta aquí. 
+# Como estamos analisando apenas a Geração 50 (estado estável evolutivo), 
+# as réplicas são independentes. Logo, modelos lineares (lm) são perfeitos 
+# e evitam problemas de "singular fit" dos modelos mistos (lmer). o sea desde 0.2 hasta 1.0 la línea es casi plana (no pasa nada). Pero justo después del 1.0, la línea se dispara hacia arriba. Una sola línea recta promediaría ambas tendencias, subestimando la explosión final y sobrestimando el inicio. ¡Destruiría tu descubrimiento del Tipping Point! La Regresión Segmentada se usa cuando sabemos (o sospechamos) que el sistema cambia de comportamiento drásticamente a partir de un "Punto de Quiebre" (Breakpoint o Knot).En lugar de calcular una sola pendiente, la fórmula matemática calcula DOS pendientes simultáneamente, pero las obliga a conectarse exactamente en el punto de quiebre. ## alternativa manual aqui, y mas abajo la oficial:
 
-cat("\nPreparando dados para os Modelos..\n")
+cat("\nPreparando dados para os Modelos Lineares...\n")
 
-# 1. Preparamos os dados (Focamos na Geração 50, que é o destino evolutivo)
-# Escalamos as variáveis contínuas (Z-score) para que os coeficientes sejam comparáveis
-# Nota: o Z-score é calculado dentro de cada subconjunto para que seja comparável internamente.
+# Dividimos em "Abaixo do Limiar" e "Acima do Limiar", usando 1.0 como 
+# ponto de ancoragem (dobradiça) para ambos os modelos!
 
-df_stats_low <- df_gen50 %>%  # Subconjunto: sigma_p <= 1.0 (regime abaixo do limiar ecológico)
-  filter(sigma_p <= 1.0) %>%
+df_stats_low <- df_gen50 %>%  
+  filter(sigma_p <= 1.0) %>% # <-- O 1.0 FICA AQUI (Ponto Máximo)
   drop_na(Modularity, Nestedness, Centralization, I_s, varz_males, zbar_males) %>%
   mutate(
-    z_Modularity     = scale(Modularity),
-    z_Nestedness     = scale(Nestedness),
-    z_Centralization = scale(Centralization),
-    z_SigmaP         = scale(sigma_p),
+    z_Modularity     = as.numeric(scale(Modularity)),
+    z_Nestedness     = as.numeric(scale(Nestedness)),
+    z_Centralization = as.numeric(scale(Centralization)),
+    z_SigmaP         = as.numeric(scale(sigma_p)),
     f_encounters     = factor(encounters_n)
   )
 
-df_stats_high <- df_gen50 %>%  # Subconjunto: sigma_p >= 1.0 (regime acima do limiar ecológico)
-  filter(sigma_p >= 1.0) %>%
+df_stats_high <- df_gen50 %>%  
+  filter(sigma_p >= 1.0) %>% # <-- E O 1.0 FICA AQUI TAMBÉM (Linha Base)
   drop_na(Modularity, Nestedness, Centralization, I_s, varz_males, zbar_males) %>%
   mutate(
-    z_Modularity     = scale(Modularity),
-    z_Nestedness     = scale(Nestedness),
-    z_Centralization = scale(Centralization),
-    z_SigmaP         = scale(sigma_p),
+    z_Modularity     = as.numeric(scale(Modularity)),
+    z_Nestedness     = as.numeric(scale(Nestedness)),
+    z_Centralization = as.numeric(scale(Centralization)),
+    z_SigmaP         = as.numeric(scale(sigma_p)),
     f_encounters     = factor(encounters_n)
   )
 
 # -----------------------------------------------------------------------
 # MODELO 1: A Topologia resgatando a Diversidade Genética
-# Interação z_Modularity * tipo_selecao: captura que Gaussiana e Disruptiva
-# respondem de forma distinta à modularidade
 # -----------------------------------------------------------------------
 cat("\n--- MODELO 1a (sigma_p <= 1.0): Modularidade e Diversidade Genética ---\n")
 mod1a <- lm(varz_males ~ z_Modularity * tipo_selecao + z_SigmaP + f_encounters, data = df_stats_low)
 print(summary(mod1a))
 
-cat("\n--- MODELO 1b (sigma_p >= 1.0): Modularidade e Diversidade Genética ---\n")
+cat("\n--- MODELO 1b (sigma_p > 1.0): Modularidade e Diversidade Genética ---\n")
 mod1b <- lm(varz_males ~ z_Modularity * tipo_selecao + z_SigmaP + f_encounters, data = df_stats_high)
 print(summary(mod1b))
 
@@ -256,7 +257,7 @@ cat("\n--- MODELO 2a (sigma_p <= 1.0): Aninhamento e Exagero do Traço ---\n")
 mod2a <- lm(zbar_males ~ z_Nestedness * tipo_selecao + z_SigmaP + f_encounters, data = df_stats_low)
 print(summary(mod2a))
 
-cat("\n--- MODELO 2b (sigma_p >= 1.0): Aninhamento e Exagero do Traço ---\n")
+cat("\n--- MODELO 2b (sigma_p > 1.0): Aninhamento e Exagero do Traço ---\n")
 mod2b <- lm(zbar_males ~ z_Nestedness * tipo_selecao + z_SigmaP + f_encounters, data = df_stats_high)
 print(summary(mod2b))
 
@@ -267,7 +268,18 @@ cat("\n--- MODELO 3a (sigma_p <= 1.0): Is ~ Centralização + Modularidade ---\n
 mod3a <- lm(I_s ~ z_Centralization + z_Modularity + z_SigmaP + tipo_selecao + f_encounters, data = df_stats_low)
 print(summary(mod3a))
 
-cat("\n--- MODELO 3b (sigma_p >= 1.0): Is ~ Centralização + Modularidade ---\n")
+cat("\n--- MODELO 3b (sigma_p > 1.0): Is ~ Centralização + Modularidade ---\n")
 mod3b <- lm(I_s ~ z_Centralization + z_Modularity + z_SigmaP + tipo_selecao + f_encounters, data = df_stats_high)
 print(summary(mod3b))
 
+######
+ 
+#######conceptualmente es evaluar un sistema "Piecewise", porque la biología cambia sus leyes de la física justo en el umbral donde el comportamiento de la hembra supera a la genética del macho 
+
+# 1. Haces un modelo lineal general
+modelo_general <- lm(varz_males ~ sigma_p, data = df_gen50)
+
+# 2. Le dices a R: "Rómpeme esta línea en dos, exactamente en sigma_p = 1.0"
+modelo_segmentado <- segmented(modelo_general, seg.Z = ~sigma_p, psi = 1.0)
+
+summary(modelo_segmentado)
