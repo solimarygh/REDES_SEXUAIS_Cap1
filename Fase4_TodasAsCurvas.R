@@ -70,25 +70,33 @@ if (file.exists(arquivo_backup)) {
     length(lista_fase4) <- nrow(cenarios_fase4) 
   }
 } else {
-  # Bug 3 Corrigido: O set.seed só roda se começarmos do zero! 
-  # En el contexto de un IBM esto probablemente no es crítico (cada simulación es independente), 
-  # pero afecta la reproducibilidad exacta de las simulaciones reanudadas. 
-  # Movi o set.seed(2026) para que solo se ejecute cuando no hay backup.
-  set.seed(2026) 
-  
   lista_fase4 <- vector("list", nrow(cenarios_fase4))
   cat("Nenhum backup encontrado. Iniciando do zero.\n")
 }
 
 # =====================================================================
+# REPRODUCIBILIDADE INDIVIDUAL DAS RÉPLICAS
+# Cada cenário (linha de cenarios_fase4) recebe a sua própria semente,
+# derivada do índice i. Isso permite:
+#  (1) re-rodar exatamente uma simulação específica sem repetir o resto;
+#  (2) capturar redes representativas a posteriori (Script 09 - Stage 2);
+#  (3) total reprodutibilidade independente da ordem de execução.
+# A semente base 2026 é fixa para que o experimento inteiro seja replicável.
+# =====================================================================
+SEED_BASE <- 2026
+
+# =====================================================================
 # 3) LOOP DE SIMULAÇÃO (Pode pausar e retomar quando quiser)
 # =====================================================================
 for (i in 1:nrow(cenarios_fase4)) {
-  
+
   if (!is.null(lista_fase4[[i]])) next # Resume mágico: Pula o que já está pronto
-  
+
   if (i %% 20 == 0 || i == 1) cat(sprintf("Rodando cenário %d de %d (%.1f%%)\n", i, nrow(cenarios_fase4), (i/nrow(cenarios_fase4))*100))
-  
+
+  # Semente individual para reprodutibilidade desta simulação específica
+  set.seed(SEED_BASE + i)
+
   res <- tryCatch({
     simulate_evolution(
       generations = 50,
@@ -101,7 +109,7 @@ for (i in 1:nrow(cenarios_fase4)) {
     )
   }, error = function(e) {
     cat("Erro no cenário", i, ":", conditionMessage(e), "\n")
-    return(NULL) 
+    return(NULL)
   })
   
   if (!is.null(res)) {
