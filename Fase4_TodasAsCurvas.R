@@ -41,7 +41,7 @@ diretorios <- configurar_diretorios("Fase4_TodasAsCurvas")
 cat("Iniciando Fase 4: O Confronto dos 4 Titãs Evolutivos...\n")
 
 valores_sigma_p <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
-n_replicas <- 1000 # Mude para 100 depois
+n_replicas <- 100
 
 cenarios_fase4 <- expand.grid(
   tipo_selecao = c("uniform", "gaussian", "sigmoid", "u-shaped"),
