@@ -45,10 +45,12 @@ Crucially, although females do not phenotypically express the sexually selected 
 This allows alleles for extreme male traits to "hide" from natural viability selection within female bodies and be transmitted to the next generation—a phenomenon analogous to cross-sex genetic correlation or genetic hitchhiking.
 To isolate the evolutionary response of the male trait, female preference parameters were not allowed to co-evolve, matching the methodology of Millan et al. (2020); instead, the preference parameters of the newly born daughters were independently redrawn each generation from scenario-specific distributions. We acknowledge that this framework differs from the classical Fisherian runaway, in which female preferences co-evolve with the male trait via inherited genetic covariance (Fisher 1930; Lande 1981). In our model, preference thresholds are redrawn independently each generation and do not evolve. This was a deliberate simplification to isolate the causal effect of preference function shape and population-level preference heterogeneity $\sigma_p$ on mating network topology, without the confounding feedback of preference evolution. Our goal is not to model the origin of exaggerated traits via runaway, but to ask how the geometry of female choice — given a fixed preference distribution — structures the sexual network and mediates the evolutionary response of the male phenotype.
 
-**2.3. Mating Dynamics and Preference Functions** Females were defined by two behavioral traits: their preference threshold ($p$, the ideal male trait value) and their choosiness ($s$, the strictness of the preference).
+**2.3. Mating Dynamics and Preference Functions** Females were defined by two behavioural traits: their preference threshold ($p$, the ideal male trait value) and their choosiness ($s$, the strictness of the preference).
 The parameter $s$ determines the steepness of the preference curves.
-Following Millan et al. (2020), we fixed the population mean choosiness at a moderately high mean value ($s_{mean} = 2.0$) with a slight individual variance $\sigma_s = 0.2$, keeping this distribution constant across all generations.
-While we acknowledge that in natural populations females might exhibit behavioral plasticity—dynamically lowering their choosiness as they fail to find an ideal mate—fixing this parameter was mathematically necessary to strictly isolate the evolutionary effects of population-level preference variation ($\sigma_p$).
+Following Millan et al. (2020), who used an identical value of $s_{mean} = 2.0$ in their simulations, we fixed the population mean choosiness at a moderately high value ($s_{mean} = 2.0$, $\sigma_s = 0.2$), keeping this distribution constant across all generations.
+This decision is empirically supported by Millan et al. (2020), who demonstrated that within-population variation in preference strength ($\sigma_s$) had negligible effects on both $I_s$ and the evolutionary trajectory of the male trait across all simulated scenarios — in contrast to within-population variation in preference threshold ($\sigma_p$), which consistently drove meaningful evolutionary divergence.
+Fixing $s$ therefore isolates the parameter most relevant to our questions while remaining consistent with prior modelling choices in the field.
+While we acknowledge that in natural populations females might exhibit behavioural plasticity — dynamically lowering their choosiness as they fail to find an ideal mate — fixing this parameter was mathematically necessary to strictly isolate the evolutionary effects of population-level preference variation ($\sigma_p$).
 
 To test the impact of preference heterogeneity, we manipulated the within-population variation in female preference ($\sigma_p$).
 A low value (e.g., $\sigma_p = 0.2$) indicates a strong population consensus where almost all females desire the same male phenotype.
@@ -99,7 +101,40 @@ We built three primary models: (1) predicting genetic variance ($Var(z)$) as a f
 To control for confounding effects and independent experimental variables, preference function type, preference variation ($\sigma_p$), and sampling capacity ($A_{max}$) were included as fixed covariates in all models.
 All continuous predictors were standardized (Z-scored) prior to modeling to facilitate algorithm convergence and direct effect size comparison.
 
-REsultados:
+**3. RESULTADOS**
+
+**3.1. A Assinatura Topológica Suprema (Fase 4, A_max = 200)**
+
+Quando as fêmeas operam sob capacidade de amostragem irrestrita (A_max = 200), os quatro regimes de preferência geram trajetórias topológicas distintas ao longo do gradiente de variação de preferência (σ_p), mas apenas a partir do limiar crítico σ_p = σ_z = 1.0 (Fig. Fase4_PlotA).
+
+Abaixo deste limiar (σ_p < 1.0), todas as funções de preferência produziram redes com modularidade elevada e similar (~0.80–0.82), independentemente da geometria da função. A análise das redes representativas revelou que, a σ_p = 0.5, a rede Uniforme (aleatória), a Gaussiana e a Disruptiva apresentaram estruturas comparáveis em número de tribos Laplacianas (28, 49 e 32, respectivamente) e comunidades Louvain (47, 65 e 47). Este resultado indica que a fragmentação observada a baixa variação de preferência é primariamente uma restrição demográfica imposta pelo tamanho populacional finito (N = 200): com grau médio dos machos ~2, a rede é intrinsecamente esparsa e fragmentada independentemente das regras comportamentais.
+
+A partir de σ_p = 1.0, no entanto, as funções de preferência divergem marcadamente. A preferência **Gaussiana** exibiu o aumento mais pronunciado de modularidade (atingindo ~0.90 a σ_p = 2.0), enquanto a **Disruptiva** convergiu progressivamente para o baseline aleatório (Uniforme). As redes representativas a σ_p = 2.0 confirmaram esta divergência: a Gaussiana gerou 79 tribos e 94 comunidades Louvain com modularidade média de 0.897, em contraste com a Uniforme, que permaneceu inalterada (28 tribos, 47 comunidades, Mod = 0.816), e a Disruptiva, que apresentou sinal apenas leve (41 tribos, 57 comunidades, Mod = 0.816).
+
+Biologicamente, a assinatura modular da preferência Gaussiana a alta σ_p reflete o matching assortativo ativo: fêmeas com limiares divergentes monopolizam subconjuntos fenotipicamente distintos de machos, fragmentando a rede em cliques reprodutivos isolados. A convergência da Disruptiva ao baseline a σ_p > 1.0 indica que, quando a heterogeneidade de preferência supera a variação do traço masculino, a evitação do promédio perde resolução fenotípica suficiente para estruturar a rede.
+
+Quanto ao aninhamento (NODF), a preferência **Sigmoidal** produziu os valores mais elevados e estáveis ao longo de todo o gradiente de σ_p, consistente com a sua geometria direcional: fêmeas sempre aceitam machos com traços superiores ao seu limiar, gerando uma hierarquia global onde machos com traços mais exagerados monopolizam tanto fêmeas exigentes quanto generalistas.
+
+**3.2. O Limiar Ecológico como Fronteira entre Restrição Demográfica e Sinal Biológico**
+
+A comparação sistemática das redes representativas permite interpretar a linha σ_p = σ_z = 1.0 não apenas como um limiar estatístico, mas como a fronteira onde a seleção sexual supera a restrição demográfica como driver principal da topologia da rede. Abaixo deste limiar, a esparsidade intrínseca da rede domina a estrutura observada. Acima dele, as regras comportamentais das fêmeas imprimem assinaturas topológicas específicas e biologicamente informativas.
+
+As análises das distribuições fenotípicas ao longo das gerações (histogramas "3 Atos") reforçam este contraste: a σ_p = 0.5, a preferência Gaussiana produz convergência progressiva dos machos em direção a φ = 5.0 com erosão da variância genética, enquanto a preferência Disruptiva desloca os machos abaixo de φ, preservando parcialmente a variância. Ambas as redes apresentam fragmentação similar (restrição demográfica), mas consequências evolutivas opostas — demonstrando que a quantidade de fragmentação não prediz a trajetória evolutiva; a geometria dos cliques é o fator determinante.
+
+**3.3. O Relevo Topológico: Dois Mecanismos Sequenciais de Resgate de Diversidade Genética**
+
+Os modelos lineares, ajustados separadamente para os regimes abaixo (σ_p ≤ 1.0) e acima (σ_p ≥ 1.0) do limiar crítico com termos de interação entre modularidade e tipo de seleção, revelaram um padrão de revezamento entre mecanismos de resgate de variância genética.
+
+No regime σ_p ≤ 1.0 (Modelo 1a), o preditor mais forte da variância genética dos machos foi a interação entre modularidade e preferência Disruptiva (β = 0.0031, p < 0.001), seguida pela interação com a preferência Gaussiana (β = 0.0014, p = 0.02). A preferência Disruptiva a baixa σ_p fragmenta a rede em múltiplos cliques de nicho fenotípico em torno de valores extremos do traço — não em dois blocos polares, como o argumento da "bipartição" sugeriria, mas em ~32–47 micro-cliques distintos. Este mecanismo preserva alelos extremos ao distribuí-los em ilhas reprodutivas separadas.
+
+No regime σ_p ≥ 1.0 (Modelo 1b), há uma inversão de protagonistas: a preferência Gaussiana emerge como o preditor dominante da variância genética (β = 0.0119, p < 0.001), enquanto a interação da modularidade Disruptiva deixa de ser significativa. A preferência Gaussiana a alta σ_p gera fragmentação assortativa por matching de limiar — cada clique agrupa fêmeas com preferências similares e os machos que as satisfazem, criando ilhas de diversidade fenotípica que resistem à homogeneização.
+
+Denominamos este padrão de **relevo topológico**: dois mecanismos biologicamente distintos se sucedem ao longo do gradiente de σ_p, com a Disruptiva operando via atomização fenotípica no regime de baixa heterogeneidade, e a Gaussiana assumindo via fragmentação assortativa no regime de alta heterogeneidade.
+
+---
+
+**REFERÊNCIAS**
+
 1. Darwin (1871)
 The Descent of Man and Selection in Relation to Sex
 John Murray, London. — Libro clásico, disponible en dominio público:
