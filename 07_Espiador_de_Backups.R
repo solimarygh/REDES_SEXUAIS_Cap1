@@ -4,6 +4,7 @@
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(patchwork)
 
 arquivo <- "Resultados_Artigo/Fase4_TodasAsCurvas/Dados/backup_lista_fase4_final.rds"
 
@@ -111,6 +112,293 @@ if(file.exists(arquivo)) {
   print(p_nest)
   print(p_cent)
   print(p_is)
+
+  # =====================================================================
+  # LIMITES GLOBAIS POR MÉTRICA (para eixo Y consistente entre cenários)
+  # =====================================================================
+  df_global <- df_parcial %>%
+    drop_na() %>%
+    group_by(generation, tipo_selecao, sigma_p, encounters_n) %>%
+    summarise(across(c(Modularity, Nestedness, I_s, Centralization),
+                     \(x) mean(x, na.rm = TRUE)),
+              .groups = "drop") %>%
+    pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization),
+                 names_to = "Metrica", values_to = "Valor") %>%
+    mutate(Metrica = case_when(
+      Metrica == "Modularity"     ~ "1. Modularidade",
+      Metrica == "Nestedness"     ~ "2. Aninhamento",
+      Metrica == "I_s"            ~ "3. Oportunidade de Seleção (Is)",
+      Metrica == "Centralization" ~ "4. Centralidade"
+    ))
+
+  limites_metrica <- df_global %>%
+    group_by(Metrica) %>%
+    summarise(ymin = min(Valor, na.rm = TRUE),
+              ymax = max(Valor, na.rm = TRUE),
+              .groups = "drop")
+
+  df_limites <- bind_rows(
+    limites_metrica %>% mutate(Valor = ymin),
+    limites_metrica %>% mutate(Valor = ymax)
+  ) %>%
+    mutate(generation = 1, tipo_selecao = "uniform")
+
+  # =====================================================================
+  # LIMITES GLOBAIS para métricas EVOLUTIVAS (MeanZ e VarZ)
+  # =====================================================================
+  df_global_evo <- df_parcial %>%
+    drop_na() %>%
+    group_by(generation, tipo_selecao, sigma_p, encounters_n) %>%
+    summarise(zbar_males = mean(zbar_males, na.rm = TRUE),
+              varz_males = mean(varz_males, na.rm = TRUE),
+              .groups = "drop") %>%
+    pivot_longer(cols = c(zbar_males, varz_males),
+                 names_to = "Metrica", values_to = "Valor") %>%
+    mutate(Metrica = case_when(
+      Metrica == "zbar_males" ~ "1. Média do traço (z̄)",
+      Metrica == "varz_males" ~ "2. Variância do traço (Var z)"
+    ))
+
+  limites_evo <- df_global_evo %>%
+    group_by(Metrica) %>%
+    summarise(ymin = min(Valor, na.rm = TRUE),
+              ymax = max(Valor, na.rm = TRUE),
+              .groups = "drop")
+
+  df_limites_evo <- bind_rows(
+    limites_evo %>% mutate(Valor = ymin),
+    limites_evo %>% mutate(Valor = ymax)
+  ) %>%
+    mutate(generation = 1, tipo_selecao = "uniform")
+
+  # =====================================================================
+  # FUNÇÃO HELPER: Trajetórias evolutivas (MeanZ + VarZ)
+  # Recebe A_max como parâmetro
+  # =====================================================================
+  trajetoria_evolutiva <- function(amax, num_espiadinha) {
+    df_traj <- df_parcial %>%
+      filter(encounters_n == amax, sigma_p %in% c(0.5, 2.0)) %>%
+      drop_na() %>%
+      group_by(generation, tipo_selecao, sigma_p) %>%
+      summarise(zbar_males = mean(zbar_males, na.rm = TRUE),
+                varz_males = mean(varz_males, na.rm = TRUE),
+                .groups = "drop") %>%
+      pivot_longer(cols = c(zbar_males, varz_males),
+                   names_to = "Metrica", values_to = "Valor") %>%
+      mutate(Metrica = case_when(
+        Metrica == "zbar_males" ~ "1. Média do traço (z̄)",
+        Metrica == "varz_males" ~ "2. Variância do traço (Var z)"
+      ),
+      sigma_label = factor(sprintf("σp = %.1f", sigma_p),
+                           levels = c("σp = 0.5", "σp = 2.0")))
+
+    if (nrow(df_traj) == 0) {
+      cat(sprintf("ESPIADINHA %d: ainda não há dados para A_max=%d\n",
+                  num_espiadinha, amax))
+      return(invisible(NULL))
+    }
+
+    # Linha horizontal em φ=5 só para a métrica de média
+    df_phi <- data.frame(Metrica = "1. Média do traço (z̄)", yintercept = 5.0)
+
+    ggplot(df_traj, aes(x = generation, y = Valor, color = tipo_selecao)) +
+      geom_blank(data = df_limites_evo) +
+      geom_hline(data = df_phi, aes(yintercept = yintercept),
+                 linetype = "dashed", alpha = 0.5, color = "gray30") +
+      geom_line(linewidth = 0.8, alpha = 0.9) +
+      facet_grid(Metrica ~ sigma_label, scales = "free_y") +
+      scale_color_manual(values = cores_4, labels = labels_4) +
+      labs(title = sprintf("Trajetórias evolutivas (A_max = %d)", amax),
+           x = "Geração", y = "Valor", color = "Funcao") +
+      theme_light(base_size = 12) +
+      theme(legend.position = "bottom",
+            strip.background = element_rect(fill = "gray20"),
+            strip.text = element_text(color = "white", face = "bold"))
+  }
+
+  # =====================================================================
+  # FUNÇÃO HELPER: Trajetórias estilo Espiadinha 7 (σp=0.5 vs σp=2.0)
+  # Recebe A_max como parâmetro
+  # =====================================================================
+  trajetoria_dois_sigmas <- function(amax, num_espiadinha) {
+    df_traj <- df_parcial %>%
+      filter(encounters_n == amax, sigma_p %in% c(0.5, 2.0)) %>%
+      drop_na() %>%
+      group_by(generation, tipo_selecao, sigma_p) %>%
+      summarise(across(c(Modularity, Nestedness, I_s, Centralization),
+                       \(x) mean(x, na.rm = TRUE)),
+                .groups = "drop") %>%
+      pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization),
+                   names_to = "Metrica", values_to = "Valor") %>%
+      mutate(Metrica = case_when(
+        Metrica == "Modularity"     ~ "1. Modularidade",
+        Metrica == "Nestedness"     ~ "2. Aninhamento",
+        Metrica == "I_s"            ~ "3. Oportunidade de Seleção (Is)",
+        Metrica == "Centralization" ~ "4. Centralidade"
+      ),
+      sigma_label = factor(sprintf("σp = %.1f", sigma_p),
+                           levels = c("σp = 0.5", "σp = 2.0")))
+
+    if (nrow(df_traj) == 0) {
+      cat(sprintf("ESPIADINHA %d: ainda não há dados para A_max=%d\n",
+                  num_espiadinha, amax))
+      return(invisible(NULL))
+    }
+
+    ggplot(df_traj, aes(x = generation, y = Valor, color = tipo_selecao)) +
+      geom_blank(data = df_limites) +  # força limites globais por métrica
+      geom_line(linewidth = 0.8, alpha = 0.9) +
+      facet_grid(Metrica ~ sigma_label, scales = "free_y") +
+      scale_color_manual(values = cores_4, labels = labels_4) +
+      labs(title = sprintf("ESPIADINHA %d: Trajetórias por geração (A_max = %d)",
+                           num_espiadinha, amax),
+           subtitle = "Médias por geração | Eixo Y consistente entre cenários",
+           x = "Geração", y = "Valor da Métrica", color = "Funcao") +
+      theme_light(base_size = 12) +
+      theme(legend.position = "top",
+            strip.background = element_rect(fill = "gray20"),
+            strip.text = element_text(color = "white", face = "bold"))
+  }
+
+  # =====================================================================
+  # ESPIADINHA 7: Trajetórias σp=0.5 vs 2.0 em DOIS níveis de A_max
+  # Painel duplo lado a lado:
+  #   Esquerda: A_max = 500 (sem restrição ecológica)
+  #   Direita:  A_max = 25  (restrição severa)
+  # =====================================================================
+  p_left  <- trajetoria_dois_sigmas(amax = 500, num_espiadinha = 7)
+  p_right <- trajetoria_dois_sigmas(amax = 25,  num_espiadinha = 7)
+
+  if (!is.null(p_left) && !is.null(p_right)) {
+    # Títulos curtos + subtítulos com a descrição
+    p_left_clean  <- p_left  +
+      labs(title = "A_max = 500",
+           subtitle = "500 machos amostrados por fêmea") +
+      theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
+            plot.subtitle = element_text(size = 10, hjust = 0.5),
+            plot.title.position = "plot",
+            legend.position = "bottom")
+
+    p_right_clean <- p_right +
+      labs(title = "A_max = 25",
+           subtitle = "25 machos amostrados por fêmea",
+           y = NULL) +
+      theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
+            plot.subtitle = element_text(size = 10, hjust = 0.5),
+            plot.title.position = "plot",
+            legend.position = "bottom",
+            axis.text.y = element_blank())
+
+    p_combinado <- (p_left_clean | p_right_clean) +
+      plot_annotation(
+        title = "ESPIADINHA 7: Trajetórias topológicas sob níveis contrastantes de A_max",
+        subtitle = "Linhas = médias por geração entre todas as réplicas | Eixo Y consistente entre painéis",
+        theme = theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
+                      plot.subtitle = element_text(size = 11, hjust = 0.5),
+                      legend.position = "bottom")
+      ) +
+      plot_layout(guides = "collect")
+
+    print(p_combinado)
+  } else {
+    if (!is.null(p_left))  print(p_left)
+    if (!is.null(p_right)) print(p_right)
+  }
+
+  # =====================================================================
+  # ESPIADINHA 8: Trajetórias EVOLUTIVAS (MeanZ + VarZ)
+  # Painel duplo lado a lado, mesmo formato da Espiadinha 7
+  #   Esquerda: A_max = 500 (sem restrição ecológica)
+  #   Direita:  A_max = 25  (restrição severa)
+  # =====================================================================
+  p_evo_left  <- trajetoria_evolutiva(amax = 500, num_espiadinha = 8)
+  p_evo_right <- trajetoria_evolutiva(amax = 25,  num_espiadinha = 8)
+
+  if (!is.null(p_evo_left) && !is.null(p_evo_right)) {
+    p_evo_left_clean  <- p_evo_left  +
+      labs(title = "A_max = 500",
+           subtitle = "500 machos amostrados por fêmea") +
+      theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
+            plot.subtitle = element_text(size = 10, hjust = 0.5),
+            plot.title.position = "plot",
+            legend.position = "bottom")
+
+    p_evo_right_clean <- p_evo_right +
+      labs(title = "A_max = 25",
+           subtitle = "25 machos amostrados por fêmea",
+           y = NULL) +
+      theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
+            plot.subtitle = element_text(size = 10, hjust = 0.5),
+            plot.title.position = "plot",
+            legend.position = "bottom",
+            axis.text.y = element_blank())
+
+    p_evo_combinado <- (p_evo_left_clean | p_evo_right_clean) +
+      plot_annotation(
+        title    = "ESPIADINHA 8: Trajetórias evolutivas (média e variância do traço masculino)",
+        subtitle = "Linha tracejada cinza = φ = 5.0 (ótimo ecológico) | Eixo Y consistente entre painéis",
+        theme = theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
+                      plot.subtitle = element_text(size = 11, hjust = 0.5),
+                      legend.position = "bottom")
+      ) +
+      plot_layout(guides = "collect")
+
+    print(p_evo_combinado)
+  } else {
+    if (!is.null(p_evo_left))  print(p_evo_left)
+    if (!is.null(p_evo_right)) print(p_evo_right)
+  }
+
+  # =====================================================================
+  # TABELA: Comparação Geração 1 vs Geração 50 para todas as métricas
+  # =====================================================================
+  cat("\n\n========== TABELA: Gen 1 vs Gen 50 ==========\n")
+
+  df_tabela <- df_parcial %>%
+    filter(generation %in% c(1, 50)) %>%
+    drop_na() %>%
+    group_by(generation, tipo_selecao, sigma_p, encounters_n) %>%
+    summarise(
+      Modularity     = mean(Modularity,     na.rm = TRUE),
+      Nestedness     = mean(Nestedness,     na.rm = TRUE),
+      I_s            = mean(I_s,            na.rm = TRUE),
+      Centralization = mean(Centralization, na.rm = TRUE),
+      varz_males     = mean(varz_males,     na.rm = TRUE),
+      zbar_males     = mean(zbar_males,     na.rm = TRUE),
+      n_reps         = n(),
+      .groups = "drop"
+    ) %>%
+    pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization,
+                          varz_males, zbar_males),
+                 names_to = "Metrica", values_to = "Valor") %>%
+    pivot_wider(names_from = generation, names_prefix = "Gen_", values_from = Valor) %>%
+    mutate(Delta       = Gen_50 - Gen_1,
+           Delta_pct   = 100 * (Gen_50 - Gen_1) / Gen_1) %>%
+    arrange(encounters_n, sigma_p, tipo_selecao, Metrica)
+
+  # Imprime no console em formato legível
+  print(df_tabela, n = Inf, width = Inf)
+
+  # Salva como CSV para análise posterior
+  out_csv <- "Resultados_Artigo/Fase4_TodasAsCurvas/Dados/Tabela_Gen1_vs_Gen50.csv"
+  write.csv(df_tabela, out_csv, row.names = FALSE)
+  cat(sprintf("\nTabela salva em: %s\n", out_csv))
+
+  # =====================================================================
+  # TABELA FOCAL: Modularity + Nestedness | A_max=500 | sigma_p=2.0
+  # =====================================================================
+  cat("\n\n========== TABELA FOCAL: Mod + Nest | A_max=500 | σp=2.0 ==========\n")
+
+  df_focal <- df_tabela %>%
+    filter(Metrica %in% c("Modularity", "Nestedness"),
+           encounters_n == 500,
+           sigma_p == 2.0) %>%
+    select(tipo_selecao, Metrica, Gen_1, Gen_50, Delta, Delta_pct) %>%
+    arrange(Metrica, tipo_selecao) %>%
+    mutate(across(c(Gen_1, Gen_50, Delta), \(x) round(x, 3)),
+           Delta_pct = round(Delta_pct, 1))
+
+  print(df_focal, n = Inf)
 
 } else {
   cat("O arquivo de backup ainda não foi criado. Espere a simulação rodar mais um pouco!\n")
