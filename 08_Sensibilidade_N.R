@@ -5,15 +5,15 @@
 # são robustas ao tamanho populacional (N=200 vs N=1000), ou se são
 # artefatos demográficos da rede esparsa.
 #
-# Design minimalista para material suplementar:
+# Design para material suplementar:
 #   N            : 200 vs 1000
-#   tipo_selecao : uniform, gaussian, u-shaped
+#   tipo_selecao : uniform, gaussian, sigmoid, u-shaped (4 funções completas)
 #   sigma_p      : 0.5, 2.0
 #   encounters_n : 200 (condição ideal, sem ruído ecológico)
 #   réplicas     : 30
 #   gerações     : 50
 #
-# Total: 2 x 3 x 2 x 30 = 360 simulações
+# Total: 2 x 4 x 2 x 30 = 480 simulações
 # =====================================================================
 source("01_metricas_e_utilitarios.R")
 
@@ -30,7 +30,7 @@ dir08 <- configurar_diretorios("Fase8_SensibilidadeN")
 # =====================================================================
 cenarios <- expand.grid(
   N_pop        = c(200, 1000),
-  tipo_selecao = c("uniform", "gaussian", "u-shaped"),
+  tipo_selecao = c("uniform", "gaussian", "sigmoid", "u-shaped"),
   sigma_p      = c(0.5, 2.0),
   encounters_n = 200,
   replica      = 1:30,
@@ -94,73 +94,86 @@ cat(sprintf("\nConcluído! %d linhas salvas em: %s\n", nrow(df_sens), arquivo_fi
 # =====================================================================
 # ANÁLISE E GRÁFICOS (Geração 50)
 # =====================================================================
+
+backup <- readRDS("Resultados_Artigo/Fase8_SensibilidadeN/Dados/backup_sensibilidade_N.rds")
+df_sens <- bind_rows(backup[!sapply(backup, is.null)])
+
+table(df_sens$tipo_selecao) ### no inclui la sigmoinal....:/
+
+# Preparar para gráficos
 df_gen50 <- df_sens %>%
-  filter(generation == 50) %>%
-  drop_na() %>%
+  filter(generation == 50) %>% drop_na() %>%
   mutate(
     N_label    = factor(paste0("N = ", N_pop), levels = c("N = 200", "N = 1000")),
     tipo_label = factor(tipo_selecao,
-                        levels = c("uniform", "gaussian", "u-shaped"),
-                        labels = c("Aleatória", "Gaussiana", "Disruptiva"))
+                        levels = c("uniform", "gaussian", "sigmoid", "u-shaped"),
+                        labels = c("Aleatória", "Gaussiana", "Sigmoide", "Disruptiva"))
   )
 
-cores_3 <- c("Aleatória" = "gray60", "Gaussiana" = "#E6B800", "Disruptiva" = "#9932CC")
+cores_4 <- c("Aleatória"="gray60", "Gaussiana"="#E6B800",
+             "Sigmoide"="#3BA273", "Disruptiva"="#9932CC")
+tema <- theme_light(base_size=13) +
+  theme(legend.position="bottom",
+        strip.background=element_rect(fill="gray10"),
+        strip.text=element_text(color="white", face="bold"))
 
-tema <- theme_light(base_size = 13) +
-  theme(legend.position  = "bottom",
-        strip.background = element_rect(fill = "gray10"),
-        strip.text       = element_text(color = "white", face = "bold"))
+# Plot 1 — Modularity
+p_mod <- ggplot(df_gen50, aes(x=tipo_label, y=Modularity, color=tipo_label, fill=tipo_label)) +
+  geom_boxplot(alpha=0.3, outlier.size=0.8) +
+  facet_grid(N_label ~ factor(sigma_p, labels=c("σp = 0.5","σp = 2.0"))) +
+  scale_color_manual(values=cores_4) + scale_fill_manual(values=cores_4) +
+  labs(title="Sensibilidade ao N: Modularidade", x="", y="Modularity (Louvain)", color="", fill="") + tema
 
-# ---------------------------------------------------------------------
-# PLOT 1: Modularity — sinal topológico persiste com N=1000?
-# ---------------------------------------------------------------------
-p_mod <- ggplot(df_gen50, aes(x = tipo_label, y = Modularity,
-                               color = tipo_label, fill = tipo_label)) +
-  geom_boxplot(alpha = 0.3, outlier.size = 0.8) +
-  facet_grid(N_label ~ factor(sigma_p, labels = c("σp = 0.5", "σp = 2.0"))) +
-  scale_color_manual(values = cores_3) +
-  scale_fill_manual(values  = cores_3) +
-  labs(title    = "Sensibilidade ao N: Modularidade",
-       subtitle = "Cada caixa = 30 réplicas na Geração 50",
-       x = "", y = "Modularity (Louvain)", color = "", fill = "") +
-  tema
+# Plot 2 — Varz
+p_varz <- ggplot(df_gen50, aes(x=tipo_label, y=varz_males, color=tipo_label, fill=tipo_label)) +
+  geom_boxplot(alpha=0.3, outlier.size=0.8) +
+  facet_grid(N_label ~ factor(sigma_p, labels=c("σp = 0.5","σp = 2.0"))) +
+  scale_color_manual(values=cores_4) + scale_fill_manual(values=cores_4) +
+  labs(title="Sensibilidade ao N: Diversidade Genética", x="", y="Var(z) machos", color="", fill="") + tema
 
-# ---------------------------------------------------------------------
-# PLOT 2: Variância genética — rescate persiste com N=1000?
-# ---------------------------------------------------------------------
-p_varz <- ggplot(df_gen50, aes(x = tipo_label, y = varz_males,
-                                color = tipo_label, fill = tipo_label)) +
-  geom_boxplot(alpha = 0.3, outlier.size = 0.8) +
-  facet_grid(N_label ~ factor(sigma_p, labels = c("σp = 0.5", "σp = 2.0"))) +
-  scale_color_manual(values = cores_3) +
-  scale_fill_manual(values  = cores_3) +
-  labs(title    = "Sensibilidade ao N: Diversidade Genética",
-       subtitle = "Cada caixa = 30 réplicas na Geração 50",
-       x = "", y = "Var(z) machos", color = "", fill = "") +
-  tema
+# Plot 3 — zbar
+p_zbar <- ggplot(df_gen50, aes(x=tipo_label, y=zbar_males, color=tipo_label, fill=tipo_label)) +
+  geom_boxplot(alpha=0.3, outlier.size=0.8) +
+  geom_hline(yintercept=5.0, linetype="dashed", alpha=0.5) +
+  facet_grid(N_label ~ factor(sigma_p, labels=c("σp = 0.5","σp = 2.0"))) +
+  scale_color_manual(values=cores_4) + scale_fill_manual(values=cores_4) +
+  labs(title="Sensibilidade ao N: Exagero do Traço", x="", y="Média z machos", color="", fill="") + tema
 
-# ---------------------------------------------------------------------
-# PLOT 3: Média do traço — exagero persiste com N=1000?
-# ---------------------------------------------------------------------
-p_zbar <- ggplot(df_gen50, aes(x = tipo_label, y = zbar_males,
-                                color = tipo_label, fill = tipo_label)) +
-  geom_boxplot(alpha = 0.3, outlier.size = 0.8) +
-  geom_hline(yintercept = 5.0, linetype = "dashed", alpha = 0.5) +
-  facet_grid(N_label ~ factor(sigma_p, labels = c("σp = 0.5", "σp = 2.0"))) +
-  scale_color_manual(values = cores_3) +
-  scale_fill_manual(values  = cores_3) +
-  labs(title    = "Sensibilidade ao N: Exagero do Traço",
-       subtitle = "Linha tracejada = φ = 5.0 (ótimo ecológico)",
-       x = "", y = "Média z machos", color = "", fill = "") +
-  tema
+# Salvar
+out <- "Resultados_Artigo/Fase8_SensibilidadeN/Graficos/"
+ggsave(paste0(out,"Sens_N_Modularity.png"), p_mod, width=9, height=7, dpi=300, bg="white")
+ggsave(paste0(out,"Sens_N_VarZ.png"), p_varz, width=9, height=7, dpi=300, bg="white")
+ggsave(paste0(out,"Sens_N_ZbarMachos.png"), p_zbar, width=9, height=7, dpi=300, bg="white")
+cat("Listo!\n")
 
-# Exibir
-print(p_mod)
-print(p_varz)
-print(p_zbar)
+# ---- MÉTRICAS DE REDE ADICIONAIS ----
 
-# Exportar
-ggsave(file.path(dir08$graficos, "Sens_N_Modularity.png"),  plot = p_mod,  width = 9, height = 7, dpi = 300, bg = "white")
-ggsave(file.path(dir08$graficos, "Sens_N_VarZ.png"),        plot = p_varz, width = 9, height = 7, dpi = 300, bg = "white")
-ggsave(file.path(dir08$graficos, "Sens_N_ZbarMachos.png"),  plot = p_zbar, width = 9, height = 7, dpi = 300, bg = "white")
-cat("\nGráficos de sensibilidade salvos em:", dir08$graficos, "\n")
+# Plot 4 — Nestedness (NODF)
+p_nest <- ggplot(df_gen50, aes(x=tipo_label, y=Nestedness, color=tipo_label, fill=tipo_label)) +
+  geom_boxplot(alpha=0.3, outlier.size=0.8) +
+  facet_grid(N_label ~ factor(sigma_p, labels=c("σp = 0.5","σp = 2.0"))) +
+  scale_color_manual(values=cores_4) + scale_fill_manual(values=cores_4) +
+  labs(title="Sensibilidade ao N: Aninhamento (NODF)",
+       x="", y="Nestedness", color="", fill="") + tema
+
+# Plot 5 — Centralization
+p_cent <- ggplot(df_gen50, aes(x=tipo_label, y=Centralization, color=tipo_label, fill=tipo_label)) +
+  geom_boxplot(alpha=0.3, outlier.size=0.8) +
+  facet_grid(N_label ~ factor(sigma_p, labels=c("σp = 0.5","σp = 2.0"))) +
+  scale_color_manual(values=cores_4) + scale_fill_manual(values=cores_4) +
+  labs(title="Sensibilidade ao N: Centralização",
+       x="", y="Degree Centralization", color="", fill="") + tema
+
+# Plot 6 — Is (Opportunity for Sexual Selection)
+p_is <- ggplot(df_gen50, aes(x=tipo_label, y=I_s, color=tipo_label, fill=tipo_label)) +
+  geom_boxplot(alpha=0.3, outlier.size=0.8) +
+  facet_grid(N_label ~ factor(sigma_p, labels=c("σp = 0.5","σp = 2.0"))) +
+  scale_color_manual(values=cores_4) + scale_fill_manual(values=cores_4) +
+  labs(title="Sensibilidade ao N: Oportunidade de Seleção Sexual",
+       x="", y=expression(I[s]), color="", fill="") + tema
+
+# Mostrar e salvar
+print(p_nest); print(p_cent); print(p_is)
+ggsave(paste0(out,"Sens_N_Nestedness.png"), p_nest, width=9, height=7, dpi=300, bg="white")
+ggsave(paste0(out,"Sens_N_Centralization.png"), p_cent, width=9, height=7, dpi=300, bg="white")
+ggsave(paste0(out,"Sens_N_Is.png"), p_is, width=9, height=7, dpi=300, bg="white")
