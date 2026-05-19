@@ -122,11 +122,11 @@ From these premises, we derive three hierarchical hypotheses, each with explicit
 
 *Predictions:*
 
-- P3a: At $A_{max} = 200$ (unrestricted), the four preference functions produce maximally divergent topological signatures.
-- P3b: As $A_{max}$ decreases, topological metrics converge toward the values observed under the uniform (null) function.
-- P3c: The evolutionary trajectories of $\bar{z}$ and $\text{Var}(z)$ converge across all preference functions under low $A_{max}$.
+- H3a: At $A_{max} = 500$ (unrestricted, 100% of $N$), the four preference functions produce maximally divergent topological signatures.
+- H3b: As $A_{max}$ decreases, topological metrics converge toward the values observed under the uniform (null) function.
+- H3c: The evolutionary trajectories of $\bar{z}$ and $\text{Var}(z)$ converge across all preference functions under low $A_{max}$.
 
-*What we measure:* Topological metrics and evolutionary outcomes at Generation 50 across $A_{max} \in \{20, 100, 200\}$, for all four preference functions and the full $\sigma_p$ gradient.
+*What we measure:* Topological metrics and evolutionary outcomes at Generation 50 across $A_{max} \in \{25, 100, 500\}$ (i.e., 5%, 20%, and 100% of $N$), for all four preference functions and the full $\sigma_p$ gradient.
 
 ---
 
@@ -136,12 +136,12 @@ From these premises, we derive three hierarchical hypotheses, each with explicit
 
 To explore how within-population variation in mate preference shapes the topology of sexual networks and mediates eco-evolutionary dynamics, we developed a forward-time, individual-based model (IBM).
 A forward-time model means the simulation chronologically tracks the explicit fate, interactions, and reproduction of every single individual across successive generations.
-We simulated populations with discrete, non-overlapping generations and a constant carrying capacity of $N = 200$ adult males and $N = 200$ adult females.
+We simulated populations with discrete, non-overlapping generations and a constant carrying capacity of $N = 500$ adult males and $N = 500$ adult females.
 In each generation, individuals underwent a strict sequence of life-history events (see Figure 1): viability selection (males only), sequential mate assessment and network formation, reproduction via sperm competition, and death.
 
 ```{r fig1-placeholder, echo=FALSE, fig.cap="Figure 1. Life cycle of the individual-based model. Each generation comprises four sequential phases: (i) viability selection on males based on the natural-selection optimum $\\phi$; (ii) mate assessment and bipartite network formation according to the active preference function; (iii) reproduction with sperm competition among partners; and (iv) density-independent juvenile mortality maintaining constant population size $N$."}
 # [Figure 1 placeholder: insert IBM_life_cycle_v2_initial_conditions.svg here]
-knitr::include_graphics("IBM_life_cycle_v2_initial_conditions.svg")
+#knitr::include_graphics("Resultados_Artigo/IBM_life_cycle_v2_initial_conditions.svg")
 ```
 
 ## 2.2. Viability Selection and Genetic Inheritance
@@ -212,7 +212,7 @@ Integrating demographic mechanics from Tarantino & Garcia-Gonzalez (2025), a fem
 Polyandry thus grants a direct fitness benefit, simulating the acquisition of nuptial gifts or additional resources common in arthropod mating systems.
 Paternity for each offspring was assigned via a "fair raffle" sperm competition model among the female's network partners.
 Finally, to maintain a constant population size, all offspring were pooled into a juvenile cohort.
-Extrinsic, density-independent random mortality was applied until exactly 200 males and 200 females survived to form the next generation's adult population.
+Extrinsic, density-independent random mortality was applied until exactly 500 males and 500 females survived to form the next generation's adult population.
 
 ## 2.5. Network Analysis and Sexual Selection Proxies
 
@@ -237,13 +237,13 @@ While modularity captures fragmentation into *multiple* local centres, centraliz
 
 We ran a fully crossed design tracking evolutionary trajectories across 100 independent replicates per scenario over 50 generations.
 
-- **Phase 1 (Baseline Topologies):** Contrasted Uniform vs. Gaussian preferences under equal phenotypic variance ($\sigma_p = \sigma_{z,init} = 1.0$) and optimal sampling ($A_{max} = 200$).
+- **Phase 1 (Baseline Topologies):** Contrasted Uniform vs. Gaussian preferences under equal phenotypic variance ($\sigma_p = \sigma_{z,init} = 1.0$) and optimal sampling ($A_{max} = 500$, i.e. 100% of $N$).
 
 - **Phase 2 (Preference Variation and Tipping Points):** Evaluated a continuous gradient of female preference variation ($\sigma_p \in \{0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0\}$) across Uniform and Gaussian regimes to detect the threshold at which assortative modularity rescues genetic variance.
 
-- **Phase 3 (Ecological Noise and Sampling Costs):** Fixed $\sigma_p = 2.0$ and constrained sampling capacity ($A_{max} \in \{20, 50, 100, 200\}$) across Uniform and Gaussian preference functions, to test whether modularity and evolutionary rescue collapse under ecological search costs.
+- **Phase 3 (Ecological Noise and Sampling Costs):** Fixed $\sigma_p = 2.0$ and constrained sampling capacity ($A_{max} \in \{25, 100, 500\}$, i.e. 5%, 20%, and 100% of $N$) across Uniform and Gaussian preference functions, to test whether modularity and evolutionary rescue collapse under ecological search costs.
 
-- **Phase 4 (Topological Signatures of Selection):** Compared all four preference functions across the $\sigma_p$ gradient at three sampling capacities ($A_{max} \in \{20, 100, 200\}$) to evaluate the interaction between fundamental selection regimes and ecological noise.
+- **Phase 4 (Topological Signatures of Selection):** Compared all four preference functions across the $\sigma_p$ gradient at three sampling capacities ($A_{max} \in \{25, 100, 500\}$, i.e. 5%, 20%, and 100% of $N$) to evaluate the interaction between fundamental selection regimes and ecological noise.
 
 ## 2.7. Statistical Analyses
 
@@ -255,7 +255,7 @@ Because each simulation at Generation 50 constitutes an independent observation,
 We built three primary models: (1) predicting genetic variance ($\text{Var}(z)$) as a function of Modularity, (2) predicting trait exaggeration ($\bar{z}$) as a function of Nestedness, and (3) predicting the Opportunity for Sexual Selection ($I_s$) as a function of both Degree Centralization and Modularity, to untangle whether reproductive skew is driven by global monopolisation or network fragmentation.
 To control for confounding effects, preference function type, preference variation ($\sigma_p$), and sampling capacity ($A_{max}$) were included as fixed covariates in all models.
 All continuous predictors were Z-scored prior to modelling to facilitate direct effect-size comparison.
-All analyses were conducted in R version 4.x using the packages `lme4`, `dplyr`, `ggplot2`, `igraph`, and `bipartite`.
+All analyses were conducted in R version 4.x using the packages `dplyr`, `tidyr`, `ggplot2`, `igraph`, and `bipartite`.
 
 ## 2.8. Parameterization and Model Overview
 
@@ -270,7 +270,7 @@ Table 1 summarises the parameters, variables, and probabilistic distributions us
 | $p$ | Individual female preference (preferred trait value) | Truncated Gaussian distribution; mean $p_{mean}=5$, standard deviation $\sigma_p \in \{0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0\}$; minimum zero. |
 | $s$ | Individual female choosiness | Truncated Gaussian distribution; population mean $s_{mean}=2.0$, standard deviation $\sigma_s=0.2$; minimum zero. |
 | $P_{ij}$ | Probability of copulation between female $i$ and male $j$ | Governed by Uniform, Gaussian, Sigmoid, or U-shaped preference functions. |
-| $A_{max}$ | Maximum number of male assessments per female | Default $200$; varied proportionally $\in \{20, 100, 200\}$ in Phases 3 and 4. |
+| $A_{max}$ | Maximum number of male assessments per female | Default $500$ (100% of $N$); varied proportionally $\in \{25, 100, 500\}$ (5%, 20%, 100% of $N$) in Phases 3 and 4. |
 | $C$ | Female polyandry limit (number of actual copulations) | Randomly sampled from a uniform discrete distribution: $U(1, 3)$ matings per female. |
 | **Evolutionary Time (Survival & Genetic Inheritance)** | | |
 | $V_j$ | Viability (survival probability) of male $j$ before mating | Given by $\exp(-\gamma(z_j - \phi)^2)$. |
@@ -278,12 +278,18 @@ Table 1 summarises the parameters, variables, and probabilistic distributions us
 | $\gamma$ | Intensity of stabilising natural selection acting on $z$ | $0.2$ |
 | $F_{base}$ | Base fecundity reward per copulation event | $10$ offspring per successful network edge (mating). |
 | $\epsilon$ | Segregation variance (mutation/recombination noise) | Normal distribution with mean $0$ and standard deviation $\sigma_\epsilon = 0.2$. |
-| $N$ | Adult carrying capacity (population size per sex) | $200$ adult males and $200$ adult females per generation. |
+| $N$ | Adult carrying capacity (population size per sex) | $500$ adult males and $500$ adult females per generation. |
 | $t_{max}$ | Total number of discrete generations simulated | $50$ generations per replicate. |
 
 ---
 
 # 3. Results
+
+> **⚠️ [PENDENTE — Atualizar com resultados de N=500]**
+> Esta seção foi escrita com base nas simulações exploratórias preliminares com $N=200$.
+> Os valores numéricos específicos (e.g., número de tribos, comunidades, coeficientes dos modelos) e os gráficos referenciados (Figure 2, redes representativas, histogramas) precisarão ser regenerados a partir das simulações com $N=500$ atualmente em execução nesta branch.
+> A estrutura narrativa e a interpretação biológica (limiar $\sigma_p = \sigma_z$, relevo topológico, etc.) provavelmente se manterão, mas devem ser reavaliadas após a conclusão das novas simulações.
+> A tradução do português para inglês também está pendente até termos os dados definitivos.
 
 ## 3.1. A Assinatura Topológica Suprema (Fase 4, A_max = 200)
 
