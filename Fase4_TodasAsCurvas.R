@@ -11,7 +11,7 @@
 #    Sigmoide maximiza o Aninhamento (gerando o Fisherian Runaway) e a U-shaped 
 #    maximiza a Modularidade por desassortatividade, resgatando a variância.
 # 2. Para testar o "Ruído Ecológico": Avaliaremos essas 4 curvas sob 3 
-#    restrições de amostragem proporcional (A_max = 500, 100 e 25) para demonstrar que o 
+#    restrições de amostragem proporcional (A_max = 200, 40 e 10) para demonstrar que o
 #    ruído destrói as assinaturas topológicas e neutraliza a evolução.
 # 3. Para fazer a "Prova Causal": Congelaremos a genética (fixando sigma_p = 2.0)
 #    e faremos regressões lineares diretas (Topologia vs Evolução) para provar 
@@ -44,12 +44,12 @@ diretorios <- configurar_diretorios("Fase4_TodasAsCurvas")
 cat("Iniciando Fase 4: O Confronto dos 4 Titãs Evolutivos...\n")
 
 valores_sigma_p <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
-n_replicas <- 100
+n_replicas <- 30  # Rodada exploratória: 30 réplicas (depois pode subir para 100)
 
 cenarios_fase4 <- expand.grid(
   tipo_selecao = c("uniform", "gaussian", "sigmoid", "u-shaped"),
   sigma_p = valores_sigma_p,
-  encounters_n = c(500, 100, 25), # 100%, 20% e 5% de N=500
+  encounters_n = c(200, 40, 10), # 100%, 20% e 5% de N=200
   replica = 1:n_replicas
 )
 
@@ -99,11 +99,11 @@ for (i in 1:nrow(cenarios_fase4)) {
 
   res <- tryCatch({
     simulate_evolution(
-      generations = 50,
-      N_machos = 500,  # <-- N atualizado para 500
-      N_femeas = 500,  # <-- N atualizado para 500
+      generations  = 100,  # <-- Aumentado de 50 para 100
+      N_machos     = 200,  # <-- Voltou para 200
+      N_femeas     = 200,  # <-- Voltou para 200
       tipo_selecao = cenarios_fase4$tipo_selecao[i],
-      sigma_p = cenarios_fase4$sigma_p[i],
+      sigma_p      = cenarios_fase4$sigma_p[i],
       encounters_n = cenarios_fase4$encounters_n[i],
       return_details = FALSE
     )
@@ -145,9 +145,9 @@ cores_4 <- c("uniform" = "gray60", "gaussian" = "#E6B800", "sigmoid" = "#3BA273"
 labels_4 <- c("uniform" = "Aleatória", "gaussian" = "Gaussiana", "sigmoid" = "Sigmoide", "u-shaped" = "Disruptiva")
 
 # ---------------------------------------------------------------------
-# PLOT A: ASSINATURA TOPOLÓGICA (Apenas cenário ideal: A_max = 500)
+# PLOT A: ASSINATURA TOPOLÓGICA (Apenas cenário ideal: A_max = 200)
 # ---------------------------------------------------------------------
-p_fase4_topo <- df_gen50 %>% filter(encounters_n == 500) %>%
+p_fase4_topo <- df_gen50 %>% filter(encounters_n == 200) %>%
   pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization), names_to = "Metrica", values_to = "Valor") %>%
   mutate(Metrica = case_when(Metrica == "Modularity" ~ "1. Modularidade", Metrica == "Nestedness" ~ "2. Aninhamento",
                              Metrica == "I_s" ~ "3. Is", Metrica == "Centralization" ~ "4. Centralidade")) %>%
@@ -157,15 +157,15 @@ p_fase4_topo <- df_gen50 %>% filter(encounters_n == 500) %>%
   geom_jitter(alpha = 0.2, width = 0.05, size = 1.2) +
   facet_wrap(~Metrica, scales = "free_y", ncol=2) +
   scale_color_manual(values = cores_4, labels = labels_4) + scale_fill_manual(values = cores_4, labels = labels_4) +
-  labs(title = "Fase 4: A Assinatura Topológica Suprema (A_max = 500)", subtitle = subtitulo_base,
+  labs(title = "Fase 4: A Assinatura Topológica Suprema (A_max = 200)", subtitle = subtitulo_base,
        x = expression(paste("Variação da Preferência (", sigma[p], ")")), y = "Valor da Métrica", color = "", fill="") +
   guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) + tema_master
 
 # ---------------------------------------------------------------------
-# PLOT B: RUÍDO ECOLÓGICO - A Queda da Evolução (A_max: 500, 100, 25)
+# PLOT B: RUÍDO ECOLÓGICO - A Queda da Evolução (A_max: 200, 40, 10)
 # ---------------------------------------------------------------------
-df_ruido <- df_gen50 %>% mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n), 
-                                                      levels = c("A_max: 500", "A_max: 100", "A_max: 25"))) %>%
+df_ruido <- df_gen50 %>% mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
+                                                      levels = c("A_max: 200", "A_max: 40", "A_max: 10"))) %>%
   pivot_longer(cols = c(zbar_males, varz_males), names_to = "Variavel", values_to = "Valor") %>%
   mutate(Variavel = ifelse(Variavel == "zbar_males", "1. Média (Exagero)", "2. Diversidade Genética (Var z)"))
 
@@ -182,9 +182,9 @@ p_fase4_ruido <- ggplot(df_ruido, aes(x = sigma_p, y = Valor, color = tipo_selec
   guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) + tema_master
 
 # ---------------------------------------------------------------------
-# PLOT C: A PROVA CAUSAL (A_max = 500, sigma_p fixo em 2.0)
+# PLOT C: A PROVA CAUSAL (A_max = 200, sigma_p fixo em 2.0)
 # ---------------------------------------------------------------------
-df_causal <- df_gen50 %>% filter(encounters_n == 500, sigma_p == 2.0) %>%
+df_causal <- df_gen50 %>% filter(encounters_n == 200, sigma_p == 2.0) %>%
   pivot_longer(cols = c(Modularity, Nestedness), names_to = "Topologia", values_to = "EixoX") %>%
   mutate(Topologia = ifelse(Topologia == "Modularity", "1. Modularidade (vs Var z)", "2. Aninhamento (vs Média z)"),
          EixoY = ifelse(Topologia == "1. Modularidade (vs Var z)", varz_males, zbar_males))

@@ -21,7 +21,7 @@ if(file.exists(arquivo)) {
 
   df_gen50 <- df_parcial %>% filter(generation == 50) %>% drop_na() %>%
     mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
-                                 levels = c("A_max: 500", "A_max: 100", "A_max: 25")))
+                                 levels = c("A_max: 200", "A_max: 40", "A_max: 10")))
 
   cores_4  <- c("uniform"="gray60", "gaussian"="#E6B800", "sigmoid"="#3BA273", "u-shaped"="#9932CC")
   labels_4 <- c("uniform"="Aleatória", "gaussian"="Gaussiana", "sigmoid"="Sigmoide", "u-shaped"="Disruptiva")
@@ -263,25 +263,25 @@ if(file.exists(arquivo)) {
   # =====================================================================
   # ESPIADINHA 7: Trajetórias σp=0.5 vs 2.0 em DOIS níveis de A_max
   # Painel duplo lado a lado:
-  #   Esquerda: A_max = 500 (sem restrição ecológica)
-  #   Direita:  A_max = 25  (restrição severa)
+  #   Esquerda: A_max = 200 (sem restrição ecológica)
+  #   Direita:  A_max = 10  (restrição severa)
   # =====================================================================
-  p_left  <- trajetoria_dois_sigmas(amax = 500, num_espiadinha = 7)
-  p_right <- trajetoria_dois_sigmas(amax = 25,  num_espiadinha = 7)
+  p_left  <- trajetoria_dois_sigmas(amax = 200, num_espiadinha = 7)
+  p_right <- trajetoria_dois_sigmas(amax = 10,  num_espiadinha = 7)
 
   if (!is.null(p_left) && !is.null(p_right)) {
     # Títulos curtos + subtítulos com a descrição
     p_left_clean  <- p_left  +
-      labs(title = "A_max = 500",
-           subtitle = "500 machos amostrados por fêmea") +
+      labs(title = "A_max = 200",
+           subtitle = "200 machos amostrados por fêmea") +
       theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
             plot.subtitle = element_text(size = 10, hjust = 0.5),
             plot.title.position = "plot",
             legend.position = "bottom")
 
     p_right_clean <- p_right +
-      labs(title = "A_max = 25",
-           subtitle = "25 machos amostrados por fêmea",
+      labs(title = "A_max = 10",
+           subtitle = "10 machos amostrados por fêmea",
            y = NULL) +
       theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
             plot.subtitle = element_text(size = 10, hjust = 0.5),
@@ -308,24 +308,24 @@ if(file.exists(arquivo)) {
   # =====================================================================
   # ESPIADINHA 8: Trajetórias EVOLUTIVAS (MeanZ + VarZ)
   # Painel duplo lado a lado, mesmo formato da Espiadinha 7
-  #   Esquerda: A_max = 500 (sem restrição ecológica)
-  #   Direita:  A_max = 25  (restrição severa)
+  #   Esquerda: A_max = 200 (sem restrição ecológica)
+  #   Direita:  A_max = 10  (restrição severa)
   # =====================================================================
-  p_evo_left  <- trajetoria_evolutiva(amax = 500, num_espiadinha = 8)
-  p_evo_right <- trajetoria_evolutiva(amax = 25,  num_espiadinha = 8)
+  p_evo_left  <- trajetoria_evolutiva(amax = 200, num_espiadinha = 8)
+  p_evo_right <- trajetoria_evolutiva(amax = 10,  num_espiadinha = 8)
 
   if (!is.null(p_evo_left) && !is.null(p_evo_right)) {
     p_evo_left_clean  <- p_evo_left  +
-      labs(title = "A_max = 500",
-           subtitle = "500 machos amostrados por fêmea") +
+      labs(title = "A_max = 200",
+           subtitle = "200 machos amostrados por fêmea") +
       theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
             plot.subtitle = element_text(size = 10, hjust = 0.5),
             plot.title.position = "plot",
             legend.position = "bottom")
 
     p_evo_right_clean <- p_evo_right +
-      labs(title = "A_max = 25",
-           subtitle = "25 machos amostrados por fêmea",
+      labs(title = "A_max = 10",
+           subtitle = "10 machos amostrados por fêmea",
            y = NULL) +
       theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
             plot.subtitle = element_text(size = 10, hjust = 0.5),
