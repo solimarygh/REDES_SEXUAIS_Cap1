@@ -232,7 +232,7 @@ ensure_min_survivors <- function(survive_vec, viability, min_surv = 2) {
 }
 
 mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
-                                min_cop = 1, max_cop = 3, encounters_n = 200) {
+                                min_cop = 1, max_cop = 5, encounters_n = 200) {
   n_m <- length(male_z_surv); n_f <- length(female_p)
   matings_per_female <- sample(min_cop:max_cop, n_f, replace = TRUE)
   M <- matrix(0L, nrow = n_m, ncol = n_f)
@@ -281,9 +281,15 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
 # en el espermatóforo, aumentando la cantidad de huevos que pone la hembra.-- Aclaré mejor en el texto.
 # =====================================================================
 
-produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, N_females_next = 200, fecundidade_base = 10, eps_sd = 0.2) {
+produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, N_females_next = 200, fecundidade_base = 50, eps_sd = 0.2) {
   n_femeas <- ncol(M)
-  num_filhotes_por_femea <- colSums(M) * fecundidade_base
+  # POLIANDRIA NEUTRA: fecundidade fixa por fêmea, independente do número de parceiros.
+  # A poliandria continua importando para a competência espermática (paternidade
+  # ainda é distribuída entre as parceiras via "fair raffle"), mas NÃO para o
+  # número total de filhotes. Decisão tomada em reunião com supervisor (2026-05-21).
+  # Hembras que não acasalaram com ninguém recebem 0 filhotes.
+  acasalaram <- colSums(M) > 0
+  num_filhotes_por_femea <- ifelse(acasalaram, fecundidade_base, 0)
   total_juveniles <- sum(num_filhotes_por_femea)
   
   # Segurança: se ninguém acasalou, devolve a geração anterior

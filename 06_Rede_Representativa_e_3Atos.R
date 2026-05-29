@@ -36,7 +36,7 @@ rodar_cenario <- function(tipo_selecao, sigma_p, encounters_n) {
   cat(sprintf("\n>>> Rodando: %s | sigmap=%.1f | Amax=%d\n", tipo_selecao, sigma_p, encounters_n))
 
   # 1) Simulação: busca rede representativa na fase estável
-  simulate_stable_phase <- function(generations=50, N_machos=200, N_femeas=200, gen_inicio=20) {
+  simulate_stable_phase <- function(generations=100, N_machos=200, N_femeas=200, gen_inicio=40) {
     male_z_gen1   <- pmax(0, rnorm(N_machos, 5, 1.0))
     female_p_gen1 <- pmax(0, rnorm(N_femeas, 5, sigma_p))
     female_z_gen1 <- pmax(0, rnorm(N_femeas, 5, 1.0))
@@ -120,7 +120,7 @@ rodar_cenario <- function(tipo_selecao, sigma_p, encounters_n) {
                Geracao=sprintf("2. A Rede (Gen %d)", rede_escolhida$geracao)),
     data.frame(Valor=c(pop_escolhida$Gen50$Z_Machos, pop_escolhida$Gen50$P_Femeas),
                Nome=c(rep("Macho (z)", length(pop_escolhida$Gen50$Z_Machos)), rep("Fêmea (p)",200)),
-               Geracao="3. O Destino (Gen 50)")
+               Geracao="3. O Destino (Gen 100)")
   )
   p_hist <- ggplot(df_hist, aes(x=Valor, fill=Nome, color=Nome)) +
     geom_density(alpha=0.4, linewidth=1) + facet_wrap(~Geracao, ncol=1) +
@@ -161,8 +161,8 @@ rodar_cenario(TIPO_SELECAO, SIGMA_P, ENCOUNTERS_N)
 # =====================================================================
 cenarios <- expand.grid(
   tipo_selecao = c("uniform", "gaussian", "sigmoid", "u-shaped"),
-  sigma_p      = c(0.5, 1.0, 2.0),
-  encounters_n = 200,
+  sigma_p      = c(0.5, 2.0),
+  encounters_n = c(200, 40, 10),
   stringsAsFactors = FALSE
 )
 
@@ -181,41 +181,50 @@ write.csv(tabela_resumo, file.path(diretorios$dados, "resumo_redes_representativ
 cat("\nTabela resumo salva!\n")
 
 # -----------------------------------------------------------------
-# PAINÉIS COMPARATIVOS: um painel de redes por sigma_p
+# PAINÉIS COMPARATIVOS: um painel de redes por (sigma_p × A_max)
 # -----------------------------------------------------------------
-for (sp in c(0.5, 1.0, 2.0)) {
-  idx <- which(cenarios$sigma_p == sp)
-  nome_painel <- sprintf("%s/Painel_Redes_sigmap%.1f_Amax200.png", diretorios$graficos, sp)
-  png(nome_painel, width=5600, height=5600, res=300); par(mfrow=c(2,2), mar=c(3,2,5,2))
+sigmas_painel <- unique(cenarios$sigma_p)
+amaxes_painel <- unique(cenarios$encounters_n)
 
-  for (i in idx) {
-    r  <- resultados[[i]]
-    tl <- labels_tipo[cenarios$tipo_selecao[i]]
-    plot(r$g_final, layout=r$layout_fr, vertex.color=r$cores_comunidade,
-         vertex.shape=r$formas, vertex.size=4, vertex.label=NA,
-         vertex.frame.color=rgb(0,0,0,0.2), edge.color=rgb(0.4,0.4,0.4,0.12),
-         edge.width=0.8,
-         main=sprintf("%s\nMod: %.3f | Tribos: %d | Comunidades: %d",
-                      tl, r$rede_escolhida$modularity, r$num_grupos, r$n_comunidades))
+for (sp in sigmas_painel) {
+  for (am in amaxes_painel) {
+    idx <- which(cenarios$sigma_p == sp & cenarios$encounters_n == am)
+    nome_painel <- sprintf("%s/Painel_Redes_sigmap%.1f_Amax%d.png",
+                           diretorios$graficos, sp, am)
+    png(nome_painel, width=5600, height=5600, res=300); par(mfrow=c(2,2), mar=c(3,2,5,2))
+
+    for (i in idx) {
+      r  <- resultados[[i]]
+      tl <- labels_tipo[cenarios$tipo_selecao[i]]
+      plot(r$g_final, layout=r$layout_fr, vertex.color=r$cores_comunidade,
+           vertex.shape=r$formas, vertex.size=4, vertex.label=NA,
+           vertex.frame.color=rgb(0,0,0,0.2), edge.color=rgb(0.4,0.4,0.4,0.12),
+           edge.width=0.8,
+           main=sprintf("%s\nMod: %.3f | Tribos: %d | Comunidades: %d",
+                        tl, r$rede_escolhida$modularity, r$num_grupos, r$n_comunidades))
+    }
+    dev.off()
+    cat(sprintf("Painel de redes salvo: %s\n", nome_painel))
   }
-  dev.off()
-  cat(sprintf("Painel de redes salvo: %s\n", nome_painel))
 }
 
 # -----------------------------------------------------------------
-# PAINÉIS COMPARATIVOS: um painel de histogramas por sigma_p
+# PAINÉIS COMPARATIVOS: um painel de histogramas por (sigma_p × A_max)
 # -----------------------------------------------------------------
-for (sp in c(0.5, 1.0, 2.0)) {
-  idx <- which(cenarios$sigma_p == sp)
-  plots_hist <- lapply(idx, function(i) {
-    tl <- labels_tipo[cenarios$tipo_selecao[i]]
-    resultados[[i]]$p_hist + ggtitle(tl) + theme(plot.title=element_text(size=12, face="bold"))
-  })
-  painel_hist <- (plots_hist[[1]] | plots_hist[[2]]) / (plots_hist[[3]] | plots_hist[[4]]) +
-    plot_annotation(title=sprintf("Evolução em 3 Atos — σp = %.1f | A_max = 200", sp),
-                    theme=theme(plot.title=element_text(size=16, face="bold", hjust=0.5)))
+for (sp in sigmas_painel) {
+  for (am in amaxes_painel) {
+    idx <- which(cenarios$sigma_p == sp & cenarios$encounters_n == am)
+    plots_hist <- lapply(idx, function(i) {
+      tl <- labels_tipo[cenarios$tipo_selecao[i]]
+      resultados[[i]]$p_hist + ggtitle(tl) + theme(plot.title=element_text(size=12, face="bold"))
+    })
+    painel_hist <- (plots_hist[[1]] | plots_hist[[2]]) / (plots_hist[[3]] | plots_hist[[4]]) +
+      plot_annotation(title=sprintf("Evolução em 3 Atos — σp = %.1f | A_max = %d", sp, am),
+                      theme=theme(plot.title=element_text(size=16, face="bold", hjust=0.5)))
 
-  nome_hist_painel <- sprintf("%s/Painel_Histogramas_sigmap%.1f_Amax200.png", diretorios$graficos, sp)
-  ggsave(nome_hist_painel, plot=painel_hist, width=16, height=20, dpi=300, bg="white")
-  cat(sprintf("Painel de histogramas salvo: %s\n", nome_hist_painel))
+    nome_hist_painel <- sprintf("%s/Painel_Histogramas_sigmap%.1f_Amax%d.png",
+                                 diretorios$graficos, sp, am)
+    ggsave(nome_hist_painel, plot=painel_hist, width=16, height=20, dpi=300, bg="white")
+    cat(sprintf("Painel de histogramas salvo: %s\n", nome_hist_painel))
+  }
 }
