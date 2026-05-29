@@ -315,6 +315,8 @@ if(file.exists(arquivo)) {
       plot_layout(guides = "collect")
 
     print(p_combinado)
+    ggsave(file.path(dir_espiadinhas, "Espiadinha7_Topologia_Amax.png"),
+           p_combinado, width=14, height=10, dpi=200, bg="white")
   } else {
     if (!is.null(p_left))  print(p_left)
     if (!is.null(p_right)) print(p_right)
