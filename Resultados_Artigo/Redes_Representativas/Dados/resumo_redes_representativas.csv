@@ -1,0 +1,13 @@
+"tipo_selecao","sigma_p","encounters_n","modularity","tribos","comunidades"
+"uniform",0.5,200,0.816,28,47
+"gaussian",0.5,200,0.816,49,65
+"sigmoid",0.5,200,0.793,33,53
+"u-shaped",0.5,200,0.784,32,47
+"uniform",1,200,0.816,28,47
+"gaussian",1,200,0.834,45,62
+"sigmoid",1,200,0.789,30,44
+"u-shaped",1,200,0.811,43,61
+"uniform",2,200,0.816,28,47
+"gaussian",2,200,0.897,79,94
+"sigmoid",2,200,0.798,27,46
+"u-shaped",2,200,0.816,41,57
