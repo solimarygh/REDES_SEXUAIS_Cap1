@@ -8,18 +8,25 @@ library(patchwork)
 
 arquivo <- "Resultados_Artigo/Fase4_TodasAsCurvas/Dados/backup_lista_fase4_final.rds"
 
+# Pasta onde as espiadinhas serão salvas como PNG
+dir_espiadinhas <- "Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Espiadinhas"
+dir.create(dir_espiadinhas, recursive = TRUE, showWarnings = FALSE)
+
 if(file.exists(arquivo)) {
   lista_parcial <- readRDS(arquivo)
   df_parcial <- bind_rows(lista_parcial[!sapply(lista_parcial, is.null)])
+
+  # GEN_FINAL: detecta automaticamente a última geração (50, 100, etc.)
+  GEN_FINAL <- max(df_parcial$generation, na.rm = TRUE)
 
   n_completos <- sum(!sapply(lista_parcial, is.null))
   n_total <- length(lista_parcial)
   cat(sprintf("Espiando! Cenários completos: %d / %d (%.1f%%)\n",
               n_completos, n_total, 100 * n_completos / n_total))
-  cat(sprintf("Linhas no df_parcial: %d  |  Réplicas equivalentes: %.1f\n",
-              nrow(df_parcial), nrow(df_parcial) / 50))
+  cat(sprintf("Linhas no df_parcial: %d  |  Geração final detectada: %d\n",
+              nrow(df_parcial), GEN_FINAL))
 
-  df_gen50 <- df_parcial %>% filter(generation == 50) %>% drop_na() %>%
+  df_gen50 <- df_parcial %>% filter(generation == GEN_FINAL) %>% drop_na() %>%
     mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
                                  levels = c("A_max: 200", "A_max: 40", "A_max: 10")))
 
@@ -112,6 +119,14 @@ if(file.exists(arquivo)) {
   print(p_nest)
   print(p_cent)
   print(p_is)
+
+  # Salvar espiadinhas 1-6 como PNG
+  ggsave(file.path(dir_espiadinhas, "Espiadinha1_VarZ.png"),        p_varz, width=10, height=5, dpi=200, bg="white")
+  ggsave(file.path(dir_espiadinhas, "Espiadinha2_Modularidade.png"), p_mod,  width=10, height=5, dpi=200, bg="white")
+  ggsave(file.path(dir_espiadinhas, "Espiadinha3_MediaTraco.png"),  p_zbar, width=10, height=5, dpi=200, bg="white")
+  ggsave(file.path(dir_espiadinhas, "Espiadinha4_Aninhamento.png"), p_nest, width=10, height=5, dpi=200, bg="white")
+  ggsave(file.path(dir_espiadinhas, "Espiadinha5_Centralizacao.png"), p_cent, width=10, height=5, dpi=200, bg="white")
+  ggsave(file.path(dir_espiadinhas, "Espiadinha6_Is.png"),         p_is,   width=10, height=5, dpi=200, bg="white")
 
   # =====================================================================
   # LIMITES GLOBAIS POR MÉTRICA (para eixo Y consistente entre cenários)
