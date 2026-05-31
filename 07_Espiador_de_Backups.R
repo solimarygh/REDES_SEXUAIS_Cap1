@@ -361,20 +361,23 @@ if(file.exists(arquivo)) {
       plot_layout(guides = "collect")
 
     print(p_evo_combinado)
+    ggsave(file.path(dir_espiadinhas, "Espiadinha8_Evolutivo_Amax.png"),
+           p_evo_combinado, width=14, height=8, dpi=200, bg="white")
   } else {
     if (!is.null(p_evo_left))  print(p_evo_left)
     if (!is.null(p_evo_right)) print(p_evo_right)
   }
 
   # =====================================================================
-  # TABELA: Comparação Geração 1 vs Geração 50 para todas as métricas
+  # TABELA: Comparação Geração 1 vs Geração FINAL para todas as métricas
   # =====================================================================
-  cat("\n\n========== TABELA: Gen 1 vs Gen 50 ==========\n")
+  cat(sprintf("\n\n========== TABELA: Gen 1 vs Gen %d ==========\n", GEN_FINAL))
 
   df_tabela <- df_parcial %>%
-    filter(generation %in% c(1, 50)) %>%
+    filter(generation %in% c(1, GEN_FINAL)) %>%
     drop_na() %>%
-    group_by(generation, tipo_selecao, sigma_p, encounters_n) %>%
+    mutate(gen_label = ifelse(generation == 1, "Gen_inicial", "Gen_final")) %>%
+    group_by(gen_label, tipo_selecao, sigma_p, encounters_n) %>%
     summarise(
       Modularity     = mean(Modularity,     na.rm = TRUE),
       Nestedness     = mean(Nestedness,     na.rm = TRUE),
@@ -388,31 +391,31 @@ if(file.exists(arquivo)) {
     pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization,
                           varz_males, zbar_males),
                  names_to = "Metrica", values_to = "Valor") %>%
-    pivot_wider(names_from = generation, names_prefix = "Gen_", values_from = Valor) %>%
-    mutate(Delta       = Gen_50 - Gen_1,
-           Delta_pct   = 100 * (Gen_50 - Gen_1) / Gen_1) %>%
+    pivot_wider(names_from = gen_label, values_from = Valor) %>%
+    mutate(Delta       = Gen_final - Gen_inicial,
+           Delta_pct   = 100 * (Gen_final - Gen_inicial) / Gen_inicial) %>%
     arrange(encounters_n, sigma_p, tipo_selecao, Metrica)
 
   # Imprime no console em formato legível
   print(df_tabela, n = Inf, width = Inf)
 
   # Salva como CSV para análise posterior
-  out_csv <- "Resultados_Artigo/Fase4_TodasAsCurvas/Dados/Tabela_Gen1_vs_Gen50.csv"
+  out_csv <- sprintf("Resultados_Artigo/Fase4_TodasAsCurvas/Dados/Tabela_Gen1_vs_Gen%d.csv", GEN_FINAL)
   write.csv(df_tabela, out_csv, row.names = FALSE)
   cat(sprintf("\nTabela salva em: %s\n", out_csv))
 
   # =====================================================================
-  # TABELA FOCAL: Modularity + Nestedness | A_max=500 | sigma_p=2.0
+  # TABELA FOCAL: Modularity + Nestedness | A_max=200 | sigma_p=2.0
   # =====================================================================
-  cat("\n\n========== TABELA FOCAL: Mod + Nest | A_max=500 | σp=2.0 ==========\n")
+  cat("\n\n========== TABELA FOCAL: Mod + Nest | A_max=200 | σp=2.0 ==========\n")
 
   df_focal <- df_tabela %>%
     filter(Metrica %in% c("Modularity", "Nestedness"),
-           encounters_n == 500,
+           encounters_n == 200,
            sigma_p == 2.0) %>%
-    select(tipo_selecao, Metrica, Gen_1, Gen_50, Delta, Delta_pct) %>%
+    select(tipo_selecao, Metrica, Gen_inicial, Gen_final, Delta, Delta_pct) %>%
     arrange(Metrica, tipo_selecao) %>%
-    mutate(across(c(Gen_1, Gen_50, Delta), \(x) round(x, 3)),
+    mutate(across(c(Gen_inicial, Gen_final, Delta), \(x) round(x, 3)),
            Delta_pct = round(Delta_pct, 1))
 
   print(df_focal, n = Inf)
