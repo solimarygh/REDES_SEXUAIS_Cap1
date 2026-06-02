@@ -61,7 +61,7 @@ Machos com traço $z_j$ muito diferente do ótimo ecológico $\phi = 5$ têm men
 | Sigmoide (direcional) | $P_{ij} = \dfrac{1}{1 + \exp(-s_i(z_j - p_i))}$ |
 | U-shaped (disruptiva) | $P_{ij} = 1 - \exp\!\left(-s_i(z_j - p_i)^2\right)$ |
 
-onde $p_i \sim \mathcal{N}(5,\, \sigma_p^2)$ é a preferência da fêmea $i$ e $s_i \sim \mathcal{N}(2,\, 0.2^2)$ é a sua discriminação.
+onde $p_i \sim N(5,\, \sigma_p^2)$ é a preferência da fêmea $i$ e $s_i \sim N(2,\, 0.2^2)$ é a sua discriminação.
 
 **3. Fecundidade neutra** — ponto central do desenho experimental:
 
@@ -73,7 +73,7 @@ A poliandria **não aumenta** a fecundidade da fêmea. O número de filhotes é 
 
 **4. Herança quantitativa**:
 
-$$z_{filho} = \frac{z_{pai} + z_{mãe}}{2} + \varepsilon, \quad \varepsilon \sim \mathcal{N}(0,\, 0.2^2)$$
+$$z_{filho} = \frac{z_{pai} + z_{mãe}}{2} + \varepsilon, \quad \varepsilon \sim N(0,\, 0.2^2)$$
 
 ## Métricas de rede calculadas por geração
 
