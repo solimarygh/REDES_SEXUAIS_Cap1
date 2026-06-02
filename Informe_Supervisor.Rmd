@@ -152,10 +152,10 @@ knitr::include_graphics("Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_Pl
 ## Tabela de Resultados: Geração 1 → Geração 100
 
 ```{r tabela, echo=FALSE}
-df <- tryCatch(
-  read.csv("Resultados_Artigo/Fase4_TodasAsCurvas/Dados/Tabela_Gen1_vs_Gen100.csv"),
-  error = function(e) NULL
-)
+csv_files <- list.files("Resultados_Artigo/Fase4_TodasAsCurvas/Dados/",
+                        pattern = "Tabela_Gen1_vs_Gen.*\\.csv",
+                        full.names = TRUE)
+df <- if (length(csv_files) > 0) read.csv(csv_files[1]) else NULL
 
 if (!is.null(df)) {
   df %>%
