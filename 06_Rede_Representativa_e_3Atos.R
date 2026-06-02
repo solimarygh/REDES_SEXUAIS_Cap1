@@ -31,12 +31,14 @@ ENCOUNTERS_N <- 200
 # ---------------------------------------------------------------------
 # FUNÇÃO PRINCIPAL: roda um cenário completo e salva os gráficos
 # ---------------------------------------------------------------------
-rodar_cenario <- function(tipo_selecao, sigma_p, encounters_n) {
+rodar_cenario <- function(tipo_selecao, sigma_p, encounters_n, generations=100) {
 
-  cat(sprintf("\n>>> Rodando: %s | sigmap=%.1f | Amax=%d\n", tipo_selecao, sigma_p, encounters_n))
+  cat(sprintf("\n>>> Rodando: %s | sigmap=%.1f | Amax=%d | Gen=%d\n",
+              tipo_selecao, sigma_p, encounters_n, generations))
 
   # 1) Simulação: busca rede representativa na fase estável
-  simulate_stable_phase <- function(generations=100, N_machos=200, N_femeas=200, gen_inicio=40) {
+  simulate_stable_phase <- function(generations=generations, N_machos=200, N_femeas=200,
+                                    gen_inicio=ceiling(generations * 0.4)) {
     male_z_gen1   <- pmax(0, rnorm(N_machos, 5, 1.0))
     female_p_gen1 <- pmax(0, rnorm(N_femeas, 5, sigma_p))
     female_z_gen1 <- pmax(0, rnorm(N_femeas, 5, 1.0))
@@ -58,11 +60,11 @@ rodar_cenario <- function(tipo_selecao, sigma_p, encounters_n) {
           geracao=t, Matriz_M=M, male_z_surv=male_z_surv, female_p=female_p,
           modularity=safe_modularity(igraph::graph_from_adjacency_matrix(adj, mode="undirected")))
       }
-      if (t == generations) Gen50_dados <- list(Z_Machos=male_z_surv, P_Femeas=female_p)
+      if (t == generations) GenFinal_dados <- list(Z_Machos=male_z_surv, P_Femeas=female_p)
       offspring   <- produce_offspring(M, male_z_surv, female_z_gen, N_machos, N_femeas, eps_sd=0.2)
       male_z_gen  <- offspring$male_z_next; female_z_gen <- offspring$female_z_next
     }
-    list(Gen1=list(Z_Machos=male_z_gen1, P_Femeas=female_p_gen1), Redes=redes_estaveis, Gen50=Gen50_dados)
+    list(Gen1=list(Z_Machos=male_z_gen1, P_Femeas=female_p_gen1), Redes=redes_estaveis, GenFinal=GenFinal_dados)
   }
 
   # 2) Busca da rede com modularity mais próxima da média estável
@@ -99,13 +101,15 @@ rodar_cenario <- function(tipo_selecao, sigma_p, encounters_n) {
   layout_fr <- igraph::layout_with_fr(g_final)
   formas    <- ifelse(V(g_final)$type, "square", "circle")
 
-  nome_rede <- sprintf("%s/Rede_%s_sigmap%.1f_Amax%d.png", diretorios$graficos, tipo_selecao, sigma_p, encounters_n)
+  nome_rede <- sprintf("%s/Rede_%s_sigmap%.1f_Amax%d_Gen%d.png",
+                       diretorios$graficos, tipo_selecao, sigma_p, encounters_n, generations)
   png(nome_rede, width=3000, height=2800, res=300); par(mar=c(5,2,5,2))
   plot(g_final, layout=layout_fr, vertex.color=cores_comunidade, vertex.shape=formas,
        vertex.size=4, vertex.label=NA, vertex.frame.color=rgb(0,0,0,0.2),
        edge.color=rgb(0.4,0.4,0.4,0.12), edge.width=0.8,
-       main=sprintf("Rede Representativa — %s | σp = %.1f | A_max = %d\nMod: %.3f | Tribos: %d | Comunidades: %d",
-                    tipo_selecao, sigma_p, encounters_n, rede_escolhida$modularity, num_grupos, n_comunidades))
+       main=sprintf("Rede Representativa — %s | σp = %.1f | A_max = %d | N=200 | Gen=%d\nMod: %.3f | Tribos: %d | Comunidades: %d",
+                    tipo_selecao, sigma_p, encounters_n, generations,
+                    rede_escolhida$modularity, num_grupos, n_comunidades))
   legend("bottomleft", legend=c("Macho","Fêmea"), pch=c(15,16), col="gray40", pt.cex=2, bty="n", title="Tipo")
   legend("bottomright", legend=paste("Comunidade", 1:n_comunidades), fill=paleta, bty="n", title="Louvain")
   dev.off()
@@ -118,9 +122,9 @@ rodar_cenario <- function(tipo_selecao, sigma_p, encounters_n) {
     data.frame(Valor=c(rede_escolhida$male_z_surv, rede_escolhida$female_p),
                Nome=c(rep("Macho (z)", length(rede_escolhida$male_z_surv)), rep("Fêmea (p)",200)),
                Geracao=sprintf("2. A Rede (Gen %d)", rede_escolhida$geracao)),
-    data.frame(Valor=c(pop_escolhida$Gen50$Z_Machos, pop_escolhida$Gen50$P_Femeas),
-               Nome=c(rep("Macho (z)", length(pop_escolhida$Gen50$Z_Machos)), rep("Fêmea (p)",200)),
-               Geracao="3. O Destino (Gen 100)")
+    data.frame(Valor=c(pop_escolhida$GenFinal$Z_Machos, pop_escolhida$GenFinal$P_Femeas),
+               Nome=c(rep("Macho (z)", length(pop_escolhida$GenFinal$Z_Machos)), rep("Fêmea (p)",200)),
+               Geracao=sprintf("3. O Destino (Gen %d)", generations))
   )
   p_hist <- ggplot(df_hist, aes(x=Valor, fill=Nome, color=Nome)) +
     geom_density(alpha=0.4, linewidth=1) + facet_wrap(~Geracao, ncol=1) +
@@ -130,7 +134,8 @@ rodar_cenario <- function(tipo_selecao, sigma_p, encounters_n) {
     labs(title=sprintf("Evolução em 3 Atos — %s | σp = %.1f | A_max = %d", tipo_selecao, sigma_p, encounters_n)) +
     theme_minimal(base_size=14) + theme(legend.position="top")
 
-  nome_hist <- sprintf("%s/Histogramas_%s_sigmap%.1f_Amax%d.png", diretorios$graficos, tipo_selecao, sigma_p, encounters_n)
+  nome_hist <- sprintf("%s/Histogramas_%s_sigmap%.1f_Amax%d_Gen%d.png",
+                       diretorios$graficos, tipo_selecao, sigma_p, encounters_n, generations)
   ggsave(nome_hist, plot=p_hist, width=6, height=8, dpi=300, bg="white")
   cat(sprintf("    Histogramas salvos: %s\n", nome_hist))
 
@@ -191,7 +196,8 @@ for (sp in sigmas_painel) {
     idx <- which(cenarios$sigma_p == sp & cenarios$encounters_n == am)
     nome_painel <- sprintf("%s/Painel_Redes_sigmap%.1f_Amax%d.png",
                            diretorios$graficos, sp, am)
-    png(nome_painel, width=5600, height=5600, res=300); par(mfrow=c(2,2), mar=c(3,2,5,2))
+    png(nome_painel, width=5600, height=6000, res=300)
+    par(mfrow=c(2,2), mar=c(3,2,5,2), oma=c(0,0,4,0))
 
     for (i in idx) {
       r  <- resultados[[i]]
@@ -200,9 +206,12 @@ for (sp in sigmas_painel) {
            vertex.shape=r$formas, vertex.size=4, vertex.label=NA,
            vertex.frame.color=rgb(0,0,0,0.2), edge.color=rgb(0.4,0.4,0.4,0.12),
            edge.width=0.8,
-           main=sprintf("%s\nMod: %.3f | Tribos: %d | Comunidades: %d",
+           main=sprintf("%s\nMod: %.3f | Tribos: %d | Com: %d",
                         tl, r$rede_escolhida$modularity, r$num_grupos, r$n_comunidades))
     }
+    mtext(sprintf("Redes Representativas | σp = %.1f | A_max = %d | N=200 | Gen=100",
+                  sp, am),
+          outer=TRUE, cex=1.4, font=2, line=1)
     dev.off()
     cat(sprintf("Painel de redes salvo: %s\n", nome_painel))
   }
