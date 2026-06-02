@@ -1,0 +1,250 @@
+---
+title: "Redes Sexuais & Poliandria Neutra"
+subtitle: "Topologia das Redes de Acasalamento como Motor Evolutivo — Resultados Exploratórios"
+author: "Solimary García Hernández"
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+output:
+  html_document:
+    theme: flatly
+    highlight: tango
+    toc: true
+    toc_float:
+      collapsed: false
+    toc_depth: 3
+    number_sections: true
+    self_contained: true
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.align = "center", out.width = "90%")
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+```
+
+---
+
+# Desenho Experimental
+
+## Modelo Individual-Based (IBM)
+
+Simulamos uma população de **N = 200 machos** e **N = 200 fêmeas** ao longo de **100 gerações**, com **30 réplicas independentes** por cenário. O espaço de parâmetros é:
+
+| Parâmetro | Valores | Descrição |
+|---|---|---|
+| Curva de preferência | uniform, gaussian, sigmoid, u-shaped | Regime de seleção sexual |
+| $\sigma_p$ | 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0 | Variação da preferência feminina |
+| $A_{max}$ | 200, 40, 10 | Machos amostrados por fêmea (100%, 20%, 5% de N) |
+
+**Total de cenários:** 4 × 7 × 3 × 30 = **2.520 simulações**
+
+## Ciclo de vida por geração
+
+Cada geração segue quatro etapas:
+
+**1. Seleção de viabilidade** (seleção natural estabilizadora):
+
+$$V_j = \exp\left(-0.2 \cdot (z_j - \phi)^2\right), \quad \phi = 5.0$$
+
+Machos com traço $z_j$ muito diferente do ótimo ecológico $\phi = 5$ têm menor probabilidade de sobreviver.
+
+**2. Acasalamento** — cada fêmea sorteia entre 1 e 5 parceiros (poliandria máxima = 5) de entre $A_{max}$ machos amostrados aleatoriamente. A probabilidade de aceitar o macho $j$ depende da curva de preferência:
+
+| Regime | Função $P_{ij}$ |
+|---|---|
+| Uniforme (nula) | $P_{ij} = 0.5$ |
+| Gaussiana (estabilizadora) | $P_{ij} = \exp\!\left(-s_i(z_j - p_i)^2\right)$ |
+| Sigmoide (direcional) | $P_{ij} = \dfrac{1}{1 + \exp(-s_i(z_j - p_i))}$ |
+| U-shaped (disruptiva) | $P_{ij} = 1 - \exp\!\left(-s_i(z_j - p_i)^2\right)$ |
+
+onde $p_i \sim N(5,\, \sigma_p^2)$ é a preferência da fêmea $i$ e $s_i \sim N(2,\, 0.2^2)$ é a sua discriminação.
+
+**3. Fecundidade neutra** — ponto central do desenho experimental:
+
+$$F_i = \begin{cases} F_{base} = 50 & \text{se a fêmea acasalou} \\ 0 & \text{caso contrário} \end{cases}$$
+
+A poliandria **não aumenta** a fecundidade da fêmea. O número de filhotes é fixo em 50, independente do número de parceiros. A paternidade é distribuída entre os parceiros via *fair raffle* (competição espermática).
+
+**Por que fecundidade neutra?** Para isolar o efeito puramente topológico da rede. Se a poliandria trouxesse benefício direto, não saberíamos se a evolução do traço foi causada pela estrutura da rede ou pelo incentivo de ter mais parceiros.
+
+**4. Herança quantitativa**:
+
+$$z_{filho} = \frac{z_{pai} + z_{mãe}}{2} + \varepsilon, \quad \varepsilon \sim N(0,\, 0.2^2)$$
+
+## Métricas de rede calculadas por geração
+
+A cada geração, a rede bipartita macho–fêmea é usada para calcular:
+
+- **Modularidade Q** (algoritmo Louvain) — grau de compartimentação
+- **Aninhamento NODF** — grau de hierarquização das interações
+- **Centralização** (degree centralization) — concentração de acasalamentos
+- **$I_s$** (oportunidade de seleção sexual) = $\text{Var}(k) / \bar{k}^2$, onde $k$ = sucesso de acasalamento
+
+---
+
+# Resultados
+
+## Assinatura Topológica das Curvas de Preferência {.tabset}
+
+### Gráfico
+
+```{r plot-a, echo=FALSE, fig.cap="**Figura 1.** Métricas topológicas da rede em função de σ_p (A_max = 200, geração 100). A linha vermelha tracejada marca o tipping point em σ_p = 1.0."}
+knitr::include_graphics("Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_PlotA_AssinaturaTopologica.png")
+```
+
+### Interpretação
+
+As quatro curvas de preferência geram **assinaturas topológicas distintas**:
+
+- **Sigmoide**: mantém o maior aninhamento e reduz a modularidade. A preferência direcional cria uma hierarquia de machos onde os mais "extremos" acumulam parceiras — estrutura de rede consistente com o *Fisherian runaway*.
+- **Gaussiana**: perde aninhamento (-37%) e ganha modularidade (+9%) ao longo do tempo. As fêmeas "especializam-se" em grupos de machos próximos à sua preferência — estrutura mais fragmentada.
+- **U-shaped**: mantém aninhamento mas aumenta modularidade, especialmente sob restrição ecológica. Consistente com a formação de dois morfos masculinos (ver Secção 3).
+- **Uniforme**: comportamento basal, sem sinal evolutivo direcional.
+
+O **tipping point em $\sigma_p = 1.0$** é visível: abaixo desse valor as métricas são relativamente estáveis; acima, as diferenças entre curvas se amplificam.
+
+---
+
+## Ruído Ecológico e Colapso Evolutivo {.tabset}
+
+### Gráfico
+
+```{r plot-b, echo=FALSE, fig.cap="**Figura 2.** Evolução da média do traço masculino (z̄) e da diversidade genética (Var z) em função de σ_p, para os três níveis de A_max. A linha tracejada horizontal marca o ótimo ecológico φ = 5.0."}
+knitr::include_graphics("Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_PlotB_RuidoEcologico.png")
+```
+
+### Interpretação
+
+**Diversidade genética (Var z):** colapso universal de ~88–90% em todas as curvas e todos os valores de $A_{max}$. Com fecundidade neutra, a seleção viabilidade é o único motor atuando sobre $z$, convergindo a população para $\phi = 5$. A poliandria, sem benefício de fecundidade, não resgata variância genética.
+
+**Média do traço (z̄):**
+
+| Curva | $A_{max}=200$ | $A_{max}=40$ | $A_{max}=10$ |
+|---|---|---|---|
+| Uniforme | $z̄ \approx 5.04$ (neutra) | $z̄ \approx 5.00$ | $z̄ \approx 5.00$ |
+| Gaussiana | $z̄ \approx 5.01$ (neutra) | $z̄ \approx 5.00$ | $z̄ \approx 5.00$ |
+| **Sigmoide** | **$z̄ = 6.16$ (+23%)** | **$z̄ = 6.04$ (+21%)** | **$z̄ = 5.84$ (+17%)** |
+| U-shaped | $z̄ \approx 4.98$ (neutra) | $z̄ \approx 5.01$ | $z̄ \approx 5.01$ |
+
+A sigmoide é a **única curva que gera exageração real do traço** — o *runaway* persiste mesmo sem benefício direto da poliandria. O gradiente $A_{max}=200 > 40 > 10$ confirma que o ruído ecológico atenua mas **não neutraliza** o *runaway* topológico.
+
+---
+
+## Evidência Correlacional: Topologia → Evolução {.tabset}
+
+### Gráfico
+
+```{r plot-c, echo=FALSE, fig.cap="**Figura 3.** Regressões lineares entre métricas topológicas e evolutivas (σ_p = 2.0, A_max = 200, geração 100). Cada ponto é uma réplica independente."}
+knitr::include_graphics("Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_PlotC_ProvaCausal.png")
+```
+
+### Interpretação
+
+- **Modularidade → Var(z):** correlação positiva — redes mais modulares preservam mais variância genética. A u-shaped (rede modular) mantém diversidade; a sigmoide (rede integrada) a colapsa.
+- **Aninhamento → z̄:** correlação positiva para a sigmoide — redes mais aninhadas produzem maior exageração do traço. A hierarquia criada pelo aninhamento concentra o sucesso reprodutivo nos machos "extremos", amplificando a deriva fenotípica para cima de $\phi$.
+
+---
+
+## Tabela de Resultados: Geração 1 → Geração 100
+
+```{r tabela, echo=FALSE}
+csv_files <- list.files("Resultados_Artigo/Fase4_TodasAsCurvas/Dados/",
+                        pattern = "Tabela_Gen1_vs_Gen.*\\.csv",
+                        full.names = TRUE)
+df <- if (length(csv_files) > 0) read.csv(csv_files[1]) else NULL
+
+if (!is.null(df)) {
+  df %>%
+    filter(sigma_p == 2.0, Metrica %in% c("zbar_males","varz_males","Modularity","Nestedness","I_s")) %>%
+    mutate(
+      Metrica = case_when(
+        Metrica == "zbar_males"     ~ "z̄ (média do traço)",
+        Metrica == "varz_males"     ~ "Var(z) diversidade",
+        Metrica == "Modularity"     ~ "Modularidade",
+        Metrica == "Nestedness"     ~ "Aninhamento (NODF)",
+        Metrica == "I_s"            ~ "Is (oportunidade sel.)"
+      ),
+      tipo_selecao = case_when(
+        tipo_selecao == "uniform"   ~ "Uniforme",
+        tipo_selecao == "gaussian"  ~ "Gaussiana",
+        tipo_selecao == "sigmoid"   ~ "Sigmoide",
+        tipo_selecao == "u-shaped"  ~ "U-shaped"
+      ),
+      Amax = paste0("A=", encounters_n),
+      Delta_pct = round(Delta_pct, 1)
+    ) %>%
+    select(tipo_selecao, Metrica, Amax, Gen_inicial, Gen_final, Delta_pct) %>%
+    mutate(across(c(Gen_inicial, Gen_final), \(x) round(x, 3))) %>%
+    rename(Curva = tipo_selecao, `Gen 1` = Gen_inicial,
+           `Gen 100` = Gen_final, `Δ%` = Delta_pct) %>%
+    arrange(Amax, Metrica, Curva) %>%
+    kable(caption = "**Tabela 1.** Valores médios (30 réplicas) das métricas na geração 1 e 100, σp = 2.0.",
+          align = c("l","l","c","r","r","r")) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                  full_width = FALSE, font_size = 13) %>%
+    column_spec(6, color = ifelse(
+      df %>% filter(sigma_p == 2.0, Metrica %in% c("zbar_males","varz_males",
+                    "Modularity","Nestedness","I_s")) %>%
+        mutate(Delta_pct = round(Delta_pct, 1)) %>% pull(Delta_pct) > 0,
+      "forestgreen", "firebrick"
+    ))
+} else {
+  cat("*Tabela não encontrada — rode o Script 07 primeiro.*")
+}
+```
+
+---
+
+## Redes Representativas e a Evolução em 3 Atos
+
+> **Secção em construção** — resultados do Script 06 em processamento.
+>
+> Adicionar após Script 06 terminar:
+>
+> - `knitr::include_graphics("Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap2.0_Amax200.png")`
+> - Histogramas "3 Atos" por curva
+> - **Morfos U-shaped**: bimodalidade em z̄ (dois picos simétricos em torno de φ = 5)
+
+---
+
+# Discussão
+
+## Por que a Sigmoide gera *runaway* mesmo com fecundidade neutra?
+
+A função sigmoide cria uma preferência **direcional com limiar**: fêmeas com $p_i < z_j$ aceitam o macho $j$ com probabilidade crescente. Isso cria uma hierarquia assimétrica na rede — machos com $z > \bar{p}$ acumulam parceiras não porque as fêmeas ganhem mais filhotes com eles, mas porque a estrutura da rede (aninhamento) concentra paternidade neles via competição espermática.
+
+O *runaway* é, portanto, um **efeito topológico puro**: a rede aninhada gerada pela sigmoide é o motor da evolução, não o benefício direto da poliandria.
+
+## O paradoxo de $I_s$ na sigmoide
+
+A sigmoide reduz $I_s$ em −58% enquanto gera o maior *runaway* (+23% em z̄). Isso parece contraditório, mas tem uma explicação: à medida que z̄ sobe para 6.16, os machos sobreviventes convergem para um novo "ótimo percebido" pelas fêmeas — todos ficam igualmente atrativos e a assimetria reprodutiva colapsa. $I_s$ mede a oportunidade *atual* de seleção, não a histórica.
+
+## U-shaped: dois morfos masculinos?
+
+A função u-shaped gera **seleção sexual disruptiva**: fêmeas evitam machos próximos à sua preferência ($z \approx p \approx 5$) e preferem os extremos. Em conflito com a seleção viabilidade (que estabiliza em $\phi = 5$), o equilíbrio pode gerar **dois morfos** — um ligeiramente acima e outro abaixo de $\phi$. A distribuição bimodal nos histogramas (Script 06) e o aumento de modularidade da rede (+10.6% a $A_{max}=10$) são consistentes com essa hipótese.
+
+---
+
+# Próximos Passos
+
+1. Aumentar réplicas de 30 → 100 para reduzir erro de estimação
+2. Confirmar bimodalidade u-shaped com teste de Hartigan's dip
+3. Analisar trajetórias geração-a-geração (Espiadinhas 7 e 8) para identificar quando o *runaway* sigmoide se inicia
+4. Explorar redes representativas (Script 06) para visualizar diferenças estruturais entre os quatro regimes
+
+---
+
+# Informações da Simulação
+
+```{r session-info, echo=FALSE}
+cat(sprintf("Branch: polyandria5_neutral_100gen\n"))
+cat(sprintf("Parâmetros: N=200, Gen=100, Réplicas=30\n"))
+cat(sprintf("Fecundidade: NEUTRA (F_base=50, independente do nº de parceiros)\n"))
+cat(sprintf("Poliandria: 1–5 parceiros por fêmea (max_cop=5)\n"))
+cat(sprintf("A_max: {200, 40, 10} = {100%%, 20%%, 5%%} de N\n"))
+cat(sprintf("Gerado em: %s\n", format(Sys.time(), "%Y-%m-%d %H:%M")))
+```

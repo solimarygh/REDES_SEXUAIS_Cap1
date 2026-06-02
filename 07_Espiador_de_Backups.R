@@ -5,11 +5,13 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(patchwork)
+library(segmented)
 
 arquivo <- "Resultados_Artigo/Fase4_TodasAsCurvas/Dados/backup_lista_fase4_final.rds"
 
-# Pasta onde as espiadinhas serão salvas como PNG
+# Pastas de saída
 dir_espiadinhas <- "Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Espiadinhas"
+dir_graficos    <- "Resultados_Artigo/Fase4_TodasAsCurvas/Graficos"
 dir.create(dir_espiadinhas, recursive = TRUE, showWarnings = FALSE)
 
 if(file.exists(arquivo)) {
@@ -361,23 +363,20 @@ if(file.exists(arquivo)) {
       plot_layout(guides = "collect")
 
     print(p_evo_combinado)
-    ggsave(file.path(dir_espiadinhas, "Espiadinha8_Evolutivo_Amax.png"),
-           p_evo_combinado, width=14, height=8, dpi=200, bg="white")
   } else {
     if (!is.null(p_evo_left))  print(p_evo_left)
     if (!is.null(p_evo_right)) print(p_evo_right)
   }
 
   # =====================================================================
-  # TABELA: Comparação Geração 1 vs Geração FINAL para todas as métricas
+  # TABELA: Comparação Geração 1 vs Geração Final para todas as métricas
   # =====================================================================
   cat(sprintf("\n\n========== TABELA: Gen 1 vs Gen %d ==========\n", GEN_FINAL))
 
   df_tabela <- df_parcial %>%
     filter(generation %in% c(1, GEN_FINAL)) %>%
     drop_na() %>%
-    mutate(gen_label = ifelse(generation == 1, "Gen_inicial", "Gen_final")) %>%
-    group_by(gen_label, tipo_selecao, sigma_p, encounters_n) %>%
+    group_by(generation, tipo_selecao, sigma_p, encounters_n) %>%
     summarise(
       Modularity     = mean(Modularity,     na.rm = TRUE),
       Nestedness     = mean(Nestedness,     na.rm = TRUE),
@@ -391,15 +390,17 @@ if(file.exists(arquivo)) {
     pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization,
                           varz_males, zbar_males),
                  names_to = "Metrica", values_to = "Valor") %>%
+    mutate(gen_label = ifelse(generation == 1, "Gen_inicial", "Gen_final")) %>%
     pivot_wider(names_from = gen_label, values_from = Valor) %>%
-    mutate(Delta       = Gen_final - Gen_inicial,
-           Delta_pct   = 100 * (Gen_final - Gen_inicial) / Gen_inicial) %>%
+    select(-generation) %>%
+    mutate(Delta     = Gen_final - Gen_inicial,
+           Delta_pct = 100 * (Gen_final - Gen_inicial) / Gen_inicial) %>%
     arrange(encounters_n, sigma_p, tipo_selecao, Metrica)
 
   # Imprime no console em formato legível
   print(df_tabela, n = Inf, width = Inf)
 
-  # Salva como CSV para análise posterior
+  # Salva como CSV com nome dinâmico (Tabela_Gen1_vs_Gen100.csv, etc.)
   out_csv <- sprintf("Resultados_Artigo/Fase4_TodasAsCurvas/Dados/Tabela_Gen1_vs_Gen%d.csv", GEN_FINAL)
   write.csv(df_tabela, out_csv, row.names = FALSE)
   cat(sprintf("\nTabela salva em: %s\n", out_csv))
@@ -407,7 +408,7 @@ if(file.exists(arquivo)) {
   # =====================================================================
   # TABELA FOCAL: Modularity + Nestedness | A_max=200 | sigma_p=2.0
   # =====================================================================
-  cat("\n\n========== TABELA FOCAL: Mod + Nest | A_max=200 | σp=2.0 ==========\n")
+  cat(sprintf("\n\n========== TABELA FOCAL: Mod + Nest | A_max=200 | σp=2.0 ==========\n"))
 
   df_focal <- df_tabela %>%
     filter(Metrica %in% c("Modularity", "Nestedness"),
@@ -419,6 +420,178 @@ if(file.exists(arquivo)) {
            Delta_pct = round(Delta_pct, 1))
 
   print(df_focal, n = Inf)
+
+  # =====================================================================
+  # GRÁFICOS FINAIS (Fase 4)
+  # =====================================================================
+  val_reps       <- length(unique(df_parcial$replica[!is.na(df_parcial$replica)]))
+  subtitulo_base <- sprintf("Parâmetros: %d Gerações | N=200 | Réplicas: %d de 30 (%.0f%%)",
+                             GEN_FINAL, val_reps, 100 * n_completos / n_total)
+
+  tema_master <- theme_light(base_size = 14) +
+    theme(legend.position = "bottom",
+          strip.background = element_rect(fill = "gray10"),
+          strip.text = element_text(color = "white", face = "bold"))
+
+  # ---------------------------------------------------------------------
+  # PLOT A: ASSINATURA TOPOLÓGICA (A_max = 200)
+  # ---------------------------------------------------------------------
+  p_fase4_topo <- df_gen50 %>% filter(encounters_n == 200) %>%
+    pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization),
+                 names_to = "Metrica", values_to = "Valor") %>%
+    mutate(Metrica = case_when(
+      Metrica == "Modularity"     ~ "1. Modularidade",
+      Metrica == "Nestedness"     ~ "2. Aninhamento",
+      Metrica == "I_s"            ~ "3. Is",
+      Metrica == "Centralization" ~ "4. Centralidade")) %>%
+    ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
+    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
+    geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2,
+                show.legend = FALSE) +
+    geom_jitter(alpha = 0.2, width = 0.05, size = 1.2) +
+    facet_wrap(~Metrica, scales = "free_y", ncol = 2) +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values = cores_4, labels = labels_4) +
+    labs(title    = sprintf("Fase 4: A Assinatura Topológica Suprema (A_max = 200, Gen %d)", GEN_FINAL),
+         subtitle = subtitulo_base,
+         x = expression(paste("Variação da Preferência (", sigma[p], ")")),
+         y = "Valor da Métrica", color = "", fill = "") +
+    guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
+    tema_master
+
+  # ---------------------------------------------------------------------
+  # PLOT B: RUÍDO ECOLÓGICO (A_max: 200, 40, 10)
+  # ---------------------------------------------------------------------
+  df_ruido <- df_gen50 %>%
+    mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
+                                 levels = c("A_max: 200", "A_max: 40", "A_max: 10"))) %>%
+    pivot_longer(cols = c(zbar_males, varz_males),
+                 names_to = "Variavel", values_to = "Valor") %>%
+    mutate(Variavel = ifelse(Variavel == "zbar_males",
+                             "1. Média (Exagero)", "2. Diversidade Genética (Var z)"))
+
+  p_fase4_ruido <- ggplot(df_ruido, aes(x = sigma_p, y = Valor,
+                                         color = tipo_selecao, fill = tipo_selecao)) +
+    geom_hline(data = filter(df_ruido, Variavel == "1. Média (Exagero)"),
+               aes(yintercept = 5.0), linetype = "dashed", alpha = 0.6) +
+    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
+    geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2,
+                show.legend = FALSE) +
+    geom_jitter(alpha = 0.2, width = 0.05, size = 1) +
+    facet_grid(Variavel ~ Cenario_Ecol, scales = "free_y") +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values = cores_4, labels = labels_4) +
+    labs(title    = sprintf("Fase 4: O Colapso Ecológico das Forças Evolutivas (Gen %d)", GEN_FINAL),
+         subtitle = "Lendo da esq. para a dir.: O custo de busca neutraliza a seleção sexual",
+         x = expression(paste("Variação da Preferência (", sigma[p], ")")),
+         y = "Valor Fenotípico / Genético", color = "", fill = "") +
+    guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
+    tema_master
+
+  # ---------------------------------------------------------------------
+  # PLOT C: PROVA CAUSAL (A_max = 200, sigma_p = 2.0)
+  # ---------------------------------------------------------------------
+  df_causal <- df_gen50 %>%
+    filter(encounters_n == 200, sigma_p == 2.0) %>%
+    pivot_longer(cols = c(Modularity, Nestedness),
+                 names_to = "Topologia", values_to = "EixoX") %>%
+    mutate(Topologia = ifelse(Topologia == "Modularity",
+                              "1. Modularidade (vs Var z)",
+                              "2. Aninhamento (vs Média z)"),
+           EixoY = ifelse(Topologia == "1. Modularidade (vs Var z)",
+                          varz_males, zbar_males))
+
+  p_fase4_causal <- ggplot(df_causal, aes(x = EixoX, y = EixoY,
+                                           color = tipo_selecao, fill = tipo_selecao)) +
+    geom_point(alpha = 0.5, size = 2) +
+    geom_smooth(method = "lm", formula = y~x, se = TRUE, linewidth = 1.2,
+                alpha = 0.15, show.legend = FALSE) +
+    facet_wrap(~Topologia, scales = "free", ncol = 2) +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values = cores_4, labels = labels_4) +
+    labs(title    = sprintf("Fase 4: Evidência Correlacional Topologia–Evolução (σp=2.0, Gen %d)", GEN_FINAL),
+         subtitle = "Regressões lineares indicam associação entre estrutura da rede e fenótipo",
+         x = "Valor Topológico da Rede",
+         y = "Valor Evolutivo (Média ou Variância)", color = "", fill = "") +
+    guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
+    tema_master
+
+  print(p_fase4_topo)
+  print(p_fase4_ruido)
+  print(p_fase4_causal)
+
+  ggsave(file.path(dir_graficos, "Fase4_PlotA_AssinaturaTopologica.png"),
+         plot = p_fase4_topo,   width = 10, height = 8, dpi = 300, bg = "white")
+  ggsave(file.path(dir_graficos, "Fase4_PlotB_RuidoEcologico.png"),
+         plot = p_fase4_ruido,  width = 12, height = 7, dpi = 300, bg = "white")
+  ggsave(file.path(dir_graficos, "Fase4_PlotC_ProvaCausal.png"),
+         plot = p_fase4_causal, width = 10, height = 5, dpi = 300, bg = "white")
+  cat(sprintf("\nGráficos A, B, C salvos em: %s\n", dir_graficos))
+
+  # =====================================================================
+  # BLOCO E: MODELOS LINEARES (LMs) — ESTATÍSTICA OFICIAL
+  # =====================================================================
+  cat("\nPreparando dados para os Modelos Lineares...\n")
+
+  df_stats_low <- df_gen50 %>%
+    filter(sigma_p <= 1.0) %>%
+    drop_na(Modularity, Nestedness, Centralization, I_s, varz_males, zbar_males) %>%
+    mutate(
+      z_Modularity     = as.numeric(scale(Modularity)),
+      z_Nestedness     = as.numeric(scale(Nestedness)),
+      z_Centralization = as.numeric(scale(Centralization)),
+      z_SigmaP         = as.numeric(scale(sigma_p)),
+      f_encounters     = factor(encounters_n)
+    )
+
+  df_stats_high <- df_gen50 %>%
+    filter(sigma_p >= 1.0) %>%
+    drop_na(Modularity, Nestedness, Centralization, I_s, varz_males, zbar_males) %>%
+    mutate(
+      z_Modularity     = as.numeric(scale(Modularity)),
+      z_Nestedness     = as.numeric(scale(Nestedness)),
+      z_Centralization = as.numeric(scale(Centralization)),
+      z_SigmaP         = as.numeric(scale(sigma_p)),
+      f_encounters     = factor(encounters_n)
+    )
+
+  cat("\n--- MODELO 1a (sigma_p <= 1.0): Modularidade e Diversidade Genética ---\n")
+  mod1a <- lm(varz_males ~ z_Modularity * tipo_selecao + z_SigmaP + f_encounters,
+              data = df_stats_low)
+  print(summary(mod1a))
+
+  cat("\n--- MODELO 1b (sigma_p >= 1.0): Modularidade e Diversidade Genética ---\n")
+  mod1b <- lm(varz_males ~ z_Modularity * tipo_selecao + z_SigmaP + f_encounters,
+              data = df_stats_high)
+  print(summary(mod1b))
+
+  cat("\n--- MODELO 2a (sigma_p <= 1.0): Aninhamento e Exagero do Traço ---\n")
+  mod2a <- lm(zbar_males ~ z_Nestedness * tipo_selecao + z_SigmaP + f_encounters,
+              data = df_stats_low)
+  print(summary(mod2a))
+
+  cat("\n--- MODELO 2b (sigma_p >= 1.0): Aninhamento e Exagero do Traço ---\n")
+  mod2b <- lm(zbar_males ~ z_Nestedness * tipo_selecao + z_SigmaP + f_encounters,
+              data = df_stats_high)
+  print(summary(mod2b))
+
+  cat("\n--- MODELO 3a (sigma_p <= 1.0): Is ~ Centralização + Modularidade ---\n")
+  mod3a <- lm(I_s ~ z_Centralization + z_Modularity + z_SigmaP + tipo_selecao + f_encounters,
+              data = df_stats_low)
+  print(summary(mod3a))
+
+  cat("\n--- MODELO 3b (sigma_p >= 1.0): Is ~ Centralização + Modularidade ---\n")
+  mod3b <- lm(I_s ~ z_Centralization + z_Modularity + z_SigmaP + tipo_selecao + f_encounters,
+              data = df_stats_high)
+  print(summary(mod3b))
+
+  # =====================================================================
+  # MODELO SEGMENTADO: Tipping Point em sigma_p = 1.0
+  # =====================================================================
+  cat("\n--- MODELO SEGMENTADO: Var(z) ~ sigma_p com breakpoint em 1.0 ---\n")
+  modelo_geral      <- lm(varz_males ~ sigma_p, data = df_gen50)
+  modelo_segmentado <- segmented(modelo_geral, seg.Z = ~sigma_p, psi = 1.0)
+  print(summary(modelo_segmentado))
 
 } else {
   cat("O arquivo de backup ainda não foi criado. Espere a simulação rodar mais um pouco!\n")
