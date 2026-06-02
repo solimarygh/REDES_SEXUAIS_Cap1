@@ -281,7 +281,7 @@ mod3b <- lm(I_s ~ z_Centralization + z_Modularity + z_SigmaP + tipo_selecao + f_
 print(summary(mod3b))
 
 ######
- 
+
 #######conceptualmente es evaluar un sistema "Piecewise", porque la biología cambia sus leyes de la física justo en el umbral donde el comportamiento de la hembra supera a la genética del macho 
 
 # 1. Haces un modelo lineal general
