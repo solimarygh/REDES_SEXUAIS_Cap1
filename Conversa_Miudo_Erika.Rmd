@@ -313,6 +313,45 @@ A função $P_{ij} = 1 - \exp(-s_i(z_j - p_i)^2)$ penaliza machos próximos da p
 
 ---
 
+## Trajetórias Temporais: Como Chega a Geração 100? {.tabset}
+
+### Topologia ao longo do tempo (Espiadinha 7)
+
+```{r esp7, echo=FALSE, fig.cap="**Figura 9.** Trajetórias das métricas topológicas (Modularidade e Aninhamento) geração-a-geração, para A_max = 200 (esquerda) e A_max = 10 (direita). Linhas = médias entre réplicas. O eixo Y é consistente entre painéis para permitir comparação directa do efeito de A_max."}
+img_esp7 <- "Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Espiadinhas/Espiadinha7_Topologia_Amax.png"
+if (file.exists(img_esp7)) {
+  knitr::include_graphics(img_esp7)
+} else {
+  cat("*Gráfico não encontrado — rode o Script 07 primeiro.*")
+}
+```
+
+**Leitura:** em que geração as curvas se separam? A divergência começa cedo (gerações 1-10) ou é gradual? A comparação entre A_max = 200 e A_max = 10 mostra se a restrição de amostragem atrasa ou dissolve essa separação.
+
+### Traço masculino ao longo do tempo (Espiadinha 8)
+
+```{r esp8, echo=FALSE, fig.cap="**Figura 10.** Trajetórias da média (z̄) e variância (Var z) do traço masculino ao longo das gerações, para A_max = 200 (esquerda) e A_max = 10 (direita). Linha tracejada = φ = 5.0 (ótimo ecológico)."}
+img_esp8 <- "Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Espiadinhas/Espiadinha8_Trajetorias_Evolutivas.png"
+if (file.exists(img_esp8)) {
+  knitr::include_graphics(img_esp8)
+} else {
+  cat("*Gráfico não encontrado — rode o Script 07 primeiro.*")
+}
+```
+
+**Leitura:** quando é que o *runaway* sigmoide arranca? O deslocamento de z̄ é linear ao longo das gerações ou há um ponto de inflexão? A variância colapsa ao mesmo ritmo em todas as curvas ou a u-shaped preserva-a mais tempo?
+
+### Interpretação
+
+As trajetórias respondem à pergunta que os gráficos da geração 100 não conseguem responder: **a geração 100 é um estado estável ou ainda está a evoluir?**
+
+- Se as curvas das Espiadinhas 7 e 8 estabilizaram antes da geração 100, os resultados da Tabela 1 reflectem um equilíbrio dinâmico.
+- Se ainda estão a mudar na geração 100, as estimativas podem subestimar os efeitos a longo prazo, o que justifica aumentar o número de gerações (ver Próximos Passos).
+
+A comparação entre A_max = 200 e A_max = 10 nestas trajetórias revela se o ruído ecológico **atrasa** a assinatura topológica ou se a **elimina** permanentemente.
+
+---
+
 ## Bimodalidade U-shaped: Evidência dos Dois Morfos {.tabset}
 
 ### Gráfico

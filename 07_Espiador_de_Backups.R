@@ -365,6 +365,8 @@ if(file.exists(arquivo)) {
       plot_layout(guides = "collect")
 
     print(p_evo_combinado)
+    ggsave(file.path(dir_espiadinhas, "Espiadinha8_Trajetorias_Evolutivas.png"),
+           p_evo_combinado, width = 14, height = 10, dpi = 200, bg = "white")
   } else {
     if (!is.null(p_evo_left))  print(p_evo_left)
     if (!is.null(p_evo_right)) print(p_evo_right)
