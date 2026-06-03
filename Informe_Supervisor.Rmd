@@ -270,6 +270,60 @@ A função $P_{ij} = 1 - \exp(-s_i(z_j - p_i)^2)$ penaliza machos próximos da p
 
 ---
 
+## Bimodalidade U-shaped: Evidência dos Dois Morfos {.tabset}
+
+### Gráfico
+
+```{r bimodalidade, echo=FALSE, fig.cap="**Figura 8.** Distribuições do traço masculino z na geração 100 para a curva U-shaped (Script 09, 30 réplicas pooled). Painel esquerdo: gradiente de bimodalidade com σ_p (A_max = 200). Painel direito: efeito do custo de busca na separação dos morfos (σ_p = 2.0). Painel inferior: comparação directa das 4 curvas."}
+img_bim <- "Resultados_Artigo/UShape_Bimodalidade/Graficos/Bimodalidade_Ushaped.png"
+if (file.exists(img_bim)) {
+  knitr::include_graphics(img_bim)
+} else {
+  cat("*Gráfico não encontrado — rode o Script 09 primeiro.*")
+}
+```
+
+### Teste de Hartigan's Dip
+
+O **teste de Hartigan's dip** (Hartigan & Hartigan 1985) avalia formalmente se uma distribuição é unimodal ou multimodal. H₀: distribuição unimodal. p < 0.05 indica bimodalidade.
+
+```{r dip-test, echo=FALSE}
+csv_dip <- "Resultados_Artigo/UShape_Bimodalidade/Dados/dip_test_resultados.csv"
+if (file.exists(csv_dip)) {
+  read.csv(csv_dip) %>%
+    mutate(
+      Resultado = ifelse(p_valor < 0.05, "*** Bimodal", "Unimodal"),
+      p_valor   = round(p_valor, 4),
+      D         = round(D, 4)
+    ) %>%
+    rename(`σp` = sigma_p, `A_max` = encounters_n, `p-valor` = p_valor) %>%
+    kable(caption = "**Tabela 2.** Teste de Hartigan's dip para bimodalidade (u-shaped, 30 réplicas pooled).",
+          align = c("c","c","r","r","l")) %>%
+    kable_styling(bootstrap_options = c("striped","hover","condensed"),
+                  full_width = FALSE, font_size = 13) %>%
+    column_spec(5, color = ifelse(read.csv(csv_dip)$p_valor < 0.05, "forestgreen", "gray40"),
+                bold = ifelse(read.csv(csv_dip)$p_valor < 0.05, TRUE, FALSE))
+} else {
+  cat("*Tabela não encontrada — rode o Script 09 primeiro.*")
+}
+```
+
+### Interpretação
+
+A função U-shaped ($P_{ij} = 1 - \exp(-s_i(z_j - p_i)^2)$) gera **seleção sexual disruptiva**: as fêmeas evitam machos com traço próximo à sua preferência e favorecem os extremos. Este mecanismo, em conflito com a seleção viabilidade estabilizadora (ótimo em φ = 5), produz dois atratores evolutivos simétricos.
+
+**Predições testáveis:**
+
+| Predição | Evidência esperada |
+|---|---|
+| Bimodalidade aumenta com σ_p | Dip test mais significativo a σ_p = 2.0 vs 0.5 |
+| Custo de busca (A_max) suprime morfos | Distribuição mais unimodal a A_max = 10 |
+| Morfos ausentes nas outras curvas | Sigmoide e Gaussiana unimodais no painel comparativo |
+
+Se confirmado, este resultado sugere que a **topologia da rede é suficiente para manter polimorfismo** mesmo com fecundidade neutra — um mecanismo alternativo à teoria clássica de polimorfismo por balanceamento.
+
+---
+
 # Discussão
 
 ## Por que a Sigmoide gera *runaway* mesmo com fecundidade neutra?
@@ -291,9 +345,8 @@ A função u-shaped gera **seleção sexual disruptiva**: fêmeas evitam machos 
 # Próximos Passos
 
 1. Aumentar réplicas de 30 → 100 para reduzir erro de estimação
-2. Confirmar bimodalidade u-shaped com teste de Hartigan's dip
-3. Analisar trajetórias geração-a-geração (Espiadinhas 7 e 8) para identificar quando o *runaway* sigmoide se inicia
-4. Confirmar bimodalidade U-shaped com teste de Hartigan's dip (resultado visual já visível nos histogramas do Script 06)
+2. Analisar trajetórias geração-a-geração (Espiadinhas 7 e 8) para identificar quando o *runaway* sigmoide se inicia
+3. Interpretar o resultado do teste de Hartigan's dip e discutir implicações do polimorfismo U-shaped
 
 ---
 

@@ -159,14 +159,35 @@ cat(sprintf("\nGráfico salvo em: %s\n", nome_saida))
 # ---- 6. TESTE DE HARTIGAN'S DIP (bimodalidade formal) ----
 if (requireNamespace("diptest", quietly = TRUE)) {
   library(diptest)
-  cat("\n===== TESTE DE HARTIGAN'S DIP (u-shaped, A_max = 200) =====\n")
-  for (sp in SIGMAS) {
-    z_vals <- df_u %>% filter(encounters_n == 200, sigma_p == sp) %>% pull(z)
-    d <- dip.test(z_vals)
-    cat(sprintf("  σp = %.1f  |  D = %.4f  |  p = %.4f  %s\n",
-                sp, d$statistic, d$p.value,
-                ifelse(d$p.value < 0.05, "*** BIMODAL", "")))
+  cat("\n===== TESTE DE HARTIGAN'S DIP =====\n")
+
+  dir_dados <- "Resultados_Artigo/UShape_Bimodalidade/Dados"
+  dir.create(dir_dados, recursive = TRUE, showWarnings = FALSE)
+
+  resultados_dip <- list()
+  cont_dip <- 1
+
+  for (am in AMAXES) {
+    for (sp in SIGMAS) {
+      z_vals <- df_u %>% filter(encounters_n == am, sigma_p == sp) %>% pull(z)
+      d <- dip.test(z_vals)
+      cat(sprintf("  σp = %.1f | A_max = %3d  |  D = %.4f  |  p = %.4f  %s\n",
+                  sp, am, d$statistic, d$p.value,
+                  ifelse(d$p.value < 0.05, "*** BIMODAL", "")))
+      resultados_dip[[cont_dip]] <- data.frame(
+        sigma_p     = sp,
+        encounters_n = am,
+        D           = round(as.numeric(d$statistic), 4),
+        p_valor     = round(d$p.value, 4)
+      )
+      cont_dip <- cont_dip + 1
+    }
   }
+
+  df_dip <- bind_rows(resultados_dip)
+  write.csv(df_dip, file.path(dir_dados, "dip_test_resultados.csv"), row.names = FALSE)
+  cat(sprintf("\nTabela dip test salva em: %s/dip_test_resultados.csv\n", dir_dados))
+
 } else {
   cat("\nPara testar bimodalidade formalmente: install.packages('diptest')\n")
 }
