@@ -12,7 +12,11 @@ arquivo <- "Resultados_Artigo/Fase4_TodasAsCurvas/Dados/backup_lista_fase4_final
 # Pastas de saída
 dir_espiadinhas <- "Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Espiadinhas"
 dir_graficos    <- "Resultados_Artigo/Fase4_TodasAsCurvas/Graficos"
+dir.create(dir_graficos,    recursive = TRUE, showWarnings = FALSE)
 dir.create(dir_espiadinhas, recursive = TRUE, showWarnings = FALSE)
+
+cat(sprintf("Procurando backup em: %s\n", normalizePath(arquivo, mustWork = FALSE)))
+cat(sprintf("Arquivo existe? %s\n", ifelse(file.exists(arquivo), "SIM", "NAO - verifique o caminho")))
 
 if(file.exists(arquivo)) {
   lista_parcial <- readRDS(arquivo)
