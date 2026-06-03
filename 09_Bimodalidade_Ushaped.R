@@ -13,7 +13,7 @@ set.seed(2026)
 
 GENERATIONS  <- 100
 N            <- 200
-N_REPS       <- 15
+N_REPS       <- 30
 SIGMAS       <- c(0.5, 1.0, 1.5, 2.0)
 AMAXES       <- c(200, 40, 10)
 CURVAS_COMP  <- c("u-shaped", "sigmoid", "gaussian", "uniform")
