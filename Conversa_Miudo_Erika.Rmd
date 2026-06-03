@@ -138,6 +138,33 @@ O **tipping point em $\sigma_p = 1.0 = \sigma_z$** é o ponto onde a variação 
 
 ---
 
+## A Restrição de Amostragem Dissolve a Assinatura Topológica? {.tabset}
+
+### Gráfico
+
+```{r plot-d, echo=FALSE, fig.cap="**Figura 2.** Modularidade e aninhamento em função de σ_p, para os três níveis de A_max (geração 100). A linha tracejada vertical marca σ_p = σ_z = 1.0. Lendo da esquerda para a direita: como a restrição de amostragem modifica a assinatura topológica de cada curva ao longo do gradiente de σ_p."}
+img_d <- "Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_PlotD_TopologiaAmax.png"
+if (file.exists(img_d)) {
+  knitr::include_graphics(img_d)
+} else {
+  cat("*Gráfico não encontrado — rode o Script 07 primeiro.*")
+}
+```
+
+### Interpretação
+
+Esta secção testa directamente se $A_{max}$ actua como ruído que **dissolve a estrutura da rede** gerada por cada curva de preferência ao longo do gradiente de σp.
+
+**O que procurar no gráfico:** as assinaturas de cada curva (distância entre as linhas) mantêm-se à medida que passamos de A_max=200 para A_max=10? Se as linhas convergirem (tornarem-se indistinguíveis), o ruído ecológico neutralizou a assinatura topológica.
+
+- **Modularidade:** à medida que A_max diminui, as curvas convergem? A gaussiana (alta modularidade) e a sigmoide (baixa modularidade) continuam separadas sob A_max=10?
+- **Aninhamento:** a hierarquia da sigmoide e o anti-aninhamento da gaussiana resistem à restrição de amostragem, ou colapsam sob A_max=10?
+- **Acima de σp = 1.0 (= σz):** a divergência entre curvas amplifica-se ou atenua-se com A_max restrito?
+
+A resposta a estas perguntas determina se os caminhos topo-evolutivos são **robustos** ao ruído ecológico ou se dependem de condições de alta capacidade de amostragem.
+
+---
+
 ## Efeito do Custo de Busca sobre a Evolução do Traço {.tabset}
 
 ### Gráfico

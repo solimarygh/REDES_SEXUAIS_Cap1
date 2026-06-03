@@ -520,16 +520,49 @@ if(file.exists(arquivo)) {
     guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
     tema_master
 
+  # ---------------------------------------------------------------------
+  # PLOT D: TOPOLOGIA × σp × A_max
+  # Mostra como A_max (ruído ecológico) modifica a assinatura topológica
+  # de cada curva ao longo do gradiente de σp
+  # ---------------------------------------------------------------------
+  p_fase4_topo_amax <- df_gen50 %>%
+    mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
+                                 levels = c("A_max: 200", "A_max: 40", "A_max: 10"))) %>%
+    pivot_longer(cols = c(Modularity, Nestedness),
+                 names_to = "Metrica", values_to = "Valor") %>%
+    mutate(Metrica = case_when(
+      Metrica == "Modularity"  ~ "1. Modularidade",
+      Metrica == "Nestedness"  ~ "2. Aninhamento")) %>%
+    ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
+    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
+    annotate("text", x = 1.0, y = Inf, label = "σp = σz", hjust = -0.15, vjust = 1.8,
+             color = "red", size = 3.0, fontface = "italic") +
+    geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2,
+                show.legend = FALSE) +
+    geom_jitter(alpha = 0.2, width = 0.05, size = 1) +
+    facet_grid(Metrica ~ Cenario_Ecol, scales = "free_y") +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values = cores_4, labels = labels_4) +
+    labs(title    = sprintf("Fase 4: A Restrição de Amostragem Dissolve a Assinatura Topológica? (Gen %d)", GEN_FINAL),
+         subtitle = "Lendo da esq. para a dir.: A_max reduz o acesso feminino e perturba a estrutura da rede",
+         x = expression(paste("Variação da Preferência das Fêmeas (", sigma[p], ")")),
+         y = "Valor da Métrica Topológica", color = "", fill = "") +
+    guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
+    tema_master
+
   print(p_fase4_topo)
+  print(p_fase4_topo_amax)
   print(p_fase4_ruido)
   print(p_fase4_causal)
 
   ggsave(file.path(dir_graficos, "Fase4_PlotA_AssinaturaTopologica.png"),
-         plot = p_fase4_topo,   width = 10, height = 8, dpi = 300, bg = "white")
+         plot = p_fase4_topo,       width = 10, height = 8,  dpi = 300, bg = "white")
+  ggsave(file.path(dir_graficos, "Fase4_PlotD_TopologiaAmax.png"),
+         plot = p_fase4_topo_amax,  width = 12, height = 7,  dpi = 300, bg = "white")
   ggsave(file.path(dir_graficos, "Fase4_PlotB_RuidoEcologico.png"),
-         plot = p_fase4_ruido,  width = 12, height = 7, dpi = 300, bg = "white")
+         plot = p_fase4_ruido,      width = 12, height = 7,  dpi = 300, bg = "white")
   ggsave(file.path(dir_graficos, "Fase4_PlotC_ProvaCausal.png"),
-         plot = p_fase4_causal, width = 10, height = 5, dpi = 300, bg = "white")
+         plot = p_fase4_causal,     width = 10, height = 5,  dpi = 300, bg = "white")
   cat(sprintf("\nGráficos A, B, C salvos em: %s\n", dir_graficos))
 
   # =====================================================================
