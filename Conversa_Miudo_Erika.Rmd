@@ -85,7 +85,7 @@ $$Q = \frac{1}{2m} \sum_{ij} \left[ A_{ij} - \frac{k_i k_j}{2m} \right] \delta(c
 
 onde $A_{ij}$ é a matriz de adjacência, $k_i$ o grau do nó $i$, $m$ o número total de arestas, e $\delta(c_i, c_j) = 1$ se $i$ e $j$ pertencem à mesma comunidade. $Q \in [0, 1]$: valores altos indicam redes fragmentadas em grupos de machos e fêmeas que se acasalam preferencialmente entre si.
 
-> **Implementação:** `igraph::cluster_louvain()` + `igraph::modularity()` (pacote `igraph`). O algoritmo de Louvain é aplicado à projecção não-dirigida da rede bipartita (machos + fêmeas como nós, cópulas como arestas). A alternativa bipartite-específica seria `bipartite::computeModules()`, mas é 100-1000× mais lenta e inviável para 2.520 simulações × 100 gerações. Louvain é amplamente usado em redes de acasalamento (e.g. Sartori & Mantovani 2019) e altamente correlacionado com a modularidade bipartida real.
+> **Implementação:** `igraph::cluster_louvain()` + `igraph::modularity()` (pacote `igraph`). O algoritmo de Louvain é aplicado à projecção não-dirigida da rede bipartita (machos + fêmeas como nós, cópulas como arestas). A alternativa bipartite-específica seria `bipartite::computeModules()`, mas é 100-1000× mais lenta.
 
 **Aninhamento NODF** (*Nestedness based on Overlap and Decreasing Fill*): grau de hierarquização das interações:
 
@@ -93,7 +93,7 @@ $$\text{NODF} = \frac{1}{\binom{R}{2} + \binom{C}{2}} \left( \sum_{i < j}^{R} N_
 
 Para cada par de linhas $i, j$ com $k_i > k_j$: $N_{ij} = \dfrac{\text{interações partilhadas}}{k_j}$; se $k_i = k_j$ então $N_{ij} = 0$. $\text{NODF} \in [0, 100]$: valores altos indicam que os machos menos populares são subconjuntos dos mais populares (estrutura hierárquica típica do *runaway*).
 
-> **Implementação:** `bipartite::nested(M, method = "NODF")` (pacote `bipartite`; Dormann et al. 2008). A função recebe a matriz de incidência $M$ (machos × fêmeas) directamente, sem projecção.
+> **Implementação:** `bipartite::nested(M, method = "NODF")` (pacote `bipartite`). A função recebe a matriz de incidência $M$ (machos × fêmeas) directamente, sem projecção.
 
 **Centralização** (degree centralization): concentração de acasalamentos na rede:
 
