@@ -312,11 +312,10 @@ if(file.exists(arquivo)) {
 
     p_combinado <- (p_left_clean | p_right_clean) +
       plot_annotation(
-        title = "ESPIADINHA 7: Trajetórias topológicas sob níveis contrastantes de A_max",
+        title    = "ESPIADINHA 7: Trajetórias topológicas sob níveis contrastantes de A_max",
         subtitle = "Linhas = médias por geração entre todas as réplicas | Eixo Y consistente entre painéis",
-        theme = theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
-                      plot.subtitle = element_text(size = 11, hjust = 0.5),
-                      legend.position = "bottom")
+        theme    = theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
+                         plot.subtitle = element_text(size = 11, hjust = 0.5))
       ) +
       plot_layout(guides = "collect")
 
@@ -360,9 +359,8 @@ if(file.exists(arquivo)) {
       plot_annotation(
         title    = "ESPIADINHA 8: Trajetórias evolutivas (média e variância do traço masculino)",
         subtitle = "Linha tracejada cinza = φ = 5.0 (ótimo ecológico) | Eixo Y consistente entre painéis",
-        theme = theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
-                      plot.subtitle = element_text(size = 11, hjust = 0.5),
-                      legend.position = "bottom")
+        theme    = theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
+                         plot.subtitle = element_text(size = 11, hjust = 0.5))
       ) +
       plot_layout(guides = "collect")
 
@@ -395,8 +393,8 @@ if(file.exists(arquivo)) {
                           varz_males, zbar_males),
                  names_to = "Metrica", values_to = "Valor") %>%
     mutate(gen_label = ifelse(generation == 1, "Gen_inicial", "Gen_final")) %>%
+    dplyr::select(-generation, -n_reps) %>%
     pivot_wider(names_from = gen_label, values_from = Valor) %>%
-    select(-generation) %>%
     mutate(Delta     = Gen_final - Gen_inicial,
            Delta_pct = 100 * (Gen_final - Gen_inicial) / Gen_inicial) %>%
     arrange(encounters_n, sigma_p, tipo_selecao, Metrica)
