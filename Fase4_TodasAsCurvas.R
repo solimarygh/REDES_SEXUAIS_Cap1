@@ -134,7 +134,7 @@ df_gen50 <- df_fase4 %>% filter(generation == 50) %>% drop_na()
 
 val_gens <- max(df_fase4$generation)
 val_reps <- length(unique(df_fase4$replica))
-subtitulo_base <- sprintf("Parâmetros: %d Gerações | População: 1000 | Réplicas: %d", val_gens, val_reps)
+subtitulo_base <- sprintf("Parâmetros: %d Gerações | N=200 | Réplicas: %d", val_gens, val_reps)
 
 tema_master <- theme_light(base_size = 14) +
   theme(legend.position = "bottom", 
