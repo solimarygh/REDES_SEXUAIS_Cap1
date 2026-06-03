@@ -134,6 +134,8 @@ if(file.exists(arquivo)) {
   ggsave(file.path(dir_espiadinhas, "Espiadinha5_Centralizacao.png"), p_cent, width=10, height=5, dpi=200, bg="white")
   ggsave(file.path(dir_espiadinhas, "Espiadinha6_Is.png"),         p_is,   width=10, height=5, dpi=200, bg="white")
 
+  cat("\n>>> CHECKPOINT 1: Espiadinhas 1-6 OK\n")
+
   # =====================================================================
   # LIMITES GLOBAIS POR MÉTRICA (para eixo Y consistente entre cenários)
   # =====================================================================
@@ -191,6 +193,8 @@ if(file.exists(arquivo)) {
     limites_evo %>% mutate(Valor = ymax)
   ) %>%
     mutate(generation = 1, tipo_selecao = "uniform")
+
+  cat(">>> CHECKPOINT 2: Limites globais OK\n")
 
   # =====================================================================
   # FUNÇÃO HELPER: Trajetórias evolutivas (MeanZ + VarZ)
@@ -280,6 +284,8 @@ if(file.exists(arquivo)) {
             strip.background = element_rect(fill = "gray20"),
             strip.text = element_text(color = "white", face = "bold"))
   }
+
+  cat(">>> CHECKPOINT 3: Funções trajetória definidas OK\n")
 
   # =====================================================================
   # ESPIADINHA 7: Trajetórias σp=0.5 vs 2.0 em DOIS níveis de A_max
@@ -372,6 +378,8 @@ if(file.exists(arquivo)) {
     if (!is.null(p_evo_right)) print(p_evo_right)
   }
 
+  cat(">>> CHECKPOINT 4: Espiadinhas 7 e 8 OK\n")
+
   # =====================================================================
   # TABELA: Comparação Geração 1 vs Geração Final para todas as métricas
   # =====================================================================
@@ -424,6 +432,8 @@ if(file.exists(arquivo)) {
            Delta_pct = round(Delta_pct, 1))
 
   print(df_focal, n = Inf)
+
+  cat(">>> CHECKPOINT 5: Tabela OK\n")
 
   # =====================================================================
   # GRÁFICOS FINAIS (Fase 4)
