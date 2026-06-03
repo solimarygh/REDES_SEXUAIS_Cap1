@@ -79,11 +79,13 @@ $$z_{filho} = \frac{z_{pai} + z_{mãe}}{2} + \varepsilon, \quad \varepsilon \sim
 
 A cada geração, a rede bipartita macho–fêmea é usada para calcular:
 
-**Modularidade Q** (algoritmo Louvain) — grau de compartimentação da rede em módulos:
+**Modularidade Q** — grau de compartimentação da rede em módulos:
 
 $$Q = \frac{1}{2m} \sum_{ij} \left[ A_{ij} - \frac{k_i k_j}{2m} \right] \delta(c_i,\, c_j)$$
 
 onde $A_{ij}$ é a matriz de adjacência, $k_i$ o grau do nó $i$, $m$ o número total de arestas, e $\delta(c_i, c_j) = 1$ se $i$ e $j$ pertencem à mesma comunidade. $Q \in [0, 1]$: valores altos indicam redes fragmentadas em grupos de machos e fêmeas que se acasalam preferencialmente entre si.
+
+> **Implementação:** `igraph::cluster_louvain()` + `igraph::modularity()` (pacote `igraph`). O algoritmo de Louvain é aplicado à projecção não-dirigida da rede bipartita (machos + fêmeas como nós, cópulas como arestas). A alternativa bipartite-específica seria `bipartite::computeModules()`, mas é 100–1000× mais lenta e inviável para 2.520 simulações × 100 gerações. Louvain é amplamente usado em redes de acasalamento (e.g. Sartori & Mantovani 2019) e altamente correlacionado com a modularidade bipartida real.
 
 **Aninhamento NODF** (*Nestedness based on Overlap and Decreasing Fill*) — grau de hierarquização das interações:
 
@@ -91,17 +93,23 @@ $$\text{NODF} = \frac{1}{\binom{R}{2} + \binom{C}{2}} \left( \sum_{i < j}^{R} N_
 
 Para cada par de linhas $i, j$ com $k_i > k_j$: $N_{ij} = \dfrac{\text{interações partilhadas}}{k_j}$; se $k_i = k_j$ então $N_{ij} = 0$. $\text{NODF} \in [0, 100]$: valores altos indicam que os machos menos populares são subconjuntos dos mais populares — estrutura hierárquica típica do *runaway*.
 
-**Centralização** (degree centralization) — concentração de acasalamentos nos machos:
+> **Implementação:** `bipartite::nested(M, method = "NODF")` (pacote `bipartite`; Dormann et al. 2008). A função recebe a matriz de incidência $M$ (machos × fêmeas) directamente, sem projecção.
+
+**Centralização** (degree centralization) — concentração de acasalamentos na rede:
 
 $$C_D = \frac{\sum_{i=1}^{n} (k_{\max} - k_i)}{(n-1)^2}$$
 
-onde $k_i$ é o número de fêmeas com quem o macho $i$ se acasalou e $k_{\max}$ é o máximo observado. $C_D \in [0, 1]$: valores altos indicam que poucos machos monopolizam os acasalamentos.
+onde $k_i$ é o grau do nó $i$ e $k_{\max}$ é o grau máximo observado. $C_D \in [0, 1]$: valores altos indicam que poucos nós concentram a maioria das ligações.
+
+> **Implementação:** `igraph::centr_degree(g, mode = "all")$centralization` (pacote `igraph`). Calculada sobre a rede completa (machos + fêmeas), não só machos. Para centralização exclusivamente masculina, $I_s$ é mais informativo e directo.
 
 **$I_s$** (oportunidade de seleção sexual) — variação padronizada do sucesso reprodutivo masculino:
 
 $$I_s = \frac{\text{Var}(k)}{\bar{k}^2}$$
 
-onde $k$ = número de parceiras por macho. Equivale ao coeficiente de variação ao quadrado; mede a intensidade *atual* da seleção sexual na população.
+onde $k$ = número de parceiras por macho (= `rowSums(M)`). Equivale ao coeficiente de variação ao quadrado; mede a intensidade *atual* da seleção sexual na população (Wade 1979; Shuster & Wade 2003).
+
+> **Implementação:** calculado directamente em R base: `var(rowSums(M)) / mean(rowSums(M))^2`, sem pacote externo.
 
 ---
 
