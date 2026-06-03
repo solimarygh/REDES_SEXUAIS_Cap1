@@ -588,10 +588,10 @@ if(file.exists(arquivo)) {
                size = 4, shape = 21, fill = "white", stroke = 2) +
     geom_point(aes(x = Gen_final, y = tipo_label, color = tipo_selecao),
                size = 4) +
-    geom_text(aes(x = Gen_final, y = tipo_label,
+    geom_text(aes(x = (Gen_inicial + Gen_final) / 2, y = tipo_label,
                   label = sprintf("%+.3f", Delta),
                   color = tipo_selecao),
-              hjust = -0.35, size = 3.2, fontface = "bold") +
+              hjust = 0.5, vjust = -0.6, size = 3.0, fontface = "bold") +
     facet_grid(Metrica_label ~ Amax_label, scales = "free_x") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     labs(
