@@ -125,14 +125,16 @@ knitr::include_graphics("Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_Pl
 
 ### Interpretação
 
-As quatro curvas de preferência geram **assinaturas topológicas distintas** ao longo de 100 gerações:
+A questão central desta secção é: **à medida que σp aumenta (maior variação individual na preferência feminina), cada curva gera uma assinatura topológica distinta?**
 
-- **Sigmoide**: mantém o maior aninhamento e reduz a modularidade. Será que essa estrutura corresponde a uma hierarquia visual clara na rede, com poucos machos concentrando a maioria das parceiras? (Ver Secção 2.5.)
-- **Gaussiana**: perde aninhamento (-37%) e ganha modularidade (+9%). Será que esse aumento de modularidade resulta em grupos visíveis de machos e fêmeas separados na rede? (Ver Secção 2.5.)
-- **U-shaped**: mantém aninhamento mas aumenta modularidade, especialmente sob restrição ecológica. Esse padrão é consistente com a formação de dois morfos masculinos, mas precisamos ver a distribuição de $z$ para confirmar (Ver Secção 2.6).
-- **Uniforme**: comportamento basal, sem sinal evolutivo direcional.
+Os dados indicam que sim, e que a forma da função de preferência governa como a heterogeneidade de preferência se traduz em estrutura de rede:
 
-O **tipping point em $\sigma_p = 1.0$** é visível nos dados: abaixo desse valor as métricas são relativamente estáveis; acima, as diferenças entre curvas amplificam-se.
+- **Sigmoide**: ao longo do gradiente de σp, mantém o maior aninhamento e reduz a modularidade. O aumento de σp amplifica a hierarquia na rede. Corresponde isso visualmente a uma rede com poucos machos altamente conectados? (Ver Secção 2.5.)
+- **Gaussiana**: ao longo de σp, perde aninhamento (-37%) e ganha modularidade (+9%). A heterogeneidade de preferência fragmenta a rede em grupos. Esse padrão visual é consistente com "cliques modulares" de fêmeas que partilham os mesmos machos preferidos? (Ver Secção 2.5.)
+- **U-shaped**: a modularidade aumenta com σp, especialmente sob restrição de amostragem. A heterogeneidade de preferência cria dois grupos distintos na rede? Isso seria consistente com dois morfos masculinos — mas precisamos ver a distribuição de $z$ para confirmar (Ver Secção 2.6).
+- **Uniforme**: referência nula. A topologia não responde ao gradiente de σp, confirmando que a assinatura das outras curvas é gerada pela forma da função de preferência, não por ruído.
+
+O **tipping point em $\sigma_p = 1.0 = \sigma_z$** é o ponto onde a variação individual da preferência feminina iguala a variação genética inicial dos machos. Abaixo desse valor, as métricas topológicas são relativamente estáveis entre curvas; acima, as assinaturas divergem e amplificam-se.
 
 ---
 
@@ -146,9 +148,11 @@ knitr::include_graphics("Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_Pl
 
 ### Interpretação
 
-**Variância do traço (Var z):** os valores na geração 100 são substancialmente reduzidos em relação ao valor inicial ($\sigma_z^2 = 1.0$), com reduções de 88-90% em todos os regimes de preferência. A diferença entre $A_{max}$ é, na maioria dos casos, pequena. A excepção mais visível é a **curva gaussiana**: sob $A_{max}=10$, Var z é consistentemente mais elevada do que sob $A_{max}=200$, sugerindo que a restrição de amostragem reduz a eficácia do acasalamento assortativo e preserva mais variância. Será que esse efeito de $A_{max}$ sobre a diversidade genética é específico da gaussiana, ou aparece também nas outras curvas a $\sigma_p$ mais altos? (Ver Tabela 1 para os valores exactos.)
+Esta secção testa se os caminhos topo-evolutivos gerados por cada curva são robustos ao ruído ecológico: **$A_{max}$ restringe a escolha feminina e actua como ruído que pode dissolver a estrutura da rede**.
 
-**Média do traço (z̄):**
+**Variância do traço (Var z) — diversidade genética:** reduzida 88-90% em relação ao valor inicial ($\sigma_z^2 = 1.0$) em todos os regimes. A poliandria sem benefício directo não resgata variância. O efeito de $A_{max}$ sobre Var z é pequeno na maioria das curvas, com uma excepção visível: na **curva gaussiana**, $A_{max}=10$ preserva mais Var z do que $A_{max}=200$. A hipótese é que a restrição de amostragem limita a eficácia do acasalamento assortativo, reduzindo a perda de diversidade. Será esse efeito específico da gaussiana ou aparece nas outras curvas a $\sigma_p$ altos? (Ver Tabela 1.)
+
+**Média do traço (z̄) — exageração fenotípica:** o gradiente de $\sigma_p$ não altera z̄ nas curvas uniforme, gaussiana e u-shaped. Apenas a sigmoide gera deslocamento sistemático, e esse deslocamento aumenta com $\sigma_p$:
 
 | Curva | $A_{max}=200$ | $A_{max}=40$ | $A_{max}=10$ |
 |---|---|---|---|
@@ -157,7 +161,7 @@ knitr::include_graphics("Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_Pl
 | **Sigmoide** | **$z̄ = 6.16$ (+23%)** | **$z̄ = 6.04$ (+21%)** | **$z̄ = 5.84$ (+17%)** |
 | U-shaped | $z̄ \approx 4.98$ | $z̄ \approx 5.01$ | $z̄ \approx 5.01$ |
 
-A sigmoide é a **única curva que gera deslocamento significativo de z̄** em relação ao ótimo ecológico. O gradiente $A_{max}=200 > 40 > 10$ indica que a restrição de amostragem atenua, mas não elimina, o deslocamento direcional do traço na curva sigmoide.
+O gradiente $A_{max}=200 > 40 > 10$ atenua o deslocamento da sigmoide, mas não o elimina. O custo de busca actua como ruído ecológico que **reduz, mas não neutraliza**, o caminho topo-evolutivo direcional gerado pela preferência sigmoide.
 
 ---
 
@@ -171,8 +175,10 @@ knitr::include_graphics("Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_Pl
 
 ### Interpretação
 
-- **Modularidade → Var(z):** correlação positiva. Redes mais modulares estão associadas a maior variância genética. A u-shaped (maior modularidade) apresenta Var z mais elevado; a sigmoide (menor modularidade) apresenta Var z mais baixo. Será que é a estrutura da rede que causa a diferença, ou ambas são consequências independentes da curva de preferência? (Ver Secção 2.5.)
-- **Aninhamento → z̄:** correlação positiva para a sigmoide. Réplicas com maior aninhamento apresentam maior deslocamento de z̄. O mecanismo pelo qual o aninhamento se traduz em exageração do traço é explorado nas Secções 2.5 e 3.
+Esta secção pergunta: **a topologia da rede medeia o caminho evolutivo, ou é apenas uma covariável da curva de preferência?** Cada ponto é uma réplica independente com σp = 2.0 e A_max = 200.
+
+- **Modularidade → Var(z):** correlação positiva entre réplicas. Dentro do mesmo regime de preferência, réplicas com rede mais modular apresentam maior Var z. A u-shaped (rede mais modular) rescue diversidade genética; a sigmoide (rede menos modular) reduz-a. Esse padrão é consistente com a hipótese de que **a topologia modular preserva diversidade genética** — mas confirmar causalidade requereria manipulação experimental da estrutura da rede. (Ver Secção 2.5.)
+- **Aninhamento → z̄:** correlação positiva para a sigmoide. Dentro do regime sigmoide, réplicas com maior aninhamento apresentam maior deslocamento de z̄. O gradiente de σp alimenta esse caminho: mais σp gera mais aninhamento, que gera mais exageração. Como o aninhamento traduz preferência heterogénea em exageração do traço? (Ver Secções 2.5 e 3.)
 
 ---
 
