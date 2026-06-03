@@ -367,7 +367,7 @@ Se confirmado, este resultado sugere que a **topologia da rede é suficiente par
 
 ---
 
-# Discussão
+# Tópicos para discutir...
 
 ## Por que a Sigmoide gera *runaway* mesmo com fecundidade neutra?
 
@@ -389,7 +389,6 @@ A função u-shaped gera **seleção sexual disruptiva**: fêmeas evitam machos 
 
 1. Aumentar réplicas de 30 para 100 para reduzir erro de estimação
 2. Analisar trajetórias geração-a-geração (Espiadinhas 7 e 8) para identificar quando o *runaway* sigmoide se inicia
-3. Interpretar o resultado do teste de Hartigan's dip e discutir implicações do polimorfismo U-shaped
 
 ---
 
