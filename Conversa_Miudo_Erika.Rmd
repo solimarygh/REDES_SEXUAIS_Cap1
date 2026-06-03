@@ -257,6 +257,19 @@ if (!is.null(df)) {
 }
 ```
 
+### Visualização: Gen 1 → Gen 100 (Dumbbell)
+
+```{r dumbell-plot, echo=FALSE, fig.cap="**Figura 3b.** Mudança nas métricas topológicas da geração 1 para a geração final (σp = 2.0). Círculo aberto = Geração 1, círculo fechado = Geração final. O comprimento e direção do segmento refletem a magnitude e o sinal da mudança. Rótulos = Δ absoluto médio (30 réplicas)."}
+img_e <- "Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_PlotE_Dumbell_Gen1vsGenFinal.png"
+if (file.exists(img_e)) {
+  knitr::include_graphics(img_e)
+} else {
+  cat("*Gráfico não encontrado — rode o Script 07 para gerar o Plot E.*")
+}
+```
+
+**Leitura do gráfico:** cada linha liga o valor médio da métrica na geração 1 (círculo aberto) ao valor na geração final (círculo fechado). A seleção sigmoide, com acesso irrestrito (A_max = 200), é a que mais desloca o aninhamento, enquanto a curva uniforme serve de referência de deriva neutra. Será que a modulação do aninhamento pela sigmoide acompanha o exagero do traço visto no Plot B (ver Secção 2.3)? Os gráficos das redes representativas (Secção 2.6) ajudam a responder.
+
 ---
 
 ## Redes Representativas e a Evolução em 3 Atos {.tabset}

@@ -550,10 +550,56 @@ if(file.exists(arquivo)) {
     guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
     tema_master
 
+  # ---------------------------------------------------------------------
+  # PLOT E: DUMBBELL — Mudança Gen 1 → Gen Final (Modularity + Nestedness)
+  # σp = 2.0, todos os A_max, todas as curvas
+  # ---------------------------------------------------------------------
+  df_dumbell <- df_tabela %>%
+    filter(Metrica %in% c("Modularity", "Nestedness"),
+           sigma_p == 2.0) %>%
+    mutate(
+      Amax_label = factor(paste0("A_max: ", encounters_n),
+                          levels = c("A_max: 200", "A_max: 40", "A_max: 10")),
+      Metrica_label = case_when(
+        Metrica == "Modularity" ~ "1. Modularidade",
+        Metrica == "Nestedness" ~ "2. Aninhamento"
+      ),
+      tipo_label = factor(tipo_selecao,
+                          levels = c("u-shaped", "sigmoid", "gaussian", "uniform"),
+                          labels = c("U-shaped", "Sigmoide", "Gaussiana", "Uniforme"))
+    )
+
+  p_fase4_dumbell <- ggplot(df_dumbell) +
+    geom_segment(aes(x = Gen_inicial, xend = Gen_final,
+                     y = tipo_label,  yend = tipo_label,
+                     color = tipo_selecao),
+                 linewidth = 1.8, alpha = 0.7) +
+    geom_point(aes(x = Gen_inicial, y = tipo_label, color = tipo_selecao),
+               size = 4, shape = 21, fill = "white", stroke = 2) +
+    geom_point(aes(x = Gen_final, y = tipo_label, color = tipo_selecao),
+               size = 4) +
+    geom_text(aes(x = Gen_final, y = tipo_label,
+                  label = sprintf("%+.3f", Delta),
+                  color = tipo_selecao),
+              hjust = -0.35, size = 3.2, fontface = "bold") +
+    facet_grid(Metrica_label ~ Amax_label, scales = "free_x") +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    labs(
+      title    = sprintf("Plot E: Mudança nas Métricas Topológicas: Gen 1 → Gen %d (σp = 2.0)", GEN_FINAL),
+      subtitle = "Círculo aberto = Geração 1  |  Círculo fechado = Geração final  |  Rótulos = Δ absoluto",
+      x        = "Valor Médio da Métrica",
+      y        = NULL,
+      color    = ""
+    ) +
+    guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
+    tema_master +
+    theme(panel.spacing.x = unit(1.5, "lines"))
+
   print(p_fase4_topo)
   print(p_fase4_topo_amax)
   print(p_fase4_ruido)
   print(p_fase4_causal)
+  print(p_fase4_dumbell)
 
   ggsave(file.path(dir_graficos, "Fase4_PlotA_AssinaturaTopologica.png"),
          plot = p_fase4_topo,       width = 10, height = 8,  dpi = 300, bg = "white")
@@ -563,7 +609,9 @@ if(file.exists(arquivo)) {
          plot = p_fase4_ruido,      width = 12, height = 7,  dpi = 300, bg = "white")
   ggsave(file.path(dir_graficos, "Fase4_PlotC_ProvaCausal.png"),
          plot = p_fase4_causal,     width = 10, height = 5,  dpi = 300, bg = "white")
-  cat(sprintf("\nGráficos A, B, C salvos em: %s\n", dir_graficos))
+  ggsave(file.path(dir_graficos, "Fase4_PlotE_Dumbell_Gen1vsGenFinal.png"),
+         plot = p_fase4_dumbell,    width = 12, height = 6,  dpi = 300, bg = "white")
+  cat(sprintf("\nGráficos A, B, C, D, E salvos em: %s\n", dir_graficos))
 
   # =====================================================================
   # BLOCO E: MODELOS LINEARES (LMs) — ESTATÍSTICA OFICIAL
