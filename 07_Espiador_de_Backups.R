@@ -446,6 +446,8 @@ if(file.exists(arquivo)) {
       Metrica == "Centralization" ~ "4. Centralidade")) %>%
     ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
+    annotate("text", x = 1.0, y = Inf, label = "σp = σz", hjust = -0.15, vjust = 1.8,
+             color = "red", size = 3.2, fontface = "italic") +
     geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2,
                 show.legend = FALSE) +
     geom_jitter(alpha = 0.2, width = 0.05, size = 1.2) +
@@ -475,14 +477,16 @@ if(file.exists(arquivo)) {
     geom_hline(data = filter(df_ruido, Variavel == "1. Média (Exagero)"),
                aes(yintercept = 5.0), linetype = "dashed", alpha = 0.6) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
+    annotate("text", x = 1.0, y = Inf, label = "σp = σz", hjust = -0.15, vjust = 1.8,
+             color = "red", size = 3.0, fontface = "italic") +
     geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2,
                 show.legend = FALSE) +
     geom_jitter(alpha = 0.2, width = 0.05, size = 1) +
     facet_grid(Variavel ~ Cenario_Ecol, scales = "free_y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title    = sprintf("Fase 4: O Colapso Ecológico das Forças Evolutivas (Gen %d)", GEN_FINAL),
-         subtitle = "Lendo da esq. para a dir.: O custo de busca neutraliza a seleção sexual",
+    labs(title    = sprintf("Fase 4: Efeito do Custo de Busca sobre a Média e a Variância do Traço (Gen %d)", GEN_FINAL),
+         subtitle = "Lendo da esq. para a dir.: A restrição de amostragem (A_max) atenua a seleção sexual",
          x = expression(paste("Variação da Preferência (", sigma[p], ")")),
          y = "Valor Fenotípico / Genético", color = "", fill = "") +
     guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +

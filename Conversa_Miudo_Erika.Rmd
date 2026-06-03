@@ -136,28 +136,28 @@ O **tipping point em $\sigma_p = 1.0$** é visível nos dados: abaixo desse valo
 
 ---
 
-## Ruído Ecológico e Colapso Evolutivo {.tabset}
+## Efeito do Custo de Busca sobre a Evolução do Traço {.tabset}
 
 ### Gráfico
 
-```{r plot-b, echo=FALSE, fig.cap="**Figura 2.** Evolução da média do traço masculino (z̄) e da diversidade genética (Var z) em função de σ_p, para os três níveis de A_max. A linha tracejada horizontal marca o ótimo ecológico φ = 5.0."}
+```{r plot-b, echo=FALSE, fig.cap="**Figura 2.** Média do traço masculino (z̄) e variância do traço (Var z) na geração 100 em função de σ_p, para os três níveis de A_max. A linha tracejada vertical marca σ_p = σ_z = 1.0. A linha tracejada horizontal marca φ = 5.0."}
 knitr::include_graphics("Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_PlotB_RuidoEcologico.png")
 ```
 
 ### Interpretação
 
-**Diversidade genética (Var z):** colapso universal de ~88-90% em todas as curvas e todos os valores de $A_{max}$. Com fecundidade neutra, a seleção viabilidade é o único motor atuando sobre $z$, convergindo a população para $\phi = 5$. A poliandria, sem benefício de fecundidade, não resgata variância genética.
+**Variância do traço (Var z):** os valores na geração 100 são substancialmente reduzidos em relação ao valor inicial ($\sigma_z^2 = 1.0$), com reduções médias de 88-90% em todos os regimes de preferência e todos os valores de $A_{max}$. Este padrão é consistente com a ação da seleção viabilidade estabilizadora como principal força sobre $z$ quando a fecundidade é neutra. Notavelmente, a poliandria por si só não mantém variância genética na ausência de benefícios directos.
 
 **Média do traço (z̄):**
 
 | Curva | $A_{max}=200$ | $A_{max}=40$ | $A_{max}=10$ |
 |---|---|---|---|
-| Uniforme | $z̄ \approx 5.04$ (neutra) | $z̄ \approx 5.00$ | $z̄ \approx 5.00$ |
-| Gaussiana | $z̄ \approx 5.01$ (neutra) | $z̄ \approx 5.00$ | $z̄ \approx 5.00$ |
+| Uniforme | $z̄ \approx 5.04$ | $z̄ \approx 5.00$ | $z̄ \approx 5.00$ |
+| Gaussiana | $z̄ \approx 5.01$ | $z̄ \approx 5.00$ | $z̄ \approx 5.00$ |
 | **Sigmoide** | **$z̄ = 6.16$ (+23%)** | **$z̄ = 6.04$ (+21%)** | **$z̄ = 5.84$ (+17%)** |
-| U-shaped | $z̄ \approx 4.98$ (neutra) | $z̄ \approx 5.01$ | $z̄ \approx 5.01$ |
+| U-shaped | $z̄ \approx 4.98$ | $z̄ \approx 5.01$ | $z̄ \approx 5.01$ |
 
-A sigmoide é a **única curva que gera exageração real do traço**. O *runaway* persiste mesmo sem benefício direto da poliandria. O gradiente $A_{max}=200 > 40 > 10$ confirma que o ruído ecológico atenua, mas **não neutraliza**, o *runaway* topológico.
+A sigmoide é a **única curva que gera deslocamento significativo de z̄** em relação ao ótimo ecológico. O gradiente $A_{max}=200 > 40 > 10$ indica que a restrição de amostragem atenua, mas não elimina, o deslocamento direcional do traço na curva sigmoide.
 
 ---
 
