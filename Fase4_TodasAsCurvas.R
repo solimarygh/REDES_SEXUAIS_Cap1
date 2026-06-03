@@ -291,3 +291,4 @@ modelo_general <- lm(varz_males ~ sigma_p, data = df_gen50)
 modelo_segmentado <- segmented(modelo_general, seg.Z = ~sigma_p, psi = 1.0)
 
 summary(modelo_segmentado)
+

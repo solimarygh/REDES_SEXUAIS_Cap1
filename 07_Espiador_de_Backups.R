@@ -691,3 +691,4 @@ if(file.exists(arquivo)) {
 } else {
   cat("O arquivo de backup ainda não foi criado. Espere a simulação rodar mais um pouco!\n")
 }
+
