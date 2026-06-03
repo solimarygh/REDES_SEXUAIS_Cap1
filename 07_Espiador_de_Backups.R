@@ -313,11 +313,11 @@ if(file.exists(arquivo)) {
     p_combinado <- (p_left_clean | p_right_clean) +
       plot_annotation(
         title    = "ESPIADINHA 7: Trajetórias topológicas sob níveis contrastantes de A_max",
-        subtitle = "Linhas = médias por geração entre todas as réplicas | Eixo Y consistente entre painéis",
-        theme    = theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
-                         plot.subtitle = element_text(size = 11, hjust = 0.5))
+        subtitle = "Linhas = médias por geração entre todas as réplicas | Eixo Y consistente entre painéis"
       ) +
-      plot_layout(guides = "collect")
+      plot_layout(guides = "collect") &
+      theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
+            plot.subtitle = element_text(size = 11, hjust = 0.5))
 
     print(p_combinado)
     ggsave(file.path(dir_espiadinhas, "Espiadinha7_Topologia_Amax.png"),
@@ -358,11 +358,11 @@ if(file.exists(arquivo)) {
     p_evo_combinado <- (p_evo_left_clean | p_evo_right_clean) +
       plot_annotation(
         title    = "ESPIADINHA 8: Trajetórias evolutivas (média e variância do traço masculino)",
-        subtitle = "Linha tracejada cinza = φ = 5.0 (ótimo ecológico) | Eixo Y consistente entre painéis",
-        theme    = theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
-                         plot.subtitle = element_text(size = 11, hjust = 0.5))
+        subtitle = "Linha tracejada cinza = φ = 5.0 (ótimo ecológico) | Eixo Y consistente entre painéis"
       ) +
-      plot_layout(guides = "collect")
+      plot_layout(guides = "collect") &
+      theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
+            plot.subtitle = element_text(size = 11, hjust = 0.5))
 
     print(p_evo_combinado)
     ggsave(file.path(dir_espiadinhas, "Espiadinha8_Trajetorias_Evolutivas.png"),
@@ -418,7 +418,7 @@ if(file.exists(arquivo)) {
     filter(Metrica %in% c("Modularity", "Nestedness"),
            encounters_n == 200,
            sigma_p == 2.0) %>%
-    select(tipo_selecao, Metrica, Gen_inicial, Gen_final, Delta, Delta_pct) %>%
+    dplyr::select(tipo_selecao, Metrica, Gen_inicial, Gen_final, Delta, Delta_pct) %>%
     arrange(Metrica, tipo_selecao) %>%
     mutate(across(c(Gen_inicial, Gen_final, Delta), \(x) round(x, 3)),
            Delta_pct = round(Delta_pct, 1))
