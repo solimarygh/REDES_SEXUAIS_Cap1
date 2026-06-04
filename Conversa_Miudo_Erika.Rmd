@@ -277,25 +277,25 @@ if (file.exists(img_e)) {
 ### Estrutura das Redes (σ_p = 2.0)
 
 ```{r rede-sigmap2, echo=FALSE, fig.cap="**Figura 4.** Redes bipartitas macho-fêmea representativas para σ_p = 2.0, A_max = 200. Quadrados = machos, círculos = fêmeas. Cores = comunidades Louvain. A rede com modularity mais próxima da média estável foi seleccionada entre 20 réplicas."}
-knitr::include_graphics("Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap2.0_Amax200.png")
+knitr::include_graphics("Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap2.0_Amax200_Gen100.png")
 ```
 
 ### Estrutura das Redes (σ_p = 0.5)
 
 ```{r rede-sigmap05, echo=FALSE, fig.cap="**Figura 5.** Redes representativas para σ_p = 0.5, A_max = 200. Com baixa variação de preferência, as diferenças entre curvas são mais subtis (controlo para comparação com σ_p = 2.0)."}
-knitr::include_graphics("Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax200.png")
+knitr::include_graphics("Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax200_Gen100.png")
 ```
 
 ### Evolução em 3 Atos (σ_p = 2.0)
 
 ```{r hist-sigmap2, echo=FALSE, fig.cap="**Figura 6.** Distribuições do traço masculino z e da preferência feminina p em três momentos: Geração 1 (início), rede representativa (fase estável), e geração final. Linha tracejada = ótimo ecológico φ = 5."}
-knitr::include_graphics("Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap2.0_Amax200.png")
+knitr::include_graphics("Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap2.0_Amax200_Gen100.png")
 ```
 
 ### Evolução em 3 Atos (σ_p = 0.5)
 
 ```{r hist-sigmap05, echo=FALSE, fig.cap="**Figura 7.** Mesmo painel para σ_p = 0.5. Com preferências femininas pouco variáveis, o runaway sigmoide é atenuado e os morfos U-shaped são menos pronunciados."}
-knitr::include_graphics("Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0.5_Amax200.png")
+knitr::include_graphics("Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0.5_Amax200_Gen100.png")
 ```
 
 ### Interpretação
