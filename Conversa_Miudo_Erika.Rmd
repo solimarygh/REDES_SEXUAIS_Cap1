@@ -299,10 +299,10 @@ if (file.exists(img_e)) {
 ```{r rede-hist-uniform, echo=FALSE, out.width="49%", fig.show="hold", fig.cap=c("Rede — Aleatória | σp=0.5","Rede — Aleatória | σp=2.0","Evolução em 3 Atos — Aleatória | σp=0.5","Evolução em 3 Atos — Aleatória | σp=2.0")}
 base <- "Resultados_Artigo/Redes_Representativas/Graficos"
 imgs <- file.path(base, c(
-  "Rede_uniform_sigmap0.5_Amax200_Gen100.png",
-  "Rede_uniform_sigmap2.0_Amax200_Gen100.png",
-  "Histogramas_uniform_sigmap0.5_Amax200_Gen100.png",
-  "Histogramas_uniform_sigmap2.0_Amax200_Gen100.png"
+  "Rede_uniform_sigmap0.5_Amax200.png",
+  "Rede_uniform_sigmap2.0_Amax200.png",
+  "Histogramas_uniform_sigmap0.5_Amax200.png",
+  "Histogramas_uniform_sigmap2.0_Amax200.png"
 ))
 existing <- imgs[file.exists(imgs)]
 if (length(existing) > 0) knitr::include_graphics(existing) else cat("*Rode o Script 06 primeiro.*")
@@ -313,10 +313,10 @@ if (length(existing) > 0) knitr::include_graphics(existing) else cat("*Rode o Sc
 ```{r rede-hist-gaussian, echo=FALSE, out.width="49%", fig.show="hold", fig.cap=c("Rede — Gaussiana | σp=0.5","Rede — Gaussiana | σp=2.0","Evolução em 3 Atos — Gaussiana | σp=0.5","Evolução em 3 Atos — Gaussiana | σp=2.0")}
 base <- "Resultados_Artigo/Redes_Representativas/Graficos"
 imgs <- file.path(base, c(
-  "Rede_gaussian_sigmap0.5_Amax200_Gen100.png",
-  "Rede_gaussian_sigmap2.0_Amax200_Gen100.png",
-  "Histogramas_gaussian_sigmap0.5_Amax200_Gen100.png",
-  "Histogramas_gaussian_sigmap2.0_Amax200_Gen100.png"
+  "Rede_gaussian_sigmap0.5_Amax200.png",
+  "Rede_gaussian_sigmap2.0_Amax200.png",
+  "Histogramas_gaussian_sigmap0.5_Amax200.png",
+  "Histogramas_gaussian_sigmap2.0_Amax200.png"
 ))
 existing <- imgs[file.exists(imgs)]
 if (length(existing) > 0) knitr::include_graphics(existing) else cat("*Rode o Script 06 primeiro.*")
@@ -327,10 +327,10 @@ if (length(existing) > 0) knitr::include_graphics(existing) else cat("*Rode o Sc
 ```{r rede-hist-sigmoid, echo=FALSE, out.width="49%", fig.show="hold", fig.cap=c("Rede — Sigmoide | σp=0.5","Rede — Sigmoide | σp=2.0","Evolução em 3 Atos — Sigmoide | σp=0.5","Evolução em 3 Atos — Sigmoide | σp=2.0")}
 base <- "Resultados_Artigo/Redes_Representativas/Graficos"
 imgs <- file.path(base, c(
-  "Rede_sigmoid_sigmap0.5_Amax200_Gen100.png",
-  "Rede_sigmoid_sigmap2.0_Amax200_Gen100.png",
-  "Histogramas_sigmoid_sigmap0.5_Amax200_Gen100.png",
-  "Histogramas_sigmoid_sigmap2.0_Amax200_Gen100.png"
+  "Rede_sigmoid_sigmap0.5_Amax200.png",
+  "Rede_sigmoid_sigmap2.0_Amax200.png",
+  "Histogramas_sigmoid_sigmap0.5_Amax200.png",
+  "Histogramas_sigmoid_sigmap2.0_Amax200.png"
 ))
 existing <- imgs[file.exists(imgs)]
 if (length(existing) > 0) knitr::include_graphics(existing) else cat("*Rode o Script 06 primeiro.*")
@@ -341,10 +341,10 @@ if (length(existing) > 0) knitr::include_graphics(existing) else cat("*Rode o Sc
 ```{r rede-hist-ushaped, echo=FALSE, out.width="49%", fig.show="hold", fig.cap=c("Rede — Disruptiva | σp=0.5","Rede — Disruptiva | σp=2.0","Evolução em 3 Atos — Disruptiva | σp=0.5","Evolução em 3 Atos — Disruptiva | σp=2.0")}
 base <- "Resultados_Artigo/Redes_Representativas/Graficos"
 imgs <- file.path(base, c(
-  "Rede_u-shaped_sigmap0.5_Amax200_Gen100.png",
-  "Rede_u-shaped_sigmap2.0_Amax200_Gen100.png",
-  "Histogramas_u-shaped_sigmap0.5_Amax200_Gen100.png",
-  "Histogramas_u-shaped_sigmap2.0_Amax200_Gen100.png"
+  "Rede_u-shaped_sigmap0.5_Amax200.png",
+  "Rede_u-shaped_sigmap2.0_Amax200.png",
+  "Histogramas_u-shaped_sigmap0.5_Amax200.png",
+  "Histogramas_u-shaped_sigmap2.0_Amax200.png"
 ))
 existing <- imgs[file.exists(imgs)]
 if (length(existing) > 0) knitr::include_graphics(existing) else cat("*Rode o Script 06 primeiro.*")
