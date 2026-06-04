@@ -26,6 +26,20 @@ library(knitr)
 library(kableExtra)
 ```
 
+```{r sim-info-header, echo=FALSE, results='asis'}
+cat(sprintf(
+  '<div style="font-size:0.78em; color:#777; background:#f5f5f5; border-left:3px solid #bbb; padding:6px 12px; margin:4px 0 20px 0; font-family:monospace;">
+  <b>Branch:</b> polyandria5_neutral_100gen &nbsp;|&nbsp;
+  <b>N=200</b> | Gen=100 | Réplicas=30 &nbsp;|&nbsp;
+  <b>Fecundidade:</b> neutra (F_base=50) &nbsp;|&nbsp;
+  <b>Poliandria:</b> 1–5 parceiros por fêmea &nbsp;|&nbsp;
+  <b>A_max:</b> {200, 40, 10} &nbsp;|&nbsp;
+  <b>Gerado em:</b> %s
+  </div>',
+  format(Sys.time(), "%Y-%m-%d %H:%M")
+))
+```
+
 ---
 
 # Desenho Experimental
@@ -429,15 +443,3 @@ A função u-shaped gera **seleção sexual disruptiva**: fêmeas evitam machos 
 1. Aumentar réplicas de 30 para 100 para reduzir erro de estimação
 2. Analisar trajetórias geração-a-geração (Espiadinhas 7 e 8) para identificar quando o *runaway* sigmoide se inicia
 
----
-
-# Informações da Simulação
-
-```{r session-info, echo=FALSE}
-cat(sprintf("Branch: polyandria5_neutral_100gen\n"))
-cat(sprintf("Parâmetros: N=200, Gen=100, Réplicas=30\n"))
-cat(sprintf("Fecundidade: NEUTRA (F_base=50, independente do nº de parceiros)\n"))
-cat(sprintf("Poliandria: 1-5 parceiros por fêmea (max_cop=5)\n"))
-cat(sprintf("A_max: {200, 40, 10} = {100%%, 20%%, 5%%} de N\n"))
-cat(sprintf("Gerado em: %s\n", format(Sys.time(), "%Y-%m-%d %H:%M")))
-```
