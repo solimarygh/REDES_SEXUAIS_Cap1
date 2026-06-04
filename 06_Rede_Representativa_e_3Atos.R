@@ -224,8 +224,6 @@ rodar_cenario <- function(tipo_sel, sp, am) {
                       dados$GenAlvo$modularity, num_grupos, n_comunidades))
   legend("bottomleft", legend = c("Macho","Fêmea"), pch = c(15, 16),
          col = "gray40", pt.cex = 2, bty = "n", title = "Tipo")
-  legend("bottomright", legend = paste("Comunidade", 1:n_comunidades),
-         fill = paleta, bty = "n", title = "Louvain")
   dev.off()
   cat(sprintf("    Rede salva: %s\n", nome_rede))
 
