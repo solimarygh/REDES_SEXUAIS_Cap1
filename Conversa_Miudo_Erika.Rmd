@@ -458,6 +458,18 @@ Se confirmado, este resultado sugere que a **topologia da rede é suficiente par
 
 ---
 
+# Comentários e Feedback
+
+<script src="https://utteranc.es/client.js"
+        repo="solimarygh/REDES_SEXUAIS_Cap1"
+        issue-term="title"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script>
+
+---
+
 # Tópicos para discutir...
 
 ## Por que a Sigmoide gera *runaway* mesmo com fecundidade neutra?
