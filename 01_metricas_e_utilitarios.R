@@ -232,9 +232,10 @@ ensure_min_survivors <- function(survive_vec, viability, min_surv = 2) {
 }
 
 mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
-                                min_cop = 1, max_cop = 5, encounters_n = 200) {
+                                min_cop = 1, max_cop = 5, encounters_n = 200,
+                                k_fixo = NULL) {
   n_m <- length(male_z_surv); n_f <- length(female_p)
-  matings_per_female <- sample(min_cop:max_cop, n_f, replace = TRUE)
+  matings_per_female <- if (!is.null(k_fixo)) rep(as.integer(k_fixo), n_f) else sample(min_cop:max_cop, n_f, replace = TRUE)
   M <- matrix(0L, nrow = n_m, ncol = n_f)
   
   for (i in seq_len(n_f)) {
@@ -335,7 +336,8 @@ simulate_evolution <- function(
     generations = 50, N_machos = 200, N_femeas = 200,
     sigma_z_init = 1.0, sigma_p = 1.0, sigma_s = 0.2,
     tipo_selecao = "gaussian", encounters_n = 200, phi = 5, gamma = 0.2, eps_sd = 0.2,
-    return_details = FALSE, salvar_redes = FALSE, pasta_redes = NULL, replica_id = 1
+    return_details = FALSE, salvar_redes = FALSE, pasta_redes = NULL, replica_id = 1,
+    selecao_natural = TRUE, k_fixo = NULL
 ) {
   
   male_z_gen1   <- pmax(0, rnorm(N_machos, mean = phi, sd = sigma_z_init))
@@ -360,12 +362,16 @@ simulate_evolution <- function(
     
     female_s <- pmax(0, rnorm(N_femeas, mean = 2, sd = sigma_s))
     
-    V <- exp(-gamma * (male_z_gen - phi)^2)
-    survive <- runif(N_machos) <= V
-    survive <- ensure_min_survivors(survive, V, min_surv = 2)
+    if (selecao_natural) {
+      V <- exp(-gamma * (male_z_gen - phi)^2)
+      survive <- runif(N_machos) <= V
+      survive <- ensure_min_survivors(survive, V, min_surv = 2)
+    } else {
+      survive <- rep(TRUE, N_machos)  # V_j = 1: todos os machos sobrevivem
+    }
     male_z_surv <- male_z_gen[survive]
     
-    M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_selecao, encounters_n = encounters_n)
+    M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_selecao, encounters_n = encounters_n, k_fixo = k_fixo)
     metrics <- calc_metrics_from_M(M)
     
     if (t == generations && salvar_redes && !is.null(pasta_redes)) {
@@ -375,6 +381,8 @@ simulate_evolution <- function(
     # CORREÇÃO: Salvamos a Média e a Variância apenas dos machos que SOBREVIVERAM (male_z_surv)!!!
     out[[t]] <- data.frame(
       generation = t, tipo_selecao = tipo_selecao, sigma_p = sigma_p, encounters_n = encounters_n,
+      k_fixo = ifelse(is.null(k_fixo), NA_integer_, as.integer(k_fixo)),
+      selecao_natural = selecao_natural,
       zbar_males = mean(male_z_surv), varz_males = var(male_z_surv), metrics
     )
     

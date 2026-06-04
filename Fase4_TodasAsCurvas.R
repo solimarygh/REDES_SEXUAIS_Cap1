@@ -36,7 +36,7 @@ suppressPackageStartupMessages({
   library(segmented)
 })
 
-diretorios <- configurar_diretorios("Fase4_TodasAsCurvas")
+diretorios <- configurar_diretorios("Fase5_MiudoV2")
 
 # =====================================================================
 # 2) DESENHO EXPERIMENTAL E SISTEMA DE BACKUP A PROVA DE BALAS
@@ -50,6 +50,8 @@ cenarios_fase4 <- expand.grid(
   tipo_selecao = c("uniform", "gaussian", "sigmoid", "u-shaped"),
   sigma_p = valores_sigma_p,
   encounters_n = c(200, 40, 10), # 100%, 20% e 5% de N=200
+  k_fixo = c(5L, 10L, 20L),      # acasalamentos fixos por fêmea (sugestão Miudo)
+  selecao_natural = c(TRUE, FALSE), # com/sem seleção natural viabilidade
   replica = 1:n_replicas
 )
 
@@ -57,8 +59,8 @@ cenarios_fase4 <- expand.grid(
 # A CORREÇÃO DAS PASTAS ESTÁ AQUI:
 # Forçamos os arquivos a morarem na subpasta "Dados" da Fase 4
 # ---------------------------------------------------------------------
-arquivo_backup <- file.path(diretorios$dados, "backup_lista_fase4_final.rds")
-arquivo_final  <- file.path(diretorios$dados, "resultados_Fase4_Final.rds")
+arquivo_backup <- file.path(diretorios$dados, "backup_lista_fase5_miudov2.rds")
+arquivo_final  <- file.path(diretorios$dados, "resultados_Fase5_MiudoV2.rds")
 
 if (file.exists(arquivo_backup)) {
   lista_fase4 <- readRDS(arquivo_backup)
@@ -99,13 +101,15 @@ for (i in 1:nrow(cenarios_fase4)) {
 
   res <- tryCatch({
     simulate_evolution(
-      generations  = 100,  # <-- Aumentado de 50 para 100
-      N_machos     = 200,  # <-- Voltou para 200
-      N_femeas     = 200,  # <-- Voltou para 200
-      tipo_selecao = cenarios_fase4$tipo_selecao[i],
-      sigma_p      = cenarios_fase4$sigma_p[i],
-      encounters_n = cenarios_fase4$encounters_n[i],
-      return_details = FALSE
+      generations     = 100,
+      N_machos        = 200,
+      N_femeas        = 200,
+      tipo_selecao    = cenarios_fase4$tipo_selecao[i],
+      sigma_p         = cenarios_fase4$sigma_p[i],
+      encounters_n    = cenarios_fase4$encounters_n[i],
+      k_fixo          = cenarios_fase4$k_fixo[i],
+      selecao_natural = cenarios_fase4$selecao_natural[i],
+      return_details  = FALSE
     )
   }, error = function(e) {
     cat("Erro no cenário", i, ":", conditionMessage(e), "\n")
