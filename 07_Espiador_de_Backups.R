@@ -313,15 +313,14 @@ if(file.exists(arquivo)) {
       theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
             plot.subtitle = element_text(size = 10, hjust = 0.5),
             plot.title.position = "plot",
-            legend.position = "bottom",
+            legend.position = "none",
             axis.text.y = element_blank())
 
     p_combinado <- (p_left_clean | p_right_clean) +
       plot_annotation(
         title    = "ESPIADINHA 7: Trajetórias topológicas sob níveis contrastantes de A_max",
         subtitle = "Linhas = médias por geração entre todas as réplicas | Eixo Y consistente entre painéis"
-      ) +
-      plot_layout(guides = "collect")
+      )
 
     print(p_combinado)
     ggsave(file.path(dir_espiadinhas, "Espiadinha7_Topologia_Amax.png"),
@@ -356,15 +355,14 @@ if(file.exists(arquivo)) {
       theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
             plot.subtitle = element_text(size = 10, hjust = 0.5),
             plot.title.position = "plot",
-            legend.position = "bottom",
+            legend.position = "none",
             axis.text.y = element_blank())
 
     p_evo_combinado <- (p_evo_left_clean | p_evo_right_clean) +
       plot_annotation(
         title    = "ESPIADINHA 8: Trajetórias evolutivas (média e variância do traço masculino)",
         subtitle = "Linha tracejada cinza = φ = 5.0 (ótimo ecológico) | Eixo Y consistente entre painéis"
-      ) +
-      plot_layout(guides = "collect")
+      )
 
     print(p_evo_combinado)
     ggsave(file.path(dir_espiadinhas, "Espiadinha8_Trajetorias_Evolutivas.png"),
