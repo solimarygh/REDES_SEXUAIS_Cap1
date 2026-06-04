@@ -40,7 +40,7 @@ cat(sprintf(
 ))
 ```
 
----
+------------------------------------------------------------------------
 
 # Desenho Experimental
 
@@ -49,7 +49,7 @@ cat(sprintf(
 Simulamos uma população de **N = 200 machos** e **N = 200 fêmeas** ao longo de **100 gerações**, com **30 réplicas independentes** por cenário. O espaço de parâmetros é:
 
 | Parâmetro | Valores | Descrição |
-|---|---|---|
+|----|----|----|
 | Curva de preferência | uniform, gaussian, sigmoid, u-shaped | Regime de seleção sexual |
 | $\sigma_p$ | 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0 | Variação da preferência feminina |
 | $A_{max}$ | 200, 40, 10 | Machos amostrados por fêmea (100%, 20%, 5% de N) |
@@ -69,7 +69,7 @@ Machos com traço $z_j$ muito diferente do ótimo ecológico $\phi = 5$ têm men
 **2. Acasalamento:** cada fêmea sorteia entre 1 e 5 parceiros (poliandria máxima = 5) de entre $A_{max}$ machos amostrados aleatoriamente. A probabilidade de aceitar o macho $j$ depende da curva de preferência:
 
 | Regime | Função $P_{ij}$ |
-|---|---|
+|----|----|
 | Uniforme (nula) | $P_{ij} = 0.5$ |
 | Gaussiana (estabilizadora) | $P_{ij} = \exp\!\left(-s_i(z_j - p_i)^2\right)$ |
 | Sigmoide (direcional) | $P_{ij} = \dfrac{1}{1 + \exp(-s_i(z_j - p_i))}$ |
@@ -117,7 +117,7 @@ onde $k_i$ é o grau do nó $i$ e $k_{\max}$ é o grau máximo observado. $C_D \
 
 > **Implementação:** `igraph::centr_degree(g, mode = "all")$centralization` (pacote `igraph`). Calculada sobre a rede completa (machos + fêmeas), não só machos. Para centralização exclusivamente masculina, $I_s$ é mais informativo e directo.
 
-**$I_s$** (oportunidade de seleção sexual): variação padronizada do sucesso reprodutivo masculino:
+$I_s$ (oportunidade de seleção sexual): variação padronizada do sucesso reprodutivo masculino:
 
 $$I_s = \frac{\text{Var}(k)}{\bar{k}^2}$$
 
@@ -125,7 +125,7 @@ onde $k$ = número de parceiras por macho (= `rowSums(M)`). Equivale ao coeficie
 
 > **Implementação:** calculado directamente em R base: `var(rowSums(M)) / mean(rowSums(M))^2`, sem pacote externo.
 
----
+------------------------------------------------------------------------
 
 # Resultados
 
@@ -143,14 +143,14 @@ A questão central desta secção é: **à medida que σp aumenta (maior variaç
 
 Os dados indicam que sim, e que a forma da função de preferência governa como a heterogeneidade de preferência se traduz em estrutura de rede:
 
-- **Sigmoide**: ao longo do gradiente de σp, mantém o maior aninhamento e reduz a modularidade. O aumento de σp amplifica a hierarquia na rede. Corresponde isso visualmente a uma rede com poucos machos altamente conectados? (Ver Secção 2.5.)
-- **Gaussiana**: ao longo de σp, perde aninhamento (-37%) e ganha modularidade (+9%). A heterogeneidade de preferência fragmenta a rede em grupos. Esse padrão visual é consistente com "cliques modulares" de fêmeas que partilham os mesmos machos preferidos? (Ver Secção 2.5.)
-- **U-shaped**: a modularidade aumenta com σp, especialmente sob restrição de amostragem. A heterogeneidade de preferência cria dois grupos distintos na rede? Isso seria consistente com dois morfos masculinos — mas precisamos ver a distribuição de $z$ para confirmar (Ver Secção 2.6).
-- **Uniforme**: referência nula. A topologia não responde ao gradiente de σp, confirmando que a assinatura das outras curvas é gerada pela forma da função de preferência, não por ruído.
+-   **Sigmoide**: ao longo do gradiente de σp, mantém o maior aninhamento e reduz a modularidade. O aumento de σp amplifica a hierarquia na rede. Corresponde isso visualmente a uma rede com poucos machos altamente conectados? (Ver Secção 2.5.)
+-   **Gaussiana**: ao longo de σp, perde aninhamento (-37%) e ganha modularidade (+9%). A heterogeneidade de preferência fragmenta a rede em grupos. Esse padrão visual é consistente com "cliques modulares" de fêmeas que partilham os mesmos machos preferidos? (Ver Secção 2.5.)
+-   **U-shaped**: a modularidade aumenta com σp, especialmente sob restrição de amostragem. A heterogeneidade de preferência cria dois grupos distintos na rede? Isso seria consistente com dois morfos masculinos — mas precisamos ver a distribuição de $z$ para confirmar (Ver Secção 2.6).
+-   **Uniforme**: referência nula. A topologia não responde ao gradiente de σp, confirmando que a assinatura das outras curvas é gerada pela forma da função de preferência, não por ruído.
 
-O **tipping point em $\sigma_p = 1.0 = \sigma_z$** é o ponto onde a variação individual da preferência feminina iguala a variação genética inicial dos machos. Abaixo desse valor, as métricas topológicas são relativamente estáveis entre curvas; acima, as assinaturas divergem e amplificam-se.
+O **tipping point em** $\sigma_p = 1.0 = \sigma_z$ é o ponto onde a variação individual da preferência feminina iguala a variação genética inicial dos machos. Abaixo desse valor, as métricas topológicas são relativamente estáveis entre curvas; acima, as assinaturas divergem e amplificam-se.
 
----
+------------------------------------------------------------------------
 
 ## A Restrição de Amostragem Dissolve a Assinatura Topológica? {.tabset}
 
@@ -171,13 +171,13 @@ Esta secção testa directamente se $A_{max}$ actua como ruído que **dissolve a
 
 **O que procurar no gráfico:** as assinaturas de cada curva (distância entre as linhas) mantêm-se à medida que passamos de A_max=200 para A_max=10? Se as linhas convergirem (tornarem-se indistinguíveis), o ruído ecológico neutralizou a assinatura topológica.
 
-- **Modularidade:** à medida que A_max diminui, as curvas convergem? A gaussiana (alta modularidade) e a sigmoide (baixa modularidade) continuam separadas sob A_max=10?
-- **Aninhamento:** a hierarquia da sigmoide e o anti-aninhamento da gaussiana resistem à restrição de amostragem, ou colapsam sob A_max=10?
-- **Acima de σp = 1.0 (= σz):** a divergência entre curvas amplifica-se ou atenua-se com A_max restrito?
+-   **Modularidade:** à medida que A_max diminui, as curvas convergem? A gaussiana (alta modularidade) e a sigmoide (baixa modularidade) continuam separadas sob A_max=10?
+-   **Aninhamento:** a hierarquia da sigmoide e o anti-aninhamento da gaussiana resistem à restrição de amostragem, ou colapsam sob A_max=10?
+-   **Acima de σp = 1.0 (= σz):** a divergência entre curvas amplifica-se ou atenua-se com A_max restrito?
 
 A resposta a estas perguntas determina se os caminhos topo-evolutivos são **robustos** ao ruído ecológico ou se dependem de condições de alta capacidade de amostragem.
 
----
+------------------------------------------------------------------------
 
 ## Efeito do Custo de Busca sobre a Evolução do Traço {.tabset}
 
@@ -189,22 +189,22 @@ knitr::include_graphics("Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_Pl
 
 ### Interpretação
 
-Esta secção testa se os caminhos topo-evolutivos gerados por cada curva são robustos ao ruído ecológico: **$A_{max}$ restringe a escolha feminina e actua como ruído que pode dissolver a estrutura da rede**.
+Esta secção testa se os caminhos topo-evolutivos gerados por cada curva são robustos ao ruído ecológico: $A_{max}$ restringe a escolha feminina e actua como ruído que pode dissolver a estrutura da rede.
 
 **Variância do traço (Var z) — diversidade genética:** reduzida 88-90% em relação ao valor inicial ($\sigma_z^2 = 1.0$) em todos os regimes. A poliandria sem benefício directo não resgata variância. O efeito de $A_{max}$ sobre Var z é pequeno na maioria das curvas, com uma excepção visível: na **curva gaussiana**, $A_{max}=10$ preserva mais Var z do que $A_{max}=200$. A hipótese é que a restrição de amostragem limita a eficácia do acasalamento assortativo, reduzindo a perda de diversidade. Será esse efeito específico da gaussiana ou aparece nas outras curvas a $\sigma_p$ altos? (Ver Tabela 1.)
 
 **Média do traço (z̄) — exageração fenotípica:** o gradiente de $\sigma_p$ não altera z̄ nas curvas uniforme, gaussiana e u-shaped. Apenas a sigmoide gera deslocamento sistemático, e esse deslocamento aumenta com $\sigma_p$:
 
-| Curva | $A_{max}=200$ | $A_{max}=40$ | $A_{max}=10$ |
-|---|---|---|---|
-| Uniforme | $z̄ \approx 5.04$ | $z̄ \approx 5.00$ | $z̄ \approx 5.00$ |
-| Gaussiana | $z̄ \approx 5.01$ | $z̄ \approx 5.00$ | $z̄ \approx 5.00$ |
-| **Sigmoide** | **$z̄ = 6.16$ (+23%)** | **$z̄ = 6.04$ (+21%)** | **$z̄ = 5.84$ (+17%)** |
-| U-shaped | $z̄ \approx 4.98$ | $z̄ \approx 5.01$ | $z̄ \approx 5.01$ |
+| Curva        | $A_{max}=200$     | $A_{max}=40$      | $A_{max}=10$      |
+|--------------|-------------------|-------------------|-------------------|
+| Uniforme     | $z̄ \approx 5.04$  | $z̄ \approx 5.00$  | $z̄ \approx 5.00$  |
+| Gaussiana    | $z̄ \approx 5.01$  | $z̄ \approx 5.00$  | $z̄ \approx 5.00$  |
+| **Sigmoide** | $z̄ = 6.16$ (+23%) | $z̄ = 6.04$ (+21%) | $z̄ = 5.84$ (+17%) |
+| U-shaped     | $z̄ \approx 4.98$  | $z̄ \approx 5.01$  | $z̄ \approx 5.01$  |
 
 O gradiente $A_{max}=200 > 40 > 10$ atenua o deslocamento da sigmoide, mas não o elimina. O custo de busca actua como ruído ecológico que **reduz, mas não neutraliza**, o caminho topo-evolutivo direcional gerado pela preferência sigmoide.
 
----
+------------------------------------------------------------------------
 
 ## Evidência Correlacional: Topologia → Evolução {.tabset}
 
@@ -218,10 +218,10 @@ knitr::include_graphics("Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Fase4_Pl
 
 Esta secção pergunta: **a topologia da rede medeia o caminho evolutivo, ou é apenas uma covariável da curva de preferência?** Cada ponto é uma réplica independente com σp = 2.0 e A_max = 200.
 
-- **Modularidade → Var(z):** correlação positiva entre réplicas. Dentro do mesmo regime de preferência, réplicas com rede mais modular apresentam maior Var z. A u-shaped (rede mais modular) rescue diversidade genética; a sigmoide (rede menos modular) reduz-a. Esse padrão é consistente com a hipótese de que **a topologia modular preserva diversidade genética** — mas confirmar causalidade requereria manipulação experimental da estrutura da rede. (Ver Secção 2.5.)
-- **Aninhamento → z̄:** correlação positiva para a sigmoide. Dentro do regime sigmoide, réplicas com maior aninhamento apresentam maior deslocamento de z̄. O gradiente de σp alimenta esse caminho: mais σp gera mais aninhamento, que gera mais exageração. Como o aninhamento traduz preferência heterogénea em exageração do traço? (Ver Secções 2.5 e 3.)
+-   **Modularidade → Var(z):** correlação positiva entre réplicas. Dentro do mesmo regime de preferência, réplicas com rede mais modular apresentam maior Var z. A u-shaped (rede mais modular) rescue diversidade genética; a sigmoide (rede menos modular) reduz-a. Esse padrão é consistente com a hipótese de que **a topologia modular preserva diversidade genética** — mas confirmar causalidade requereria manipulação experimental da estrutura da rede. (Ver Secção 2.5.)
+-   **Aninhamento → z̄:** correlação positiva para a sigmoide. Dentro do regime sigmoide, réplicas com maior aninhamento apresentam maior deslocamento de z̄. O gradiente de σp alimenta esse caminho: mais σp gera mais aninhamento, que gera mais exageração. Como o aninhamento traduz preferência heterogénea em exageração do traço? (Ver Secções 2.5 e 3.)
 
----
+------------------------------------------------------------------------
 
 ## Tabela de Resultados: Geração 1 → Geração 100
 
@@ -284,14 +284,14 @@ if (file.exists(img_e)) {
 
 **Leitura do gráfico:** cada linha liga o valor médio da métrica na geração 1 (círculo aberto) ao valor na geração final (círculo fechado). A seleção sigmoide, com acesso irrestrito (A_max = 200), é a que mais desloca o aninhamento, enquanto a curva uniforme serve de referência de deriva neutra. Será que a modulação do aninhamento pela sigmoide acompanha o exagero do traço visto no Plot B (ver Secção 2.3)? Os gráficos das redes representativas (Secção 2.6) ajudam a responder.
 
----
+------------------------------------------------------------------------
 
 ## Redes Representativas e a Evolução em 3 Atos {.tabset}
 
 <p style="font-size:0.85em; color:#666; margin:0 0 12px 0;">
-<b>Linha 1:</b> Estrutura da rede (comunidades Louvain) &nbsp;|&nbsp;
-<b>Linha 2:</b> Evolução em 3 Atos (distribuições de z e p) &nbsp;|&nbsp;
-<b>Esquerda:</b> σp = 0.5 &nbsp;|&nbsp; <b>Direita:</b> σp = 2.0 &nbsp;|&nbsp; A_max = 200
+
+<b>Linha 1:</b> Estrutura da rede (comunidades Louvain)  \|  <b>Linha 2:</b> Evolução em 3 Atos (distribuições de z e p)  \|  <b>Esquerda:</b> σp = 0.5  \|  <b>Direita:</b> σp = 2.0  \|  A_max = 200
+
 </p>
 
 ### Aleatória
@@ -354,16 +354,16 @@ if (length(existing) > 0) knitr::include_graphics(existing) else cat("*Rode o Sc
 
 **O que os números dizem sobre a estrutura das redes (σ_p = 2.0, A_max = 200):**
 
-- **Sigmoide**: apresenta o maior aninhamento e a menor modularidade entre as quatro curvas. Olhando para a rede (painéis acima), essa assinatura numérica traduz-se visualmente numa hierarquia clara?
-- **Gaussiana**: perde aninhamento e ganha modularidade ao longo do tempo. A estrutura visual é consistente com grupos de fêmeas que partilham os mesmos machos preferidos?
-- **U-shaped**: mantém aninhamento semelhante ao início, mas aumenta a modularidade. Isso é consistente com a hipótese de dois módulos correspondentes a dois morfos masculinos (ver Secção 2.6 para a análise formal da distribuição de $z$)?
-- **Uniforme**: serve de referência. A rede gerada é a mais aleatória e homogénea?
+-   **Sigmoide**: apresenta o maior aninhamento e a menor modularidade entre as quatro curvas. Olhando para a rede (painéis acima), essa assinatura numérica traduz-se visualmente numa hierarquia clara?
+-   **Gaussiana**: perde aninhamento e ganha modularidade ao longo do tempo. A estrutura visual é consistente com grupos de fêmeas que partilham os mesmos machos preferidos?
+-   **U-shaped**: mantém aninhamento semelhante ao início, mas aumenta a modularidade. Isso é consistente com a hipótese de dois módulos correspondentes a dois morfos masculinos (ver Secção 2.6 para a análise formal da distribuição de $z$)?
+-   **Uniforme**: serve de referência. A rede gerada é a mais aleatória e homogénea?
 
 **O mecanismo U-shaped:**
 
 A função $P_{ij} = 1 - \exp(-s_i(z_j - p_i)^2)$ penaliza machos próximos da preferência da fêmea e favorece os extremos. Em conflito com a seleção viabilidade (estabilizadora em φ = 5), o equilíbrio pode gerar dois atratores fenotípicos. A rede modular reflecte essa bipartição? Machos do morfo "alto" e do morfo "baixo" pertencem a comunidades distintas com conjuntos de fêmeas separados? A Secção 2.7 testa isso formalmente.
 
----
+------------------------------------------------------------------------
 
 ## Trajetórias Temporais: Como Chega a Geração 100? {.tabset}
 
@@ -397,12 +397,12 @@ if (file.exists(img_esp8)) {
 
 As trajetórias respondem à pergunta que os gráficos da geração 100 não conseguem responder: **a geração 100 é um estado estável ou ainda está a evoluir?**
 
-- Se as curvas das Espiadinhas 7 e 8 estabilizaram antes da geração 100, os resultados da Tabela 1 reflectem um equilíbrio dinâmico.
-- Se ainda estão a mudar na geração 100, as estimativas podem subestimar os efeitos a longo prazo, o que justifica aumentar o número de gerações (ver Próximos Passos).
+-   Se as curvas das Espiadinhas 7 e 8 estabilizaram antes da geração 100, os resultados da Tabela 1 reflectem um equilíbrio dinâmico.
+-   Se ainda estão a mudar na geração 100, as estimativas podem subestimar os efeitos a longo prazo, o que justifica aumentar o número de gerações (ver Próximos Passos).
 
 A comparação entre A_max = 200 e A_max = 10 nestas trajetórias revela se o ruído ecológico **atrasa** a assinatura topológica ou se a **elimina** permanentemente.
 
----
+------------------------------------------------------------------------
 
 ## Bimodalidade U-shaped: Evidência dos Dois Morfos {.tabset}
 
@@ -419,7 +419,7 @@ if (file.exists(img_bim)) {
 
 ### Teste de Hartigan's Dip
 
-O **teste de Hartigan's dip** (Hartigan & Hartigan 1985) avalia formalmente se uma distribuição é unimodal ou multimodal. H₀: distribuição unimodal. p < 0.05 indica bimodalidade.
+O **teste de Hartigan's dip** (Hartigan & Hartigan 1985) avalia formalmente se uma distribuição é unimodal ou multimodal. H₀: distribuição unimodal. p \< 0.05 indica bimodalidade.
 
 ```{r dip-test, echo=FALSE}
 csv_dip <- "Resultados_Artigo/UShape_Bimodalidade/Dados/dip_test_resultados.csv"
@@ -449,17 +449,18 @@ A função U-shaped ($P_{ij} = 1 - \exp(-s_i(z_j - p_i)^2)$) penaliza machos com
 **Predições testáveis:**
 
 | Predição | Evidência esperada |
-|---|---|
+|----|----|
 | Bimodalidade aumenta com σ_p | Dip test mais significativo a σ_p = 2.0 vs 0.5 |
 | Custo de busca (A_max) suprime morfos | Distribuição mais unimodal a A_max = 10 |
 | Morfos ausentes nas outras curvas | Sigmoide e Gaussiana unimodais no painel comparativo |
 
 Se confirmado, este resultado sugere que a **topologia da rede é suficiente para manter polimorfismo** mesmo com fecundidade neutra (um mecanismo alternativo à teoria clássica de polimorfismo por balanceamento).
 
----
+------------------------------------------------------------------------
 
 # Comentários e Feedback
 
+```{=html}
 <script src="https://utteranc.es/client.js"
         repo="solimarygh/REDES_SEXUAIS_Cap1"
         issue-term="title"
@@ -467,8 +468,9 @@ Se confirmado, este resultado sugere que a **topologia da rede é suficiente par
         crossorigin="anonymous"
         async>
 </script>
+```
 
----
+------------------------------------------------------------------------
 
 # Tópicos para discutir...
 
@@ -480,16 +482,15 @@ Se essa hipótese estiver correcta, o *runaway* seria um **efeito topológico pu
 
 ## O paradoxo de $I_s$ na sigmoide
 
-A sigmoide reduz $I_s$ em -58% enquanto gera o maior deslocamento de z̄ (+23%). Os dados mostram que essas duas tendências coexistem. Uma possível explicação: à medida que z̄ se desloca para ~6.16, os machos sobreviventes passam a ser percebidos pelas fêmeas como igualmente atractivos, reduzindo a variância no sucesso reprodutivo. $I_s$ mederia então a oportunidade *actual* de seleção, não a intensidade histórica que gerou o deslocamento. Essa interpretação é consistente com os dados, mas requereria análise das trajectórias geração-a-geração para ser confirmada (ver Próximos Passos).
+A sigmoide reduz $I_s$ em -58% enquanto gera o maior deslocamento de z̄ (+23%). Os dados mostram que essas duas tendências coexistem. Uma possível explicação: à medida que z̄ se desloca para \~6.16, os machos sobreviventes passam a ser percebidos pelas fêmeas como igualmente atractivos, reduzindo a variância no sucesso reprodutivo. $I_s$ mederia então a oportunidade *actual* de seleção, não a intensidade histórica que gerou o deslocamento. Essa interpretação é consistente com os dados, mas requereria análise das trajectórias geração-a-geração para ser confirmada (ver Próximos Passos).
 
 ## U-shaped: dois morfos masculinos?
 
 A função u-shaped gera **seleção sexual disruptiva**: fêmeas evitam machos próximos à sua preferência ($z \approx p \approx 5$) e preferem os extremos. Em conflito com a seleção viabilidade (que estabiliza em $\phi = 5$), o equilíbrio pode gerar **dois morfos** (um ligeiramente acima e outro abaixo de $\phi$). O aumento de modularidade da rede (+10.6% a $A_{max}=10$) e a distribuição bimodal nos histogramas (Secção 2.6) são consistentes com essa hipótese. O teste de Hartigan's dip oferece a evidência formal.
 
----
+------------------------------------------------------------------------
 
 # Próximos Passos
 
-1. Aumentar réplicas de 30 para 100 para reduzir erro de estimação
-2. Analisar trajetórias geração-a-geração (Espiadinhas 7 e 8) para identificar quando o *runaway* sigmoide se inicia
-
+1.  Aumentar réplicas de 30 para 100 para reduzir erro de estimação
+2.  Analisar trajetórias geração-a-geração (Espiadinhas 7 e 8) para identificar quando o *runaway* sigmoide se inicia
