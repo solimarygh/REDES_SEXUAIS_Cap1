@@ -296,3 +296,20 @@ modelo_segmentado <- segmented(modelo_general, seg.Z = ~sigma_p, psi = 1.0)
 
 summary(modelo_segmentado)
 
+df <- readRDS("Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds")
+
+cat("Total de linhas:", nrow(df), "\n")
+cat("Réplicas únicas:", length(unique(df$replica)), "→", paste(range(df$replica), collapse="-"), "\n")
+cat("k_fixo únicos:", paste(sort(unique(df$k_fixo)), collapse=", "), "\n")
+cat("selecao_natural únicos:", paste(unique(df$selecao_natural), collapse=", "), "\n")
+cat("tipo_selecao únicos:", paste(unique(df$tipo_selecao), collapse=", "), "\n")
+cat("Gerações:", paste(range(df$generation), collapse="-"), "\n")
+
+
+
+gens_por_cenario <- df %>%
+  group_by(tipo_selecao, sigma_p, encounters_n, k_fixo, selecao_natural, replica) %>%
+  summarise(n_gens = n(), .groups = "drop")
+
+cat("Cenários com menos de 100 gerações:", sum(gens_por_cenario$n_gens < 100), "\n")
+print(gens_por_cenario %>% filter(n_gens < 100) %>% arrange(n_gens) %>% head(20))
