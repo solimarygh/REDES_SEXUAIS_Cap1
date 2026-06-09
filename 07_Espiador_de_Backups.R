@@ -7,32 +7,43 @@ library(ggplot2)
 library(patchwork)
 library(segmented)
 
-arquivo <- "Resultados_Artigo/Fase4_TodasAsCurvas/Dados/backup_lista_fase4_final.rds"
+arquivo <- "Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds"
 
 # Pastas de saída
-dir_espiadinhas <- "Resultados_Artigo/Fase4_TodasAsCurvas/Graficos/Espiadinhas"
-dir_graficos    <- "Resultados_Artigo/Fase4_TodasAsCurvas/Graficos"
+dir_espiadinhas <- "Resultados_Artigo/Fase5_MiudoV2/Graficos/Espiadinhas"
+dir_graficos    <- "Resultados_Artigo/Fase5_MiudoV2/Graficos"
+dir_dados_out   <- "Resultados_Artigo/Fase5_MiudoV2/Dados"
 dir.create(dir_graficos,    recursive = TRUE, showWarnings = FALSE)
 dir.create(dir_espiadinhas, recursive = TRUE, showWarnings = FALSE)
+dir.create(dir_dados_out,   recursive = TRUE, showWarnings = FALSE)
 
 cat(sprintf("Procurando backup em: %s\n", normalizePath(arquivo, mustWork = FALSE)))
 cat(sprintf("Arquivo existe? %s\n", ifelse(file.exists(arquivo), "SIM", "NAO - verifique o caminho")))
 
 if(file.exists(arquivo)) {
-  lista_parcial <- readRDS(arquivo)
-  df_parcial <- bind_rows(lista_parcial[!sapply(lista_parcial, is.null)])
+  df_parcial <- readRDS(arquivo)
 
-  # GEN_FINAL: detecta automaticamente a última geração (50, 100, etc.)
+  # GEN_FINAL: detecta automaticamente a última geração
   GEN_FINAL <- max(df_parcial$generation, na.rm = TRUE)
 
-  n_completos <- sum(!sapply(lista_parcial, is.null))
-  n_total <- length(lista_parcial)
-  cat(sprintf("Espiando! Cenários completos: %d / %d (%.1f%%)\n",
-              n_completos, n_total, 100 * n_completos / n_total))
-  cat(sprintf("Linhas no df_parcial: %d  |  Geração final detectada: %d\n",
+  cat(sprintf("Dados carregados: %d linhas | Geração final: %d\n",
               nrow(df_parcial), GEN_FINAL))
+  cat(sprintf("k_fixo: %s | sel.nat: %s\n",
+              paste(sort(unique(df_parcial$k_fixo)), collapse=", "),
+              paste(unique(df_parcial$selecao_natural), collapse=", ")))
 
-  df_gen50 <- df_parcial %>% filter(generation == GEN_FINAL) %>% drop_na() %>%
+  # Baseline para Espiadinhas 1-8: k=10, sel.nat=TRUE (cenário principal)
+  K_BASE  <- 10L
+  NS_BASE <- TRUE
+  df_base <- df_parcial %>%
+    filter(k_fixo == K_BASE, selecao_natural == NS_BASE)
+  cat(sprintf("Baseline (k=%d, sel.nat=%s): %d linhas\n", K_BASE, NS_BASE, nrow(df_base)))
+
+  n_completos <- length(unique(paste(df_base$tipo_selecao, df_base$sigma_p,
+                                     df_base$encounters_n, df_base$replica)))
+  n_total <- 4 * 7 * 3 * 30  # total esperado no baseline
+
+  df_gen50 <- df_base %>% filter(generation == GEN_FINAL) %>% drop_na() %>%
     mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
                                  levels = c("A_max: 200", "A_max: 40", "A_max: 10")))
 
@@ -379,7 +390,7 @@ if(file.exists(arquivo)) {
   # =====================================================================
   cat(sprintf("\n\n========== TABELA: Gen 1 vs Gen %d ==========\n", GEN_FINAL))
 
-  df_tabela <- df_parcial %>%
+  df_tabela <- df_base %>%
     filter(generation %in% c(1, GEN_FINAL)) %>%
     drop_na() %>%
     group_by(generation, tipo_selecao, sigma_p, encounters_n) %>%
@@ -406,8 +417,8 @@ if(file.exists(arquivo)) {
   # Imprime no console em formato legível
   print(df_tabela, n = Inf, width = Inf)
 
-  # Salva como CSV com nome dinâmico (Tabela_Gen1_vs_Gen100.csv, etc.)
-  out_csv <- sprintf("Resultados_Artigo/Fase4_TodasAsCurvas/Dados/Tabela_Gen1_vs_Gen%d.csv", GEN_FINAL)
+  out_csv <- file.path(dir_dados_out, sprintf("Tabela_Gen1_vs_Gen%d_k%d_NS%s.csv",
+                                              GEN_FINAL, K_BASE, NS_BASE))
   write.csv(df_tabela, out_csv, row.names = FALSE)
   cat(sprintf("\nTabela salva em: %s\n", out_csv))
 
@@ -430,7 +441,105 @@ if(file.exists(arquivo)) {
   cat(">>> CHECKPOINT 5: Tabela OK\n")
 
   # =====================================================================
-  # GRÁFICOS FINAIS (Fase 4)
+  # ESPIADINHA 9: Efeito da Poliandria (k_fixo) na Topologia e Evolução
+  # A_max=200, sel.nat=TRUE, geração final — comparando k=5, 10, 20
+  # =====================================================================
+  df_k <- df_parcial %>%
+    filter(encounters_n == 200, selecao_natural == TRUE, generation == GEN_FINAL) %>%
+    drop_na() %>%
+    mutate(k_label = factor(paste0("k = ", k_fixo),
+                            levels = paste0("k = ", c(5, 10, 20))))
+
+  p_k_topo <- df_k %>%
+    pivot_longer(cols = c(Nestedness, Modularity), names_to = "Metrica", values_to = "Valor") %>%
+    mutate(Metrica = ifelse(Metrica == "Modularity", "1. Modularidade", "2. Aninhamento (NODF)")) %>%
+    ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
+    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
+    geom_smooth(method = "loess", formula = y~x, alpha = 0.15) +
+    geom_jitter(alpha = 0.15, width = 0.05, size = 0.8) +
+    facet_grid(Metrica ~ k_label, scales = "free_y") +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values = cores_4, labels = labels_4) +
+    labs(title = "ESPIADINHA 9: Efeito da Poliandria (k) na Topologia",
+         subtitle = "A_max=200 | sel.nat=TRUE | cada coluna = nível de poliandria",
+         x = expression(sigma[p]), y = "Valor da Métrica", color = "", fill = "") +
+    theme_light() + theme(legend.position = "bottom")
+
+  p_k_evo <- df_k %>%
+    pivot_longer(cols = c(zbar_males, varz_males), names_to = "Metrica", values_to = "Valor") %>%
+    mutate(Metrica = ifelse(Metrica == "zbar_males",
+                            "1. Média do traço (z̄)", "2. Variância do traço (Var z)")) %>%
+    ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
+    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
+    geom_smooth(method = "loess", formula = y~x, alpha = 0.15) +
+    geom_jitter(alpha = 0.15, width = 0.05, size = 0.8) +
+    facet_grid(Metrica ~ k_label, scales = "free_y") +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values = cores_4, labels = labels_4) +
+    labs(title = "ESPIADINHA 9b: Efeito da Poliandria (k) na Evolução do Traço",
+         subtitle = "A_max=200 | sel.nat=TRUE",
+         x = expression(sigma[p]), y = "Valor Evolutivo", color = "", fill = "") +
+    theme_light() + theme(legend.position = "bottom")
+
+  print(p_k_topo)
+  print(p_k_evo)
+  ggsave(file.path(dir_espiadinhas, "Espiadinha9a_Poliandria_Topologia.png"),
+         p_k_topo, width = 12, height = 7, dpi = 200, bg = "white")
+  ggsave(file.path(dir_espiadinhas, "Espiadinha9b_Poliandria_Evolucao.png"),
+         p_k_evo,  width = 12, height = 7, dpi = 200, bg = "white")
+  cat(">>> CHECKPOINT 6: Espiadinha 9 OK\n")
+
+  # =====================================================================
+  # ESPIADINHA 10: Efeito de selecao_natural (com vs sem)
+  # A_max=200, k=10, geração final
+  # =====================================================================
+  df_ns <- df_parcial %>%
+    filter(encounters_n == 200, k_fixo == 10, generation == GEN_FINAL) %>%
+    drop_na() %>%
+    mutate(ns_label = factor(ifelse(selecao_natural, "Com sel. natural", "Sem sel. natural"),
+                             levels = c("Com sel. natural", "Sem sel. natural")))
+
+  p_ns_topo <- df_ns %>%
+    pivot_longer(cols = c(Nestedness, Modularity), names_to = "Metrica", values_to = "Valor") %>%
+    mutate(Metrica = ifelse(Metrica == "Modularity", "1. Modularidade", "2. Aninhamento (NODF)")) %>%
+    ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
+    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
+    geom_smooth(method = "loess", formula = y~x, alpha = 0.15) +
+    geom_jitter(alpha = 0.15, width = 0.05, size = 0.8) +
+    facet_grid(Metrica ~ ns_label, scales = "free_y") +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values = cores_4, labels = labels_4) +
+    labs(title = "ESPIADINHA 10: Efeito da Seleção Natural na Topologia da Rede",
+         subtitle = "A_max=200 | k=10 | esquerda=com viabilidade, direita=sem viabilidade (V_j=1)",
+         x = expression(sigma[p]), y = "Valor da Métrica", color = "", fill = "") +
+    theme_light() + theme(legend.position = "bottom")
+
+  p_ns_evo <- df_ns %>%
+    pivot_longer(cols = c(zbar_males, varz_males), names_to = "Metrica", values_to = "Valor") %>%
+    mutate(Metrica = ifelse(Metrica == "zbar_males",
+                            "1. Média do traço (z̄)", "2. Variância do traço (Var z)")) %>%
+    ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
+    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
+    geom_smooth(method = "loess", formula = y~x, alpha = 0.15) +
+    geom_jitter(alpha = 0.15, width = 0.05, size = 0.8) +
+    facet_grid(Metrica ~ ns_label, scales = "free_y") +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values = cores_4, labels = labels_4) +
+    labs(title = "ESPIADINHA 10b: Efeito da Seleção Natural na Evolução do Traço",
+         subtitle = "A_max=200 | k=10",
+         x = expression(sigma[p]), y = "Valor Evolutivo", color = "", fill = "") +
+    theme_light() + theme(legend.position = "bottom")
+
+  print(p_ns_topo)
+  print(p_ns_evo)
+  ggsave(file.path(dir_espiadinhas, "Espiadinha10a_SelNat_Topologia.png"),
+         p_ns_topo, width = 10, height = 7, dpi = 200, bg = "white")
+  ggsave(file.path(dir_espiadinhas, "Espiadinha10b_SelNat_Evolucao.png"),
+         p_ns_evo,  width = 10, height = 7, dpi = 200, bg = "white")
+  cat(">>> CHECKPOINT 7: Espiadinha 10 OK\n")
+
+  # =====================================================================
+  # GRÁFICOS FINAIS (Fase 5)
   # =====================================================================
   val_reps       <- length(unique(df_parcial$replica[!is.na(df_parcial$replica)]))
   subtitulo_base <- sprintf("Parâmetros: %d Gerações | N=200 | Réplicas: %d de 30 (%.0f%%)",
@@ -626,6 +735,7 @@ if(file.exists(arquivo)) {
   # =====================================================================
   cat("\nPreparando dados para os Modelos Lineares...\n")
 
+  # Modelos lineares: baseline k=10, sel.nat=TRUE
   df_stats_low <- df_gen50 %>%
     filter(sigma_p <= 1.0) %>%
     drop_na(Modularity, Nestedness, Centralization, I_s, varz_males, zbar_males) %>%
@@ -682,7 +792,7 @@ if(file.exists(arquivo)) {
   # MODELO SEGMENTADO: Tipping Point em sigma_p = 1.0
   # =====================================================================
   cat("\n--- MODELO SEGMENTADO: Var(z) ~ sigma_p com breakpoint em 1.0 ---\n")
-  modelo_geral      <- lm(varz_males ~ sigma_p, data = df_gen50)
+  modelo_geral      <- lm(varz_males ~ sigma_p, data = df_gen50)  # baseline k=10, NS=TRUE
   modelo_segmentado <- segmented(modelo_geral, seg.Z = ~sigma_p, psi = 1.0)
   print(summary(modelo_segmentado))
 

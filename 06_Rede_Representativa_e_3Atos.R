@@ -1,16 +1,10 @@
 # =====================================================================
-# SCRIPT 06: A Rede Representativa (a partir dos dados REAIS da Fase 4)
+# SCRIPT 06: A Rede Representativa (a partir dos dados REAIS da Fase 5)
+# Atualizado para Fase5_MiudoV2 — inclui k_fixo e selecao_natural
 # =====================================================================
-# Em vez de rodar simulações novas, usa os dados já calculados da Fase 4
-# e as sementes individuais (SEED_BASE + i_cenario) para REGENERAR
-# exatamente a rede da geração escolhida.
-#
-# Critério de escolha: a réplica × geração (na fase estável, gen >= 20)
-# cuja MODULARIDADE é a mais próxima da MÉDIA da fase estável daquele
-# cenário (tipo_selecao × sigma_p × A_max).
-#
-# Vantagem metodológica: a rede visualizada é a MESMA que entra nas
-# análises estatísticas — não há "exploração paralela" desconectada.
+# Critério: réplica × geração (fase estável, gen >= 20) cuja MODULARIDADE
+# é a mais próxima da MÉDIA estável do cenário dado.
+# Replay RNG-fiel: replay_capturar() espelha simulate_evolution() exatamente.
 # =====================================================================
 
 source("01_metricas_e_utilitarios.R")
@@ -23,7 +17,7 @@ library(patchwork)
 diretorios <- configurar_diretorios("Redes_Representativas")
 
 # =====================================================================
-# PARÂMETROS DA FASE 4 (devem coincidir com Fase4_TodasAsCurvas.R)
+# PARÂMETROS (devem coincidir EXATAMENTE com Fase4_TodasAsCurvas.R)
 # =====================================================================
 SEED_BASE       <- 2026
 N_POP           <- 200
@@ -33,22 +27,24 @@ N_REPLICAS      <- 30
 VALORES_SIGMA_P <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
 VALORES_AMAX    <- c(200, 40, 10)
 TIPOS_SELECAO   <- c("uniform", "gaussian", "sigmoid", "u-shaped")
+VALORES_K       <- c(5L, 10L, 20L)
 
-# Recria a grade idêntica à de Fase4_TodasAsCurvas.R para que o índice
-# de cada cenário (e portanto a seed) coincida exatamente.
+# Grade idêntica à de Fase4_TodasAsCurvas.R — índice i == seed SEED_BASE+i
 cenarios_fase4 <- expand.grid(
-  tipo_selecao = TIPOS_SELECAO,
-  sigma_p      = VALORES_SIGMA_P,
-  encounters_n = VALORES_AMAX,
-  replica      = 1:N_REPLICAS,
+  tipo_selecao    = TIPOS_SELECAO,
+  sigma_p         = VALORES_SIGMA_P,
+  encounters_n    = VALORES_AMAX,
+  k_fixo          = VALORES_K,
+  selecao_natural = c(TRUE, FALSE),
+  replica         = 1:N_REPLICAS,
   stringsAsFactors = FALSE
 )
 
 # =====================================================================
-# CARREGAR DADOS DA FASE 4 (final consolidado ou backup parcial)
+# CARREGAR DADOS DA FASE 5 (MiudoV2)
 # =====================================================================
-arquivo_final  <- "Resultados_Artigo/Fase4_TodasAsCurvas/Dados/resultados_Fase4_Final.rds"
-arquivo_backup <- "Resultados_Artigo/Fase4_TodasAsCurvas/Dados/backup_lista_fase4_final.rds"
+arquivo_final  <- "Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds"
+arquivo_backup <- "Resultados_Artigo/Fase5_MiudoV2/Dados/backup_lista_fase5_miudov2.rds"
 
 if (file.exists(arquivo_final)) {
   df_fase4 <- readRDS(arquivo_final)
@@ -58,20 +54,21 @@ if (file.exists(arquivo_final)) {
   df_fase4 <- bind_rows(lista_backup[!sapply(lista_backup, is.null)])
   cat(sprintf("Dados PARCIAIS (backup) carregados (%d linhas).\n", nrow(df_fase4)))
 } else {
-  stop("Nenhum arquivo de dados da Fase 4 encontrado.")
+  stop("Nenhum arquivo de dados da Fase 5 encontrado. Rode Fase4_TodasAsCurvas.R primeiro.")
 }
 
 # =====================================================================
 # FUNÇÃO 1: encontrar_representativa
-# Acha (replica × geração) com modularidade ≈ média da fase estável
 # =====================================================================
-encontrar_representativa <- function(tipo_sel, sp, am, gen_burnin = GEN_BURNIN) {
-
+encontrar_representativa <- function(tipo_sel, sp, am, kf, sel_nat,
+                                     gen_burnin = GEN_BURNIN) {
   fase_estavel <- df_fase4 %>%
-    filter(tipo_selecao == tipo_sel,
-           sigma_p      == sp,
-           encounters_n == am,
-           generation   >= gen_burnin) %>%
+    filter(tipo_selecao    == tipo_sel,
+           sigma_p         == sp,
+           encounters_n    == am,
+           k_fixo          == kf,
+           selecao_natural == sel_nat,
+           generation      >= gen_burnin) %>%
     tidyr::drop_na(Modularity)
 
   if (nrow(fase_estavel) == 0) return(NULL)
@@ -80,18 +77,21 @@ encontrar_representativa <- function(tipo_sel, sp, am, gen_burnin = GEN_BURNIN) 
   idx       <- which.min(abs(fase_estavel$Modularity - mod_media))
   escolhido <- fase_estavel[idx, ]
 
-  # Índice na grade de cenários → seed individual
   i_cenario <- which(
-    cenarios_fase4$tipo_selecao == tipo_sel &
-    cenarios_fase4$sigma_p      == sp &
-    cenarios_fase4$encounters_n == am &
-    cenarios_fase4$replica      == escolhido$replica
+    cenarios_fase4$tipo_selecao    == tipo_sel &
+    cenarios_fase4$sigma_p         == sp &
+    cenarios_fase4$encounters_n    == am &
+    cenarios_fase4$k_fixo          == kf &
+    cenarios_fase4$selecao_natural == sel_nat &
+    cenarios_fase4$replica         == escolhido$replica
   )
 
   list(
     tipo_selecao     = tipo_sel,
     sigma_p          = sp,
     encounters_n     = am,
+    k_fixo           = kf,
+    selecao_natural  = sel_nat,
     replica          = escolhido$replica,
     geracao_alvo     = escolhido$generation,
     i_cenario        = i_cenario,
@@ -103,12 +103,11 @@ encontrar_representativa <- function(tipo_sel, sp, am, gen_burnin = GEN_BURNIN) 
 
 # =====================================================================
 # FUNÇÃO 2: replay_capturar
-# Re-roda a simulação com a seed individual e captura M na geração alvo.
-# IMPORTANTE: a sequência de chamadas RNG (rnorm, runif,
-# mate_with_survivors, calc_metrics_from_M, produce_offspring) é IDÊNTICA
-# à de simulate_evolution() para que o estado do RNG fique sincronizado.
+# CRÍTICO: deve espelhar simulate_evolution() exatamente para que o
+# estado do RNG coincida e a rede capturada seja a mesma dos dados.
 # =====================================================================
 replay_capturar <- function(seed, tipo_sel, sp, am, gen_alvo,
+                            k_fixo = NULL, sel_nat = TRUE,
                             N = N_POP, generations = GEN_MAX,
                             phi = 5, gamma = 0.2, sigma_z_init = 1.0,
                             sigma_s = 0.2, eps_sd = 0.2) {
@@ -132,13 +131,18 @@ replay_capturar <- function(seed, tipo_sel, sp, am, gen_alvo,
     }
     female_s <- pmax(0, rnorm(N, mean = 2, sd = sigma_s))
 
-    V <- exp(-gamma * (male_z_gen - phi)^2)
-    survive <- runif(N) <= V
-    survive <- ensure_min_survivors(survive, V, min_surv = 2)
+    # Bloco de viabilidade: idêntico ao de simulate_evolution()
+    if (sel_nat) {
+      V <- exp(-gamma * (male_z_gen - phi)^2)
+      survive <- runif(N) <= V
+      survive <- ensure_min_survivors(survive, V, min_surv = 2)
+    } else {
+      survive <- rep(TRUE, N)   # V_j = 1: sem consumo de RNG
+    }
     male_z_surv <- male_z_gen[survive]
 
     M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_sel,
-                              encounters_n = am)
+                              encounters_n = am, k_fixo = k_fixo)
 
     # OBRIGATÓRIO: calc_metrics consome RNs (cluster_louvain usa RNG)
     metrics <- calc_metrics_from_M(M)
@@ -174,13 +178,14 @@ replay_capturar <- function(seed, tipo_sel, sp, am, gen_alvo,
 
 # =====================================================================
 # FUNÇÃO 3: rodar_cenario
-# Encontra a representativa + replay + gera plots e histogramas
 # =====================================================================
-rodar_cenario <- function(tipo_sel, sp, am) {
+rodar_cenario <- function(tipo_sel, sp, am, kf, sel_nat) {
 
-  cat(sprintf("\n>>> %s | σp=%.1f | A_max=%d\n", tipo_sel, sp, am))
+  sel_label <- ifelse(sel_nat, "NS", "noNS")
+  cat(sprintf("\n>>> %s | σp=%.1f | A_max=%d | k=%d | %s\n",
+              tipo_sel, sp, am, kf, sel_label))
 
-  rep_info <- encontrar_representativa(tipo_sel, sp, am)
+  rep_info <- encontrar_representativa(tipo_sel, sp, am, kf, sel_nat)
   if (is.null(rep_info)) {
     cat("    Sem dados disponíveis para este cenário ainda.\n")
     return(invisible(NULL))
@@ -190,7 +195,8 @@ rodar_cenario <- function(tipo_sel, sp, am) {
               rep_info$replica, rep_info$geracao_alvo,
               rep_info$modularity_alvo, rep_info$modularity_media, rep_info$seed))
 
-  dados <- replay_capturar(rep_info$seed, tipo_sel, sp, am, rep_info$geracao_alvo)
+  dados <- replay_capturar(rep_info$seed, tipo_sel, sp, am, rep_info$geracao_alvo,
+                           k_fixo = kf, sel_nat = sel_nat)
 
   # -----------------------------------------------------------------
   # PLOT DA REDE
@@ -203,24 +209,27 @@ rodar_cenario <- function(tipo_sel, sp, am) {
   g_final <- igraph::graph_from_adjacency_matrix(adj, mode = "undirected")
   V(g_final)$type <- c(rep(TRUE, n_m), rep(FALSE, n_f))
 
-  num_grupos       <- sum(round(eigen(igraph::laplacian_matrix(g_final, sparse = FALSE))$values, 5) <= 1e-7)
-  comunidades      <- igraph::cluster_louvain(g_final)
-  n_comunidades    <- length(unique(igraph::membership(comunidades)))
-  paleta           <- colorRampPalette(c("#E41A1C","#377EB8","#4DAF4A","#984EA3","#FF7F00","#A65628","#F781BF","#999999"))(n_comunidades)
+  num_grupos    <- sum(round(eigen(igraph::laplacian_matrix(g_final, sparse = FALSE))$values, 5) <= 1e-7)
+  comunidades   <- igraph::cluster_louvain(g_final)
+  n_comunidades <- length(unique(igraph::membership(comunidades)))
+  paleta        <- colorRampPalette(c("#E41A1C","#377EB8","#4DAF4A","#984EA3",
+                                      "#FF7F00","#A65628","#F781BF","#999999"))(n_comunidades)
   cores_comunidade <- paleta[igraph::membership(comunidades)]
 
-  set.seed(2026)  # layout reprodutível por cenário
+  set.seed(2026)
   layout_fr <- igraph::layout_with_fr(g_final)
   formas    <- ifelse(V(g_final)$type, "square", "circle")
 
-  nome_rede <- sprintf("%s/Rede_%s_sigmap%.1f_Amax%d.png",
-                       diretorios$graficos, tipo_sel, sp, am)
+  nome_rede <- sprintf("%s/Rede_%s_sigmap%.1f_Amax%d_k%d_%s.png",
+                       diretorios$graficos, tipo_sel, sp, am, kf, sel_label)
   png(nome_rede, width = 3000, height = 2800, res = 300); par(mar = c(5, 2, 5, 2))
-  plot(g_final, layout = layout_fr, vertex.color = cores_comunidade, vertex.shape = formas,
-       vertex.size = 4, vertex.label = NA, vertex.frame.color = rgb(0,0,0,0.2),
-       edge.color = rgb(0.4,0.4,0.4,0.12), edge.width = 0.8,
-       main = sprintf("Rede Representativa — %s | σp = %.1f | A_max = %d\nRép %d | Gen %d | Mod: %.3f | Tribos: %d | Comunidades: %d",
-                      tipo_sel, sp, am, rep_info$replica, rep_info$geracao_alvo,
+  plot(g_final, layout = layout_fr, vertex.color = cores_comunidade,
+       vertex.shape = formas, vertex.size = 4, vertex.label = NA,
+       vertex.frame.color = rgb(0,0,0,0.2), edge.color = rgb(0.4,0.4,0.4,0.12),
+       edge.width = 0.8,
+       main = sprintf("Rede Representativa — %s | σp=%.1f | A_max=%d | k=%d | %s\nRép %d | Gen %d | Mod: %.3f | Tribos: %d | Comunidades: %d",
+                      tipo_sel, sp, am, kf, sel_label,
+                      rep_info$replica, rep_info$geracao_alvo,
                       dados$GenAlvo$modularity, num_grupos, n_comunidades))
   legend("bottomleft", legend = c("Macho","Fêmea"), pch = c(15, 16),
          col = "gray40", pt.cex = 2, bty = "n", title = "Tipo")
@@ -228,7 +237,7 @@ rodar_cenario <- function(tipo_sel, sp, am) {
   cat(sprintf("    Rede salva: %s\n", nome_rede))
 
   # -----------------------------------------------------------------
-  # HISTOGRAMAS — Evolução em 3 Atos (Gen 1 → Gen alvo → Gen final)
+  # HISTOGRAMAS — Evolução em 3 Atos
   # -----------------------------------------------------------------
   n_m_gen1 <- length(dados$Gen1$Z_Machos)
   n_f_gen1 <- length(dados$Gen1$P_Femeas)
@@ -255,12 +264,12 @@ rodar_cenario <- function(tipo_sel, sp, am) {
     scale_fill_manual(values  = c("Macho (z)"="#4682B4", "Fêmea (p)"="#E6B800")) +
     scale_color_manual(values = c("Macho (z)"="#4682B4", "Fêmea (p)"="#E6B800")) +
     geom_vline(xintercept = 5, linetype = "dashed") +
-    labs(title = sprintf("Evolução em 3 Atos — %s | σp = %.1f | A_max = %d",
-                          tipo_sel, sp, am)) +
+    labs(title = sprintf("Evolução em 3 Atos — %s | σp=%.1f | k=%d | %s",
+                          tipo_sel, sp, kf, sel_label)) +
     theme_minimal(base_size = 14) + theme(legend.position = "top")
 
-  nome_hist <- sprintf("%s/Histogramas_%s_sigmap%.1f_Amax%d.png",
-                       diretorios$graficos, tipo_sel, sp, am)
+  nome_hist <- sprintf("%s/Histogramas_%s_sigmap%.1f_Amax%d_k%d_%s.png",
+                       diretorios$graficos, tipo_sel, sp, am, kf, sel_label)
   ggsave(nome_hist, plot = p_hist, width = 6, height = 8, dpi = 300, bg = "white")
   cat(sprintf("    Histogramas salvos: %s\n", nome_hist))
 
@@ -269,6 +278,8 @@ rodar_cenario <- function(tipo_sel, sp, am) {
       tipo_selecao             = tipo_sel,
       sigma_p                  = sp,
       encounters_n             = am,
+      k_fixo                   = kf,
+      selecao_natural          = sel_nat,
       replica                  = rep_info$replica,
       geracao_alvo             = rep_info$geracao_alvo,
       modularity               = round(dados$GenAlvo$modularity, 3),
@@ -293,53 +304,61 @@ rodar_cenario <- function(tipo_sel, sp, am) {
 
 # =====================================================================
 # MODO DE USO:
-#
-# (A) EXPLORAÇÃO INDIVIDUAL — define um cenário e roda:
-#       res <- rodar_cenario("gaussian", 2.0, 200)
-#
-# (B) LOTE — rode o bloco "LOTE" abaixo (descomente)
+# (A) EXPLORAÇÃO INDIVIDUAL:
+#       res <- rodar_cenario("gaussian", 2.0, 200, kf = 10, sel_nat = FALSE)
+# (B) LOTE — rode o bloco abaixo
 # =====================================================================
 
-# >>> AJUSTE AQUI PARA EXPLORAR UM CENÁRIO INDIVIDUAL <<<
-# rodar_cenario("gaussian", 2.0, 200)
-
 # =====================================================================
-# LOTE COMPLETO — gera painéis comparativos por sigma_p
+# LOTE COMPLETO
+# Foco: encounters_n=200, selecao_natural=FALSE (isolando efeito da
+# preferência feminina sem viabilidade), k ∈ {5, 10, 20}
 # =====================================================================
 cenarios <- expand.grid(
-  tipo_selecao = TIPOS_SELECAO,
-  sigma_p      = c(0.5, 2.0),
-  encounters_n = 200,
+  tipo_selecao    = TIPOS_SELECAO,
+  sigma_p         = c(0.5, 2.0),
+  encounters_n    = 200,
+  k_fixo          = c(5L, 10L, 20L),
+  selecao_natural = FALSE,
   stringsAsFactors = FALSE
 )
 
-labels_tipo <- c("uniform"="Aleatória", "gaussian"="Gaussiana",
-                 "sigmoid"="Sigmoide", "u-shaped"="Disruptiva")
+labels_tipo <- c("uniform"  = "Aleatória",
+                 "gaussian" = "Gaussiana",
+                 "sigmoid"  = "Sigmoide",
+                 "u-shaped" = "Disruptiva")
 
 resultados <- lapply(1:nrow(cenarios), function(i) {
-  rodar_cenario(cenarios$tipo_selecao[i], cenarios$sigma_p[i], cenarios$encounters_n[i])
+  rodar_cenario(cenarios$tipo_selecao[i], cenarios$sigma_p[i],
+                cenarios$encounters_n[i], cenarios$k_fixo[i],
+                cenarios$selecao_natural[i])
 })
 
 # Tabela resumo
 tabela_resumo <- bind_rows(lapply(resultados, function(r) if (!is.null(r)) r$resumo))
 print(tabela_resumo)
 write.csv(tabela_resumo,
-          file.path(diretorios$dados, "resumo_redes_representativas.csv"),
+          file.path(diretorios$dados, "resumo_redes_representativas_MiudoV2.csv"),
           row.names = FALSE)
 
-# Painéis de redes por sigma_p
-sigmas_painel <- unique(cenarios$sigma_p)
-amax_painel   <- unique(cenarios$encounters_n)
+# =====================================================================
+# PAINÉIS TIPO A: por (sigma_p × k_fixo) — 4 curvas cada
+# Para cada combinação de sigma_p e k, mostra as 4 curvas de preferência
+# =====================================================================
+params_painel <- unique(cenarios[, c("sigma_p", "k_fixo")])
 
-for (sp in sigmas_painel) {
-  idx <- which(cenarios$sigma_p == sp)
+for (j in 1:nrow(params_painel)) {
+  sp <- params_painel$sigma_p[j]
+  kf <- params_painel$k_fixo[j]
+
+  idx <- which(cenarios$sigma_p == sp & cenarios$k_fixo == kf)
   if (any(sapply(resultados[idx], is.null))) next
 
-  nome_painel <- sprintf("%s/Painel_Redes_sigmap%.1f_Amax%d.png",
-                         diretorios$graficos, sp, amax_painel)
+  # Painel de redes
+  nome_painel <- sprintf("%s/Painel_Redes_sigmap%.1f_Amax200_k%d_noNS.png",
+                         diretorios$graficos, sp, kf)
   png(nome_painel, width = 5600, height = 5600, res = 300)
   par(mfrow = c(2, 2), mar = c(3, 2, 5, 2))
-
   for (i in idx) {
     r  <- resultados[[i]]
     tl <- labels_tipo[cenarios$tipo_selecao[i]]
@@ -347,18 +366,15 @@ for (sp in sigmas_painel) {
          vertex.shape = r$formas, vertex.size = 4, vertex.label = NA,
          vertex.frame.color = rgb(0,0,0,0.2), edge.color = rgb(0.4,0.4,0.4,0.12),
          edge.width = 0.8,
-         main = sprintf("%s\nMod: %.3f | Tribos: %d | Comunidades: %d",
-                        tl, r$resumo$modularity, r$num_grupos, r$n_comunidades))
+         main = sprintf("%s\nMod: %.3f | NODF: %.3f | Tribos: %d",
+                        tl, r$resumo$modularity, r$resumo$nestedness, r$num_grupos))
+    legend("bottomleft", legend = c("Macho","Fêmea"), pch = c(15,16),
+           col = "gray40", pt.cex = 1.5, bty = "n")
   }
   dev.off()
-  cat(sprintf("Painel de redes salvo: %s\n", nome_painel))
-}
+  cat(sprintf("Painel salvo: %s\n", nome_painel))
 
-# Painéis de histogramas por sigma_p
-for (sp in sigmas_painel) {
-  idx <- which(cenarios$sigma_p == sp)
-  if (any(sapply(resultados[idx], is.null))) next
-
+  # Painel de histogramas
   plots_hist <- lapply(idx, function(i) {
     tl <- labels_tipo[cenarios$tipo_selecao[i]]
     resultados[[i]]$p_hist + ggtitle(tl) +
@@ -366,13 +382,44 @@ for (sp in sigmas_painel) {
   })
   painel_hist <- (plots_hist[[1]] | plots_hist[[2]]) /
                  (plots_hist[[3]] | plots_hist[[4]]) +
-    plot_annotation(title = sprintf("Evolução em 3 Atos — σp = %.1f | A_max = %d",
-                                    sp, amax_painel))
-
-  nome_hist_painel <- sprintf("%s/Painel_Histogramas_sigmap%.1f_Amax%d.png",
-                               diretorios$graficos, sp, amax_painel)
+    plot_annotation(title = sprintf("Evolução em 3 Atos | σp=%.1f | k=%d | sem sel.natural",
+                                    sp, kf))
+  nome_hist_painel <- sprintf("%s/Painel_Histogramas_sigmap%.1f_Amax200_k%d_noNS.png",
+                               diretorios$graficos, sp, kf)
   ggsave(nome_hist_painel, plot = painel_hist, width = 16, height = 20,
          dpi = 300, bg = "white")
-  cat(sprintf("Painel de histogramas salvo: %s\n", nome_hist_painel))
+  cat(sprintf("Painel histogramas salvo: %s\n", nome_hist_painel))
 }
 
+# =====================================================================
+# PAINÉIS TIPO B: comparação de k (k=5 vs k=10 vs k=20)
+# Para cada (tipo_selecao × sigma_p), mostra 3 redes lado a lado
+# =====================================================================
+for (tc in TIPOS_SELECAO) {
+  for (sp in c(0.5, 2.0)) {
+    idx <- which(cenarios$tipo_selecao == tc & cenarios$sigma_p == sp)
+    if (length(idx) != 3 || any(sapply(resultados[idx], is.null))) next
+
+    nome_kcomp <- sprintf("%s/Comparacao_k_%s_sigmap%.1f_noNS.png",
+                          diretorios$graficos, tc, sp)
+    png(nome_kcomp, width = 7200, height = 2600, res = 300)
+    par(mfrow = c(1, 3), mar = c(3, 2, 6, 2))
+    for (i in idx) {
+      r  <- resultados[[i]]
+      kf <- cenarios$k_fixo[i]
+      plot(r$g_final, layout = r$layout_fr, vertex.color = r$cores_comunidade,
+           vertex.shape = r$formas, vertex.size = 5, vertex.label = NA,
+           vertex.frame.color = rgb(0,0,0,0.2), edge.color = rgb(0.4,0.4,0.4,0.15),
+           edge.width = 0.9,
+           main = sprintf("k = %d\nMod: %.3f | NODF: %.3f",
+                          kf, r$resumo$modularity, r$resumo$nestedness))
+      legend("bottomleft", legend = c("Macho","Fêmea"), pch = c(15,16),
+             col = "gray40", pt.cex = 1.5, bty = "n")
+    }
+    title(main = sprintf("%s | σp=%.1f | sem sel.natural — comparação de k",
+                         labels_tipo[tc], sp),
+          outer = TRUE, line = -2.5, cex.main = 1.4)
+    dev.off()
+    cat(sprintf("Comparação k salva: %s\n", nome_kcomp))
+  }
+}
