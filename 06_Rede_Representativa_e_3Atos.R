@@ -342,6 +342,50 @@ write.csv(tabela_resumo,
           row.names = FALSE)
 
 # =====================================================================
+# TABELA COMPARATIVA (para o poster): Mod/NODF/Tribos/Comunidades
+# por curva de preferência × sigma_p × k_fixo (sem sel. natural)
+# =====================================================================
+tabela_comparativa <- tabela_resumo %>%
+  mutate(Curva = labels_tipo[tipo_selecao]) %>%
+  select(Curva, sigma_p, k_fixo, modularity, nestedness, tribos, comunidades) %>%
+  rename(Sigma_p             = sigma_p,
+         k                   = k_fixo,
+         Modularidade        = modularity,
+         NODF                = nestedness,
+         Tribos              = tribos,
+         Comunidades         = comunidades) %>%
+  arrange(Curva, Sigma_p, k)
+
+cat("\n=== Tabela comparativa (Mod/NODF/Tribos/Comunidades) ===\n")
+print(tabela_comparativa)
+
+write.csv(tabela_comparativa,
+          file.path(diretorios$dados, "Tabela_Comparativa_MiudoV2.csv"),
+          row.names = FALSE)
+cat(sprintf("Tabela comparativa salva: %s\n",
+            file.path(diretorios$dados, "Tabela_Comparativa_MiudoV2.csv")))
+
+# Versão "larga" — uma linha por (Curva, sigma_p), colunas separadas por k
+tabela_comparativa_larga <- tabela_resumo %>%
+  mutate(Curva = labels_tipo[tipo_selecao]) %>%
+  select(Curva, sigma_p, k_fixo, modularity, nestedness, tribos, comunidades) %>%
+  pivot_wider(
+    names_from  = k_fixo,
+    values_from = c(modularity, nestedness, tribos, comunidades),
+    names_glue  = "{.value}_k{k_fixo}"
+  ) %>%
+  select(Curva, sigma_p,
+         starts_with("modularity"), starts_with("nestedness"),
+         starts_with("tribos"), starts_with("comunidades")) %>%
+  arrange(Curva, sigma_p)
+
+write.csv(tabela_comparativa_larga,
+          file.path(diretorios$dados, "Tabela_Comparativa_MiudoV2_larga.csv"),
+          row.names = FALSE)
+cat(sprintf("Tabela comparativa (larga) salva: %s\n",
+            file.path(diretorios$dados, "Tabela_Comparativa_MiudoV2_larga.csv")))
+
+# =====================================================================
 # PAINÉIS TIPO A: por (sigma_p × k_fixo) — 4 curvas cada
 # Para cada combinação de sigma_p e k, mostra as 4 curvas de preferência
 # =====================================================================
@@ -402,8 +446,8 @@ for (tc in TIPOS_SELECAO) {
 
     nome_kcomp <- sprintf("%s/Comparacao_k_%s_sigmap%.1f_noNS.png",
                           diretorios$graficos, tc, sp)
-    png(nome_kcomp, width = 7200, height = 2600, res = 300)
-    par(mfrow = c(1, 3), mar = c(3, 2, 6, 2))
+    png(nome_kcomp, width = 7200, height = 2800, res = 300)
+    par(mfrow = c(1, 3), mar = c(3, 2, 7, 2))
     for (i in idx) {
       r  <- resultados[[i]]
       kf <- cenarios$k_fixo[i]
@@ -411,14 +455,15 @@ for (tc in TIPOS_SELECAO) {
            vertex.shape = r$formas, vertex.size = 5, vertex.label = NA,
            vertex.frame.color = rgb(0,0,0,0.2), edge.color = rgb(0.4,0.4,0.4,0.15),
            edge.width = 0.9,
-           main = sprintf("k = %d\nMod: %.3f | NODF: %.3f",
-                          kf, r$resumo$modularity, r$resumo$nestedness))
+           main = sprintf("k = %d\nMod: %.3f | NODF: %.3f | Tribos: %d | Comunidades: %d",
+                          kf, r$resumo$modularity, r$resumo$nestedness,
+                          r$num_grupos, r$n_comunidades))
       legend("bottomleft", legend = c("Macho","Fêmea"), pch = c(15,16),
              col = "gray40", pt.cex = 1.5, bty = "n")
     }
     title(main = sprintf("%s | σp=%.1f | sem sel.natural — comparação de k",
                          labels_tipo[tc], sp),
-          outer = TRUE, line = -2.5, cex.main = 1.4)
+          outer = TRUE, line = -3.5, cex.main = 1.4)
     dev.off()
     cat(sprintf("Comparação k salva: %s\n", nome_kcomp))
   }
