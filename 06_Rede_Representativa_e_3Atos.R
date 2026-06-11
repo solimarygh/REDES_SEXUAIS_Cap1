@@ -316,7 +316,7 @@ rodar_cenario <- function(tipo_sel, sp, am, kf, sel_nat) {
 # =====================================================================
 cenarios <- expand.grid(
   tipo_selecao    = TIPOS_SELECAO,
-  sigma_p         = c(0.5, 2.0),
+  sigma_p         = c(0.5, 1.0, 2.0),
   encounters_n    = 200,
   k_fixo          = c(5L, 10L, 20L),
   selecao_natural = FALSE,
@@ -436,19 +436,19 @@ for (j in 1:nrow(params_painel)) {
 }
 
 # =====================================================================
-# PAINÉIS TIPO B: comparação de k (5/10/20) × sigma_p (2.0/0.5)
-# Para cada tipo_selecao, grade 2x3: linha de cima sigma_p=2.0,
-# linha de baixo sigma_p=0.5; colunas k=5, k=10, k=20
+# PAINÉIS TIPO B: comparação de k (5/10/20) × sigma_p (2.0/1.0/0.5)
+# Para cada tipo_selecao, grade 3x3: linhas sigma_p=2.0, 1.0, 0.5
+# (de cima para baixo); colunas k=5, k=10, k=20
 # =====================================================================
 for (tc in TIPOS_SELECAO) {
   idx <- which(cenarios$tipo_selecao == tc)
-  if (length(idx) != 6 || any(sapply(resultados[idx], is.null))) next
+  if (length(idx) != 9 || any(sapply(resultados[idx], is.null))) next
 
   nome_kcomp <- sprintf("%s/Comparacao_k_sigmap_%s_noNS.png",
                         diretorios$graficos, tc)
-  png(nome_kcomp, width = 7200, height = 5000, res = 300)
-  par(mfrow = c(2, 3), mar = c(3, 2, 6, 2))
-  for (sp in c(2.0, 0.5)) {
+  png(nome_kcomp, width = 7200, height = 7400, res = 300)
+  par(mfrow = c(3, 3), mar = c(3, 2, 6, 2))
+  for (sp in c(2.0, 1.0, 0.5)) {
     for (kf in c(5L, 10L, 20L)) {
       i <- idx[which(cenarios$sigma_p[idx] == sp & cenarios$k_fixo[idx] == kf)]
       r <- resultados[[i]]
