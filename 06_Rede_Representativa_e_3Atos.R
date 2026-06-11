@@ -310,162 +310,183 @@ rodar_cenario <- function(tipo_sel, sp, am, kf, sel_nat) {
 # =====================================================================
 
 # =====================================================================
-# LOTE COMPLETO
-# Foco: encounters_n=200, selecao_natural=FALSE (isolando efeito da
-# preferência feminina sem viabilidade), k ∈ {5, 10, 20}
+# LOTE COMPLETO (em função de encounters_n / A_max)
+# Foco: selecao_natural=FALSE (isolando efeito da preferência feminina
+# sem viabilidade), k ∈ {5, 10, 20}, sigma_p ∈ {0.5, 1.0, 2.0}
+#
+# Uso:
+#   res200 <- gerar_lote_comparativo(200)   # A_max máximo (poster)
+#   res40  <- gerar_lote_comparativo(40)    # rodar em sessão separada
+#   res10  <- gerar_lote_comparativo(10)    # rodar em sessão separada
 # =====================================================================
-cenarios <- expand.grid(
-  tipo_selecao    = TIPOS_SELECAO,
-  sigma_p         = c(0.5, 1.0, 2.0),
-  encounters_n    = 200,
-  k_fixo          = c(5L, 10L, 20L),
-  selecao_natural = FALSE,
-  stringsAsFactors = FALSE
-)
-
 labels_tipo <- c("uniform"  = "Aleatória",
                  "gaussian" = "Gaussiana",
                  "sigmoid"  = "Sigmoide",
                  "u-shaped" = "Disruptiva")
 
-resultados <- lapply(1:nrow(cenarios), function(i) {
-  rodar_cenario(cenarios$tipo_selecao[i], cenarios$sigma_p[i],
-                cenarios$encounters_n[i], cenarios$k_fixo[i],
-                cenarios$selecao_natural[i])
-})
+gerar_lote_comparativo <- function(am) {
 
-# Tabela resumo
-tabela_resumo <- bind_rows(lapply(resultados, function(r) if (!is.null(r)) r$resumo))
-print(tabela_resumo)
-write.csv(tabela_resumo,
-          file.path(diretorios$dados, "resumo_redes_representativas_MiudoV2.csv"),
-          row.names = FALSE)
+  cenarios <- expand.grid(
+    tipo_selecao    = TIPOS_SELECAO,
+    sigma_p         = c(0.5, 1.0, 2.0),
+    encounters_n    = am,
+    k_fixo          = c(5L, 10L, 20L),
+    selecao_natural = FALSE,
+    stringsAsFactors = FALSE
+  )
 
-# =====================================================================
-# TABELA COMPARATIVA (para o poster): Mod/NODF/Tribos/Comunidades
-# por curva de preferência × sigma_p × k_fixo (sem sel. natural)
-# =====================================================================
-tabela_comparativa <- tabela_resumo %>%
-  mutate(Curva = labels_tipo[tipo_selecao]) %>%
-  dplyr::select(Curva, sigma_p, k_fixo, modularity, nestedness, tribos, comunidades) %>%
-  rename(Sigma_p             = sigma_p,
-         k                   = k_fixo,
-         Modularidade        = modularity,
-         NODF                = nestedness,
-         Tribos              = tribos,
-         Comunidades         = comunidades) %>%
-  arrange(Curva, Sigma_p, k)
-
-cat("\n=== Tabela comparativa (Mod/NODF/Tribos/Comunidades) ===\n")
-print(tabela_comparativa)
-
-write.csv(tabela_comparativa,
-          file.path(diretorios$dados, "Tabela_Comparativa_MiudoV2.csv"),
-          row.names = FALSE)
-cat(sprintf("Tabela comparativa salva: %s\n",
-            file.path(diretorios$dados, "Tabela_Comparativa_MiudoV2.csv")))
-
-# Versão "larga" — uma linha por (Curva, sigma_p), colunas separadas por k
-tabela_comparativa_larga <- tabela_resumo %>%
-  mutate(Curva = labels_tipo[tipo_selecao]) %>%
-  dplyr::select(Curva, sigma_p, k_fixo, modularity, nestedness, tribos, comunidades) %>%
-  pivot_wider(
-    names_from  = k_fixo,
-    values_from = c(modularity, nestedness, tribos, comunidades),
-    names_glue  = "{.value}_k{k_fixo}"
-  ) %>%
-  dplyr::select(Curva, sigma_p,
-         starts_with("modularity"), starts_with("nestedness"),
-         starts_with("tribos"), starts_with("comunidades")) %>%
-  arrange(Curva, sigma_p)
-
-write.csv(tabela_comparativa_larga,
-          file.path(diretorios$dados, "Tabela_Comparativa_MiudoV2_larga.csv"),
-          row.names = FALSE)
-cat(sprintf("Tabela comparativa (larga) salva: %s\n",
-            file.path(diretorios$dados, "Tabela_Comparativa_MiudoV2_larga.csv")))
-
-# =====================================================================
-# PAINÉIS TIPO A: por (sigma_p × k_fixo) — 4 curvas cada
-# Para cada combinação de sigma_p e k, mostra as 4 curvas de preferência
-# =====================================================================
-params_painel <- unique(cenarios[, c("sigma_p", "k_fixo")])
-
-for (j in 1:nrow(params_painel)) {
-  sp <- params_painel$sigma_p[j]
-  kf <- params_painel$k_fixo[j]
-
-  idx <- which(cenarios$sigma_p == sp & cenarios$k_fixo == kf)
-  if (any(sapply(resultados[idx], is.null))) next
-
-  # Painel de redes
-  nome_painel <- sprintf("%s/Painel_Redes_sigmap%.1f_Amax200_k%d_noNS.png",
-                         diretorios$graficos, sp, kf)
-  png(nome_painel, width = 5600, height = 5600, res = 300)
-  par(mfrow = c(2, 2), mar = c(3, 2, 5, 2))
-  for (i in idx) {
-    r  <- resultados[[i]]
-    tl <- labels_tipo[cenarios$tipo_selecao[i]]
-    plot(r$g_final, layout = r$layout_fr, vertex.color = r$cores_comunidade,
-         vertex.shape = r$formas, vertex.size = 4, vertex.label = NA,
-         vertex.frame.color = rgb(0,0,0,0.2), edge.color = rgb(0.4,0.4,0.4,0.12),
-         edge.width = 0.8,
-         main = sprintf("%s\nMod: %.3f | NODF: %.3f | Tribos: %d",
-                        tl, r$resumo$modularity, r$resumo$nestedness, r$num_grupos))
-    legend("bottomleft", legend = c("Macho","Fêmea"), pch = c(15,16),
-           col = "gray40", pt.cex = 1.5, bty = "n")
-  }
-  dev.off()
-  cat(sprintf("Painel salvo: %s\n", nome_painel))
-
-  # Painel de histogramas
-  plots_hist <- lapply(idx, function(i) {
-    tl <- labels_tipo[cenarios$tipo_selecao[i]]
-    resultados[[i]]$p_hist + ggtitle(tl) +
-      theme(plot.title = element_text(size = 12, face = "bold"))
+  resultados <- lapply(1:nrow(cenarios), function(i) {
+    rodar_cenario(cenarios$tipo_selecao[i], cenarios$sigma_p[i],
+                  cenarios$encounters_n[i], cenarios$k_fixo[i],
+                  cenarios$selecao_natural[i])
   })
-  painel_hist <- (plots_hist[[1]] | plots_hist[[2]]) /
-                 (plots_hist[[3]] | plots_hist[[4]]) +
-    plot_annotation(title = sprintf("Evolução em 3 Atos | σp=%.1f | k=%d | sem sel.natural",
-                                    sp, kf))
-  nome_hist_painel <- sprintf("%s/Painel_Histogramas_sigmap%.1f_Amax200_k%d_noNS.png",
-                               diretorios$graficos, sp, kf)
-  ggsave(nome_hist_painel, plot = painel_hist, width = 16, height = 20,
-         dpi = 300, bg = "white")
-  cat(sprintf("Painel histogramas salvo: %s\n", nome_hist_painel))
-}
 
-# =====================================================================
-# PAINÉIS TIPO B: comparação de k (5/10/20) × sigma_p (2.0/1.0/0.5)
-# Para cada tipo_selecao, grade 3x3: linhas sigma_p=2.0, 1.0, 0.5
-# (de cima para baixo); colunas k=5, k=10, k=20
-# =====================================================================
-for (tc in TIPOS_SELECAO) {
-  idx <- which(cenarios$tipo_selecao == tc)
-  if (length(idx) != 9 || any(sapply(resultados[idx], is.null))) next
+  # Tabela resumo
+  tabela_resumo <- bind_rows(lapply(resultados, function(r) if (!is.null(r)) r$resumo))
+  print(tabela_resumo)
+  write.csv(tabela_resumo,
+            file.path(diretorios$dados, sprintf("resumo_redes_representativas_MiudoV2_Amax%d.csv", am)),
+            row.names = FALSE)
 
-  nome_kcomp <- sprintf("%s/Comparacao_k_sigmap_%s_noNS.png",
-                        diretorios$graficos, tc)
-  png(nome_kcomp, width = 7200, height = 7400, res = 300)
-  par(mfrow = c(3, 3), mar = c(3, 2, 6, 2))
-  for (sp in c(2.0, 1.0, 0.5)) {
-    for (kf in c(5L, 10L, 20L)) {
-      i <- idx[which(cenarios$sigma_p[idx] == sp & cenarios$k_fixo[idx] == kf)]
-      r <- resultados[[i]]
+  # =====================================================================
+  # TABELA COMPARATIVA (para o poster): Mod/NODF/Tribos/Comunidades
+  # por curva de preferência × sigma_p × k_fixo (sem sel. natural)
+  # =====================================================================
+  tabela_comparativa <- tabela_resumo %>%
+    mutate(Curva = labels_tipo[tipo_selecao]) %>%
+    dplyr::select(Curva, sigma_p, k_fixo, modularity, nestedness, tribos, comunidades) %>%
+    rename(Sigma_p             = sigma_p,
+           k                   = k_fixo,
+           Modularidade        = modularity,
+           NODF                = nestedness,
+           Tribos              = tribos,
+           Comunidades         = comunidades) %>%
+    arrange(Curva, Sigma_p, k)
+
+  cat(sprintf("\n=== Tabela comparativa (Mod/NODF/Tribos/Comunidades) — A_max=%d ===\n", am))
+  print(tabela_comparativa)
+
+  write.csv(tabela_comparativa,
+            file.path(diretorios$dados, sprintf("Tabela_Comparativa_MiudoV2_Amax%d.csv", am)),
+            row.names = FALSE)
+  cat(sprintf("Tabela comparativa salva: %s\n",
+              file.path(diretorios$dados, sprintf("Tabela_Comparativa_MiudoV2_Amax%d.csv", am))))
+
+  # Versão "larga" — uma linha por (Curva, sigma_p), colunas separadas por k
+  tabela_comparativa_larga <- tabela_resumo %>%
+    mutate(Curva = labels_tipo[tipo_selecao]) %>%
+    dplyr::select(Curva, sigma_p, k_fixo, modularity, nestedness, tribos, comunidades) %>%
+    pivot_wider(
+      names_from  = k_fixo,
+      values_from = c(modularity, nestedness, tribos, comunidades),
+      names_glue  = "{.value}_k{k_fixo}"
+    ) %>%
+    dplyr::select(Curva, sigma_p,
+           starts_with("modularity"), starts_with("nestedness"),
+           starts_with("tribos"), starts_with("comunidades")) %>%
+    arrange(Curva, sigma_p)
+
+  write.csv(tabela_comparativa_larga,
+            file.path(diretorios$dados, sprintf("Tabela_Comparativa_MiudoV2_larga_Amax%d.csv", am)),
+            row.names = FALSE)
+  cat(sprintf("Tabela comparativa (larga) salva: %s\n",
+              file.path(diretorios$dados, sprintf("Tabela_Comparativa_MiudoV2_larga_Amax%d.csv", am))))
+
+  # =====================================================================
+  # PAINÉIS TIPO A: por (sigma_p × k_fixo) — 4 curvas cada
+  # Para cada combinação de sigma_p e k, mostra as 4 curvas de preferência
+  # =====================================================================
+  params_painel <- unique(cenarios[, c("sigma_p", "k_fixo")])
+
+  for (j in 1:nrow(params_painel)) {
+    sp <- params_painel$sigma_p[j]
+    kf <- params_painel$k_fixo[j]
+
+    idx <- which(cenarios$sigma_p == sp & cenarios$k_fixo == kf)
+    if (any(sapply(resultados[idx], is.null))) next
+
+    # Painel de redes
+    nome_painel <- sprintf("%s/Painel_Redes_sigmap%.1f_Amax%d_k%d_noNS.png",
+                           diretorios$graficos, sp, am, kf)
+    png(nome_painel, width = 5600, height = 5600, res = 300)
+    par(mfrow = c(2, 2), mar = c(3, 2, 5, 2))
+    for (i in idx) {
+      r  <- resultados[[i]]
+      tl <- labels_tipo[cenarios$tipo_selecao[i]]
       plot(r$g_final, layout = r$layout_fr, vertex.color = r$cores_comunidade,
-           vertex.shape = r$formas, vertex.size = 5, vertex.label = NA,
-           vertex.frame.color = rgb(0,0,0,0.2), edge.color = rgb(0.4,0.4,0.4,0.15),
-           edge.width = 0.9,
-           main = sprintf("k = %d | σp = %.1f\nMod: %.3f | NODF: %.3f | Tribos: %d | Com: %d",
-                          kf, sp, r$resumo$modularity, r$resumo$nestedness,
-                          r$num_grupos, r$n_comunidades))
+           vertex.shape = r$formas, vertex.size = 4, vertex.label = NA,
+           vertex.frame.color = rgb(0,0,0,0.2), edge.color = rgb(0.4,0.4,0.4,0.12),
+           edge.width = 0.8,
+           main = sprintf("%s\nMod: %.3f | NODF: %.3f | Tribos: %d",
+                          tl, r$resumo$modularity, r$resumo$nestedness, r$num_grupos))
       legend("bottomleft", legend = c("Macho","Fêmea"), pch = c(15,16),
              col = "gray40", pt.cex = 1.5, bty = "n")
     }
+    dev.off()
+    cat(sprintf("Painel salvo: %s\n", nome_painel))
+
+    # Painel de histogramas
+    plots_hist <- lapply(idx, function(i) {
+      tl <- labels_tipo[cenarios$tipo_selecao[i]]
+      resultados[[i]]$p_hist + ggtitle(tl) +
+        theme(plot.title = element_text(size = 12, face = "bold"))
+    })
+    painel_hist <- (plots_hist[[1]] | plots_hist[[2]]) /
+                   (plots_hist[[3]] | plots_hist[[4]]) +
+      plot_annotation(title = sprintf("Evolução em 3 Atos | σp=%.1f | A_max=%d | k=%d | sem sel.natural",
+                                      sp, am, kf))
+    nome_hist_painel <- sprintf("%s/Painel_Histogramas_sigmap%.1f_Amax%d_k%d_noNS.png",
+                                 diretorios$graficos, sp, am, kf)
+    ggsave(nome_hist_painel, plot = painel_hist, width = 16, height = 20,
+           dpi = 300, bg = "white")
+    cat(sprintf("Painel histogramas salvo: %s\n", nome_hist_painel))
   }
-  title(main = sprintf("%s | sem sel.natural — comparação de k e σp",
-                       labels_tipo[tc]),
-        outer = TRUE, line = -1.5, cex.main = 1.6)
-  dev.off()
-  cat(sprintf("Comparação k×σp salva: %s\n", nome_kcomp))
+
+  # =====================================================================
+  # PAINÉIS TIPO B: comparação de k (5/10/20) × sigma_p (2.0/1.0/0.5)
+  # Para cada tipo_selecao, grade 3x3: linhas sigma_p=2.0, 1.0, 0.5
+  # (de cima para baixo); colunas k=5, k=10, k=20
+  # =====================================================================
+  for (tc in TIPOS_SELECAO) {
+    idx <- which(cenarios$tipo_selecao == tc)
+    if (length(idx) != 9 || any(sapply(resultados[idx], is.null))) next
+
+    nome_kcomp <- sprintf("%s/Comparacao_k_sigmap_%s_Amax%d_noNS.png",
+                          diretorios$graficos, tc, am)
+    png(nome_kcomp, width = 7200, height = 7400, res = 300)
+    par(mfrow = c(3, 3), mar = c(3, 2, 6, 2))
+    for (sp in c(2.0, 1.0, 0.5)) {
+      for (kf in c(5L, 10L, 20L)) {
+        i <- idx[which(cenarios$sigma_p[idx] == sp & cenarios$k_fixo[idx] == kf)]
+        r <- resultados[[i]]
+        plot(r$g_final, layout = r$layout_fr, vertex.color = r$cores_comunidade,
+             vertex.shape = r$formas, vertex.size = 5, vertex.label = NA,
+             vertex.frame.color = rgb(0,0,0,0.2), edge.color = rgb(0.4,0.4,0.4,0.15),
+             edge.width = 0.9,
+             main = sprintf("k = %d | σp = %.1f\nMod: %.3f | NODF: %.3f | Tribos: %d | Com: %d",
+                            kf, sp, r$resumo$modularity, r$resumo$nestedness,
+                            r$num_grupos, r$n_comunidades))
+        legend("bottomleft", legend = c("Macho","Fêmea"), pch = c(15,16),
+               col = "gray40", pt.cex = 1.5, bty = "n")
+      }
+    }
+    title(main = sprintf("%s | A_max=%d | sem sel.natural — comparação de k e σp",
+                         labels_tipo[tc], am),
+          outer = TRUE, line = -1.5, cex.main = 1.6)
+    dev.off()
+    cat(sprintf("Comparação k×σp salva: %s\n", nome_kcomp))
+  }
+
+  invisible(list(cenarios = cenarios, resultados = resultados,
+                  tabela_resumo = tabela_resumo,
+                  tabela_comparativa = tabela_comparativa,
+                  tabela_comparativa_larga = tabela_comparativa_larga))
 }
+
+# Rodar para A_max=200 (conjunto principal, usado no poster)
+res_amax200 <- gerar_lote_comparativo(200)
+
+# Para rodar A_max=40 ou A_max=10 (curiosidade — quando as fêmeas "veem"
+# menos machos), chame em uma sessão separada:
+#   res_amax40 <- gerar_lote_comparativo(40)
+#   res_amax10 <- gerar_lote_comparativo(10)
