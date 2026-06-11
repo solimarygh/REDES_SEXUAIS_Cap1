@@ -347,7 +347,7 @@ write.csv(tabela_resumo,
 # =====================================================================
 tabela_comparativa <- tabela_resumo %>%
   mutate(Curva = labels_tipo[tipo_selecao]) %>%
-  select(Curva, sigma_p, k_fixo, modularity, nestedness, tribos, comunidades) %>%
+  dplyr::select(Curva, sigma_p, k_fixo, modularity, nestedness, tribos, comunidades) %>%
   rename(Sigma_p             = sigma_p,
          k                   = k_fixo,
          Modularidade        = modularity,
@@ -368,13 +368,13 @@ cat(sprintf("Tabela comparativa salva: %s\n",
 # Versão "larga" — uma linha por (Curva, sigma_p), colunas separadas por k
 tabela_comparativa_larga <- tabela_resumo %>%
   mutate(Curva = labels_tipo[tipo_selecao]) %>%
-  select(Curva, sigma_p, k_fixo, modularity, nestedness, tribos, comunidades) %>%
+  dplyr::select(Curva, sigma_p, k_fixo, modularity, nestedness, tribos, comunidades) %>%
   pivot_wider(
     names_from  = k_fixo,
     values_from = c(modularity, nestedness, tribos, comunidades),
     names_glue  = "{.value}_k{k_fixo}"
   ) %>%
-  select(Curva, sigma_p,
+  dplyr::select(Curva, sigma_p,
          starts_with("modularity"), starts_with("nestedness"),
          starts_with("tribos"), starts_with("comunidades")) %>%
   arrange(Curva, sigma_p)
