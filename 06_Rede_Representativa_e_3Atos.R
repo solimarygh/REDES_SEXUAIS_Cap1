@@ -436,35 +436,36 @@ for (j in 1:nrow(params_painel)) {
 }
 
 # =====================================================================
-# PAINÉIS TIPO B: comparação de k (k=5 vs k=10 vs k=20)
-# Para cada (tipo_selecao × sigma_p), mostra 3 redes lado a lado
+# PAINÉIS TIPO B: comparação de k (5/10/20) × sigma_p (2.0/0.5)
+# Para cada tipo_selecao, grade 2x3: linha de cima sigma_p=2.0,
+# linha de baixo sigma_p=0.5; colunas k=5, k=10, k=20
 # =====================================================================
 for (tc in TIPOS_SELECAO) {
-  for (sp in c(0.5, 2.0)) {
-    idx <- which(cenarios$tipo_selecao == tc & cenarios$sigma_p == sp)
-    if (length(idx) != 3 || any(sapply(resultados[idx], is.null))) next
+  idx <- which(cenarios$tipo_selecao == tc)
+  if (length(idx) != 6 || any(sapply(resultados[idx], is.null))) next
 
-    nome_kcomp <- sprintf("%s/Comparacao_k_%s_sigmap%.1f_noNS.png",
-                          diretorios$graficos, tc, sp)
-    png(nome_kcomp, width = 7200, height = 2800, res = 300)
-    par(mfrow = c(1, 3), mar = c(3, 2, 7, 2))
-    for (i in idx) {
-      r  <- resultados[[i]]
-      kf <- cenarios$k_fixo[i]
+  nome_kcomp <- sprintf("%s/Comparacao_k_sigmap_%s_noNS.png",
+                        diretorios$graficos, tc)
+  png(nome_kcomp, width = 7200, height = 5000, res = 300)
+  par(mfrow = c(2, 3), mar = c(3, 2, 6, 2))
+  for (sp in c(2.0, 0.5)) {
+    for (kf in c(5L, 10L, 20L)) {
+      i <- idx[which(cenarios$sigma_p[idx] == sp & cenarios$k_fixo[idx] == kf)]
+      r <- resultados[[i]]
       plot(r$g_final, layout = r$layout_fr, vertex.color = r$cores_comunidade,
            vertex.shape = r$formas, vertex.size = 5, vertex.label = NA,
            vertex.frame.color = rgb(0,0,0,0.2), edge.color = rgb(0.4,0.4,0.4,0.15),
            edge.width = 0.9,
-           main = sprintf("k = %d\nMod: %.3f | NODF: %.3f | Tribos: %d | Comunidades: %d",
-                          kf, r$resumo$modularity, r$resumo$nestedness,
+           main = sprintf("k = %d | σp = %.1f\nMod: %.3f | NODF: %.3f | Tribos: %d | Com: %d",
+                          kf, sp, r$resumo$modularity, r$resumo$nestedness,
                           r$num_grupos, r$n_comunidades))
       legend("bottomleft", legend = c("Macho","Fêmea"), pch = c(15,16),
              col = "gray40", pt.cex = 1.5, bty = "n")
     }
-    title(main = sprintf("%s | σp=%.1f | sem sel.natural — comparação de k",
-                         labels_tipo[tc], sp),
-          outer = TRUE, line = -3.5, cex.main = 1.4)
-    dev.off()
-    cat(sprintf("Comparação k salva: %s\n", nome_kcomp))
   }
+  title(main = sprintf("%s | sem sel.natural — comparação de k e σp",
+                       labels_tipo[tc]),
+        outer = TRUE, line = -1.5, cex.main = 1.6)
+  dev.off()
+  cat(sprintf("Comparação k×σp salva: %s\n", nome_kcomp))
 }
