@@ -571,7 +571,7 @@ if(file.exists(arquivo)) {
     facet_wrap(~Metrica, scales = "free_y", ncol = 2) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title    = sprintf("Fase 4: A Assinatura Topológica Suprema (A_max = 200, Gen %d)", GEN_FINAL),
+    labs(title    = sprintf("Fase 4: Assinatura Topológica das Curvas de Preferência (A_max = 200, Gen %d)", GEN_FINAL),
          subtitle = subtitulo_base,
          x = expression(paste("Variação da Preferência (", sigma[p], ")")),
          y = "Valor da Métrica", color = "", fill = "") +
@@ -630,8 +630,8 @@ if(file.exists(arquivo)) {
     facet_wrap(~Topologia, scales = "free", ncol = 2) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title    = sprintf("Fase 4: Evidência Correlacional Topologia–Evolução (σp=2.0, Gen %d)", GEN_FINAL),
-         subtitle = "Regressões lineares indicam associação entre estrutura da rede e fenótipo",
+    labs(title    = sprintf("Fase 4: Topologia da Rede vs. Evolução do Traço (σp=2.0, Gen %d)", GEN_FINAL),
+         subtitle = "Cada ponto = uma réplica | Linha = regressão linear (IC 95%) por curva de preferência",
          x = "Valor Topológico da Rede",
          y = "Valor Evolutivo (Média ou Variância)", color = "", fill = "") +
     guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
@@ -660,8 +660,8 @@ if(file.exists(arquivo)) {
     facet_grid(Metrica ~ Cenario_Ecol, scales = "free_y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title    = sprintf("Fase 4: A Restrição de Amostragem Dissolve a Assinatura Topológica? (Gen %d)", GEN_FINAL),
-         subtitle = "Lendo da esq. para a dir.: A_max reduz o acesso feminino e perturba a estrutura da rede",
+    labs(title    = sprintf("Fase 4: Assinatura Topológica sob Diferentes Níveis de Amostragem (Gen %d)", GEN_FINAL),
+         subtitle = "Painéis da esq. para a dir.: A_max = 200, 40, 10 (machos amostrados por fêmea)",
          x = expression(paste("Variação da Preferência das Fêmeas (", sigma[p], ")")),
          y = "Valor da Métrica Topológica", color = "", fill = "") +
     guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
