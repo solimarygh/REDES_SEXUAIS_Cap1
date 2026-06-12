@@ -603,7 +603,7 @@ if(file.exists(arquivo)) {
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
     labs(title    = sprintf("Fase 4: Efeito do Custo de Busca sobre a Média e a Variância do Traço (Gen %d)", GEN_FINAL),
-         subtitle = "Lendo da esq. para a dir.: A restrição de amostragem (A_max) atenua a seleção sexual",
+         subtitle = "Painéis da esq. para a dir.: A_max = 200, 40, 10 (machos amostrados por fêmea)",
          x = expression(paste("Variação da Preferência (", sigma[p], ")")),
          y = "Valor Fenotípico / Genético", color = "", fill = "") +
     guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
