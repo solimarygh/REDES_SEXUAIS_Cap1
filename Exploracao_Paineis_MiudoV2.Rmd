@@ -1,0 +1,135 @@
+---
+title: "Exploração de Painéis — Fase5_MiudoV2"
+subtitle: "Histogramas (Evolução em 3 Atos) e Redes Comparativas (k × σp)"
+author: "Solimary García Hernández"
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float:
+      collapsed: false
+    toc_depth: 3
+    self_contained: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.align = "center", out.width = "100%")
+```
+
+```{r config}
+graficos_dir <- "Resultados_Artigo/Redes_Representativas/Graficos"
+
+labels_tipo <- c("uniform"  = "Aleatória",
+                 "gaussian" = "Gaussiana",
+                 "sigmoid"  = "Sigmoide",
+                 "u-shaped" = "Disruptiva")
+
+# Ordem de exibição
+ordem_curvas <- c("uniform", "gaussian", "sigmoid", "u-shaped")
+ordem_sigma  <- c(2.0, 1.0, 0.5)
+ordem_k      <- c(5, 10, 20)
+```
+
+Este documento reúne, de forma simples e navegável, os painéis gerados pelo Script 06 (`gerar_lote_comparativo()`) para a Fase5_MiudoV2 (k fixo por fêmea e controle sem seleção natural). Use o índice à esquerda ou as abas para navegar. Cada imagem é exibida em largura total para facilitar a exploração.
+
+------------------------------------------------------------------------
+
+# Redes Comparativas: k × σp (uma figura por curva) {.tabset}
+
+Cada figura é uma grade 3×3: linhas = σp (2.0, 1.0, 0.5, de cima para baixo), colunas = k (5, 10, 20). Cada subtítulo traz Mod, NODF, Tribos e Comunidades.
+
+```{r redes-comparativas, results='asis'}
+arquivos <- list.files(graficos_dir, pattern = "^Comparacao_k_sigmap_.*_Amax[0-9]+_noNS\\.png$",
+                       full.names = TRUE)
+
+if (length(arquivos) == 0) {
+  cat("\n*Nenhum painel encontrado. Rode `gerar_lote_comparativo()` no Script 06 primeiro.*\n")
+} else {
+  info <- data.frame(
+    arquivo = arquivos,
+    base    = basename(arquivos)
+  )
+  m <- regmatches(info$base,
+                   regexec("^Comparacao_k_sigmap_(.+)_Amax([0-9]+)_noNS\\.png$", info$base))
+  info$curva <- sapply(m, function(x) x[2])
+  info$amax  <- as.integer(sapply(m, function(x) x[3]))
+
+  for (am in sort(unique(info$amax), decreasing = TRUE)) {
+    cat(sprintf("\n## A_max = %d {.tabset}\n\n", am))
+    sub <- info[info$amax == am, ]
+    sub <- sub[order(match(sub$curva, ordem_curvas)), ]
+    for (i in seq_len(nrow(sub))) {
+      tl <- labels_tipo[sub$curva[i]]
+      if (is.na(tl)) tl <- sub$curva[i]
+      cat(sprintf("\n### %s\n\n", tl))
+      cat(sprintf("![](%s)\n\n", sub$arquivo[i]))
+    }
+  }
+}
+```
+
+------------------------------------------------------------------------
+
+# Painéis de Redes: 4 curvas por (σp, k) {.tabset}
+
+Cada figura mostra as 4 curvas de preferência (Aleatória, Gaussiana, Sigmoide, Disruptiva) para um par fixo (σp, k).
+
+```{r paineis-redes, results='asis'}
+arquivos <- list.files(graficos_dir, pattern = "^Painel_Redes_sigmap[0-9.]+_Amax[0-9]+_k[0-9]+_noNS\\.png$",
+                       full.names = TRUE)
+
+if (length(arquivos) == 0) {
+  cat("\n*Nenhum painel encontrado. Rode `gerar_lote_comparativo()` no Script 06 primeiro.*\n")
+} else {
+  info <- data.frame(arquivo = arquivos, base = basename(arquivos))
+  m <- regmatches(info$base,
+                   regexec("^Painel_Redes_sigmap([0-9.]+)_Amax([0-9]+)_k([0-9]+)_noNS\\.png$", info$base))
+  info$sigma_p <- as.numeric(sapply(m, function(x) x[2]))
+  info$amax    <- as.integer(sapply(m, function(x) x[3]))
+  info$k       <- as.integer(sapply(m, function(x) x[4]))
+
+  for (am in sort(unique(info$amax), decreasing = TRUE)) {
+    cat(sprintf("\n## A_max = %d {.tabset}\n\n", am))
+    sub <- info[info$amax == am, ]
+    sub <- sub[order(match(sub$sigma_p, ordem_sigma), match(sub$k, ordem_k)), ]
+    for (i in seq_len(nrow(sub))) {
+      cat(sprintf("\n### σp=%.1f, k=%d\n\n", sub$sigma_p[i], sub$k[i]))
+      cat(sprintf("![](%s)\n\n", sub$arquivo[i]))
+    }
+  }
+}
+```
+
+------------------------------------------------------------------------
+
+# Painéis de Histogramas: Evolução em 3 Atos {.tabset}
+
+Cada figura mostra, para as 4 curvas de preferência, as distribuições de $z$ (machos) e $p$ (fêmeas) em três momentos: Geração 1, a geração da rede representativa, e a geração final.
+
+```{r paineis-histogramas, results='asis'}
+arquivos <- list.files(graficos_dir, pattern = "^Painel_Histogramas_sigmap[0-9.]+_Amax[0-9]+_k[0-9]+_noNS\\.png$",
+                       full.names = TRUE)
+
+if (length(arquivos) == 0) {
+  cat("\n*Nenhum painel encontrado. Rode `gerar_lote_comparativo()` no Script 06 primeiro.*\n")
+} else {
+  info <- data.frame(arquivo = arquivos, base = basename(arquivos))
+  m <- regmatches(info$base,
+                   regexec("^Painel_Histogramas_sigmap([0-9.]+)_Amax([0-9]+)_k([0-9]+)_noNS\\.png$", info$base))
+  info$sigma_p <- as.numeric(sapply(m, function(x) x[2]))
+  info$amax    <- as.integer(sapply(m, function(x) x[3]))
+  info$k       <- as.integer(sapply(m, function(x) x[4]))
+
+  for (am in sort(unique(info$amax), decreasing = TRUE)) {
+    cat(sprintf("\n## A_max = %d {.tabset}\n\n", am))
+    sub <- info[info$amax == am, ]
+    sub <- sub[order(match(sub$sigma_p, ordem_sigma), match(sub$k, ordem_k)), ]
+    for (i in seq_len(nrow(sub))) {
+      cat(sprintf("\n### σp=%.1f, k=%d\n\n", sub$sigma_p[i], sub$k[i]))
+      cat(sprintf("![](%s){width=70%%}\n\n", sub$arquivo[i]))
+    }
+  }
+}
+```
