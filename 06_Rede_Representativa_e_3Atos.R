@@ -268,11 +268,6 @@ rodar_cenario <- function(tipo_sel, sp, am, kf, sel_nat) {
                           tipo_sel, sp, kf, sel_label)) +
     theme_minimal(base_size = 14) + theme(legend.position = "top")
 
-  nome_hist <- sprintf("%s/Histogramas_%s_sigmap%.1f_Amax%d_k%d_%s.png",
-                       diretorios$graficos, tipo_sel, sp, am, kf, sel_label)
-  ggsave(nome_hist, plot = p_hist, width = 6, height = 8, dpi = 300, bg = "white")
-  cat(sprintf("    Histogramas salvos: %s\n", nome_hist))
-
   invisible(list(
     resumo = data.frame(
       tipo_selecao             = tipo_sel,
