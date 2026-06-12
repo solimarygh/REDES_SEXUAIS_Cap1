@@ -458,6 +458,78 @@ Se confirmado, este resultado sugere que a **topologia da rede é suficiente par
 
 ------------------------------------------------------------------------
 
+# Atualização: Sugestões do Miudo — k fixo por fêmea e controle sem seleção natural
+
+Miudo sugeriu duas modificações ao desenho original (no qual cada fêmea sorteava entre 1 e 5 parceiros, sempre sob seleção natural):
+
+1.  **k fixo por fêmea**: cada fêmea acasala com exatamente $k$ machos, $k \in \{5, 10, 20\}$, em vez de sortear $U[1,5]$ parceiros. Isso permite controlar diretamente o grau de poliandria.
+2.  **Controle sem seleção natural** ($V_j = 1$ para todos os machos): isola o efeito *puro* da preferência feminina sobre a topologia, sem a viabilidade diferencial $V_j = \exp(-0.2(z_j-\phi)^2)$.
+
+Esta seção testa essas modificações na grade completa: 4 curvas de preferência × $\sigma_p \in \{0.5, 1.0, 2.0\}$ × $k \in \{5, 10, 20\}$, sempre com $A_{max}=200$ e **sem seleção natural**, 30 réplicas (Fase5_MiudoV2). O valor $\sigma_p = 1.0$ corresponde ao *tipping point* identificado na Secção 2.1 ($\sigma_p = \sigma_z$).
+
+## Tabela Comparativa
+
+```{r tabela-miudov2, echo=FALSE}
+csv_miudo <- "Resultados_Artigo/Redes_Representativas/Dados/Tabela_Comparativa_MiudoV2_Amax200.csv"
+if (file.exists(csv_miudo)) {
+  read.csv(csv_miudo) %>%
+    kable(caption = "**Tabela 3.** Modularidade, NODF (aninhamento), número de tribos (componentes conexos do Laplaciano) e comunidades (Louvain) para a rede representativa de cada combinação Curva × σp × k (A_max=200, sem seleção natural, 30 réplicas).",
+          align = c("l","c","c","r","r","r","r"),
+          digits = 3) %>%
+    kable_styling(bootstrap_options = c("striped","hover","condensed"),
+                  full_width = FALSE, font_size = 13)
+} else {
+  cat("*Tabela não encontrada — rode `gerar_lote_comparativo(200)` no Script 06 primeiro.*")
+}
+```
+
+## Painéis Comparativos: k × σp {.tabset}
+
+<p style="font-size:0.85em; color:#666; margin:0 0 12px 0;">
+
+Cada painel mostra a rede representativa para $k \in \{5,10,20\}$ (colunas) e $\sigma_p \in \{2.0, 1.0, 0.5\}$ (linhas, de cima para baixo). A_max=200, sem seleção natural.
+
+</p>
+
+### Aleatória
+
+```{r painel-miudov2-uniform, echo=FALSE, fig.cap="**Figura 11.** Aleatória — comparação de k e σp (A_max=200, sem seleção natural)."}
+img <- "Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_uniform_Amax200_noNS.png"
+if (file.exists(img)) knitr::include_graphics(img) else cat("*Rode `gerar_lote_comparativo(200)` no Script 06 primeiro.*")
+```
+
+### Gaussiana
+
+```{r painel-miudov2-gaussian, echo=FALSE, fig.cap="**Figura 12.** Gaussiana — comparação de k e σp (A_max=200, sem seleção natural)."}
+img <- "Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_gaussian_Amax200_noNS.png"
+if (file.exists(img)) knitr::include_graphics(img) else cat("*Rode `gerar_lote_comparativo(200)` no Script 06 primeiro.*")
+```
+
+### Sigmoide
+
+```{r painel-miudov2-sigmoid, echo=FALSE, fig.cap="**Figura 13.** Sigmoide — comparação de k e σp (A_max=200, sem seleção natural)."}
+img <- "Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_sigmoid_Amax200_noNS.png"
+if (file.exists(img)) knitr::include_graphics(img) else cat("*Rode `gerar_lote_comparativo(200)` no Script 06 primeiro.*")
+```
+
+### Disruptiva
+
+```{r painel-miudov2-ushaped, echo=FALSE, fig.cap="**Figura 14.** Disruptiva — comparação de k e σp (A_max=200, sem seleção natural)."}
+img <- "Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_u-shaped_Amax200_noNS.png"
+if (file.exists(img)) knitr::include_graphics(img) else cat("*Rode `gerar_lote_comparativo(200)` no Script 06 primeiro.*")
+```
+
+### Interpretação
+
+-   **k controla diretamente o aninhamento e a fragmentação**: em todas as curvas, aumentar $k$ (5 → 10 → 20) reduz a modularidade e aumenta o NODF — redes com mais cópulas por fêmea ficam menos compartimentadas e mais hierárquicas/aninhadas, com menos tribos.
+-   **A curva Aleatória é insensível a σp** (Mod e NODF praticamente idênticos entre σp=0.5 e σp=2.0 para o mesmo k), como esperado de uma referência nula — bom *sanity check* dos dados.
+-   **A curva Gaussiana mostra forte interação k × σp**: com $k=5$, $\sigma_p=2.0$ fragmenta a rede em até 14 tribos, enquanto $\sigma_p=0.5$ mantém uma única componente conexa. Com $k=20$ essa diferença praticamente desaparece — **k alto "dilui" o efeito de σp** sobre a fragmentação.
+-   O valor $\sigma_p=1.0$ (tipping point, linha do meio nos painéis) tende a posicionar-se entre os extremos $\sigma_p=0.5$ e $\sigma_p=2.0$, consistente com a ideia de que é o ponto onde a variação da preferência feminina iguala a variação inicial do traço masculino ($\sigma_z=1.0$).
+
+> **Nota:** estes resultados focam em $A_{max}=200$ (amostragem irrestrita). Os mesmos cenários para $A_{max}=40$ e $A_{max}=10$ (quando as fêmeas "veem" menos machos) podem ser gerados com `gerar_lote_comparativo(40)` / `gerar_lote_comparativo(10)` no Script 06, para investigar se a restrição de amostragem atenua essas interações k × σp.
+
+------------------------------------------------------------------------
+
 # Comentários e Feedback
 
 ```{=html}
