@@ -6,10 +6,7 @@ date: "`r format(Sys.Date(), '%d de %B de %Y')`"
 output:
   html_document:
     theme: flatly
-    toc: true
-    toc_float:
-      collapsed: false
-    toc_depth: 3
+    toc: false
     self_contained: false
 ---
 
