@@ -23,7 +23,7 @@ SEED_BASE       <- 2026
 N_POP           <- 200
 GEN_MAX         <- 100
 GEN_BURNIN      <- 20
-N_REPLICAS      <- 30
+N_REPLICAS      <- 100
 VALORES_SIGMA_P <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
 VALORES_AMAX    <- c(200, 40, 10)
 TIPOS_SELECAO   <- c("uniform", "gaussian", "sigmoid", "u-shaped")

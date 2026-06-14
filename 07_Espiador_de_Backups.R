@@ -41,7 +41,7 @@ if(file.exists(arquivo)) {
 
   n_completos <- length(unique(paste(df_base$tipo_selecao, df_base$sigma_p,
                                      df_base$encounters_n, df_base$replica)))
-  n_total <- 4 * 7 * 3 * 30  # total esperado no baseline
+  n_total <- 4 * 7 * 3 * 100  # total esperado no baseline
 
   df_gen50 <- df_base %>% filter(generation == GEN_FINAL) %>% drop_na() %>%
     mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
@@ -542,7 +542,7 @@ if(file.exists(arquivo)) {
   # GRÁFICOS FINAIS (Fase 5)
   # =====================================================================
   val_reps       <- length(unique(df_parcial$replica[!is.na(df_parcial$replica)]))
-  subtitulo_base <- sprintf("Parâmetros: %d Gerações | N=200 | Réplicas: %d de 30 (%.0f%%)",
+  subtitulo_base <- sprintf("Parâmetros: %d Gerações | N=200 | Réplicas: %d de 100 (%.0f%%)",
                              GEN_FINAL, val_reps, 100 * n_completos / n_total)
 
   tema_master <- theme_light(base_size = 14) +
