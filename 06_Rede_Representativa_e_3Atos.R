@@ -483,5 +483,5 @@ res_amax200 <- gerar_lote_comparativo(200)
 
 # Para rodar A_max=40 ou A_max=10 (curiosidade — quando as fêmeas "veem"
 # menos machos), chame em uma sessão separada:
-#   res_amax40 <- gerar_lote_comparativo(40)
-#   res_amax10 <- gerar_lote_comparativo(10)
+  res_amax40 <- gerar_lote_comparativo(40)
+   res_amax10 <- gerar_lote_comparativo(10)
