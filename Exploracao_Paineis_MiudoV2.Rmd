@@ -29,8 +29,9 @@ library(kableExtra)
 ```
 
 ```{r config}
-dados_dir    <- "Resultados_Artigo/Redes_Representativas/Dados"
-graficos_dir <- "Resultados_Artigo/Redes_Representativas/Graficos"
+dados_dir       <- "Resultados_Artigo/Redes_Representativas/Dados"
+graficos_dir    <- "Resultados_Artigo/Redes_Representativas/Graficos"
+fase4_graficos_dir <- "Resultados_Artigo/Fase5_MiudoV2/Graficos"
 
 labels_tipo <- c("uniform"  = "Aleatória",
                  "gaussian" = "Gaussiana",
@@ -47,34 +48,29 @@ Este documento reúne, de forma simples e navegável, os resultados gerados pelo
 
 ------------------------------------------------------------------------
 
-# Tabela Comparativa de Resultados {.tabset}
+# Resultados Fase 4: Assinatura Topológica e Mudança Evolutiva {.tabset}
 
-Modularidade, NODF (aninhamento), número de tribos (componentes conexos do Laplaciano) e comunidades (Louvain) para a rede representativa de cada combinação Curva × σp × k (sem seleção natural).
+Estes gráficos usam o conjunto completo de réplicas da Fase5_MiudoV2 (todas as combinações de k e seleção natural) para mostrar como Modularidade, Aninhamento e outras métricas topológicas variam com σp na geração final, e como essas métricas mudam ao longo do tempo evolutivo (Geração 1 → Geração final).
 
-```{r tabela-comparativa, results='asis'}
-arquivos <- list.files(dados_dir, pattern = "^Tabela_Comparativa_MiudoV2_Amax[0-9]+\\.csv$",
-                       full.names = TRUE)
+## Métricas vs σp (Geração Final)
 
-if (length(arquivos) == 0) {
-  cat("\n*Nenhuma tabela encontrada. Rode `gerar_lote_comparativo()` no Script 06 primeiro.*\n")
+```{r fase4-plotA, results='asis'}
+img <- file.path(fase4_graficos_dir, "Fase4_PlotA_AssinaturaTopologica.png")
+if (file.exists(img)) {
+  cat(sprintf("![](%s)\n\n", img))
 } else {
-  m     <- regmatches(basename(arquivos),
-                       regexec("Amax([0-9]+)\\.csv$", basename(arquivos)))
-  amaxs <- as.integer(sapply(m, function(x) x[2]))
-  ordem <- order(amaxs, decreasing = TRUE)
-  arquivos <- arquivos[ordem]
-  amaxs    <- amaxs[ordem]
+  cat("\n*Gráfico não encontrado. Rode o Script 07 (Espiador de Backups) primeiro.*\n")
+}
+```
 
-  for (i in seq_along(arquivos)) {
-    cat(sprintf("\n## A_max = %d\n\n", amaxs[i]))
-    tbl <- read.csv(arquivos[i])
-    print(
-      kable(tbl, digits = 3, align = c("l","c","c","r","r","r","r")) %>%
-        kable_styling(bootstrap_options = c("striped","hover","condensed"),
-                      full_width = FALSE, font_size = 13)
-    )
-    cat("\n")
-  }
+## Mudança Gen 1 → Gen Final
+
+```{r fase4-plotE, results='asis'}
+img <- file.path(fase4_graficos_dir, "Fase4_PlotE_Dumbell_Gen1vsGenFinal.png")
+if (file.exists(img)) {
+  cat(sprintf("![](%s)\n\n", img))
+} else {
+  cat("\n*Gráfico não encontrado. Rode o Script 07 (Espiador de Backups) primeiro.*\n")
 }
 ```
 
