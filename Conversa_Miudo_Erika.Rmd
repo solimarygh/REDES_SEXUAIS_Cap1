@@ -467,20 +467,22 @@ Miudo sugeriu duas modificações ao desenho original (no qual cada fêmea sorte
 
 Esta seção testa essas modificações na grade completa: 4 curvas de preferência × $\sigma_p \in \{0.5, 1.0, 2.0\}$ × $k \in \{5, 10, 20\}$, sempre com $A_{max}=200$ e **sem seleção natural**, 30 réplicas (Fase5_MiudoV2). O valor $\sigma_p = 1.0$ corresponde ao *tipping point* identificado na Secção 2.1 ($\sigma_p = \sigma_z$).
 
-## Tabela Comparativa
+## Assinatura Topológica (σp) e Mudança Evolutiva {.tabset}
 
-```{r tabela-miudov2, echo=FALSE}
-csv_miudo <- "Resultados_Artigo/Redes_Representativas/Dados/Tabela_Comparativa_MiudoV2_Amax200.csv"
-if (file.exists(csv_miudo)) {
-  read.csv(csv_miudo) %>%
-    kable(caption = "**Tabela 3.** Modularidade, NODF (aninhamento), número de tribos (componentes conexos do Laplaciano) e comunidades (Louvain) para a rede representativa de cada combinação Curva × σp × k (A_max=200, sem seleção natural, 30 réplicas).",
-          align = c("l","c","c","r","r","r","r"),
-          digits = 3) %>%
-    kable_styling(bootstrap_options = c("striped","hover","condensed"),
-                  full_width = FALSE, font_size = 13)
-} else {
-  cat("*Tabela não encontrada — rode `gerar_lote_comparativo(200)` no Script 06 primeiro.*")
-}
+Estes gráficos usam o conjunto completo de réplicas da Fase5_MiudoV2 (todas as combinações de k e seleção natural) para mostrar como Modularidade, Aninhamento e outras métricas topológicas variam com σp na geração final, e como essas métricas mudam ao longo do tempo evolutivo (Geração 1 → Geração final).
+
+### Métricas vs σp (Geração Final)
+
+```{r fase4-plotA, echo=FALSE, fig.cap="Modularidade, Aninhamento, Is e Centralização vs. variação da preferência feminina (σp), na geração final, para A_max=200."}
+img <- "Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotA_AssinaturaTopologica.png"
+if (file.exists(img)) knitr::include_graphics(img) else cat("*Rode o Script 07 (Espiador de Backups) primeiro.*")
+```
+
+### Mudança Gen 1 → Gen Final
+
+```{r fase4-plotE, echo=FALSE, fig.cap="Mudança na Modularidade e Aninhamento entre a Geração 1 e a Geração final (σp=2.0), para A_max = 200, 40 e 10."}
+img <- "Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotE_Dumbell_Gen1vsGenFinal.png"
+if (file.exists(img)) knitr::include_graphics(img) else cat("*Rode o Script 07 (Espiador de Backups) primeiro.*")
 ```
 
 ## Painéis Comparativos: k × σp {.tabset}
@@ -526,7 +528,7 @@ if (file.exists(img)) knitr::include_graphics(img) else cat("*Rode `gerar_lote_c
 -   **A curva Gaussiana mostra forte interação k × σp**: com $k=5$, $\sigma_p=2.0$ fragmenta a rede em até 14 tribos, enquanto $\sigma_p=0.5$ mantém uma única componente conexa. Com $k=20$ essa diferença praticamente desaparece — **k alto "dilui" o efeito de σp** sobre a fragmentação.
 -   O valor $\sigma_p=1.0$ (tipping point, linha do meio nos painéis) tende a posicionar-se entre os extremos $\sigma_p=0.5$ e $\sigma_p=2.0$, consistente com a ideia de que é o ponto onde a variação da preferência feminina iguala a variação inicial do traço masculino ($\sigma_z=1.0$).
 
-> **Nota:** estes resultados focam em $A_{max}=200$ (amostragem irrestrita). Os mesmos cenários para $A_{max}=40$ e $A_{max}=10$ (quando as fêmeas "veem" menos machos) podem ser gerados com `gerar_lote_comparativo(40)` / `gerar_lote_comparativo(10)` no Script 06, para investigar se a restrição de amostragem atenua essas interações k × σp.
+> **Nota:** estes painéis mostram $A_{max}=200$ (amostragem irrestrita). Os mesmos cenários para $A_{max}=40$ e $A_{max}=10$ (quando as fêmeas "veem" menos machos) já foram gerados e estão disponíveis no HTML de exploração (`Exploracao_Paineis_MiudoV2.Rmd`), para investigar como a restrição de amostragem afeta essas interações k × σp.
 
 ------------------------------------------------------------------------
 
