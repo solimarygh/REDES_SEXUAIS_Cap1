@@ -65,10 +65,12 @@ Neste conjunto de resultados (Fase5_MiudoV2) **não há seleção natural**: tod
 
 ## O que as métricas significam
 
--   **Modularidade:** o quanto a rede se divide em grupos de machos e fêmeas que acasalam preferencialmente entre si.
--   **Aninhamento (NODF):** o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares", uma strutura hierárquica.
--   **Tribos:** número de subpopulações completamente isoladas reprodutivamente (sem nenhuma ligação entre elas).
--   **Comunidades:** número de subgrupos sociais detectados dentro da rede (podem estar conectados entre si, mas formam grupos mais coesos internamente).
+-   **Modularidade** ($Q \in [0,1]$; `igraph::cluster_louvain()` + `igraph::modularity()`): o quanto a rede se divide em grupos de machos e fêmeas que acasalam preferencialmente entre si.
+-   **Aninhamento (NODF)** ($\in [0,100]$; `bipartite::nested(M, method = "NODF")`): o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares" — uma estrutura hierárquica.
+-   **Centralização** ($\in [0,1]$; `igraph::centr_degree(g, mode = "all")`): o quanto os acasalamentos se concentram em poucos indivíduos. Valores altos = poucos indivíduos concentram a maioria das ligações.
+-   **$I_s$** (oportunidade de seleção sexual, $\geq 0$; `var(k)/mean(k)^2` em R base, onde $k$ = nº de parceiras por macho): mede a variação no sucesso reprodutivo dos machos — quanto maior, mais desigual é a distribuição de cópulas.
+-   **Tribos** (nº inteiro $\geq 1$; autovalores $\approx 0$ de `igraph::laplacian_matrix()`): número de subpopulações completamente isoladas reprodutivamente (sem nenhuma ligação entre elas).
+-   **Comunidades** (nº inteiro $\geq 1$; `igraph::cluster_louvain()`): número de subgrupos sociais detectados dentro da rede (podem estar conectados entre si, mas formam grupos mais coesos internamente).
 
 ## Como navegar
 
