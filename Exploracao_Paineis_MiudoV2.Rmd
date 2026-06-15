@@ -59,14 +59,14 @@ Este documento mostra os resultados de um modelo computacional (IBM) que simula,
     -   **Disruptiva (U-shaped)** — as fêmeas preferem machos bem diferentes de $p$, seja para mais ou para menos.
 -   **$\sigma_p$** — o quanto a preferência varia entre as fêmeas da população: $\sigma_p=0.5$ (fêmeas parecidas entre si) até $\sigma_p=2.0$ (fêmeas bem diferentes entre si).
 -   **$k$** — quantos parceiros cada fêmea acasala (poliandria fixa: 5, 10 ou 20).
--   **$A_{max}$** — quantos machos cada fêmea "enxerga"/avalia antes de escolher: 200 (todos), 40 (20%) ou 10 (5%) — simula uma restrição/custo de busca.
+-   **$A_{max}$** — quantos machos cada fêmea "enxerga"/avalia antes de escolher: 200 (todos), 40 (20%) ou 10 (5%) —> simula uma restrição/custo de busca.
 
 Neste conjunto de resultados (Fase5_MiudoV2) **não há seleção natural**: todos os machos têm a mesma chance de sobreviver, isolando o efeito puro da escolha feminina sobre a estrutura da rede.
 
 ## O que as métricas significam
 
 -   **Modularidade:** o quanto a rede se divide em grupos de machos e fêmeas que acasalam preferencialmente entre si.
--   **Aninhamento (NODF):** o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares" — uma estrutura hierárquica.
+-   **Aninhamento (NODF):** o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares", uma strutura hierárquica.
 -   **Tribos:** número de subpopulações completamente isoladas reprodutivamente (sem nenhuma ligação entre elas).
 -   **Comunidades:** número de subgrupos sociais detectados dentro da rede (podem estar conectados entre si, mas formam grupos mais coesos internamente).
 
