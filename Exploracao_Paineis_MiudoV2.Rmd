@@ -1,6 +1,6 @@
 ---
-title: "Exploração de Painéis — Fase5_MiudoV2"
-subtitle: "Histogramas (Evolução em 3 Atos) e Redes Comparativas (k × σp)"
+title: "Exploração de Resultados"
+subtitle: "Evolucao, Histogramas do trait do macho e Redes Comparativas"
 author: "Solimary García Hernández"
 date: "`r format(Sys.Date(), '%d de %B de %Y')`"
 output:
@@ -46,13 +46,13 @@ ordem_k      <- c(5, 10, 20)
 
 # Sobre este documento
 
-Este documento mostra os resultados de um modelo computacional (IBM) que simula, geração a geração, como a escolha de parceiros pelas fêmeas afeta a estrutura da "rede de acasalamentos" da população — e como essa estrutura evolui ao longo do tempo.
+Este documento mostra os resultados de um modelo computacional (IBM) que simula, geração a geração, como a escolha de parceiros pelas fêmeas afeta a estrutura da rede de acasalamentos da população, e como essa estrutura evolui ao longo do tempo.
 
 ## O modelo, em poucas palavras
 
--   **População:** 200 machos e 200 fêmeas, evoluindo por 100 gerações, com 30 réplicas (repetições independentes) por cenário.
+-   **População:** 200 machos e 200 fêmeas, evoluindo por 100 gerações, com 30 réplicas (repetições independentes) por cenário. No futuro serão 100 réplicas.
 -   **O traço e a preferência:** cada macho tem um traço $z$ (ex.: tamanho de um ornamento); cada fêmea tem uma preferência $p$ por um determinado valor de $z$.
--   **Quatro "tipos de preferência" (curvas):**
+-   **Quatro curvas de preferência:**
     -   **Aleatória** — as fêmeas não discriminam entre machos (referência nula, sem seleção sexual).
     -   **Gaussiana** — as fêmeas preferem machos com $z$ próximo do seu valor preferido $p$ (preferência *estabilizadora*).
     -   **Sigmoide** — as fêmeas preferem machos com $z$ maior que $p$ (preferência *direcional*, pode gerar "corrida evolutiva"/*runaway*).
@@ -61,26 +61,26 @@ Este documento mostra os resultados de um modelo computacional (IBM) que simula,
 -   **$k$** — quantos parceiros cada fêmea acasala (poliandria fixa: 5, 10 ou 20).
 -   **$A_{max}$** — quantos machos cada fêmea "enxerga"/avalia antes de escolher: 200 (todos), 40 (20%) ou 10 (5%) —> simula uma restrição/custo de busca.
 
-Neste conjunto de resultados (Fase5_MiudoV2) **não há seleção natural**: todos os machos têm a mesma chance de sobreviver, isolando o efeito puro da escolha feminina sobre a estrutura da rede.
+Miudo, como combinamos neste conjunto de resultados não há seleção natural: todos os machos têm a mesma chance de sobreviver, isolando o efeito puro da escolha feminina sobre a estrutura da rede.
 
 ## O que as métricas significam
 
 -   **Modularidade** ($Q \in [0,1]$; `igraph::cluster_louvain()` + `igraph::modularity()`): o quanto a rede se divide em grupos de machos e fêmeas que acasalam preferencialmente entre si.
--   **Aninhamento (NODF)** ($\in [0,100]$; `bipartite::nested(M, method = "NODF")`): o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares" — uma estrutura hierárquica.
+-   **Aninhamento (NODF)** ($\in [0,100]$; `bipartite::nested(M, method = "NODF")`): o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares".
 -   **Centralização** ($\in [0,1]$; `igraph::centr_degree(g, mode = "all")`): o quanto os acasalamentos se concentram em poucos indivíduos. Valores altos = poucos indivíduos concentram a maioria das ligações.
--   **$I_s$** (oportunidade de seleção sexual, $\geq 0$; `var(k)/mean(k)^2` em R base, onde $k$ = nº de parceiras por macho): mede a variação no sucesso reprodutivo dos machos — quanto maior, mais desigual é a distribuição de cópulas.
+-   **$I_s$** (oportunidade de seleção sexual, $\geq 0$; `var(k)/mean(k)^2` em R base, onde $k$ = nº de parceiras por macho): mede a variação no sucesso reprodutivo dos machos, quanto maior, mais desigual é a distribuição de cópulas.
 -   **Tribos** (nº inteiro $\geq 1$; autovalores $\approx 0$ de `igraph::laplacian_matrix()`): número de subpopulações completamente isoladas reprodutivamente (sem nenhuma ligação entre elas).
 -   **Comunidades** (nº inteiro $\geq 1$; `igraph::cluster_louvain()`): número de subgrupos sociais detectados dentro da rede (podem estar conectados entre si, mas formam grupos mais coesos internamente).
 
-## Como navegar
 
-Use as abas (tabs) para alternar entre $A_{max}$, curvas de preferência e combinações de $\sigma_p$/$k$. As imagens são exibidas em largura total para facilitar a exploração.
+
+Para navegar use as abas (tabs) para alternar entre $A_{max}$, curvas de preferência e combinações de $\sigma_p$/$k$. As imagens são exibidas em largura total para facilitar a exploração :)
 
 ------------------------------------------------------------------------
 
-# Resultados Fase 4: Assinatura Topológica e Mudança Evolutiva {.tabset}
+# Resultados Fase 4: Forma da rede e Mudança Evolutiva {.tabset}
 
-Estes gráficos usam o conjunto completo de réplicas da Fase5_MiudoV2 (todas as combinações de k e seleção natural) para mostrar como Modularidade, Aninhamento e outras métricas topológicas variam com σp na geração final, e como essas métricas mudam ao longo do tempo evolutivo (Geração 1 → Geração final).
+Estes gráficos usam o conjunto completo de réplicas da Fase5_MiudoV2 (todas as combinações de k e seleção natural) para mostrar como Modularidade, Aninhamento e outras métricas topológicas variam com σp na geração final, e como essas métricas mudam ao longo do tempo evolutivo (Geração 1 → Geração final). #tenho mais graficos, mas por enquanto queria focar nas redes mesmo.
 
 ## Métricas vs σp (Geração Final)
 
