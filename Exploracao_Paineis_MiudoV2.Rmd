@@ -178,6 +178,8 @@ if (length(arquivos) == 0) {
 
 Cada figura mostra, para as 4 curvas de preferência, as distribuições de $z$ (machos) e $p$ (fêmeas) em três momentos: Geração 1, a geração da rede representativa, e a geração final.
 
+> A "geração da rede representativa" é uma réplica específica cuja Modularidade é a mais "típica" (mais próxima da média) da fase estável ($generation \geq 20$) daquele cenário — ver `encontrar_representativa()` no Script 06.
+
 ```{r paineis-histogramas, results='asis'}
 arquivos <- list.files(graficos_dir, pattern = "^Painel_Histogramas_sigmap[0-9.]+_Amax[0-9]+_k[0-9]+_noNS\\.png$",
                        full.names = TRUE)
