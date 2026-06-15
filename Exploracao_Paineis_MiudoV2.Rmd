@@ -44,7 +44,35 @@ ordem_sigma  <- c(2.0, 1.0, 0.5)
 ordem_k      <- c(5, 10, 20)
 ```
 
-Este documento reúne, de forma simples e navegável, os resultados gerados pelo Script 06 (`gerar_lote_comparativo()`) para a Fase5_MiudoV2 (k fixo por fêmea e controle sem seleção natural). Use o índice à esquerda ou as abas para navegar. Cada imagem é exibida em largura total para facilitar a exploração.
+# Sobre este documento
+
+Este documento mostra os resultados de um modelo computacional (IBM) que simula, geração a geração, como a escolha de parceiros pelas fêmeas afeta a estrutura da "rede de acasalamentos" da população — e como essa estrutura evolui ao longo do tempo.
+
+## O modelo, em poucas palavras
+
+-   **População:** 200 machos e 200 fêmeas, evoluindo por 100 gerações, com 30 réplicas (repetições independentes) por cenário.
+-   **O traço e a preferência:** cada macho tem um traço $z$ (ex.: tamanho de um ornamento); cada fêmea tem uma preferência $p$ por um determinado valor de $z$.
+-   **Quatro "tipos de preferência" (curvas):**
+    -   **Aleatória** — as fêmeas não discriminam entre machos (referência nula, sem seleção sexual).
+    -   **Gaussiana** — as fêmeas preferem machos com $z$ próximo do seu valor preferido $p$ (preferência *estabilizadora*).
+    -   **Sigmoide** — as fêmeas preferem machos com $z$ maior que $p$ (preferência *direcional*, pode gerar "corrida evolutiva"/*runaway*).
+    -   **Disruptiva (U-shaped)** — as fêmeas preferem machos bem diferentes de $p$, seja para mais ou para menos.
+-   **$\sigma_p$** — o quanto a preferência varia entre as fêmeas da população: $\sigma_p=0.5$ (fêmeas parecidas entre si) até $\sigma_p=2.0$ (fêmeas bem diferentes entre si).
+-   **$k$** — quantos parceiros cada fêmea acasala (poliandria fixa: 5, 10 ou 20).
+-   **$A_{max}$** — quantos machos cada fêmea "enxerga"/avalia antes de escolher: 200 (todos), 40 (20%) ou 10 (5%) — simula uma restrição/custo de busca.
+
+Neste conjunto de resultados (Fase5_MiudoV2) **não há seleção natural**: todos os machos têm a mesma chance de sobreviver, isolando o efeito puro da escolha feminina sobre a estrutura da rede.
+
+## O que as métricas significam
+
+-   **Modularidade:** o quanto a rede se divide em grupos de machos e fêmeas que acasalam preferencialmente entre si.
+-   **Aninhamento (NODF):** o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares" — uma estrutura hierárquica.
+-   **Tribos:** número de subpopulações completamente isoladas reprodutivamente (sem nenhuma ligação entre elas).
+-   **Comunidades:** número de subgrupos sociais detectados dentro da rede (podem estar conectados entre si, mas formam grupos mais coesos internamente).
+
+## Como navegar
+
+Use as abas (tabs) para alternar entre $A_{max}$, curvas de preferência e combinações de $\sigma_p$/$k$. As imagens são exibidas em largura total para facilitar a exploração.
 
 ------------------------------------------------------------------------
 
