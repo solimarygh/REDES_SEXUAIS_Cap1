@@ -46,7 +46,7 @@ ordem_k      <- c(5, 10, 20)
 
 # Sobre este documento
 
-Este documento mostra os resultados de um modelo computacional (IBM) que simula, geração a geração, como a escolha de parceiros pelas fêmeas afeta a estrutura da rede de acasalamentos da população, e como essa estrutura evolui ao longo do tempo.
+Este documento mostra os resultados do nosso IBM que simula, geração a geração, como a escolha de parceiros pelas fêmeas afeta a estrutura da rede de acasalamentos da população, e como essa estrutura evolui ao longo do tempo.
 
 ## O modelo, em poucas palavras
 
