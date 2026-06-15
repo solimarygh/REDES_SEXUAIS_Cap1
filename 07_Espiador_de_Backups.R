@@ -6,6 +6,7 @@ library(tidyr)
 library(ggplot2)
 library(patchwork)
 library(segmented)
+library(ggh4x)
 
 arquivo <- "Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds"
 
@@ -699,7 +700,7 @@ if(file.exists(arquivo)) {
                   label = sprintf("%+.3f", Delta),
                   color = tipo_selecao),
               hjust = 0.5, vjust = -0.6, size = 3.0, fontface = "bold") +
-    facet_grid(Metrica_label ~ Amax_label, scales = "free_x") +
+    facet_grid2(Metrica_label ~ Amax_label, scales = "free_x", independent = "x") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     labs(
       title    = sprintf("Plot E: Mudança nas Métricas Topológicas: Gen 1 → Gen %d (σp = 2.0)", GEN_FINAL),
