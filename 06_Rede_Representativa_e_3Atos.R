@@ -426,13 +426,12 @@ gerar_lote_comparativo <- function(am) {
       resultados[[i]]$p_hist + ggtitle(tl) +
         theme(plot.title = element_text(size = 12, face = "bold"))
     })
-    painel_hist <- (plots_hist[[1]] | plots_hist[[2]]) /
-                   (plots_hist[[3]] | plots_hist[[4]]) +
+    painel_hist <- (plots_hist[[1]] | plots_hist[[2]] | plots_hist[[3]] | plots_hist[[4]]) +
       plot_annotation(title = sprintf("Evolução em 3 Atos | σp=%.1f | A_max=%d | k=%d | sem sel.natural",
                                       sp, am, kf))
     nome_hist_painel <- sprintf("%s/Painel_Histogramas_sigmap%.1f_Amax%d_k%d_noNS.png",
                                  diretorios$graficos, sp, am, kf)
-    ggsave(nome_hist_painel, plot = painel_hist, width = 16, height = 20,
+    ggsave(nome_hist_painel, plot = painel_hist, width = 28, height = 10,
            dpi = 300, bg = "white")
     cat(sprintf("Painel histogramas salvo: %s\n", nome_hist_painel))
   }
