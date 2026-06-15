@@ -82,25 +82,35 @@ Para navegar use as abas (tabs) para alternar entre $A_{max}$, curvas de prefer�
 
 Estes gráficos usam o conjunto completo de réplicas da Fase5_MiudoV2 (todas as combinações de k e seleção natural) para mostrar como Modularidade, Aninhamento e outras métricas topológicas variam com σp na geração final, e como essas métricas mudam ao longo do tempo evolutivo (Geração 1 → Geração final). #tenho mais graficos, mas por enquanto queria focar nas redes mesmo.
 
-## Métricas vs σp (Geração Final)
+> Cada figura abaixo tem abas para $k=5$, $k=10$ e $k=20$ (poliandria fixa: nº de parceiros por fêmea), todas com $A_{max}=200$ e sem seleção natural.
+
+## Métricas vs σp (Geração Final) {.tabset}
 
 ```{r fase4-plotA, results='asis'}
-img <- file.path(fase4_graficos_dir, "Fase4_PlotA_AssinaturaTopologica.png")
-if (file.exists(img)) {
-  cat(sprintf("![](%s)\n\n", img))
-} else {
-  cat("\n*Gráfico não encontrado. Rode o Script 07 (Espiador de Backups) primeiro.*\n")
+for (k_val in c(10, 5, 20)) {
+  sufixo <- if (k_val == 10) "" else sprintf("_k%d", k_val)
+  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotA_AssinaturaTopologica%s.png", sufixo))
+  cat(sprintf("\n### k = %d\n\n", k_val))
+  if (file.exists(img)) {
+    cat(sprintf("![](%s)\n\n", img))
+  } else {
+    cat("\n*Gráfico não encontrado. Rode o Script 07 (Espiador de Backups) primeiro.*\n")
+  }
 }
 ```
 
-## Mudança Gen 1 → Gen Final
+## Mudança Gen 1 → Gen Final {.tabset}
 
 ```{r fase4-plotE, results='asis'}
-img <- file.path(fase4_graficos_dir, "Fase4_PlotE_Dumbell_Gen1vsGenFinal.png")
-if (file.exists(img)) {
-  cat(sprintf("![](%s)\n\n", img))
-} else {
-  cat("\n*Gráfico não encontrado. Rode o Script 07 (Espiador de Backups) primeiro.*\n")
+for (k_val in c(10, 5, 20)) {
+  sufixo <- if (k_val == 10) "" else sprintf("_k%d", k_val)
+  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotE_Dumbell_Gen1vsGenFinal%s.png", sufixo))
+  cat(sprintf("\n### k = %d\n\n", k_val))
+  if (file.exists(img)) {
+    cat(sprintf("![](%s)\n\n", img))
+  } else {
+    cat("\n*Gráfico não encontrado. Rode o Script 07 (Espiador de Backups) primeiro.*\n")
+  }
 }
 ```
 

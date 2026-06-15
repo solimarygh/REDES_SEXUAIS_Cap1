@@ -391,29 +391,35 @@ if(file.exists(arquivo)) {
   # =====================================================================
   cat(sprintf("\n\n========== TABELA: Gen 1 vs Gen %d ==========\n", GEN_FINAL))
 
-  df_tabela <- df_base %>%
-    filter(generation %in% c(1, GEN_FINAL)) %>%
-    drop_na() %>%
-    group_by(generation, tipo_selecao, sigma_p, encounters_n) %>%
-    summarise(
-      Modularity     = mean(Modularity,     na.rm = TRUE),
-      Nestedness     = mean(Nestedness,     na.rm = TRUE),
-      I_s            = mean(I_s,            na.rm = TRUE),
-      Centralization = mean(Centralization, na.rm = TRUE),
-      varz_males     = mean(varz_males,     na.rm = TRUE),
-      zbar_males     = mean(zbar_males,     na.rm = TRUE),
-      n_reps         = n(),
-      .groups = "drop"
-    ) %>%
-    pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization,
-                          varz_males, zbar_males),
-                 names_to = "Metrica", values_to = "Valor") %>%
-    mutate(gen_label = ifelse(generation == 1, "Gen_inicial", "Gen_final")) %>%
-    dplyr::select(-generation, -n_reps) %>%
-    pivot_wider(names_from = gen_label, values_from = Valor) %>%
-    mutate(Delta     = Gen_final - Gen_inicial,
-           Delta_pct = 100 * (Gen_final - Gen_inicial) / Gen_inicial) %>%
-    arrange(encounters_n, sigma_p, tipo_selecao, Metrica)
+  # Função reutilizável: tabela Gen1 vs Gen Final (Modularity, Nestedness, etc.)
+  # a partir de um df_base já filtrado por k_fixo/selecao_natural
+  construir_df_tabela <- function(df_base_x) {
+    df_base_x %>%
+      filter(generation %in% c(1, GEN_FINAL)) %>%
+      drop_na() %>%
+      group_by(generation, tipo_selecao, sigma_p, encounters_n) %>%
+      summarise(
+        Modularity     = mean(Modularity,     na.rm = TRUE),
+        Nestedness     = mean(Nestedness,     na.rm = TRUE),
+        I_s            = mean(I_s,            na.rm = TRUE),
+        Centralization = mean(Centralization, na.rm = TRUE),
+        varz_males     = mean(varz_males,     na.rm = TRUE),
+        zbar_males     = mean(zbar_males,     na.rm = TRUE),
+        n_reps         = n(),
+        .groups = "drop"
+      ) %>%
+      pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization,
+                            varz_males, zbar_males),
+                   names_to = "Metrica", values_to = "Valor") %>%
+      mutate(gen_label = ifelse(generation == 1, "Gen_inicial", "Gen_final")) %>%
+      dplyr::select(-generation, -n_reps) %>%
+      pivot_wider(names_from = gen_label, values_from = Valor) %>%
+      mutate(Delta     = Gen_final - Gen_inicial,
+             Delta_pct = 100 * (Gen_final - Gen_inicial) / Gen_inicial) %>%
+      arrange(encounters_n, sigma_p, tipo_selecao, Metrica)
+  }
+
+  df_tabela <- construir_df_tabela(df_base)
 
   # Imprime no console em formato legível
   print(df_tabela, n = Inf, width = Inf)
@@ -543,8 +549,8 @@ if(file.exists(arquivo)) {
   # GRÁFICOS FINAIS (Fase 5)
   # =====================================================================
   val_reps       <- length(unique(df_parcial$replica[!is.na(df_parcial$replica)]))
-  subtitulo_base <- sprintf("Parâmetros: %d Gerações | N=200 | Réplicas: %d de 100 (%.0f%%)",
-                             GEN_FINAL, val_reps, 100 * n_completos / n_total)
+  subtitulo_base <- sprintf("Parâmetros: %d Gerações | N=200 | k=%d | Réplicas: %d de 100 (%.0f%%)",
+                             GEN_FINAL, K_BASE, val_reps, 100 * n_completos / n_total)
 
   tema_master <- theme_light(base_size = 14) +
     theme(legend.position = "bottom",
@@ -553,31 +559,36 @@ if(file.exists(arquivo)) {
 
   # ---------------------------------------------------------------------
   # PLOT A: ASSINATURA TOPOLÓGICA (A_max = 200)
+  # Função reutilizável para gerar a mesma figura com diferentes valores de k
   # ---------------------------------------------------------------------
-  p_fase4_topo <- df_gen50 %>% filter(encounters_n == 200) %>%
-    pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization),
-                 names_to = "Metrica", values_to = "Valor") %>%
-    mutate(Metrica = case_when(
-      Metrica == "Modularity"     ~ "1. Modularidade",
-      Metrica == "Nestedness"     ~ "2. Aninhamento",
-      Metrica == "I_s"            ~ "3. Is",
-      Metrica == "Centralization" ~ "4. Centralidade")) %>%
-    ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
-    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
-    annotate("text", x = 1.0, y = Inf, label = "σp = σz", hjust = -0.15, vjust = 1.8,
-             color = "red", size = 3.2, fontface = "italic") +
-    geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2,
-                show.legend = FALSE) +
-    geom_jitter(alpha = 0.2, width = 0.05, size = 1.2) +
-    facet_wrap(~Metrica, scales = "free_y", ncol = 2) +
-    scale_color_manual(values = cores_4, labels = labels_4) +
-    scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title    = sprintf("Fase 4: Assinatura Topológica das Curvas de Preferência (A_max = 200, Gen %d)", GEN_FINAL),
-         subtitle = subtitulo_base,
-         x = expression(paste("Variação da Preferência (", sigma[p], ")")),
-         y = "Valor da Métrica", color = "", fill = "") +
-    guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
-    tema_master
+  construir_plot_assinatura <- function(df_gen50_x, k_val, subtitulo_x) {
+    df_gen50_x %>% filter(encounters_n == 200) %>%
+      pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization),
+                   names_to = "Metrica", values_to = "Valor") %>%
+      mutate(Metrica = case_when(
+        Metrica == "Modularity"     ~ "1. Modularidade",
+        Metrica == "Nestedness"     ~ "2. Aninhamento",
+        Metrica == "I_s"            ~ "3. Is",
+        Metrica == "Centralization" ~ "4. Centralidade")) %>%
+      ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
+      geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
+      annotate("text", x = 1.0, y = Inf, label = "σp = σz", hjust = -0.15, vjust = 1.8,
+               color = "red", size = 3.2, fontface = "italic") +
+      geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2,
+                  show.legend = FALSE) +
+      geom_jitter(alpha = 0.2, width = 0.05, size = 1.2) +
+      facet_wrap(~Metrica, scales = "free_y", ncol = 2) +
+      scale_color_manual(values = cores_4, labels = labels_4) +
+      scale_fill_manual(values = cores_4, labels = labels_4) +
+      labs(title    = sprintf("Fase 4: Assinatura Topológica das Curvas de Preferência (A_max = 200, k = %d, Gen %d)", k_val, GEN_FINAL),
+           subtitle = subtitulo_x,
+           x = expression(paste("Variação da Preferência (", sigma[p], ")")),
+           y = "Valor da Métrica", color = "", fill = "") +
+      guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
+      tema_master
+  }
+
+  p_fase4_topo <- construir_plot_assinatura(df_gen50, K_BASE, subtitulo_base)
 
   # ---------------------------------------------------------------------
   # PLOT B: RUÍDO ECOLÓGICO (A_max: 200, 40, 10)
@@ -671,47 +682,52 @@ if(file.exists(arquivo)) {
   # ---------------------------------------------------------------------
   # PLOT E: DUMBBELL — Mudança Gen 1 → Gen Final (Modularity + Nestedness)
   # σp = 2.0, todos os A_max, todas as curvas
+  # Função reutilizável para gerar a mesma figura com diferentes valores de k
   # ---------------------------------------------------------------------
-  df_dumbell <- df_tabela %>%
-    filter(Metrica %in% c("Modularity", "Nestedness"),
-           sigma_p == 2.0) %>%
-    mutate(
-      Amax_label = factor(paste0("A_max: ", encounters_n),
-                          levels = c("A_max: 200", "A_max: 40", "A_max: 10")),
-      Metrica_label = case_when(
-        Metrica == "Modularity" ~ "1. Modularidade",
-        Metrica == "Nestedness" ~ "2. Aninhamento"
-      ),
-      tipo_label = factor(tipo_selecao,
-                          levels = c("u-shaped", "sigmoid", "gaussian", "uniform"),
-                          labels = c("U-shaped", "Sigmoide", "Gaussiana", "Uniforme"))
-    )
+  construir_plot_dumbell <- function(df_tabela_x, k_val) {
+    df_dumbell_x <- df_tabela_x %>%
+      filter(Metrica %in% c("Modularity", "Nestedness"),
+             sigma_p == 2.0) %>%
+      mutate(
+        Amax_label = factor(paste0("A_max: ", encounters_n),
+                            levels = c("A_max: 200", "A_max: 40", "A_max: 10")),
+        Metrica_label = case_when(
+          Metrica == "Modularity" ~ "1. Modularidade",
+          Metrica == "Nestedness" ~ "2. Aninhamento"
+        ),
+        tipo_label = factor(tipo_selecao,
+                            levels = c("u-shaped", "sigmoid", "gaussian", "uniform"),
+                            labels = c("U-shaped", "Sigmoide", "Gaussiana", "Uniforme"))
+      )
 
-  p_fase4_dumbell <- ggplot(df_dumbell) +
-    geom_segment(aes(x = Gen_inicial, xend = Gen_final,
-                     y = tipo_label,  yend = tipo_label,
-                     color = tipo_selecao),
-                 linewidth = 1.8, alpha = 0.7) +
-    geom_point(aes(x = Gen_inicial, y = tipo_label, color = tipo_selecao),
-               size = 4, shape = 21, fill = "white", stroke = 2) +
-    geom_point(aes(x = Gen_final, y = tipo_label, color = tipo_selecao),
-               size = 4) +
-    geom_text(aes(x = (Gen_inicial + Gen_final) / 2, y = tipo_label,
-                  label = sprintf("%+.3f", Delta),
-                  color = tipo_selecao),
-              hjust = 0.5, vjust = -0.6, size = 3.0, fontface = "bold") +
-    facet_grid2(Metrica_label ~ Amax_label, scales = "free_x", independent = "x") +
-    scale_color_manual(values = cores_4, labels = labels_4) +
-    labs(
-      title    = sprintf("Plot E: Mudança nas Métricas Topológicas: Gen 1 → Gen %d (σp = 2.0)", GEN_FINAL),
-      subtitle = "Círculo aberto = Geração 1  |  Círculo fechado = Geração final  |  Rótulos = Δ absoluto",
-      x        = "Valor Médio da Métrica",
-      y        = NULL,
-      color    = ""
-    ) +
-    guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
-    tema_master +
-    theme(panel.spacing.x = unit(1.5, "lines"))
+    ggplot(df_dumbell_x) +
+      geom_segment(aes(x = Gen_inicial, xend = Gen_final,
+                       y = tipo_label,  yend = tipo_label,
+                       color = tipo_selecao),
+                   linewidth = 1.8, alpha = 0.7) +
+      geom_point(aes(x = Gen_inicial, y = tipo_label, color = tipo_selecao),
+                 size = 4, shape = 21, fill = "white", stroke = 2) +
+      geom_point(aes(x = Gen_final, y = tipo_label, color = tipo_selecao),
+                 size = 4) +
+      geom_text(aes(x = (Gen_inicial + Gen_final) / 2, y = tipo_label,
+                    label = sprintf("%+.3f", Delta),
+                    color = tipo_selecao),
+                hjust = 0.5, vjust = -0.6, size = 3.0, fontface = "bold") +
+      facet_grid2(Metrica_label ~ Amax_label, scales = "free_x", independent = "x") +
+      scale_color_manual(values = cores_4, labels = labels_4) +
+      labs(
+        title    = sprintf("Plot E: Mudança nas Métricas Topológicas: Gen 1 → Gen %d (σp = 2.0, k = %d)", GEN_FINAL, k_val),
+        subtitle = "Círculo aberto = Geração 1  |  Círculo fechado = Geração final  |  Rótulos = Δ absoluto",
+        x        = "Valor Médio da Métrica",
+        y        = NULL,
+        color    = ""
+      ) +
+      guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
+      tema_master +
+      theme(panel.spacing.x = unit(1.5, "lines"))
+  }
+
+  p_fase4_dumbell <- construir_plot_dumbell(df_tabela, K_BASE)
 
   print(p_fase4_topo)
   print(p_fase4_topo_amax)
@@ -730,6 +746,35 @@ if(file.exists(arquivo)) {
   ggsave(file.path(dir_graficos, "Fase4_PlotE_Dumbell_Gen1vsGenFinal.png"),
          plot = p_fase4_dumbell,    width = 12, height = 6,  dpi = 300, bg = "white")
   cat(sprintf("\nGráficos A, B, C, D, E salvos em: %s\n", dir_graficos))
+
+  # =====================================================================
+  # PLOTS A e E PARA k = 5 e k = 20 (efeito da poliandria na assinatura)
+  # O baseline acima (Plot A e Plot E "sem sufixo") usa k = 10 (K_BASE).
+  # Aqui geramos as mesmas figuras para k = 5 e k = 20, para comparação.
+  # =====================================================================
+  for (k_val in c(5L, 20L)) {
+    df_base_k  <- df_parcial %>% filter(k_fixo == k_val, selecao_natural == NS_BASE)
+    df_gen50_k <- df_base_k %>% filter(generation == GEN_FINAL) %>% drop_na() %>%
+      mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
+                                   levels = c("A_max: 200", "A_max: 40", "A_max: 10")))
+
+    val_reps_k     <- length(unique(df_base_k$replica[!is.na(df_base_k$replica)]))
+    n_completos_k  <- length(unique(paste(df_base_k$tipo_selecao, df_base_k$sigma_p,
+                                          df_base_k$encounters_n, df_base_k$replica)))
+    subtitulo_k <- sprintf("Parâmetros: %d Gerações | N=200 | k=%d | Réplicas: %d de 100 (%.0f%%)",
+                           GEN_FINAL, k_val, val_reps_k, 100 * n_completos_k / n_total)
+
+    df_tabela_k <- construir_df_tabela(df_base_k)
+
+    p_topo_k    <- construir_plot_assinatura(df_gen50_k, k_val, subtitulo_k)
+    p_dumbell_k <- construir_plot_dumbell(df_tabela_k, k_val)
+
+    ggsave(file.path(dir_graficos, sprintf("Fase4_PlotA_AssinaturaTopologica_k%d.png", k_val)),
+           plot = p_topo_k,    width = 10, height = 8, dpi = 300, bg = "white")
+    ggsave(file.path(dir_graficos, sprintf("Fase4_PlotE_Dumbell_Gen1vsGenFinal_k%d.png", k_val)),
+           plot = p_dumbell_k, width = 12, height = 6, dpi = 300, bg = "white")
+  }
+  cat(sprintf("\nGráficos A e E para k=5 e k=20 salvos em: %s\n", dir_graficos))
 
   # =====================================================================
   # BLOCO E: MODELOS LINEARES (LMs) — ESTATÍSTICA OFICIAL
