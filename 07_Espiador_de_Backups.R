@@ -752,7 +752,7 @@ if(file.exists(arquivo)) {
   # O baseline acima (Plot A e Plot E "sem sufixo") usa k = 10 (K_BASE).
   # Aqui geramos as mesmas figuras para k = 5 e k = 20, para comparação.
   # =====================================================================
-  for (k_val in c(5L, 20L)) {
+  for (k_val in c(5L, 10L, 20L)) {
     df_base_k  <- df_parcial %>% filter(k_fixo == k_val, selecao_natural == NS_BASE)
     df_gen50_k <- df_base_k %>% filter(generation == GEN_FINAL) %>% drop_na() %>%
       mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),

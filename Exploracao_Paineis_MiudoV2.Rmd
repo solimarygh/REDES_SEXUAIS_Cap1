@@ -88,8 +88,7 @@ Estes gráficos usam o conjunto completo de réplicas da Fase5_MiudoV2 (todas as
 
 ```{r fase4-plotA, results='asis'}
 for (k_val in c(10, 5, 20)) {
-  sufixo <- if (k_val == 10) "" else sprintf("_k%d", k_val)
-  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotA_AssinaturaTopologica%s.png", sufixo))
+  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotA_AssinaturaTopologica_k%d.png", k_val))
   cat(sprintf("\n### k = %d\n\n", k_val))
   if (file.exists(img)) {
     cat(sprintf("![](%s)\n\n", img))
@@ -103,8 +102,7 @@ for (k_val in c(10, 5, 20)) {
 
 ```{r fase4-plotE, results='asis'}
 for (k_val in c(10, 5, 20)) {
-  sufixo <- if (k_val == 10) "" else sprintf("_k%d", k_val)
-  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotE_Dumbell_Gen1vsGenFinal%s.png", sufixo))
+  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotE_Dumbell_Gen1vsGenFinal_k%d.png", k_val))
   cat(sprintf("\n### k = %d\n\n", k_val))
   if (file.exists(img)) {
     cat(sprintf("![](%s)\n\n", img))
