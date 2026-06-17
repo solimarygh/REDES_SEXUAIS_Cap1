@@ -208,7 +208,7 @@ if (length(arquivos) == 0) {
     sub <- sub[order(match(sub$sigma_p, ordem_sigma), match(sub$k, ordem_k)), ]
     for (i in seq_len(nrow(sub))) {
       cat(sprintf("\n### σp=%.1f, k=%d\n\n", sub$sigma_p[i], sub$k[i]))
-      cat(sprintf("![](%s){width=70%%}\n\n", sub$arquivo[i]))
+      cat(sprintf("![](%s){width=100%%}\n\n", sub$arquivo[i]))
     }
   }
 }
