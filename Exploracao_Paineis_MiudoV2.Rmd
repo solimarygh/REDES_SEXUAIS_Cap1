@@ -76,7 +76,7 @@ A cada nova geração, os valores de preferência $p$ das fêmeas são re-sortea
 Cada macho sobrevive com probabilidade $V_j = \exp\!\bigl(-\gamma(z_j - \phi)^2\bigr)$. Neste conjunto de resultados essa etapa é **desligada** ($V_j = 1$ para todos os machos), isolando o efeito puro da escolha feminina sobre a estrutura da rede.
 
 **4. Acasalamento (formação da rede)**
-Cada fêmea $i$ amostra $A_{max}$ machos aleatoriamente da população de sobreviventes. Para cada macho $j$ amostrado, calcula a probabilidade de aceite $P_{ij}$ conforme a curva de preferência:
+Cada fêmea $i$ amostra $A_{max}$ machos aleatoriamente da população (de sobreviventes se há selecao por viavilidade). Para cada macho $j$ amostrado (lembrando que podem ser 5, 10 ou 20), calcula a probabilidade de aceite $P_{ij}$ conforme a curva de preferência:
 
 | Curva | Função $P_{ij}$ |
 |:------|:----------------|
@@ -94,10 +94,10 @@ Cada fêmea que acasalou produz $F = 50$ filhotes (a poliandria **não aumenta**
 $$z_{\text{filho}} = \frac{z_{\text{pai}} + z_{\text{mãe}}}{2} + \varepsilon, \quad \varepsilon \sim \mathcal{N}(0,\, 0.2)$$
 O pool de juvenis é então amostrado aleatoriamente para preencher as 200 vagas de machos e as 200 vagas de fêmeas (capacidade de carga fixa).
 
-## O que as métricas significam
+## A cada gerão calculamos Modularidade, Aninhamento, centralizaçao, e Is. Para VER em mais detalhe as redes, também selecionamos de cada cenário a rede representativa e para essa calculamos o número lapaciano e o numero de grupos.
 
 -   **Modularidade** ($Q \in [0,1]$; `igraph::cluster_louvain()` + `igraph::modularity()`): o quanto a rede se divide em grupos de machos e fêmeas que acasalam preferencialmente entre si.
--   **Aninhamento (NODF)** ($\in [0,100]$; `bipartite::nested(M, method = "NODF")`): o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares".
+-   **Aninhamento (NODF)** ($\in [0,100]$; `bipartite::nested(M, method = "NODF")`): o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares". Veja que, como esperado, ao deixar as femeas se acasalarem com mais machos o Aninhamento aumentou.
 -   **Centralização** ($\in [0,1]$; `igraph::centr_degree(g, mode = "all")`): o quanto os acasalamentos se concentram em poucos indivíduos. Valores altos = poucos indivíduos concentram a maioria das ligações.
 -   **$I_s$** (oportunidade de seleção sexual, $\geq 0$; `var(k)/mean(k)^2` em R base, onde $k$ = nº de parceiras por macho): mede a variação no sucesso reprodutivo dos machos, quanto maior, mais desigual é a distribuição de cópulas.
 -   **Tribos** (nº inteiro $\geq 1$; autovalores $\approx 0$ de `igraph::laplacian_matrix()`): número de subpopulações completamente isoladas reprodutivamente (sem nenhuma ligação entre elas).
@@ -111,9 +111,9 @@ Para navegar use as abas (tabs) para alternar entre $A_{max}$, curvas de prefer�
 
 # Resultados Fase 4: Forma da rede e Mudança Evolutiva {.tabset}
 
-Estes gráficos usam o conjunto completo de réplicas da Fase5_MiudoV2 (todas as combinações de k e seleção natural) para mostrar como Modularidade, Aninhamento e outras métricas topológicas variam com σp na geração final, e como essas métricas mudam ao longo do tempo evolutivo (Geração 1 → Geração final). #tenho mais graficos, mas por enquanto queria focar nas redes mesmo.
+Estes gráficos usam o conjunto completo de réplicas da Fase5_MiudoV2 (todas as combinações de k e seleção natural) para mostrar especialmete como Modularidade, Aninhamento variam com σp na geração final, e como essas métricas mudam ao longo do tempo evolutivo (Geração 1 → Geração final). #tenho mais graficos, mas por enquanto queria focar nas redes que mostrarei mais na frente.
 
-Cada figura abaixo tem abas para $k=5$, $k=10$ e $k=20$ (poliandria fixa: nº de parceiros por fêmea), todas com $A_{max}=200$ e sem seleção natural.
+Lembra que cada figura abaixo tem abas para $k=5$, $k=10$ e $k=20$ (poliandria fixa: nº de parceiros por fêmea), y aqui quando o numero de machos não é especificado é pq é $A_{max}=200$, y aquie todas estão sem seleção natural.
 
 ## Métricas vs σp (Geração Final) {.tabset}
 
