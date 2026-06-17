@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Solimary García Hernández" />
+
+
+<title>Exploração de Resultados</title>
+
+<script src="Exploracao_Paineis_MiudoV2_files/header-attrs-2.30/header-attrs.js"></script>
+<script src="Exploracao_Paineis_MiudoV2_files/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="Exploracao_Paineis_MiudoV2_files/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="Exploracao_Paineis_MiudoV2_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="Exploracao_Paineis_MiudoV2_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="Exploracao_Paineis_MiudoV2_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="Exploracao_Paineis_MiudoV2_files/navigation-1.1/tabsets.js"></script>
+<link href="Exploracao_Paineis_MiudoV2_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="Exploracao_Paineis_MiudoV2_files/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Exploração de Resultados</h1>
+<h3 class="subtitle">Evolucao, Histogramas e Redes comparativas</h3>
+<h4 class="author">Solimary García Hernández</h4>
+<h4 class="date">17 de June de 2026</h4>
+
+</div>
+
+
+<style type="text/css">
+.main-container {
+  max-width: 98% !important;
+  width: 98% !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+<blockquote>
+<p>Este documento mostra os resultados do nosso IBM que simula, geração
+a geração, como a escolha de parceiros pelas fêmeas afeta a estrutura da
+rede de acasalamentos da população, e como essa estrutura evolui ao
+longo do tempo.</p>
+</blockquote>
+<div id="lembrando-detalhes-do-modelo" class="section level2">
+<h2>Lembrando detalhes do modelo</h2>
+<ul>
+<li><strong>População:</strong> 200 machos e 200 fêmeas, evoluindo por
+100 gerações, com 30 réplicas (repetições independentes) por cenário. No
+futuro serão 100 réplicas.</li>
+<li><strong>O traço e a preferência:</strong> cada macho tem um traço
+<span class="math inline">\(z\)</span> (ex.: tamanho de um ornamento);
+cada fêmea tem uma preferência <span class="math inline">\(p\)</span>
+por um determinado valor de <span class="math inline">\(z\)</span>.</li>
+<li><strong>Quatro curvas de preferência:</strong>
+<ul>
+<li><strong>Aleatória</strong> — as fêmeas não discriminam entre machos
+(referência nula, sem seleção sexual).</li>
+<li><strong>Gaussiana</strong> — as fêmeas preferem machos com <span
+class="math inline">\(z\)</span> próximo do seu valor preferido <span
+class="math inline">\(p\)</span> (preferência
+<em>estabilizadora</em>).</li>
+<li><strong>Sigmoide</strong> — as fêmeas preferem machos com <span
+class="math inline">\(z\)</span> maior que <span
+class="math inline">\(p\)</span> (preferência <em>direcional</em>, pode
+gerar “corrida evolutiva”/<em>runaway</em>).</li>
+<li><strong>Disruptiva (U-shaped)</strong> — as fêmeas preferem machos
+bem diferentes de <span class="math inline">\(p\)</span>, seja para mais
+ou para menos.</li>
+</ul></li>
+<li><strong><span class="math inline">\(\sigma_p\)</span></strong> — o
+quanto a preferência varia entre as fêmeas da população: <span
+class="math inline">\(\sigma_p=0.5\)</span> (fêmeas parecidas entre si)
+até <span class="math inline">\(\sigma_p=2.0\)</span> (fêmeas bem
+diferentes entre si).</li>
+<li><strong><span class="math inline">\(k\)</span></strong> — quantos
+parceiros cada fêmea acasala (poliandria fixa: 5, 10 ou 20).</li>
+<li><strong><span class="math inline">\(A_{max}\)</span></strong> —
+quantos machos cada fêmea “enxerga”/avalia antes de escolher: 200
+(todos), 40 (20%) ou 10 (5%) — simula uma restrição/custo de busca.</li>
+</ul>
+</div>
+<div id="ciclo-de-vida-por-geração" class="section level2">
+<h2>Ciclo de vida por geração</h2>
+<p>Cada geração <span class="math inline">\(t\)</span> segue estas
+etapas, em ordem:</p>
+<p><strong>1. Inicialização (apenas geração 1)</strong> Traços iniciais
+são sorteados de distribuições normais centradas em <span
+class="math inline">\(\phi = 5\)</span>: os machos recebem <span
+class="math inline">\(z \sim \mathcal{N}(\phi,\, \sigma_z{=}1)\)</span>
+e as fêmeas recebem <span class="math inline">\(p \sim
+\mathcal{N}(\phi,\, \sigma_p)\)</span>.</p>
+<p><strong>2. Re-sorteio das preferências (toda geração)</strong> A cada
+nova geração, os valores de preferência <span
+class="math inline">\(p\)</span> das fêmeas são re-sorteados de <span
+class="math inline">\(\mathcal{N}(\phi,\, \sigma_p)\)</span> — <em>a
+preferência não é herdada</em>. Isso é intencional: fixa a distribuição
+de preferências na população e permite isolar o efeito da <em>forma</em>
+e da <em>largura</em> (<span class="math inline">\(\sigma_p\)</span>)
+dessa distribuição sobre a rede, sem que a preferência feminina evolua
+junto com o traço masculino <span class="math inline">\(z\)</span>.</p>
+<p><strong>3. Seleção de viabilidade (opcional)</strong> Cada macho
+sobrevive com probabilidade <span class="math inline">\(V_j =
+\exp\!\bigl(-\gamma(z_j - \phi)^2\bigr)\)</span>. Neste conjunto de
+resultados essa etapa é <strong>desligada</strong> (<span
+class="math inline">\(V_j = 1\)</span> para todos os machos), isolando o
+efeito puro da escolha feminina sobre a estrutura da rede.</p>
+<p><strong>4. Acasalamento (formação da rede)</strong> Cada fêmea <span
+class="math inline">\(i\)</span> amostra <span
+class="math inline">\(A_{max}\)</span> machos aleatoriamente da
+população (de sobreviventes se há selecao por viavilidade). Para cada
+macho <span class="math inline">\(j\)</span> amostrado (lembrando que
+podem ser 5, 10 ou 20), calcula a probabilidade de aceite <span
+class="math inline">\(P_{ij}\)</span> conforme a curva de
+preferência:</p>
+<table>
+<colgroup>
+<col width="29%" />
+<col width="70%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Curva</th>
+<th align="left">Função <span class="math inline">\(P_{ij}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Aleatória (nula)</td>
+<td align="left"><span class="math inline">\(P_{ij} = 0.5\)</span></td>
+</tr>
+<tr class="even">
+<td align="left">Gaussiana (estabilizadora)</td>
+<td align="left"><span class="math inline">\(P_{ij} =
+\exp\!\bigl(-s_i\,(z_j - p_i)^2\bigr)\)</span></td>
+</tr>
+<tr class="odd">
+<td align="left">Sigmoide (direcional)</td>
+<td align="left"><span class="math inline">\(P_{ij} = 1\,/\,\bigl(1 +
+\exp(-s_i\,(z_j - p_i))\bigr)\)</span></td>
+</tr>
+<tr class="even">
+<td align="left">U-shaped (disruptiva)</td>
+<td align="left"><span class="math inline">\(P_{ij} = 1 -
+\exp\!\bigl(-s_i\,(z_j - p_i)^2\bigr)\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>onde <span class="math inline">\(s_i \sim \mathcal{N}(2,\,
+0.2)\)</span> é a intensidade da discriminação da fêmea <span
+class="math inline">\(i\)</span>. Ela aceita o macho <span
+class="math inline">\(j\)</span> com probabilidade <span
+class="math inline">\(P_{ij}\)</span> (sem repetir o mesmo parceiro) e
+para quando acumula <span class="math inline">\(k\)</span> parceiros. Se
+terminar sem nenhuma cópula, aceita o último macho avaliado (regra de
+escape).</p>
+<p>O resultado de cada geração é a <strong>matriz de
+acasalamentos</strong> <span class="math inline">\(M\)</span> (machos ×
+fêmeas, binária): <span class="math inline">\(M_{ji} = 1\)</span> se o
+macho <span class="math inline">\(j\)</span> acasalou com a fêmea <span
+class="math inline">\(i\)</span>. Essa é a rede bipartita sobre a qual
+calculamos as métricas.</p>
+<p><strong>5. Fecundidade e herança</strong> Cada fêmea que acasalou
+produz <span class="math inline">\(F = 50\)</span> filhotes (a
+poliandria <strong>não aumenta</strong> a fecundidade). A paternidade de
+cada filhote é distribuída aleatoriamente entre os parceiros da mãe
+(<em>fair raffle</em> / competição espermática neutra). O traço do
+filhote segue herança de ponto médio com mutação: <span
+class="math display">\[z_{\text{filho}} = \frac{z_{\text{pai}} +
+z_{\text{mãe}}}{2} + \varepsilon, \quad \varepsilon \sim
+\mathcal{N}(0,\, 0.2)\]</span> O pool de juvenis é então amostrado
+aleatoriamente para preencher as 200 vagas de machos e as 200 vagas de
+fêmeas (capacidade de carga fixa).</p>
+</div>
+<div
+id="a-cada-gerão-calculamos-modularidade-aninhamento-centralizaçao-e-is.-para-ver-em-mais-detalhe-as-redes-também-selecionamos-de-cada-cenário-a-rede-representativa-e-para-essa-calculamos-o-número-lapaciano-e-o-numero-de-grupos."
+class="section level2">
+<h2>A cada gerão calculamos Modularidade, Aninhamento, centralizaçao, e
+Is. Para VER em mais detalhe as redes, também selecionamos de cada
+cenário a rede representativa e para essa calculamos o número lapaciano
+e o numero de grupos.</h2>
+<ul>
+<li><strong>Modularidade</strong> (<span class="math inline">\(Q \in
+[0,1]\)</span>; <code>igraph::cluster_louvain()</code> +
+<code>igraph::modularity()</code>): o quanto a rede se divide em grupos
+de machos e fêmeas que acasalam preferencialmente entre si.</li>
+<li><strong>Aninhamento (NODF)</strong> (<span class="math inline">\(\in
+[0,100]\)</span>; <code>bipartite::nested(M, method = "NODF")</code>): o
+quanto os parceiros dos machos menos “populares” são um subconjunto dos
+parceiros dos machos mais “populares”. Veja que, como esperado, ao
+deixar as femeas se acasalarem com mais machos o Aninhamento
+aumentou.</li>
+<li><strong>Centralização</strong> (<span class="math inline">\(\in
+[0,1]\)</span>; <code>igraph::centr_degree(g, mode = "all")</code>): o
+quanto os acasalamentos se concentram em poucos indivíduos. Valores
+altos = poucos indivíduos concentram a maioria das ligações.</li>
+<li><strong><span class="math inline">\(I_s\)</span></strong>
+(oportunidade de seleção sexual, <span class="math inline">\(\geq
+0\)</span>; <code>var(k)/mean(k)^2</code> em R base, onde <span
+class="math inline">\(k\)</span> = nº de parceiras por macho): mede a
+variação no sucesso reprodutivo dos machos, quanto maior, mais desigual
+é a distribuição de cópulas.</li>
+<li><strong>Tribos</strong> (nº inteiro <span class="math inline">\(\geq
+1\)</span>; autovalores <span class="math inline">\(\approx 0\)</span>
+de <code>igraph::laplacian_matrix()</code>): número de subpopulações
+completamente isoladas reprodutivamente (sem nenhuma ligação entre
+elas).</li>
+<li><strong>Comunidades</strong> (nº inteiro <span
+class="math inline">\(\geq 1\)</span>;
+<code>igraph::cluster_louvain()</code>): número de subgrupos sociais
+detectados dentro da rede (podem estar conectados entre si, mas formam
+grupos mais cohesos internamente).</li>
+</ul>
+<p>Para navegar use as abas (tabs) para alternar entre <span
+class="math inline">\(A_{max}\)</span>, curvas de preferência e
+combinações de <span class="math inline">\(\sigma_p\)</span>/<span
+class="math inline">\(k\)</span>. As imagens são exibidas em largura
+total para facilitar a exploração :)</p>
+<hr />
+</div>
+<div id="resultados-fase-4-forma-da-rede-e-mudança-evolutiva"
+class="section level1 tabset">
+<h1 class="tabset">Resultados Fase 4: Forma da rede e Mudança
+Evolutiva</h1>
+<p>Estes gráficos usam o conjunto completo de réplicas da Fase5_MiudoV2
+(todas as combinações de k e seleção natural) para mostrar especialmete
+como Modularidade, Aninhamento variam com σp na geração final, e como
+essas métricas mudam ao longo do tempo evolutivo (Geração 1 → Geração
+final). #tenho mais graficos, mas por enquanto queria focar nas redes
+que mostrarei mais na frente.</p>
+<p>Lembra que cada figura abaixo tem abas para <span
+class="math inline">\(k=5\)</span>, <span
+class="math inline">\(k=10\)</span> e <span
+class="math inline">\(k=20\)</span> (poliandria fixa: nº de parceiros
+por fêmea), y aqui quando o numero de machos não é especificado é pq é
+<span class="math inline">\(A_{max}=200\)</span>, y aquie todas estão
+sem seleção natural.</p>
+<div id="métricas-vs-σp-geração-final" class="section level2 tabset">
+<h2 class="tabset">Métricas vs σp (Geração Final)</h2>
+<div id="k-5" class="section level3">
+<h3>k = 5</h3>
+<p><img
+src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotA_AssinaturaTopologica_k5.png" /></p>
+</div>
+<div id="k-10" class="section level3">
+<h3>k = 10</h3>
+<p><img
+src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotA_AssinaturaTopologica_k10.png" /></p>
+</div>
+<div id="k-20" class="section level3">
+<h3>k = 20</h3>
+<p><img
+src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotA_AssinaturaTopologica_k20.png" /></p>
+</div>
+</div>
+<div id="mudança-gen-1-gen-final" class="section level2 tabset">
+<h2 class="tabset">Mudança Gen 1 → Gen Final</h2>
+<div id="k-5-1" class="section level3">
+<h3>k = 5</h3>
+<p><img
+src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotE_Dumbell_Gen1vsGenFinal_k5.png" /></p>
+</div>
+<div id="k-10-1" class="section level3">
+<h3>k = 10</h3>
+<p><img
+src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotE_Dumbell_Gen1vsGenFinal_k10.png" /></p>
+</div>
+<div id="k-20-1" class="section level3">
+<h3>k = 20</h3>
+<p><img
+src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotE_Dumbell_Gen1vsGenFinal_k20.png" /></p>
+<hr />
+</div>
+</div>
+</div>
+<div id="redes-comparativas-k-σp-uma-figura-por-curva"
+class="section level1 tabset">
+<h1 class="tabset">Redes Comparativas: k × σp (uma figura por
+curva)</h1>
+<p>Cada figura é uma grade 3×3: linhas = σp (2.0, 1.0, 0.5, de cima para
+baixo), colunas = k (5, 10, 20). Cada subtítulo traz Mod, NODF, Tribos e
+Comunidades.</p>
+<div id="a_max-200" class="section level2 tabset">
+<h2 class="tabset">A_max = 200</h2>
+<div id="aleatória" class="section level3">
+<h3>Aleatória</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_uniform_Amax200_noNS.png" /></p>
+</div>
+<div id="gaussiana" class="section level3">
+<h3>Gaussiana</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_gaussian_Amax200_noNS.png" /></p>
+</div>
+<div id="sigmoide" class="section level3">
+<h3>Sigmoide</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_sigmoid_Amax200_noNS.png" /></p>
+</div>
+<div id="disruptiva" class="section level3">
+<h3>Disruptiva</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_u-shaped_Amax200_noNS.png" /></p>
+</div>
+</div>
+<div id="a_max-40" class="section level2 tabset">
+<h2 class="tabset">A_max = 40</h2>
+<div id="aleatória-1" class="section level3">
+<h3>Aleatória</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_uniform_Amax40_noNS.png" /></p>
+</div>
+<div id="gaussiana-1" class="section level3">
+<h3>Gaussiana</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_gaussian_Amax40_noNS.png" /></p>
+</div>
+<div id="sigmoide-1" class="section level3">
+<h3>Sigmoide</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_sigmoid_Amax40_noNS.png" /></p>
+</div>
+<div id="disruptiva-1" class="section level3">
+<h3>Disruptiva</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_u-shaped_Amax40_noNS.png" /></p>
+</div>
+</div>
+<div id="a_max-10" class="section level2 tabset">
+<h2 class="tabset">A_max = 10</h2>
+<div id="aleatória-2" class="section level3">
+<h3>Aleatória</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_uniform_Amax10_noNS.png" /></p>
+</div>
+<div id="gaussiana-2" class="section level3">
+<h3>Gaussiana</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_gaussian_Amax10_noNS.png" /></p>
+</div>
+<div id="sigmoide-2" class="section level3">
+<h3>Sigmoide</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_sigmoid_Amax10_noNS.png" /></p>
+</div>
+<div id="disruptiva-2" class="section level3">
+<h3>Disruptiva</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_u-shaped_Amax10_noNS.png" /></p>
+<hr />
+</div>
+</div>
+</div>
+<div id="painéis-de-redes-4-curvas-por-σp-k"
+class="section level1 tabset">
+<h1 class="tabset">Painéis de Redes: 4 curvas por (σp, k)</h1>
+<p>Agora, vamos as mesmas redes mas agrupanto as 4 curvas de preferência
+(Aleatória, Gaussiana, Sigmoide, Disruptiva) para um par fixo (σp,
+k).</p>
+<div id="a_max-200-1" class="section level2 tabset">
+<h2 class="tabset">A_max = 200</h2>
+<div id="σp2.0-k5" class="section level3">
+<h3>σp=2.0, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap2.0_Amax200_k5_noNS.png" /></p>
+</div>
+<div id="σp2.0-k10" class="section level3">
+<h3>σp=2.0, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap2.0_Amax200_k10_noNS.png" /></p>
+</div>
+<div id="σp2.0-k20" class="section level3">
+<h3>σp=2.0, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap2.0_Amax200_k20_noNS.png" /></p>
+</div>
+<div id="σp1.0-k5" class="section level3">
+<h3>σp=1.0, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap1.0_Amax200_k5_noNS.png" /></p>
+</div>
+<div id="σp1.0-k10" class="section level3">
+<h3>σp=1.0, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap1.0_Amax200_k10_noNS.png" /></p>
+</div>
+<div id="σp1.0-k20" class="section level3">
+<h3>σp=1.0, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap1.0_Amax200_k20_noNS.png" /></p>
+</div>
+<div id="σp0.5-k5" class="section level3">
+<h3>σp=0.5, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax200_k5_noNS.png" /></p>
+</div>
+<div id="σp0.5-k10" class="section level3">
+<h3>σp=0.5, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax200_k10_noNS.png" /></p>
+</div>
+<div id="σp0.5-k20" class="section level3">
+<h3>σp=0.5, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax200_k20_noNS.png" /></p>
+</div>
+</div>
+<div id="a_max-40-1" class="section level2 tabset">
+<h2 class="tabset">A_max = 40</h2>
+<div id="σp2.0-k5-1" class="section level3">
+<h3>σp=2.0, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap2.0_Amax40_k5_noNS.png" /></p>
+</div>
+<div id="σp2.0-k10-1" class="section level3">
+<h3>σp=2.0, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap2.0_Amax40_k10_noNS.png" /></p>
+</div>
+<div id="σp2.0-k20-1" class="section level3">
+<h3>σp=2.0, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap2.0_Amax40_k20_noNS.png" /></p>
+</div>
+<div id="σp1.0-k5-1" class="section level3">
+<h3>σp=1.0, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap1.0_Amax40_k5_noNS.png" /></p>
+</div>
+<div id="σp1.0-k10-1" class="section level3">
+<h3>σp=1.0, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap1.0_Amax40_k10_noNS.png" /></p>
+</div>
+<div id="σp1.0-k20-1" class="section level3">
+<h3>σp=1.0, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap1.0_Amax40_k20_noNS.png" /></p>
+</div>
+<div id="σp0.5-k5-1" class="section level3">
+<h3>σp=0.5, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax40_k5_noNS.png" /></p>
+</div>
+<div id="σp0.5-k10-1" class="section level3">
+<h3>σp=0.5, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax40_k10_noNS.png" /></p>
+</div>
+<div id="σp0.5-k20-1" class="section level3">
+<h3>σp=0.5, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax40_k20_noNS.png" /></p>
+</div>
+</div>
+<div id="a_max-10-1" class="section level2 tabset">
+<h2 class="tabset">A_max = 10</h2>
+<div id="σp2.0-k5-2" class="section level3">
+<h3>σp=2.0, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap2.0_Amax10_k5_noNS.png" /></p>
+</div>
+<div id="σp2.0-k10-2" class="section level3">
+<h3>σp=2.0, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap2.0_Amax10_k10_noNS.png" /></p>
+</div>
+<div id="σp2.0-k20-2" class="section level3">
+<h3>σp=2.0, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap2.0_Amax10_k20_noNS.png" /></p>
+</div>
+<div id="σp1.0-k5-2" class="section level3">
+<h3>σp=1.0, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap1.0_Amax10_k5_noNS.png" /></p>
+</div>
+<div id="σp1.0-k10-2" class="section level3">
+<h3>σp=1.0, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap1.0_Amax10_k10_noNS.png" /></p>
+</div>
+<div id="σp1.0-k20-2" class="section level3">
+<h3>σp=1.0, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap1.0_Amax10_k20_noNS.png" /></p>
+</div>
+<div id="σp0.5-k5-2" class="section level3">
+<h3>σp=0.5, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax10_k5_noNS.png" /></p>
+</div>
+<div id="σp0.5-k10-2" class="section level3">
+<h3>σp=0.5, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax10_k10_noNS.png" /></p>
+</div>
+<div id="σp0.5-k20-2" class="section level3">
+<h3>σp=0.5, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax10_k20_noNS.png" /></p>
+<hr />
+</div>
+</div>
+</div>
+<div id="painéis-de-histogramas-evolução-em-3-atos"
+class="section level1 tabset">
+<h1 class="tabset">Painéis de Histogramas: Evolução em 3 Atos</h1>
+<p>Aqui cada figura mostra, para as 4 curvas de preferência, as
+distribuições de <span class="math inline">\(z\)</span> (machos) e <span
+class="math inline">\(p\)</span> (fêmeas) em três momentos: Geração 1, a
+geração da rede representativa, e a geração final. A rede representativa
+é uma réplica específica cuja Modularidade é a mais “típica” (mais
+próxima da média) da fase estável (<span
+class="math inline">\(generation \geq 20\)</span>) daquele cenário (
+<code>encontrar_representativa()</code> no Script 06).</p>
+<div id="a_max-200-2" class="section level2 tabset">
+<h2 class="tabset">A_max = 200</h2>
+<div id="σp2.0-k5-3" class="section level3">
+<h3>σp=2.0, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap2.0_Amax200_k5_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp2.0-k10-3" class="section level3">
+<h3>σp=2.0, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap2.0_Amax200_k10_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp2.0-k20-3" class="section level3">
+<h3>σp=2.0, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap2.0_Amax200_k20_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp1.0-k5-3" class="section level3">
+<h3>σp=1.0, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap1.0_Amax200_k5_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp1.0-k10-3" class="section level3">
+<h3>σp=1.0, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap1.0_Amax200_k10_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp1.0-k20-3" class="section level3">
+<h3>σp=1.0, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap1.0_Amax200_k20_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp0.5-k5-3" class="section level3">
+<h3>σp=0.5, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0.5_Amax200_k5_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp0.5-k10-3" class="section level3">
+<h3>σp=0.5, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0.5_Amax200_k10_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp0.5-k20-3" class="section level3">
+<h3>σp=0.5, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0.5_Amax200_k20_noNS.png"
+style="width:100.0%" /></p>
+</div>
+</div>
+<div id="a_max-40-2" class="section level2 tabset">
+<h2 class="tabset">A_max = 40</h2>
+<div id="σp2.0-k5-4" class="section level3">
+<h3>σp=2.0, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap2.0_Amax40_k5_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp2.0-k10-4" class="section level3">
+<h3>σp=2.0, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap2.0_Amax40_k10_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp2.0-k20-4" class="section level3">
+<h3>σp=2.0, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap2.0_Amax40_k20_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp1.0-k5-4" class="section level3">
+<h3>σp=1.0, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap1.0_Amax40_k5_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp1.0-k10-4" class="section level3">
+<h3>σp=1.0, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap1.0_Amax40_k10_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp1.0-k20-4" class="section level3">
+<h3>σp=1.0, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap1.0_Amax40_k20_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp0.5-k5-4" class="section level3">
+<h3>σp=0.5, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0.5_Amax40_k5_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp0.5-k10-4" class="section level3">
+<h3>σp=0.5, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0.5_Amax40_k10_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp0.5-k20-4" class="section level3">
+<h3>σp=0.5, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0.5_Amax40_k20_noNS.png"
+style="width:100.0%" /></p>
+</div>
+</div>
+<div id="a_max-10-2" class="section level2 tabset">
+<h2 class="tabset">A_max = 10</h2>
+<div id="σp2.0-k5-5" class="section level3">
+<h3>σp=2.0, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap2.0_Amax10_k5_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp2.0-k10-5" class="section level3">
+<h3>σp=2.0, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap2.0_Amax10_k10_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp2.0-k20-5" class="section level3">
+<h3>σp=2.0, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap2.0_Amax10_k20_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp1.0-k5-5" class="section level3">
+<h3>σp=1.0, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap1.0_Amax10_k5_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp1.0-k10-5" class="section level3">
+<h3>σp=1.0, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap1.0_Amax10_k10_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp1.0-k20-5" class="section level3">
+<h3>σp=1.0, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap1.0_Amax10_k20_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp0.5-k5-5" class="section level3">
+<h3>σp=0.5, k=5</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0.5_Amax10_k5_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp0.5-k10-5" class="section level3">
+<h3>σp=0.5, k=10</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0.5_Amax10_k10_noNS.png"
+style="width:100.0%" /></p>
+</div>
+<div id="σp0.5-k20-5" class="section level3">
+<h3>σp=0.5, k=20</h3>
+<p><img
+src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0.5_Amax10_k20_noNS.png"
+style="width:100.0%" /></p>
+</div>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
