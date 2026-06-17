@@ -1,6 +1,6 @@
 ---
 title: "Exploração de Resultados"
-subtitle: "Evolucao, Histogramas do trait do macho e Redes Comparativas"
+subtitle: "Evolucao, Histogramas e Redes comparativas"
 author: "Solimary García Hernández"
 date: "`r format(Sys.Date(), '%d de %B de %Y')`"
 output:
@@ -44,11 +44,11 @@ ordem_sigma  <- c(2.0, 1.0, 0.5)
 ordem_k      <- c(5, 10, 20)
 ```
 
-# Sobre este documento
 
-Este documento mostra os resultados do nosso IBM que simula, geração a geração, como a escolha de parceiros pelas fêmeas afeta a estrutura da rede de acasalamentos da população, e como essa estrutura evolui ao longo do tempo.
 
-## O modelo, em poucas palavras
+>Este documento mostra os resultados do nosso IBM que simula, geração a geração, como a escolha de parceiros pelas fêmeas afeta a estrutura da rede de acasalamentos da população, e como essa estrutura evolui ao longo do tempo.
+
+## Lembrando detalhes do modelo
 
 -   **População:** 200 machos e 200 fêmeas, evoluindo por 100 gerações, com 30 réplicas (repetições independentes) por cenário. No futuro serão 100 réplicas.
 -   **O traço e a preferência:** cada macho tem um traço $z$ (ex.: tamanho de um ornamento); cada fêmea tem uma preferência $p$ por um determinado valor de $z$.
@@ -61,7 +61,30 @@ Este documento mostra os resultados do nosso IBM que simula, geração a geraç�
 -   **$k$** — quantos parceiros cada fêmea acasala (poliandria fixa: 5, 10 ou 20).
 -   **$A_{max}$** — quantos machos cada fêmea "enxerga"/avalia antes de escolher: 200 (todos), 40 (20%) ou 10 (5%) —> simula uma restrição/custo de busca.
 
-Miudo, como combinamos neste conjunto de resultados não há seleção natural: todos os machos têm a mesma chance de sobreviver, isolando o efeito puro da escolha feminina sobre a estrutura da rede.
+
+## Ciclo de vida por geração
+
+
+**1. NAO Seleção de viabilidade**: Miudo, como combinamos neste conjunto de resultados **não** há seleção natural: todos os machos têm a mesma chance de sobreviver, isolando o efeito puro da escolha feminina sobre a estrutura da rede.
+
+
+**2. Acasalamento:** cada fêmea sorteia se acasala com machos = o valor indicado com poliandría 5, 10 ou 20. A probabilidade de aceitar o macho $j$ depende da curva de preferência:
+
+| Regime | Função $P_{ij}$ |
+|------------------------------------|------------------------------------|
+| Uniforme (nula) | $P_{ij} = 0.5$ |
+| Gaussiana (estabilizadora) | $P_{ij} = \exp\!\left(-s_i(z_j - p_i)^2\right)$ |
+| Sigmoide (direcional) | $P_{ij} = \dfrac{1}{1 + \exp(-s_i(z_j - p_i))}$ |
+| U-shaped (disruptiva) | $P_{ij} = 1 - \exp\!\left(-s_i(z_j - p_i)^2\right)$ |
+
+onde $p_i \sim N(5,\, \sigma_p^2)$ é a preferência da fêmea $i$ e $s_i \sim N(2,\, 0.2^2)$ é a sua discriminação.
+
+**3. Fecundidade neutra**: F=50 se a fêmea acasalou, ou F= 0 se e a fêmea não acasalou.
+A poliandria **não aumenta** a fecundidade da fêmea. O número de filhotes é fixo em 50, independente do número de parceiros. A paternidade é distribuída entre os parceiros via competição espermática (fair raffle). 
+
+**4. Herança quantitativa:**
+
+$$z_{filho} = \frac{z_{pai} + z_{mãe}}{2} + \varepsilon, \quad \varepsilon \sim N(0,\, 0.2^2)$$
 
 ## O que as métricas significam
 
@@ -70,7 +93,7 @@ Miudo, como combinamos neste conjunto de resultados não há seleção natural: 
 -   **Centralização** ($\in [0,1]$; `igraph::centr_degree(g, mode = "all")`): o quanto os acasalamentos se concentram em poucos indivíduos. Valores altos = poucos indivíduos concentram a maioria das ligações.
 -   **$I_s$** (oportunidade de seleção sexual, $\geq 0$; `var(k)/mean(k)^2` em R base, onde $k$ = nº de parceiras por macho): mede a variação no sucesso reprodutivo dos machos, quanto maior, mais desigual é a distribuição de cópulas.
 -   **Tribos** (nº inteiro $\geq 1$; autovalores $\approx 0$ de `igraph::laplacian_matrix()`): número de subpopulações completamente isoladas reprodutivamente (sem nenhuma ligação entre elas).
--   **Comunidades** (nº inteiro $\geq 1$; `igraph::cluster_louvain()`): número de subgrupos sociais detectados dentro da rede (podem estar conectados entre si, mas formam grupos mais coesos internamente).
+-   **Comunidades** (nº inteiro $\geq 1$; `igraph::cluster_louvain()`): número de subgrupos sociais detectados dentro da rede (podem estar conectados entre si, mas formam grupos mais cohesos internamente).
 
 
 
@@ -82,12 +105,12 @@ Para navegar use as abas (tabs) para alternar entre $A_{max}$, curvas de prefer�
 
 Estes gráficos usam o conjunto completo de réplicas da Fase5_MiudoV2 (todas as combinações de k e seleção natural) para mostrar como Modularidade, Aninhamento e outras métricas topológicas variam com σp na geração final, e como essas métricas mudam ao longo do tempo evolutivo (Geração 1 → Geração final). #tenho mais graficos, mas por enquanto queria focar nas redes mesmo.
 
-> Cada figura abaixo tem abas para $k=5$, $k=10$ e $k=20$ (poliandria fixa: nº de parceiros por fêmea), todas com $A_{max}=200$ e sem seleção natural.
+Cada figura abaixo tem abas para $k=5$, $k=10$ e $k=20$ (poliandria fixa: nº de parceiros por fêmea), todas com $A_{max}=200$ e sem seleção natural.
 
 ## Métricas vs σp (Geração Final) {.tabset}
 
 ```{r fase4-plotA, results='asis'}
-for (k_val in c(10, 5, 20)) {
+for (k_val in c( 5, 10,20)) {
   img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotA_AssinaturaTopologica_k%d.png", k_val))
   cat(sprintf("\n### k = %d\n\n", k_val))
   if (file.exists(img)) {
@@ -101,7 +124,7 @@ for (k_val in c(10, 5, 20)) {
 ## Mudança Gen 1 → Gen Final {.tabset}
 
 ```{r fase4-plotE, results='asis'}
-for (k_val in c(10, 5, 20)) {
+for (k_val in c(5, 10, 20)) {
   img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotE_Dumbell_Gen1vsGenFinal_k%d.png", k_val))
   cat(sprintf("\n### k = %d\n\n", k_val))
   if (file.exists(img)) {
@@ -152,7 +175,7 @@ if (length(arquivos) == 0) {
 
 # Painéis de Redes: 4 curvas por (σp, k) {.tabset}
 
-Cada figura mostra as 4 curvas de preferência (Aleatória, Gaussiana, Sigmoide, Disruptiva) para um par fixo (σp, k).
+Agora, vamos as mesmas redes mas agrupanto as 4 curvas de preferência (Aleatória, Gaussiana, Sigmoide, Disruptiva) para um par fixo (σp, k).
 
 ```{r paineis-redes, results='asis'}
 arquivos <- list.files(graficos_dir, pattern = "^Painel_Redes_sigmap[0-9.]+_Amax[0-9]+_k[0-9]+_noNS\\.png$",
@@ -184,9 +207,7 @@ if (length(arquivos) == 0) {
 
 # Painéis de Histogramas: Evolução em 3 Atos {.tabset}
 
-Cada figura mostra, para as 4 curvas de preferência, as distribuições de $z$ (machos) e $p$ (fêmeas) em três momentos: Geração 1, a geração da rede representativa, e a geração final.
-
-> A "geração da rede representativa" é uma réplica específica cuja Modularidade é a mais "típica" (mais próxima da média) da fase estável ($generation \geq 20$) daquele cenário — ver `encontrar_representativa()` no Script 06.
+Aqui cada figura mostra, para as 4 curvas de preferência, as distribuições de $z$ (machos) e $p$ (fêmeas) em três momentos: Geração 1, a geração da rede representativa, e a geração final. A rede representativa é uma réplica específica cuja Modularidade é a mais "típica" (mais próxima da média) da fase estável ($generation \geq 20$) daquele cenário ( `encontrar_representativa()` no Script 06).
 
 ```{r paineis-histogramas, results='asis'}
 arquivos <- list.files(graficos_dir, pattern = "^Painel_Histogramas_sigmap[0-9.]+_Amax[0-9]+_k[0-9]+_noNS\\.png$",
