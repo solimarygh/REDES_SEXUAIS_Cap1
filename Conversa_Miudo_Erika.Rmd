@@ -49,7 +49,7 @@ cat(sprintf(
 Simulamos uma população de **N = 200 machos** e **N = 200 fêmeas** ao longo de **100 gerações**, com **30 réplicas independentes** por cenário. O espaço de parâmetros é:
 
 | Parâmetro | Valores | Descrição |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | Curva de preferência | uniform, gaussian, sigmoid, u-shaped | Regime de seleção sexual |
 | $\sigma_p$ | 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0 | Variação da preferência feminina |
 | $A_{max}$ | 200, 40, 10 | Machos amostrados por fêmea (100%, 20%, 5% de N) |
@@ -69,7 +69,7 @@ Machos com traço $z_j$ muito diferente do ótimo ecológico $\phi = 5$ têm men
 **2. Acasalamento:** cada fêmea sorteia entre 1 e 5 parceiros (poliandria máxima = 5) de entre $A_{max}$ machos amostrados aleatoriamente. A probabilidade de aceitar o macho $j$ depende da curva de preferência:
 
 | Regime | Função $P_{ij}$ |
-|----|----|
+|------------------------------------|------------------------------------|
 | Uniforme (nula) | $P_{ij} = 0.5$ |
 | Gaussiana (estabilizadora) | $P_{ij} = \exp\!\left(-s_i(z_j - p_i)^2\right)$ |
 | Sigmoide (direcional) | $P_{ij} = \dfrac{1}{1 + \exp(-s_i(z_j - p_i))}$ |
@@ -449,7 +449,7 @@ A função U-shaped ($P_{ij} = 1 - \exp(-s_i(z_j - p_i)^2)$) penaliza machos com
 **Predições testáveis:**
 
 | Predição | Evidência esperada |
-|----|----|
+|------------------------------------|------------------------------------|
 | Bimodalidade aumenta com σ_p | Dip test mais significativo a σ_p = 2.0 vs 0.5 |
 | Custo de busca (A_max) suprime morfos | Distribuição mais unimodal a A_max = 10 |
 | Morfos ausentes nas outras curvas | Sigmoide e Gaussiana unimodais no painel comparativo |

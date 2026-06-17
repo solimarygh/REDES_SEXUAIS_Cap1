@@ -228,26 +228,27 @@ etapas, em ordem:</p>
 <p><strong>1. Inicialização (apenas geração 1)</strong> Traços iniciais
 são sorteados de distribuições normais centradas em <span
 class="math inline">\(\phi = 5\)</span>: os machos recebem <span
-class="math inline">\(z \sim \mathcal{N}(\phi,\, \sigma_z{=}1)\)</span>
-e as fêmeas recebem <span class="math inline">\(p \sim
-\mathcal{N}(\phi,\, \sigma_p)\)</span>.</p>
+class="math inline">\(z \sim N(\phi,\, \sigma_z{=}1)\)</span> e as
+fêmeas recebem <span class="math inline">\(p \sim N(\phi,\,
+\sigma_p)\)</span>.</p>
 <p><strong>2. Re-sorteio das preferências (toda geração)</strong> A cada
 nova geração, os valores de preferência <span
 class="math inline">\(p\)</span> das fêmeas são re-sorteados de <span
-class="math inline">\(\mathcal{N}(\phi,\, \sigma_p)\)</span> — <em>a
-preferência não é herdada</em>. Isso é intencional: fixa a distribuição
-de preferências na população e permite isolar o efeito da <em>forma</em>
-e da <em>largura</em> (<span class="math inline">\(\sigma_p\)</span>)
+class="math inline">\(N(\phi,\, \sigma_p)\)</span>. <em>A preferência
+não é herdada</em>. Isso é intencional: fixa a distribuição de
+preferências na população e permite isolar o efeito da <em>forma</em> e
+da <em>largura</em> (<span class="math inline">\(\sigma_p\)</span>)
 dessa distribuição sobre a rede, sem que a preferência feminina evolua
 junto com o traço masculino <span class="math inline">\(z\)</span>.</p>
 <p><strong>3. Seleção de viabilidade (opcional)</strong> Cada macho
 sobrevive com probabilidade <span class="math inline">\(V_j =
-\exp\!\bigl(-\gamma(z_j - \phi)^2\bigr)\)</span>. Neste conjunto de
-resultados essa etapa é <strong>desligada</strong> (<span
-class="math inline">\(V_j = 1\)</span> para todos os machos), isolando o
-efeito puro da escolha feminina sobre a estrutura da rede.</p>
-<p><strong>4. Acasalamento (formação da rede)</strong> Cada fêmea <span
-class="math inline">\(i\)</span> amostra <span
+\exp\!\bigl(-\gamma(z_j - \phi)^2\bigr)\)</span>. Muido, seguindo nossa
+ultima conversa, nestes resultados essa etapa é
+<strong>desligada</strong> (<span class="math inline">\(V_j = 1\)</span>
+para todos os machos), isolando o efeito puro da escolha feminina sobre
+a estrutura da rede.</p>
+<p><strong>4. Formação da rede de acasalamentos</strong> Cada fêmea
+<span class="math inline">\(i\)</span> amostra <span
 class="math inline">\(A_{max}\)</span> machos aleatoriamente da
 população (de sobreviventes se há selecao por viavilidade). Para cada
 macho <span class="math inline">\(j\)</span> amostrado (lembrando que
@@ -287,14 +288,16 @@ preferência:</p>
 </tr>
 </tbody>
 </table>
-<p>onde <span class="math inline">\(s_i \sim \mathcal{N}(2,\,
-0.2)\)</span> é a intensidade da discriminação da fêmea <span
-class="math inline">\(i\)</span>. Ela aceita o macho <span
-class="math inline">\(j\)</span> com probabilidade <span
-class="math inline">\(P_{ij}\)</span> (sem repetir o mesmo parceiro) e
-para quando acumula <span class="math inline">\(k\)</span> parceiros. Se
-terminar sem nenhuma cópula, aceita o último macho avaliado (regra de
-escape).</p>
+<p>onde <span class="math inline">\(s_i \sim N(2,\, 0.2)\)</span> é a
+intensidade de discriminação da fêmea <span
+class="math inline">\(i\)</span>, quanto maior <span
+class="math inline">\(s_i\)</span>, mais seletiva ela é (no trabalho da
+Cris, ela viu que não foi tao relevante, mas podemos brincar com esss
+valor depois). A variação entre fêmeas é pequena (CV = 10%), de modo que
+<span class="math inline">\(s_i \approx 2\)</span> para todas na
+prática; no futuro, esse parâmetro poderia ser explorado como eixo
+adicional do modelo. Se terminar sem nenhuma cópula, aceita o último
+macho avaliado (regra de escape).</p>
 <p>O resultado de cada geração é a <strong>matriz de
 acasalamentos</strong> <span class="math inline">\(M\)</span> (machos ×
 fêmeas, binária): <span class="math inline">\(M_{ji} = 1\)</span> se o
@@ -306,12 +309,12 @@ produz <span class="math inline">\(F = 50\)</span> filhotes (a
 poliandria <strong>não aumenta</strong> a fecundidade). A paternidade de
 cada filhote é distribuída aleatoriamente entre os parceiros da mãe
 (<em>fair raffle</em> / competição espermática neutra). O traço do
-filhote segue herança de ponto médio com mutação: <span
+filhote segue herança de ponto médio com uma peq mutação: <span
 class="math display">\[z_{\text{filho}} = \frac{z_{\text{pai}} +
-z_{\text{mãe}}}{2} + \varepsilon, \quad \varepsilon \sim
-\mathcal{N}(0,\, 0.2)\]</span> O pool de juvenis é então amostrado
-aleatoriamente para preencher as 200 vagas de machos e as 200 vagas de
-fêmeas (capacidade de carga fixa).</p>
+z_{\text{mãe}}}{2} + \varepsilon, \quad \varepsilon \sim N(0,\,
+0.2)\]</span> O pool de juvenis é então amostrado aleatoriamente para
+preencher as 200 vagas de machos e as 200 vagas de fêmeas (capacidade de
+carga fixa).</p>
 </div>
 <div
 id="a-cada-gerão-calculamos-modularidade-aninhamento-centralizaçao-e-is.-para-ver-em-mais-detalhe-as-redes-também-selecionamos-de-cada-cenário-a-rede-representativa-e-para-essa-calculamos-o-número-lapaciano-e-o-numero-de-grupos."
@@ -352,30 +355,34 @@ class="math inline">\(\geq 1\)</span>;
 detectados dentro da rede (podem estar conectados entre si, mas formam
 grupos mais cohesos internamente).</li>
 </ul>
-<p>Para navegar use as abas (tabs) para alternar entre <span
+<p>Veja que dá para navegar use as abas (tabs) para alternar entre <span
 class="math inline">\(A_{max}\)</span>, curvas de preferência e
 combinações de <span class="math inline">\(\sigma_p\)</span>/<span
-class="math inline">\(k\)</span>. As imagens são exibidas em largura
-total para facilitar a exploração :)</p>
+class="math inline">\(k\)</span>. As imagens são exibidas bem grandes
+para facilitar a exploração :)</p>
 <hr />
 </div>
 <div id="resultados-fase-4-forma-da-rede-e-mudança-evolutiva"
 class="section level1 tabset">
 <h1 class="tabset">Resultados Fase 4: Forma da rede e Mudança
 Evolutiva</h1>
-<p>Estes gráficos usam o conjunto completo de réplicas da Fase5_MiudoV2
+<p>Estes gráficos usam o conjunto completo de réplicas da última versao
 (todas as combinações de k e seleção natural) para mostrar especialmete
 como Modularidade, Aninhamento variam com σp na geração final, e como
 essas métricas mudam ao longo do tempo evolutivo (Geração 1 → Geração
 final). #tenho mais graficos, mas por enquanto queria focar nas redes
 que mostrarei mais na frente.</p>
-<p>Lembra que cada figura abaixo tem abas para <span
+<p>De novo, lembra que cada figura abaixo tem abas para <span
 class="math inline">\(k=5\)</span>, <span
 class="math inline">\(k=10\)</span> e <span
 class="math inline">\(k=20\)</span> (poliandria fixa: nº de parceiros
 por fêmea), y aqui quando o numero de machos não é especificado é pq é
-<span class="math inline">\(A_{max}=200\)</span>, y aquie todas estão
-sem seleção natural.</p>
+<span class="math inline">\(A_{max}=200\)</span>. Mais um detalhe: a
+linha vermelha em <span class="math inline">\(\sigma_p = 1.0\)</span>
+marca o limiar inicial onde <span class="math inline">\(\sigma_p =
+\sigma_z\)</span> (Geração 1). Note que <span
+class="math inline">\(\sigma_z\)</span> dos machos evolui ao longo das
+gerações (veja abaixo os histogramas dos traits).</p>
 <div id="métricas-vs-σp-geração-final" class="section level2 tabset">
 <h2 class="tabset">Métricas vs σp (Geração Final)</h2>
 <div id="k-5" class="section level3">
@@ -414,10 +421,10 @@ src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotE_Dumbell_Gen1vsGenFinal
 </div>
 </div>
 </div>
-<div id="redes-comparativas-k-σp-uma-figura-por-curva"
+<div id="redes-comparativas-k-σp-uma-figura-por-curva-de-preferencia"
 class="section level1 tabset">
-<h1 class="tabset">Redes Comparativas: k × σp (uma figura por
-curva)</h1>
+<h1 class="tabset">Redes Comparativas: k × σp (uma figura por curva de
+preferencia)</h1>
 <p>Cada figura é uma grade 3×3: linhas = σp (2.0, 1.0, 0.5, de cima para
 baixo), colunas = k (5, 10, 20). Cada subtítulo traz Mod, NODF, Tribos e
 Comunidades.</p>
@@ -654,7 +661,9 @@ geração da rede representativa, e a geração final. A rede representativa
 é uma réplica específica cuja Modularidade é a mais “típica” (mais
 próxima da média) da fase estável (<span
 class="math inline">\(generation \geq 20\)</span>) daquele cenário (
-<code>encontrar_representativa()</code> no Script 06).</p>
+<code>encontrar_representativa()</code> no Script 06). Aqui a linha
+tracejada serve de referencia, está sempre apontando ao 5 (era o antigo
+ótimo evolutivo) ;).</p>
 <div id="a_max-200-2" class="section level2 tabset">
 <h2 class="tabset">A_max = 200</h2>
 <div id="σp2.0-k5-3" class="section level3">
