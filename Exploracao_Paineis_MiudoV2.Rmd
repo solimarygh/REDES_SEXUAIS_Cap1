@@ -64,59 +64,35 @@ ordem_k      <- c(5, 10, 20)
 
 ## Ciclo de vida por geração
 
-
-**1. NAO Seleção de viabilidade**: Miudo, como combinamos neste conjunto de resultados **não** há seleção natural: todos os machos têm a mesma chance de sobreviver, isolando o efeito puro da escolha feminina sobre a estrutura da rede.
-
-
-**2. Acasalamento:** cada fêmea sorteia se acasala com machos = o valor indicado com poliandría 5, 10 ou 20. A probabilidade de aceitar o macho $j$ depende da curva de preferência:
-
-| Regime | Função $P_{ij}$ |
-|------------------------------------|------------------------------------|
-| Uniforme (nula) | $P_{ij} = 0.5$ |
-| Gaussiana (estabilizadora) | $P_{ij} = \exp\!\left(-s_i(z_j - p_i)^2\right)$ |
-| Sigmoide (direcional) | $P_{ij} = \dfrac{1}{1 + \exp(-s_i(z_j - p_i))}$ |
-| U-shaped (disruptiva) | $P_{ij} = 1 - \exp\!\left(-s_i(z_j - p_i)^2\right)$ |
-
-onde $p_i \sim N(5,\, \sigma_p^2)$ é a preferência da fêmea $i$ e $s_i \sim N(2,\, 0.2^2)$ é a sua discriminação.
-
-**3. Fecundidade neutra**: F=50 se a fêmea acasalou, ou F= 0 se e a fêmea não acasalou.
-A poliandria **não aumenta** a fecundidade da fêmea. O número de filhotes é fixo em 50, independente do número de parceiros. A paternidade é distribuída entre os parceiros via competição espermática (fair raffle). 
-
-**4. Herança quantitativa:**
-
-$$z_{filho} = \frac{z_{pai} + z_{mãe}}{2} + \varepsilon, \quad \varepsilon \sim N(0,\, 0.2^2)$$
-
-## Passo a passo de uma geração
-
 Cada geração $t$ segue estas etapas, em ordem:
 
 **1. Inicialização (apenas geração 1)**
 Traços iniciais são sorteados de distribuições normais centradas em $\phi = 5$: os machos recebem $z \sim \mathcal{N}(\phi,\, \sigma_z{=}1)$ e as fêmeas recebem $p \sim \mathcal{N}(\phi,\, \sigma_p)$.
 
 **2. Re-sorteio das preferências (toda geração)**
-A cada nova geração, os valores de preferência $p$ das fêmeas são re-sorteados de $\mathcal{N}(\phi,\, \sigma_p)$ — *a preferência não é herdada*. Isso é intencional: fixa a distribuição de preferências na população e permite isolar o efeito da *forma* e da *largura* ($\sigma_p$) dessa distribuição sobre a rede, sem que a própria preferência evolua junto com $z$.
+A cada nova geração, os valores de preferência $p$ das fêmeas são re-sorteados de $\mathcal{N}(\phi,\, \sigma_p)$ — *a preferência não é herdada*. Isso é intencional: fixa a distribuição de preferências na população e permite isolar o efeito da *forma* e da *largura* ($\sigma_p$) dessa distribuição sobre a rede, sem que a preferência feminina evolua junto com o traço masculino $z$.
 
-**3. Seleção natural (opcional)**
-Cada macho sobrevive com probabilidade $V_j = \exp\!\bigl(-\gamma(z_j - \phi)^2\bigr)$. Nos cenários analisados aqui ($V_j = 1$ para todos), essa etapa é desligada, e 100% dos machos entram na escolha feminina.
+**3. Seleção de viabilidade (opcional)**
+Cada macho sobrevive com probabilidade $V_j = \exp\!\bigl(-\gamma(z_j - \phi)^2\bigr)$. Neste conjunto de resultados essa etapa é **desligada** ($V_j = 1$ para todos os machos), isolando o efeito puro da escolha feminina sobre a estrutura da rede.
 
 **4. Acasalamento (formação da rede)**
-Cada fêmea $i$ amostra $A_{max}$ machos aleatoriamente (com reposição) da população de sobreviventes. Para cada macho $j$ amostrado, calcula a probabilidade de aceite $P_{ij}$ conforme a curva de preferência:
+Cada fêmea $i$ amostra $A_{max}$ machos aleatoriamente da população de sobreviventes. Para cada macho $j$ amostrado, calcula a probabilidade de aceite $P_{ij}$ conforme a curva de preferência:
 
-| Curva       | Fórmula de $P_{ij}$                                               |
-|:------------|:------------------------------------------------------------------|
-| Aleatória   | $0.5$ (constante)                                                 |
-| Gaussiana   | $\exp\!\bigl(-s_i\,(z_j - p_i)^2\bigr)$                          |
-| Sigmoide    | $1\,/\,\bigl(1 + \exp(-s_i\,(z_j - p_i))\bigr)$                  |
-| Disruptiva  | $1 - \exp\!\bigl(-s_i\,(z_j - p_i)^2\bigr)$                      |
+| Curva | Função $P_{ij}$ |
+|:------|:----------------|
+| Aleatória (nula) | $P_{ij} = 0.5$ |
+| Gaussiana (estabilizadora) | $P_{ij} = \exp\!\bigl(-s_i\,(z_j - p_i)^2\bigr)$ |
+| Sigmoide (direcional) | $P_{ij} = 1\,/\,\bigl(1 + \exp(-s_i\,(z_j - p_i))\bigr)$ |
+| U-shaped (disruptiva) | $P_{ij} = 1 - \exp\!\bigl(-s_i\,(z_j - p_i)^2\bigr)$ |
 
-onde $s_i \sim \mathcal{N}(2,\, 0.2)$ é a intensidade da discriminação da fêmea $i$. A fêmea aceita o macho $j$ com probabilidade $P_{ij}$ (e não repete o mesmo parceiro). Ela para quando acumula $k$ parceiros distintos. Se terminar sem nenhuma cópula, aceita o último macho avaliado (regra de escape).
+onde $s_i \sim \mathcal{N}(2,\, 0.2)$ é a intensidade da discriminação da fêmea $i$. Ela aceita o macho $j$ com probabilidade $P_{ij}$ (sem repetir o mesmo parceiro) e para quando acumula $k$ parceiros. Se terminar sem nenhuma cópula, aceita o último macho avaliado (regra de escape).
 
-O resultado é a **matriz de acasalamentos** $M$ (machos × fêmeas, binária): $M_{ji} = 1$ se o macho $j$ acasalou com a fêmea $i$. Essa é a rede bipartita sobre a qual calculamos as métricas.
+O resultado de cada geração é a **matriz de acasalamentos** $M$ (machos × fêmeas, binária): $M_{ji} = 1$ se o macho $j$ acasalou com a fêmea $i$. Essa é a rede bipartita sobre a qual calculamos as métricas.
 
-**5. Produção de descendentes**
-Cada fêmea que acasalou produz $F = 50$ filhotes. A paternidade de cada filhote é distribuída aleatoriamente entre os parceiros da mãe (*fair raffle* / competição espermática neutra). O traço do filhote segue herança de ponto médio com mutação:
+**5. Fecundidade e herança**
+Cada fêmea que acasalou produz $F = 50$ filhotes (a poliandria **não aumenta** a fecundidade). A paternidade de cada filhote é distribuída aleatoriamente entre os parceiros da mãe (*fair raffle* / competição espermática neutra). O traço do filhote segue herança de ponto médio com mutação:
 $$z_{\text{filho}} = \frac{z_{\text{pai}} + z_{\text{mãe}}}{2} + \varepsilon, \quad \varepsilon \sim \mathcal{N}(0,\, 0.2)$$
-O pool de juvenis é então amostrado aleatoriamente para preencher as 200 vagas de machos e as 200 vagas de fêmeas da geração seguinte (capacidade de carga fixa).
+O pool de juvenis é então amostrado aleatoriamente para preencher as 200 vagas de machos e as 200 vagas de fêmeas (capacidade de carga fixa).
 
 ## O que as métricas significam
 
