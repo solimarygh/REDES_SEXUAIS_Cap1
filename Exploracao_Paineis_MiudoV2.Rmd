@@ -67,10 +67,10 @@ ordem_k      <- c(5, 10, 20)
 Cada geração $t$ segue estas etapas, em ordem:
 
 **1. Inicialização (apenas geração 1)**
-Traços iniciais são sorteados de distribuições normais centradas em $\phi = 5$: os machos recebem $z \sim \mathcal{N}(\phi,\, \sigma_z{=}1)$ e as fêmeas recebem $p \sim \mathcal{N}(\phi,\, \sigma_p)$.
+Traços iniciais são sorteados de distribuições normais centradas em $\phi = 5$: os machos recebem $z \sim N(\phi,\, \sigma_z{=}1)$ e as fêmeas recebem $p \sim N(\phi,\, \sigma_p)$.
 
 **2. Re-sorteio das preferências (toda geração)**
-A cada nova geração, os valores de preferência $p$ das fêmeas são re-sorteados de $\mathcal{N}(\phi,\, \sigma_p)$ — *a preferência não é herdada*. Isso é intencional: fixa a distribuição de preferências na população e permite isolar o efeito da *forma* e da *largura* ($\sigma_p$) dessa distribuição sobre a rede, sem que a preferência feminina evolua junto com o traço masculino $z$.
+A cada nova geração, os valores de preferência $p$ das fêmeas são re-sorteados de $N(\phi,\, \sigma_p)$ — *a preferência não é herdada*. Isso é intencional: fixa a distribuição de preferências na população e permite isolar o efeito da *forma* e da *largura* ($\sigma_p$) dessa distribuição sobre a rede, sem que a preferência feminina evolua junto com o traço masculino $z$.
 
 **3. Seleção de viabilidade (opcional)**
 Cada macho sobrevive com probabilidade $V_j = \exp\!\bigl(-\gamma(z_j - \phi)^2\bigr)$. Neste conjunto de resultados essa etapa é **desligada** ($V_j = 1$ para todos os machos), isolando o efeito puro da escolha feminina sobre a estrutura da rede.
@@ -85,13 +85,13 @@ Cada fêmea $i$ amostra $A_{max}$ machos aleatoriamente da população (de sobre
 | Sigmoide (direcional) | $P_{ij} = 1\,/\,\bigl(1 + \exp(-s_i\,(z_j - p_i))\bigr)$ |
 | U-shaped (disruptiva) | $P_{ij} = 1 - \exp\!\bigl(-s_i\,(z_j - p_i)^2\bigr)$ |
 
-onde $s_i \sim \mathcal{N}(2,\, 0.2)$ é a intensidade de discriminação da fêmea $i$ — quanto maior $s_i$, mais seletiva ela é. A variação entre fêmeas é pequena (CV = 10%), de modo que $s_i \approx 2$ para todas na prática; no futuro, esse parâmetro poderia ser explorado como eixo adicional do modelo. Se terminar sem nenhuma cópula, aceita o último macho avaliado (regra de escape).
+onde $s_i \sim N(2,\, 0.2)$ é a intensidade de discriminação da fêmea $i$ — quanto maior $s_i$, mais seletiva ela é. A variação entre fêmeas é pequena (CV = 10%), de modo que $s_i \approx 2$ para todas na prática; no futuro, esse parâmetro poderia ser explorado como eixo adicional do modelo. Se terminar sem nenhuma cópula, aceita o último macho avaliado (regra de escape).
 
 O resultado de cada geração é a **matriz de acasalamentos** $M$ (machos × fêmeas, binária): $M_{ji} = 1$ se o macho $j$ acasalou com a fêmea $i$. Essa é a rede bipartita sobre a qual calculamos as métricas.
 
 **5. Fecundidade e herança**
 Cada fêmea que acasalou produz $F = 50$ filhotes (a poliandria **não aumenta** a fecundidade). A paternidade de cada filhote é distribuída aleatoriamente entre os parceiros da mãe (*fair raffle* / competição espermática neutra). O traço do filhote segue herança de ponto médio com mutação:
-$$z_{\text{filho}} = \frac{z_{\text{pai}} + z_{\text{mãe}}}{2} + \varepsilon, \quad \varepsilon \sim \mathcal{N}(0,\, 0.2)$$
+$$z_{\text{filho}} = \frac{z_{\text{pai}} + z_{\text{mãe}}}{2} + \varepsilon, \quad \varepsilon \sim N(0,\, 0.2)$$
 O pool de juvenis é então amostrado aleatoriamente para preencher as 200 vagas de machos e as 200 vagas de fêmeas (capacidade de carga fixa).
 
 ## A cada gerão calculamos Modularidade, Aninhamento, centralizaçao, e Is. Para VER em mais detalhe as redes, também selecionamos de cada cenário a rede representativa e para essa calculamos o número lapaciano e o numero de grupos.
