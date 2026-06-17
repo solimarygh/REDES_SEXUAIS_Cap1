@@ -85,7 +85,7 @@ Cada fêmea $i$ amostra $A_{max}$ machos aleatoriamente da população de sobrev
 | Sigmoide (direcional) | $P_{ij} = 1\,/\,\bigl(1 + \exp(-s_i\,(z_j - p_i))\bigr)$ |
 | U-shaped (disruptiva) | $P_{ij} = 1 - \exp\!\bigl(-s_i\,(z_j - p_i)^2\bigr)$ |
 
-onde $s_i \sim \mathcal{N}(2,\, 0.2)$ é a intensidade da discriminação da fêmea $i$. Ela aceita o macho $j$ com probabilidade $P_{ij}$ (sem repetir o mesmo parceiro) e para quando acumula $k$ parceiros. Se terminar sem nenhuma cópula, aceita o último macho avaliado (regra de escape).
+onde $s_i \sim \mathcal{N}(2,\, 0.2)$ é a intensidade de discriminação da fêmea $i$ — quanto maior $s_i$, mais seletiva ela é. A variação entre fêmeas é pequena (CV = 10%), de modo que $s_i \approx 2$ para todas na prática; no futuro, esse parâmetro poderia ser explorado como eixo adicional do modelo. Se terminar sem nenhuma cópula, aceita o último macho avaliado (regra de escape).
 
 O resultado de cada geração é a **matriz de acasalamentos** $M$ (machos × fêmeas, binária): $M_{ji} = 1$ se o macho $j$ acasalou com a fêmea $i$. Essa é a rede bipartita sobre a qual calculamos as métricas.
 
