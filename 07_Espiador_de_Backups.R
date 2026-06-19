@@ -8,7 +8,8 @@ library(patchwork)
 library(segmented)
 library(ggh4x)
 
-arquivo <- "Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds"
+arquivo_backup <- "Resultados_Artigo/Fase5_MiudoV2/Dados/backup_lista_fase5_miudov2.rds"
+arquivo_final  <- "Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds"
 
 # Pastas de saída
 dir_espiadinhas <- "Resultados_Artigo/Fase5_MiudoV2/Graficos/Espiadinhas"
@@ -18,11 +19,19 @@ dir.create(dir_graficos,    recursive = TRUE, showWarnings = FALSE)
 dir.create(dir_espiadinhas, recursive = TRUE, showWarnings = FALSE)
 dir.create(dir_dados_out,   recursive = TRUE, showWarnings = FALSE)
 
-cat(sprintf("Procurando backup em: %s\n", normalizePath(arquivo, mustWork = FALSE)))
-cat(sprintf("Arquivo existe? %s\n", ifelse(file.exists(arquivo), "SIM", "NAO - verifique o caminho")))
+# Prefere o backup (mais atual durante a simulação); cai no final se não houver backup
+if (file.exists(arquivo_backup)) {
+  lista_backup <- readRDS(arquivo_backup)
+  df_parcial   <- bind_rows(lista_backup[!sapply(lista_backup, is.null)])
+  cat(sprintf("Backup carregado: %d linhas disponíveis.\n", nrow(df_parcial)))
+} else if (file.exists(arquivo_final)) {
+  df_parcial <- readRDS(arquivo_final)
+  cat(sprintf("Arquivo final carregado: %d linhas.\n", nrow(df_parcial)))
+} else {
+  stop("Nenhum arquivo encontrado. Rode Fase4_TodasAsCurvas.R primeiro.")
+}
 
-if(file.exists(arquivo)) {
-  df_parcial <- readRDS(arquivo)
+if(nrow(df_parcial) > 0) {
 
   # GEN_FINAL: detecta automaticamente a última geração
   GEN_FINAL <- max(df_parcial$generation, na.rm = TRUE)
