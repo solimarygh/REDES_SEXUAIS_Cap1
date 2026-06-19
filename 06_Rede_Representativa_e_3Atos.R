@@ -46,13 +46,13 @@ cenarios_fase4 <- expand.grid(
 arquivo_final  <- "Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds"
 arquivo_backup <- "Resultados_Artigo/Fase5_MiudoV2/Dados/backup_lista_fase5_miudov2.rds"
 
-if (file.exists(arquivo_final)) {
-  df_fase4 <- readRDS(arquivo_final)
-  cat(sprintf("Dados FINAIS carregados (%d linhas).\n", nrow(df_fase4)))
-} else if (file.exists(arquivo_backup)) {
+if (file.exists(arquivo_backup)) {
   lista_backup <- readRDS(arquivo_backup)
   df_fase4 <- bind_rows(lista_backup[!sapply(lista_backup, is.null)])
-  cat(sprintf("Dados PARCIAIS (backup) carregados (%d linhas).\n", nrow(df_fase4)))
+  cat(sprintf("Backup carregado: %d linhas disponíveis.\n", nrow(df_fase4)))
+} else if (file.exists(arquivo_final)) {
+  df_fase4 <- readRDS(arquivo_final)
+  cat(sprintf("Arquivo final carregado: %d linhas.\n", nrow(df_fase4)))
 } else {
   stop("Nenhum arquivo de dados da Fase 5 encontrado. Rode Fase4_TodasAsCurvas.R primeiro.")
 }
