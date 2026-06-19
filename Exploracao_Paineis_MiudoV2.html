@@ -164,7 +164,7 @@ pre code {
 <h1 class="title toc-ignore">Exploração de Resultados</h1>
 <h3 class="subtitle">Evolucao, Histogramas e Redes comparativas</h3>
 <h4 class="author">Solimary García Hernández</h4>
-<h4 class="date">17 de June de 2026</h4>
+<h4 class="date">19 de June de 2026</h4>
 
 </div>
 
@@ -331,9 +331,9 @@ de machos e fêmeas que acasalam preferencialmente entre si.</li>
 <li><strong>Aninhamento (NODF)</strong> (<span class="math inline">\(\in
 [0,100]\)</span>; <code>bipartite::nested(M, method = "NODF")</code>): o
 quanto os parceiros dos machos menos “populares” são um subconjunto dos
-parceiros dos machos mais “populares”. Veja que, como esperado, ao
-deixar as femeas se acasalarem com mais machos o Aninhamento
-aumentou.</li>
+parceiros dos machos mais “populares”. Como esperado, valores maiores de
+<span class="math inline">\(k\)</span> (mais parceiros por fêmea) tendem
+a aumentar o aninhamento da rede.</li>
 <li><strong>Centralização</strong> (<span class="math inline">\(\in
 [0,1]\)</span>; <code>igraph::centr_degree(g, mode = "all")</code>): o
 quanto os acasalamentos se concentram em poucos indivíduos. Valores
