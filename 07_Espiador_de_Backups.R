@@ -549,8 +549,8 @@ if(file.exists(arquivo)) {
   # GRÁFICOS FINAIS (Fase 5)
   # =====================================================================
   val_reps       <- length(unique(df_parcial$replica[!is.na(df_parcial$replica)]))
-  subtitulo_base <- sprintf("Parâmetros: %d Gerações | N=200 | k=%d | Réplicas: %d de 100 (%.0f%%)",
-                             GEN_FINAL, K_BASE, val_reps, 100 * n_completos / n_total)
+  subtitulo_base <- sprintf("Parâmetros: %d Gerações | N=200 | k=%d | Réplicas: %d",
+                             GEN_FINAL, K_BASE, val_reps)
 
   tema_master <- theme_light(base_size = 14) +
     theme(legend.position = "bottom",
@@ -761,8 +761,8 @@ if(file.exists(arquivo)) {
     val_reps_k     <- length(unique(df_base_k$replica[!is.na(df_base_k$replica)]))
     n_completos_k  <- length(unique(paste(df_base_k$tipo_selecao, df_base_k$sigma_p,
                                           df_base_k$encounters_n, df_base_k$replica)))
-    subtitulo_k <- sprintf("Parâmetros: %d Gerações | N=200 | k=%d | Réplicas: %d de 100 (%.0f%%)",
-                           GEN_FINAL, k_val, val_reps_k, 100 * n_completos_k / n_total)
+    subtitulo_k <- sprintf("Parâmetros: %d Gerações | N=200 | k=%d | Réplicas: %d",
+                           GEN_FINAL, k_val, val_reps_k)
 
     df_tabela_k <- construir_df_tabela(df_base_k)
 
