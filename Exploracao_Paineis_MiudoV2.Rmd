@@ -7,7 +7,7 @@ output:
   html_document:
     theme: flatly
     toc: false
-    self_contained: false
+    self_contained: true
 ---
 
 ```{css, echo=FALSE}
