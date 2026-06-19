@@ -175,6 +175,7 @@ tema_poster_escuro <- theme_dark(base_size = 14) +
 
 # Change to tema_poster_escuro for a dark background poster
 tema_master <- tema_poster_claro
+#tema_master <- tema_poster_escuro   # ← was tema_poster_claro
 
 cores_4 <- c("uniform" = "gray60", "gaussian" = "#E6B800", "sigmoid" = "#3BA273", "u-shaped" = "#9932CC")
 labels_4 <- c("uniform" = "Random", "gaussian" = "Gaussian", "sigmoid" = "Sigmoid", "u-shaped" = "Disruptive")

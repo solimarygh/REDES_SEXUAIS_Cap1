@@ -586,7 +586,8 @@ if(file.exists(arquivo)) {
     )
 
   # Change to tema_poster_escuro for a dark background poster
-  tema_master <- tema_poster_claro
+  tema_master <- tema_poster_claro 
+  #tema_master <- tema_poster_escuro   # ← was tema_poster_claro
 
   # ---------------------------------------------------------------------
   # PLOT A: ASSINATURA TOPOLÓGICA (A_max = 200)

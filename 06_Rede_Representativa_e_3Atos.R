@@ -95,6 +95,7 @@ tema_poster_escuro <- theme_dark(base_size = 14) +
 
 # Change to tema_poster_escuro for a dark background poster
 tema_master <- tema_poster_claro
+#tema_master <- tema_poster_escuro   # ← was tema_poster_claro
 
 # =====================================================================
 # FUNÇÃO 1: encontrar_representativa
