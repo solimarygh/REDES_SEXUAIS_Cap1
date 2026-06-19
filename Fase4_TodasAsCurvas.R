@@ -132,12 +132,11 @@ saveRDS(df_fase4, arquivo_final)
 cat("\nFase 4 concluída com sucesso! Dados salvos em:", arquivo_final, "\n")
 
 # =====================================================================
-# 4) PREPARAÇÃO DOS GRÁFICOS (Geração 50)
+# 4) PREPARAÇÃO DOS GRÁFICOS (Geração Final)
 # =====================================================================
-df_gen50 <- df_fase4 %>% filter(generation == 50) %>% drop_na()
-
-val_gens <- max(df_fase4$generation)
-val_reps <- length(unique(df_fase4$replica))
+val_gens     <- max(df_fase4$generation)
+val_reps     <- length(unique(df_fase4$replica))
+df_gen_final <- df_fase4 %>% filter(generation == val_gens) %>% drop_na()
 subtitulo_base <- sprintf("Parameters: %d Generations | N=200 | Replicates: %d", val_gens, val_reps)
 
 tema_poster_claro <- theme_light(base_size = 14) +
@@ -183,7 +182,7 @@ labels_4 <- c("uniform" = "Random", "gaussian" = "Gaussian", "sigmoid" = "Sigmoi
 # ---------------------------------------------------------------------
 # PLOT A: ASSINATURA TOPOLÓGICA (Apenas cenário ideal: A_max = 200)
 # ---------------------------------------------------------------------
-p_fase4_topo <- df_gen50 %>% filter(encounters_n == 200) %>%
+p_fase4_topo <- df_gen_final %>% filter(encounters_n == 200) %>%
   pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization), names_to = "Metrica", values_to = "Valor") %>%
   mutate(Metrica = case_when(Metrica == "Modularity" ~ "1. Modularity", Metrica == "Nestedness" ~ "2. Nestedness",
                              Metrica == "I_s" ~ "3. Is", Metrica == "Centralization" ~ "4. Centralization")) %>%
@@ -200,7 +199,7 @@ p_fase4_topo <- df_gen50 %>% filter(encounters_n == 200) %>%
 # ---------------------------------------------------------------------
 # PLOT B: RUÍDO ECOLÓGICO - A Queda da Evolução (A_max: 200, 40, 10)
 # ---------------------------------------------------------------------
-df_ruido <- df_gen50 %>% mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
+df_ruido <- df_gen_final %>% mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
                                                       levels = c("A_max: 200", "A_max: 40", "A_max: 10"))) %>%
   pivot_longer(cols = c(zbar_males, varz_males), names_to = "Variavel", values_to = "Valor") %>%
   mutate(Variavel = ifelse(Variavel == "zbar_males", "1. Mean Ornament (zbar)", "2. Genetic Diversity (Var z)"))
@@ -220,7 +219,7 @@ p_fase4_ruido <- ggplot(df_ruido, aes(x = sigma_p, y = Valor, color = tipo_selec
 # ---------------------------------------------------------------------
 # PLOT C: A PROVA CAUSAL (A_max = 200, sigma_p fixo em 2.0)
 # ---------------------------------------------------------------------
-df_causal <- df_gen50 %>% filter(encounters_n == 200, sigma_p == 2.0) %>%
+df_causal <- df_gen_final %>% filter(encounters_n == 200, sigma_p == 2.0) %>%
   pivot_longer(cols = c(Modularity, Nestedness), names_to = "Topologia", values_to = "EixoX") %>%
   mutate(Topologia = ifelse(Topologia == "Modularity", "1. Modularity (vs Var z)", "2. Nestedness (vs Mean z)"),
          EixoY = ifelse(Topologia == "1. Modularity (vs Var z)", varz_males, zbar_males))
@@ -261,7 +260,7 @@ cat("\nPreparando dados para os Modelos Lineares...\n")
 # Dividimos em "Abaixo do Limiar" e "Acima do Limiar", usando 1.0 como 
 # ponto de ancoragem (dobradiça) para ambos os modelos!
 
-df_stats_low <- df_gen50 %>%  
+df_stats_low <- df_gen_final %>%  
   filter(sigma_p <= 1.0) %>% # <-- O 1.0 FICA AQUI (Ponto Máximo)
   drop_na(Modularity, Nestedness, Centralization, I_s, varz_males, zbar_males) %>%
   mutate(
@@ -272,7 +271,7 @@ df_stats_low <- df_gen50 %>%
     f_encounters     = factor(encounters_n)
   )
 
-df_stats_high <- df_gen50 %>%  
+df_stats_high <- df_gen_final %>%  
   filter(sigma_p >= 1.0) %>% # <-- E O 1.0 FICA AQUI TAMBÉM (Linha Base)
   drop_na(Modularity, Nestedness, Centralization, I_s, varz_males, zbar_males) %>%
   mutate(
@@ -321,7 +320,7 @@ print(summary(mod3b))
 #######conceptualmente es evaluar un sistema "Piecewise", porque la biología cambia sus leyes de la física justo en el umbral donde el comportamiento de la hembra supera a la genética del macho 
 
 # 1. Haces un modelo lineal general
-modelo_general <- lm(varz_males ~ sigma_p, data = df_gen50)
+modelo_general <- lm(varz_males ~ sigma_p, data = df_gen_final)
 
 # 2. Le dices a R: "Rómpeme esta línea en dos, exactamente en sigma_p = 1.0"
 modelo_segmentado <- segmented(modelo_general, seg.Z = ~sigma_p, psi = 1.0)
