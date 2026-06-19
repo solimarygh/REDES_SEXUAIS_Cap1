@@ -231,8 +231,8 @@ rodar_cenario <- function(tipo_sel, sp, am, kf, sel_nat) {
                       tipo_sel, sp, am, kf, sel_label,
                       rep_info$replica, rep_info$geracao_alvo,
                       dados$GenAlvo$modularity, num_grupos, n_comunidades))
-  legend("bottomleft", legend = c("Macho","Fêmea"), pch = c(15, 16),
-         col = "gray40", pt.cex = 2, bty = "n", title = "Tipo")
+  legend("bottomleft", legend = c("Male","Female"), pch = c(15, 16),
+         col = "gray40", pt.cex = 2, bty = "n", title = "Type")
   dev.off()
   cat(sprintf("    Rede salva: %s\n", nome_rede))
 
@@ -414,7 +414,7 @@ gerar_lote_comparativo <- function(am) {
            edge.width = 0.8,
            main = sprintf("%s\nMod: %.3f | NODF: %.3f | Tribos: %d",
                           tl, r$resumo$modularity, r$resumo$nestedness, r$num_grupos))
-      legend("bottomleft", legend = c("Macho","Fêmea"), pch = c(15,16),
+      legend("bottomleft", legend = c("Male","Female"), pch = c(15,16),
              col = "gray40", pt.cex = 1.5, bty = "n")
     }
     dev.off()
@@ -460,11 +460,11 @@ gerar_lote_comparativo <- function(am) {
              main = sprintf("k = %d | σp = %.1f\nMod: %.3f | NODF: %.3f | Tribos: %d | Com: %d",
                             kf, sp, r$resumo$modularity, r$resumo$nestedness,
                             r$num_grupos, r$n_comunidades))
-        legend("bottomleft", legend = c("Macho","Fêmea"), pch = c(15,16),
+        legend("bottomleft", legend = c("Male","Female"), pch = c(15,16),
                col = "gray40", pt.cex = 1.5, bty = "n")
       }
     }
-    title(main = sprintf("%s | A_max=%d | sem sel.natural — comparação de k e σp",
+    title(main = sprintf("%s | A_max=%d | no nat.selection — comparison of k and σp",
                          labels_tipo[tc], am),
           outer = TRUE, line = -1.5, cex.main = 1.6)
     dev.off()
