@@ -138,7 +138,7 @@ df_gen50 <- df_fase4 %>% filter(generation == 50) %>% drop_na()
 
 val_gens <- max(df_fase4$generation)
 val_reps <- length(unique(df_fase4$replica))
-subtitulo_base <- sprintf("Parâmetros: %d Gerações | N=200 | Réplicas: %d", val_gens, val_reps)
+subtitulo_base <- sprintf("Parameters: %d Generations | N=200 | Replicates: %d", val_gens, val_reps)
 
 tema_master <- theme_light(base_size = 14) +
   theme(legend.position = "bottom", 
@@ -146,23 +146,23 @@ tema_master <- theme_light(base_size = 14) +
         strip.text = element_text(color = "white", face = "bold"))
 
 cores_4 <- c("uniform" = "gray60", "gaussian" = "#E6B800", "sigmoid" = "#3BA273", "u-shaped" = "#9932CC")
-labels_4 <- c("uniform" = "Aleatória", "gaussian" = "Gaussiana", "sigmoid" = "Sigmoide", "u-shaped" = "Disruptiva")
+labels_4 <- c("uniform" = "Random", "gaussian" = "Gaussian", "sigmoid" = "Sigmoid", "u-shaped" = "Disruptive")
 
 # ---------------------------------------------------------------------
 # PLOT A: ASSINATURA TOPOLÓGICA (Apenas cenário ideal: A_max = 200)
 # ---------------------------------------------------------------------
 p_fase4_topo <- df_gen50 %>% filter(encounters_n == 200) %>%
   pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization), names_to = "Metrica", values_to = "Valor") %>%
-  mutate(Metrica = case_when(Metrica == "Modularity" ~ "1. Modularidade", Metrica == "Nestedness" ~ "2. Aninhamento",
-                             Metrica == "I_s" ~ "3. Is", Metrica == "Centralization" ~ "4. Centralidade")) %>%
+  mutate(Metrica = case_when(Metrica == "Modularity" ~ "1. Modularity", Metrica == "Nestedness" ~ "2. Nestedness",
+                             Metrica == "I_s" ~ "3. Is", Metrica == "Centralization" ~ "4. Centralization")) %>%
   ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
   geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
   geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2, show.legend = FALSE) +
   geom_jitter(alpha = 0.2, width = 0.05, size = 1.2) +
   facet_wrap(~Metrica, scales = "free_y", ncol=2) +
   scale_color_manual(values = cores_4, labels = labels_4) + scale_fill_manual(values = cores_4, labels = labels_4) +
-  labs(title = "Fase 4: A Assinatura Topológica Suprema (A_max = 200)", subtitle = subtitulo_base,
-       x = expression(paste("Variação da Preferência (", sigma[p], ")")), y = "Valor da Métrica", color = "", fill="") +
+  labs(title = "Phase 4: Topological Signature (A_max = 200)", subtitle = subtitulo_base,
+       x = expression(paste("Preference Variation (", sigma[p], ")")), y = "Metric Value", color = "", fill="") +
   guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) + tema_master
 
 # ---------------------------------------------------------------------
@@ -171,18 +171,18 @@ p_fase4_topo <- df_gen50 %>% filter(encounters_n == 200) %>%
 df_ruido <- df_gen50 %>% mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
                                                       levels = c("A_max: 200", "A_max: 40", "A_max: 10"))) %>%
   pivot_longer(cols = c(zbar_males, varz_males), names_to = "Variavel", values_to = "Valor") %>%
-  mutate(Variavel = ifelse(Variavel == "zbar_males", "1. Média (Exagero)", "2. Diversidade Genética (Var z)"))
+  mutate(Variavel = ifelse(Variavel == "zbar_males", "1. Mean Ornament (zbar)", "2. Genetic Diversity (Var z)"))
 
 p_fase4_ruido <- ggplot(df_ruido, aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
   # 5.0 ES la variable \phi de nuestro modelo ecológico! 
-  geom_hline(data = filter(df_ruido, Variavel == "1. Média (Exagero)"), aes(yintercept = 5.0), linetype = "dashed", alpha = 0.6) + 
+  geom_hline(data = filter(df_ruido, Variavel == "1. Mean Ornament (zbar)"), aes(yintercept = 5.0), linetype = "dashed", alpha = 0.6) +
   geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
   geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2, show.legend = FALSE) +
   geom_jitter(alpha = 0.2, width = 0.05, size = 1) +
   facet_grid(Variavel ~ Cenario_Ecol, scales = "free_y") +
   scale_color_manual(values = cores_4, labels = labels_4) + scale_fill_manual(values = cores_4, labels = labels_4) +
-  labs(title = "Fase 4: O Colapso Ecológico das Forças Evolutivas", subtitle = "Lendo da esq. para a dir.: O custo de busca neutraliza a seleção sexual",
-       x = expression(paste("Variação da Preferência (", sigma[p], ")")), y = "Valor Fenotípico / Genético", color = "", fill="") +
+  labs(title = "Phase 4: Ecological Collapse of Evolutionary Forces", subtitle = "Left to right: search cost progressively neutralizes sexual selection",
+       x = expression(paste("Preference Variation (", sigma[p], ")")), y = "Phenotypic / Genetic Value", color = "", fill="") +
   guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) + tema_master
 
 # ---------------------------------------------------------------------
@@ -190,17 +190,17 @@ p_fase4_ruido <- ggplot(df_ruido, aes(x = sigma_p, y = Valor, color = tipo_selec
 # ---------------------------------------------------------------------
 df_causal <- df_gen50 %>% filter(encounters_n == 200, sigma_p == 2.0) %>%
   pivot_longer(cols = c(Modularity, Nestedness), names_to = "Topologia", values_to = "EixoX") %>%
-  mutate(Topologia = ifelse(Topologia == "Modularity", "1. Modularidade (vs Var z)", "2. Aninhamento (vs Média z)"),
-         EixoY = ifelse(Topologia == "1. Modularidade (vs Var z)", varz_males, zbar_males))
+  mutate(Topologia = ifelse(Topologia == "Modularity", "1. Modularity (vs Var z)", "2. Nestedness (vs Mean z)"),
+         EixoY = ifelse(Topologia == "1. Modularity (vs Var z)", varz_males, zbar_males))
 
 p_fase4_causal <- ggplot(df_causal, aes(x = EixoX, y = EixoY, color = tipo_selecao, fill = tipo_selecao)) +
   geom_point(alpha = 0.5, size = 2) +
   geom_smooth(method = "lm", formula = y~x, se = TRUE, linewidth = 1.2, alpha = 0.15, show.legend = FALSE) +
   facet_wrap(~Topologia, scales = "free", ncol=2) +
   scale_color_manual(values = cores_4, labels = labels_4) + scale_fill_manual(values = cores_4, labels = labels_4) +
-  labs(title = "Fase 4: Evidência Correlacional entre Topologia e Evolução (σp = 2.0)", 
-       subtitle = "Regressões lineares indicam forte associação entre a estrutura da rede e o fenótipo",
-       x = "Valor Topológico da Rede", y = "Valor Evolutivo (Média ou Variância)", color="", fill="") +
+  labs(title = "Phase 4: Correlational Evidence between Topology and Evolution (σp = 2.0)",
+       subtitle = "Linear regressions show strong association between network structure and phenotype",
+       x = "Network Topological Value", y = "Evolutionary Value (Mean or Variance)", color="", fill="") +
   guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) + tema_master
 
 # Exibir
