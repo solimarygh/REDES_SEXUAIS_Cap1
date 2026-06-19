@@ -552,10 +552,41 @@ if(file.exists(arquivo)) {
   subtitulo_base <- sprintf("Parameters: %d Generations | N=200 | k=%d | Replicates: %d",
                              GEN_FINAL, K_BASE, val_reps)
 
-  tema_master <- theme_light(base_size = 14) +
-    theme(legend.position = "bottom",
-          strip.background = element_rect(fill = "gray10"),
-          strip.text = element_text(color = "white", face = "bold"))
+  tema_poster_claro <- theme_light(base_size = 14) +
+    theme(
+      plot.background   = element_rect(fill = "white",   color = NA),
+      panel.background  = element_rect(fill = "#F7F7F7", color = NA),
+      panel.grid.major  = element_line(color = "#E0E0E0", linewidth = 0.4),
+      panel.grid.minor  = element_blank(),
+      strip.background  = element_rect(fill = "#2C3E50"),
+      strip.text        = element_text(color = "white",  face = "bold"),
+      plot.title        = element_text(face = "bold", size = 15),
+      plot.subtitle     = element_text(color = "gray40", size = 11),
+      axis.title        = element_text(face = "bold"),
+      legend.position   = "bottom",
+      legend.background = element_rect(fill = "white", color = NA)
+    )
+
+  tema_poster_escuro <- theme_dark(base_size = 14) +
+    theme(
+      plot.background   = element_rect(fill = "#1A1A2E", color = NA),
+      panel.background  = element_rect(fill = "#16213E", color = NA),
+      panel.grid.major  = element_line(color = "#2C2C4E", linewidth = 0.4),
+      panel.grid.minor  = element_blank(),
+      strip.background  = element_rect(fill = "#E6B800"),
+      strip.text        = element_text(color = "#1A1A1A", face = "bold"),
+      plot.title        = element_text(color = "white",   face = "bold", size = 15),
+      plot.subtitle     = element_text(color = "#AAAAAA", size = 11),
+      axis.title        = element_text(color = "white",   face = "bold"),
+      axis.text         = element_text(color = "#CCCCCC"),
+      legend.position   = "bottom",
+      legend.background = element_rect(fill = "#1A1A2E", color = NA),
+      legend.text       = element_text(color = "white"),
+      legend.key        = element_rect(fill = "#1A1A2E", color = NA)
+    )
+
+  # Change to tema_poster_escuro for a dark background poster
+  tema_master <- tema_poster_claro
 
   # ---------------------------------------------------------------------
   # PLOT A: ASSINATURA TOPOLÓGICA (A_max = 200)
