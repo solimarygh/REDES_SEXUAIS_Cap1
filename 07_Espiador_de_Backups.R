@@ -49,7 +49,7 @@ if(file.exists(arquivo)) {
                                  levels = c("A_max: 200", "A_max: 40", "A_max: 10")))
 
   cores_4  <- c("uniform"="gray60", "gaussian"="#E6B800", "sigmoid"="#3BA273", "u-shaped"="#9932CC")
-  labels_4 <- c("uniform"="Aleatória", "gaussian"="Gaussiana", "sigmoid"="Sigmoide", "u-shaped"="Disruptiva")
+  labels_4 <- c("uniform"="Random", "gaussian"="Gaussian", "sigmoid"="Sigmoid", "u-shaped"="Disruptive")
 
   # ---- ESPIADINHA 1: Diversidade Genética ----
   p_varz <- ggplot(df_gen50, aes(x = sigma_p, y = varz_males,
@@ -160,10 +160,10 @@ if(file.exists(arquivo)) {
     pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization),
                  names_to = "Metrica", values_to = "Valor") %>%
     mutate(Metrica = case_when(
-      Metrica == "Modularity"     ~ "1. Modularidade",
-      Metrica == "Nestedness"     ~ "2. Aninhamento",
+      Metrica == "Modularity"     ~ "1. Modularity",
+      Metrica == "Nestedness"     ~ "2. Nestedness",
       Metrica == "I_s"            ~ "3. Oportunidade de Seleção (Is)",
-      Metrica == "Centralization" ~ "4. Centralidade"
+      Metrica == "Centralization" ~ "4. Centralization"
     ))
 
   limites_metrica <- df_global %>%
@@ -190,7 +190,7 @@ if(file.exists(arquivo)) {
     pivot_longer(cols = c(zbar_males, varz_males),
                  names_to = "Metrica", values_to = "Valor") %>%
     mutate(Metrica = case_when(
-      Metrica == "zbar_males" ~ "1. Média do traço (z̄)",
+      Metrica == "zbar_males" ~ "1. Mean Trait (z̄)",
       Metrica == "varz_males" ~ "2. Variância do traço (Var z)"
     ))
 
@@ -223,7 +223,7 @@ if(file.exists(arquivo)) {
       pivot_longer(cols = c(zbar_males, varz_males),
                    names_to = "Metrica", values_to = "Valor") %>%
       mutate(Metrica = case_when(
-        Metrica == "zbar_males" ~ "1. Média do traço (z̄)",
+        Metrica == "zbar_males" ~ "1. Mean Trait (z̄)",
         Metrica == "varz_males" ~ "2. Variância do traço (Var z)"
       ),
       sigma_label = factor(sprintf("σp = %.1f", sigma_p),
@@ -236,7 +236,7 @@ if(file.exists(arquivo)) {
     }
 
     # Linha horizontal em φ=5 só para a métrica de média
-    df_phi <- data.frame(Metrica = "1. Média do traço (z̄)", yintercept = 5.0)
+    df_phi <- data.frame(Metrica = "1. Mean Trait (z̄)", yintercept = 5.0)
 
     ggplot(df_traj, aes(x = generation, y = Valor, color = tipo_selecao)) +
       geom_blank(data = df_limites_evo) +
@@ -268,10 +268,10 @@ if(file.exists(arquivo)) {
       pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization),
                    names_to = "Metrica", values_to = "Valor") %>%
       mutate(Metrica = case_when(
-        Metrica == "Modularity"     ~ "1. Modularidade",
-        Metrica == "Nestedness"     ~ "2. Aninhamento",
+        Metrica == "Modularity"     ~ "1. Modularity",
+        Metrica == "Nestedness"     ~ "2. Nestedness",
         Metrica == "I_s"            ~ "3. Oportunidade de Seleção (Is)",
-        Metrica == "Centralization" ~ "4. Centralidade"
+        Metrica == "Centralization" ~ "4. Centralization"
       ),
       sigma_label = factor(sprintf("σp = %.1f", sigma_p),
                            levels = c("σp = 0.5", "σp = 2.0")))
@@ -290,7 +290,7 @@ if(file.exists(arquivo)) {
       labs(title = sprintf("ESPIADINHA %d: Trajetórias por geração (A_max = %d)",
                            num_espiadinha, amax),
            subtitle = "Médias por geração | Eixo Y consistente entre cenários",
-           x = "Geração", y = "Valor da Métrica", color = "Funcao") +
+           x = "Geração", y = "Metric Value", color = "Funcao") +
       theme_light(base_size = 12) +
       theme(legend.position = "top",
             strip.background = element_rect(fill = "gray20"),
@@ -459,7 +459,7 @@ if(file.exists(arquivo)) {
 
   p_k_topo <- df_k %>%
     pivot_longer(cols = c(Nestedness, Modularity), names_to = "Metrica", values_to = "Valor") %>%
-    mutate(Metrica = ifelse(Metrica == "Modularity", "1. Modularidade", "2. Aninhamento (NODF)")) %>%
+    mutate(Metrica = ifelse(Metrica == "Modularity", "1. Modularity", "2. Nestedness (NODF)")) %>%
     ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
     geom_smooth(method = "loess", formula = y~x, alpha = 0.15) +
@@ -469,13 +469,13 @@ if(file.exists(arquivo)) {
     scale_fill_manual(values = cores_4, labels = labels_4) +
     labs(title = "ESPIADINHA 9: Efeito da Poliandria (k) na Topologia",
          subtitle = "A_max=200 | sel.nat=TRUE | cada coluna = nível de poliandria",
-         x = expression(sigma[p]), y = "Valor da Métrica", color = "", fill = "") +
+         x = expression(sigma[p]), y = "Metric Value", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
 
   p_k_evo <- df_k %>%
     pivot_longer(cols = c(zbar_males, varz_males), names_to = "Metrica", values_to = "Valor") %>%
     mutate(Metrica = ifelse(Metrica == "zbar_males",
-                            "1. Média do traço (z̄)", "2. Variância do traço (Var z)")) %>%
+                            "1. Mean Trait (z̄)", "2. Variância do traço (Var z)")) %>%
     ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
     geom_smooth(method = "loess", formula = y~x, alpha = 0.15) +
@@ -485,7 +485,7 @@ if(file.exists(arquivo)) {
     scale_fill_manual(values = cores_4, labels = labels_4) +
     labs(title = "ESPIADINHA 9b: Efeito da Poliandria (k) na Evolução do Traço",
          subtitle = "A_max=200 | sel.nat=TRUE",
-         x = expression(sigma[p]), y = "Valor Evolutivo", color = "", fill = "") +
+         x = expression(sigma[p]), y = "Evolutionary Value", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
 
   print(p_k_topo)
@@ -503,12 +503,12 @@ if(file.exists(arquivo)) {
   df_ns <- df_parcial %>%
     filter(encounters_n == 200, k_fixo == 10, generation == GEN_FINAL) %>%
     drop_na() %>%
-    mutate(ns_label = factor(ifelse(selecao_natural, "Com sel. natural", "Sem sel. natural"),
-                             levels = c("Com sel. natural", "Sem sel. natural")))
+    mutate(ns_label = factor(ifelse(selecao_natural, "With nat. selection", "Without nat. selection"),
+                             levels = c("With nat. selection", "Without nat. selection")))
 
   p_ns_topo <- df_ns %>%
     pivot_longer(cols = c(Nestedness, Modularity), names_to = "Metrica", values_to = "Valor") %>%
-    mutate(Metrica = ifelse(Metrica == "Modularity", "1. Modularidade", "2. Aninhamento (NODF)")) %>%
+    mutate(Metrica = ifelse(Metrica == "Modularity", "1. Modularity", "2. Nestedness (NODF)")) %>%
     ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
     geom_smooth(method = "loess", formula = y~x, alpha = 0.15) +
@@ -517,14 +517,14 @@ if(file.exists(arquivo)) {
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
     labs(title = "ESPIADINHA 10: Efeito da Seleção Natural na Topologia da Rede",
-         subtitle = "A_max=200 | k=10 | esquerda=com viabilidade, direita=sem viabilidade (V_j=1)",
-         x = expression(sigma[p]), y = "Valor da Métrica", color = "", fill = "") +
+         subtitle = "A_max=200 | k=10 | left=with viability, right=without viability (V_j=1)",
+         x = expression(sigma[p]), y = "Metric Value", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
 
   p_ns_evo <- df_ns %>%
     pivot_longer(cols = c(zbar_males, varz_males), names_to = "Metrica", values_to = "Valor") %>%
     mutate(Metrica = ifelse(Metrica == "zbar_males",
-                            "1. Média do traço (z̄)", "2. Variância do traço (Var z)")) %>%
+                            "1. Mean Trait (z̄)", "2. Variância do traço (Var z)")) %>%
     ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
     geom_smooth(method = "loess", formula = y~x, alpha = 0.15) +
@@ -534,7 +534,7 @@ if(file.exists(arquivo)) {
     scale_fill_manual(values = cores_4, labels = labels_4) +
     labs(title = "ESPIADINHA 10b: Efeito da Seleção Natural na Evolução do Traço",
          subtitle = "A_max=200 | k=10",
-         x = expression(sigma[p]), y = "Valor Evolutivo", color = "", fill = "") +
+         x = expression(sigma[p]), y = "Evolutionary Value", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
 
   print(p_ns_topo)
@@ -549,7 +549,7 @@ if(file.exists(arquivo)) {
   # GRÁFICOS FINAIS (Fase 5)
   # =====================================================================
   val_reps       <- length(unique(df_parcial$replica[!is.na(df_parcial$replica)]))
-  subtitulo_base <- sprintf("Parâmetros: %d Gerações | N=200 | k=%d | Réplicas: %d",
+  subtitulo_base <- sprintf("Parameters: %d Generations | N=200 | k=%d | Replicates: %d",
                              GEN_FINAL, K_BASE, val_reps)
 
   tema_master <- theme_light(base_size = 14) +
@@ -566,10 +566,10 @@ if(file.exists(arquivo)) {
       pivot_longer(cols = c(Modularity, Nestedness, I_s, Centralization),
                    names_to = "Metrica", values_to = "Valor") %>%
       mutate(Metrica = case_when(
-        Metrica == "Modularity"     ~ "1. Modularidade",
-        Metrica == "Nestedness"     ~ "2. Aninhamento",
+        Metrica == "Modularity"     ~ "1. Modularity",
+        Metrica == "Nestedness"     ~ "2. Nestedness",
         Metrica == "I_s"            ~ "3. Is",
-        Metrica == "Centralization" ~ "4. Centralidade")) %>%
+        Metrica == "Centralization" ~ "4. Centralization")) %>%
       ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
       geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
       annotate("text", x = 1.0, y = Inf, label = "σp = σz", hjust = -0.15, vjust = 1.8,
@@ -580,10 +580,10 @@ if(file.exists(arquivo)) {
       facet_wrap(~Metrica, scales = "free_y", ncol = 2) +
       scale_color_manual(values = cores_4, labels = labels_4) +
       scale_fill_manual(values = cores_4, labels = labels_4) +
-      labs(title    = sprintf("Fase 4: Assinatura Topológica das Curvas de Preferência (A_max = 200, k = %d, Gen %d)", k_val, GEN_FINAL),
+      labs(title    = sprintf("Phase 4: Topological Signature of Preference Curves (A_max = 200, k = %d, Gen %d)", k_val, GEN_FINAL),
            subtitle = subtitulo_x,
-           x = expression(paste("Variação da Preferência (", sigma[p], ")")),
-           y = "Valor da Métrica", color = "", fill = "") +
+           x = expression(paste("Preference Variation (", sigma[p], ")")),
+           y = "Metric Value", color = "", fill = "") +
       guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
       tema_master
   }
@@ -599,11 +599,11 @@ if(file.exists(arquivo)) {
     pivot_longer(cols = c(zbar_males, varz_males),
                  names_to = "Variavel", values_to = "Valor") %>%
     mutate(Variavel = ifelse(Variavel == "zbar_males",
-                             "1. Média (Exagero)", "2. Diversidade Genética (Var z)"))
+                             "1. Mean (Exaggeration)", "2. Genetic Diversity (Var z)"))
 
   p_fase4_ruido <- ggplot(df_ruido, aes(x = sigma_p, y = Valor,
                                          color = tipo_selecao, fill = tipo_selecao)) +
-    geom_hline(data = filter(df_ruido, Variavel == "1. Média (Exagero)"),
+    geom_hline(data = filter(df_ruido, Variavel == "1. Mean (Exaggeration)"),
                aes(yintercept = 5.0), linetype = "dashed", alpha = 0.6) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
     annotate("text", x = 1.0, y = Inf, label = "σp = σz", hjust = -0.15, vjust = 1.8,
@@ -615,8 +615,8 @@ if(file.exists(arquivo)) {
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
     labs(title    = sprintf("Fase 4: Efeito do Custo de Busca sobre a Média e a Variância do Traço (Gen %d)", GEN_FINAL),
-         subtitle = "Painéis da esq. para a dir.: A_max = 200, 40, 10 (machos amostrados por fêmea)",
-         x = expression(paste("Variação da Preferência (", sigma[p], ")")),
+         subtitle = "Panels left to right: A_max = 200, 40, 10 (males sampled per female)",
+         x = expression(paste("Preference Variation (", sigma[p], ")")),
          y = "Valor Fenotípico / Genético", color = "", fill = "") +
     guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
     tema_master
@@ -629,9 +629,9 @@ if(file.exists(arquivo)) {
     pivot_longer(cols = c(Modularity, Nestedness),
                  names_to = "Topologia", values_to = "EixoX") %>%
     mutate(Topologia = ifelse(Topologia == "Modularity",
-                              "1. Modularidade (vs Var z)",
-                              "2. Aninhamento (vs Média z)"),
-           EixoY = ifelse(Topologia == "1. Modularidade (vs Var z)",
+                              "1. Modularity (vs Var z)",
+                              "2. Nestedness (vs Mean z)"),
+           EixoY = ifelse(Topologia == "1. Modularity (vs Var z)",
                           varz_males, zbar_males))
 
   p_fase4_causal <- ggplot(df_causal, aes(x = EixoX, y = EixoY,
@@ -642,10 +642,10 @@ if(file.exists(arquivo)) {
     facet_wrap(~Topologia, scales = "free", ncol = 2) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title    = sprintf("Fase 4: Topologia da Rede vs. Evolução do Traço (σp=2.0, Gen %d)", GEN_FINAL),
-         subtitle = "Cada ponto = uma réplica | Linha = regressão linear (IC 95%) por curva de preferência",
-         x = "Valor Topológico da Rede",
-         y = "Valor Evolutivo (Média ou Variância)", color = "", fill = "") +
+    labs(title    = sprintf("Phase 4: Network Topology vs. Trait Evolution (σp=2.0, Gen %d)", GEN_FINAL),
+         subtitle = "Each point = one replicate | Line = linear regression (95% CI) per preference curve",
+         x = "Network Topology Value",
+         y = "Evolutionary Value (Mean or Variance)", color = "", fill = "") +
     guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
     tema_master
 
@@ -660,8 +660,8 @@ if(file.exists(arquivo)) {
     pivot_longer(cols = c(Modularity, Nestedness),
                  names_to = "Metrica", values_to = "Valor") %>%
     mutate(Metrica = case_when(
-      Metrica == "Modularity"  ~ "1. Modularidade",
-      Metrica == "Nestedness"  ~ "2. Aninhamento")) %>%
+      Metrica == "Modularity"  ~ "1. Modularity",
+      Metrica == "Nestedness"  ~ "2. Nestedness")) %>%
     ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
     annotate("text", x = 1.0, y = Inf, label = "σp = σz", hjust = -0.15, vjust = 1.8,
@@ -672,10 +672,10 @@ if(file.exists(arquivo)) {
     facet_grid(Metrica ~ Cenario_Ecol, scales = "free_y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title    = sprintf("Fase 4: Assinatura Topológica sob Diferentes Níveis de Amostragem (Gen %d)", GEN_FINAL),
-         subtitle = "Painéis da esq. para a dir.: A_max = 200, 40, 10 (machos amostrados por fêmea)",
-         x = expression(paste("Variação da Preferência das Fêmeas (", sigma[p], ")")),
-         y = "Valor da Métrica Topológica", color = "", fill = "") +
+    labs(title    = sprintf("Phase 4: Topological Signature under Different Sampling Levels (Gen %d)", GEN_FINAL),
+         subtitle = "Panels left to right: A_max = 200, 40, 10 (males sampled per female)",
+         x = expression(paste("Female Preference Variation (", sigma[p], ")")),
+         y = "Topological Metric Value", color = "", fill = "") +
     guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
     tema_master
 
@@ -692,12 +692,12 @@ if(file.exists(arquivo)) {
         Amax_label = factor(paste0("A_max: ", encounters_n),
                             levels = c("A_max: 200", "A_max: 40", "A_max: 10")),
         Metrica_label = case_when(
-          Metrica == "Modularity" ~ "1. Modularidade",
-          Metrica == "Nestedness" ~ "2. Aninhamento"
+          Metrica == "Modularity" ~ "1. Modularity",
+          Metrica == "Nestedness" ~ "2. Nestedness"
         ),
         tipo_label = factor(tipo_selecao,
                             levels = c("u-shaped", "sigmoid", "gaussian", "uniform"),
-                            labels = c("U-shaped", "Sigmoide", "Gaussiana", "Uniforme"))
+                            labels = c("U-shaped", "Sigmoid", "Gaussian", "Random"))
       )
 
     ggplot(df_dumbell_x) +
@@ -716,9 +716,9 @@ if(file.exists(arquivo)) {
       facet_grid2(Metrica_label ~ Amax_label, scales = "free_x", independent = "x") +
       scale_color_manual(values = cores_4, labels = labels_4) +
       labs(
-        title    = sprintf("Plot E: Mudança nas Métricas Topológicas: Gen 1 → Gen %d (σp = 2.0, k = %d)", GEN_FINAL, k_val),
-        subtitle = "Círculo aberto = Geração 1  |  Círculo fechado = Geração final  |  Rótulos = Δ absoluto",
-        x        = "Valor Médio da Métrica",
+        title    = sprintf("Plot E: Change in Topological Metrics: Gen 1 → Gen %d (σp = 2.0, k = %d)", GEN_FINAL, k_val),
+        subtitle = "Open circle = Generation 1  |  Filled circle = Final generation  |  Labels = absolute Δ",
+        x        = "Mean Metric Value",
         y        = NULL,
         color    = ""
       ) +
@@ -761,7 +761,7 @@ if(file.exists(arquivo)) {
     val_reps_k     <- length(unique(df_base_k$replica[!is.na(df_base_k$replica)]))
     n_completos_k  <- length(unique(paste(df_base_k$tipo_selecao, df_base_k$sigma_p,
                                           df_base_k$encounters_n, df_base_k$replica)))
-    subtitulo_k <- sprintf("Parâmetros: %d Gerações | N=200 | k=%d | Réplicas: %d",
+    subtitulo_k <- sprintf("Parameters: %d Generations | N=200 | k=%d | Replicates: %d",
                            GEN_FINAL, k_val, val_reps_k)
 
     df_tabela_k <- construir_df_tabela(df_base_k)
