@@ -97,7 +97,7 @@ O pool de juvenis é então amostrado aleatoriamente para preencher as 200 vagas
 ## A cada gerão calculamos Modularidade, Aninhamento, centralizaçao, e Is. Para VER em mais detalhe as redes, também selecionamos de cada cenário a rede representativa e para essa calculamos o número lapaciano e o numero de grupos.
 
 -   **Modularidade** ($Q \in [0,1]$; `igraph::cluster_louvain()` + `igraph::modularity()`): o quanto a rede se divide em grupos de machos e fêmeas que acasalam preferencialmente entre si.
--   **Aninhamento (NODF)** ($\in [0,100]$; `bipartite::nested(M, method = "NODF")`): o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares". Veja que, como esperado, ao deixar as femeas se acasalarem com mais machos o Aninhamento aumentou.
+-   **Aninhamento (NODF)** ($\in [0,100]$; `bipartite::nested(M, method = "NODF")`): o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares". Como esperado, valores maiores de $k$ (mais parceiros por fêmea) tendem a aumentar o aninhamento da rede.
 -   **Centralização** ($\in [0,1]$; `igraph::centr_degree(g, mode = "all")`): o quanto os acasalamentos se concentram em poucos indivíduos. Valores altos = poucos indivíduos concentram a maioria das ligações.
 -   **$I_s$** (oportunidade de seleção sexual, $\geq 0$; `var(k)/mean(k)^2` em R base, onde $k$ = nº de parceiras por macho): mede a variação no sucesso reprodutivo dos machos, quanto maior, mais desigual é a distribuição de cópulas.
 -   **Tribos** (nº inteiro $\geq 1$; autovalores $\approx 0$ de `igraph::laplacian_matrix()`): número de subpopulações completamente isoladas reprodutivamente (sem nenhuma ligação entre elas).
