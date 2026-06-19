@@ -248,23 +248,23 @@ rodar_cenario <- function(tipo_sel, sp, am, kf, sel_nat) {
 
   df_hist <- bind_rows(
     data.frame(Valor = c(dados$Gen1$Z_Machos, dados$Gen1$P_Femeas),
-               Nome  = c(rep("Macho (z)", n_m_gen1), rep("Fêmea (p)", n_f_gen1)),
-               Geracao = "1. Início (Gen 1)"),
+               Nome  = c(rep("Male (z)", n_m_gen1), rep("Female (p)", n_f_gen1)),
+               Geracao = "1. Start (Gen 1)"),
     data.frame(Valor = c(dados$GenAlvo$male_z_surv, dados$GenAlvo$female_p),
-               Nome  = c(rep("Macho (z)", n_m_alvo), rep("Fêmea (p)", n_f_alvo)),
-               Geracao = sprintf("2. A Rede (Gen %d)", rep_info$geracao_alvo)),
+               Nome  = c(rep("Male (z)", n_m_alvo), rep("Female (p)", n_f_alvo)),
+               Geracao = sprintf("2. The Network (Gen %d)", rep_info$geracao_alvo)),
     data.frame(Valor = c(dados$GenFinal$Z_Machos, dados$GenFinal$P_Femeas),
-               Nome  = c(rep("Macho (z)", n_m_fim), rep("Fêmea (p)", n_f_fim)),
-               Geracao = sprintf("3. O Destino (Gen %d)", GEN_MAX))
+               Nome  = c(rep("Male (z)", n_m_fim), rep("Female (p)", n_f_fim)),
+               Geracao = sprintf("3. The End (Gen %d)", GEN_MAX))
   )
 
   p_hist <- ggplot(df_hist, aes(x = Valor, fill = Nome, color = Nome)) +
     geom_density(alpha = 0.4, linewidth = 1) +
     facet_wrap(~Geracao, ncol = 1) +
-    scale_fill_manual(values  = c("Macho (z)"="#4682B4", "Fêmea (p)"="#E6B800")) +
-    scale_color_manual(values = c("Macho (z)"="#4682B4", "Fêmea (p)"="#E6B800")) +
+    scale_fill_manual(values  = c("Male (z)"="#4682B4", "Female (p)"="#E6B800")) +
+    scale_color_manual(values = c("Male (z)"="#4682B4", "Female (p)"="#E6B800")) +
     geom_vline(xintercept = 5, linetype = "dashed") +
-    labs(title = sprintf("Evolução em 3 Atos — %s | σp=%.1f | k=%d | %s",
+    labs(title = sprintf("Evolution in 3 Acts — %s | σp=%.1f | k=%d | %s",
                           tipo_sel, sp, kf, sel_label)) +
     theme_minimal(base_size = 14) + theme(legend.position = "top")
 
@@ -314,10 +314,10 @@ rodar_cenario <- function(tipo_sel, sp, am, kf, sel_nat) {
 #   res40  <- gerar_lote_comparativo(40)    # rodar em sessão separada
 #   res10  <- gerar_lote_comparativo(10)    # rodar em sessão separada
 # =====================================================================
-labels_tipo <- c("uniform"  = "Aleatória",
-                 "gaussian" = "Gaussiana",
-                 "sigmoid"  = "Sigmoide",
-                 "u-shaped" = "Disruptiva")
+labels_tipo <- c("uniform"  = "Random",
+                 "gaussian" = "Gaussian",
+                 "sigmoid"  = "Sigmoid",
+                 "u-shaped" = "Disruptive")
 
 gerar_lote_comparativo <- function(am) {
 
@@ -427,7 +427,7 @@ gerar_lote_comparativo <- function(am) {
         theme(plot.title = element_text(size = 12, face = "bold"))
     })
     painel_hist <- (plots_hist[[1]] | plots_hist[[2]] | plots_hist[[3]] | plots_hist[[4]]) +
-      plot_annotation(title = sprintf("Evolução em 3 Atos | σp=%.1f | A_max=%d | k=%d | sem sel.natural",
+      plot_annotation(title = sprintf("Evolution in 3 Acts | σp=%.1f | A_max=%d | k=%d | no nat.selection",
                                       sp, am, kf))
     nome_hist_painel <- sprintf("%s/Painel_Histogramas_sigmap%.1f_Amax%d_k%d_noNS.png",
                                  diretorios$graficos, sp, am, kf)

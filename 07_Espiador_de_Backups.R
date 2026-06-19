@@ -60,8 +60,8 @@ if(file.exists(arquivo)) {
     facet_wrap(~Cenario_Ecol) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title = "ESPIADINHA 1: Diversidade Genética (Var z) em Tempo Real",
-         x = expression(sigma[p]), y = "Var(z) machos", color = "", fill = "") +
+    labs(title = "ESPIADINHA 1: Genetic Diversity (Var z) in Real Time",
+         x = expression(sigma[p]), y = "Var(z) males", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
 
   # ---- ESPIADINHA 2: Modularidade ----
@@ -73,7 +73,7 @@ if(file.exists(arquivo)) {
     facet_wrap(~Cenario_Ecol) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title = "ESPIADINHA 2: Modularidade em Tempo Real",
+    labs(title = "ESPIADINHA 2: Modularity in Real Time",
          x = expression(sigma[p]), y = "Modularity (Louvain)", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
 
@@ -87,9 +87,9 @@ if(file.exists(arquivo)) {
     facet_wrap(~Cenario_Ecol) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title = "ESPIADINHA 3: Média do Traço Masculino em Tempo Real",
-         subtitle = "Linha tracejada cinza = φ = 5.0 (ótimo ecológico)",
-         x = expression(sigma[p]), y = "Média z machos", color = "", fill = "") +
+    labs(title = "ESPIADINHA 3: Mean Male Trait in Real Time",
+         subtitle = "Gray dashed line = φ = 5.0 (ecological optimum)",
+         x = expression(sigma[p]), y = "Mean z males", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
 
   # ---- ESPIADINHA 4: Aninhamento (NODF) ----
@@ -101,7 +101,7 @@ if(file.exists(arquivo)) {
     facet_wrap(~Cenario_Ecol) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title = "ESPIADINHA 4: Aninhamento (NODF) em Tempo Real",
+    labs(title = "ESPIADINHA 4: Nestedness (NODF) in Real Time",
          x = expression(sigma[p]), y = "Nestedness (NODF)", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
 
@@ -114,7 +114,7 @@ if(file.exists(arquivo)) {
     facet_wrap(~Cenario_Ecol) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title = "ESPIADINHA 5: Centralização em Tempo Real",
+    labs(title = "ESPIADINHA 5: Centralization in Real Time",
          x = expression(sigma[p]), y = "Degree Centralization", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
 
@@ -127,7 +127,7 @@ if(file.exists(arquivo)) {
     facet_wrap(~Cenario_Ecol) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title = "ESPIADINHA 6: Oportunidade de Seleção Sexual (Is) em Tempo Real",
+    labs(title = "ESPIADINHA 6: Opportunity of Sexual Selection (Is) in Real Time",
          x = expression(sigma[p]), y = expression(I[s]), color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
 
@@ -191,7 +191,7 @@ if(file.exists(arquivo)) {
                  names_to = "Metrica", values_to = "Valor") %>%
     mutate(Metrica = case_when(
       Metrica == "zbar_males" ~ "1. Mean Trait (z̄)",
-      Metrica == "varz_males" ~ "2. Variância do traço (Var z)"
+      Metrica == "varz_males" ~ "2. Trait Variance (Var z)"
     ))
 
   limites_evo <- df_global_evo %>%
@@ -224,7 +224,7 @@ if(file.exists(arquivo)) {
                    names_to = "Metrica", values_to = "Valor") %>%
       mutate(Metrica = case_when(
         Metrica == "zbar_males" ~ "1. Mean Trait (z̄)",
-        Metrica == "varz_males" ~ "2. Variância do traço (Var z)"
+        Metrica == "varz_males" ~ "2. Trait Variance (Var z)"
       ),
       sigma_label = factor(sprintf("σp = %.1f", sigma_p),
                            levels = c("σp = 0.5", "σp = 2.0")))
@@ -245,8 +245,8 @@ if(file.exists(arquivo)) {
       geom_line(linewidth = 0.8, alpha = 0.9) +
       facet_grid(Metrica ~ sigma_label, scales = "free_y") +
       scale_color_manual(values = cores_4, labels = labels_4) +
-      labs(title = sprintf("Trajetórias evolutivas (A_max = %d)", amax),
-           x = "Geração", y = "Valor", color = "Funcao") +
+      labs(title = sprintf("Evolutionary trajectories (A_max = %d)", amax),
+           x = "Generation", y = "Value", color = "Funcao") +
       theme_light(base_size = 12) +
       theme(legend.position = "bottom",
             strip.background = element_rect(fill = "gray20"),
@@ -287,10 +287,10 @@ if(file.exists(arquivo)) {
       geom_line(linewidth = 0.8, alpha = 0.9) +
       facet_grid(Metrica ~ sigma_label, scales = "free_y") +
       scale_color_manual(values = cores_4, labels = labels_4) +
-      labs(title = sprintf("ESPIADINHA %d: Trajetórias por geração (A_max = %d)",
+      labs(title = sprintf("ESPIADINHA %d: Trajectories by generation (A_max = %d)",
                            num_espiadinha, amax),
-           subtitle = "Médias por geração | Eixo Y consistente entre cenários",
-           x = "Geração", y = "Metric Value", color = "Funcao") +
+           subtitle = "Averages per generation | Consistent Y axis across scenarios",
+           x = "Generation", y = "Metric Value", color = "Funcao") +
       theme_light(base_size = 12) +
       theme(legend.position = "top",
             strip.background = element_rect(fill = "gray20"),
@@ -312,7 +312,7 @@ if(file.exists(arquivo)) {
     # Títulos curtos + subtítulos com a descrição
     p_left_clean  <- p_left  +
       labs(title = "A_max = 200",
-           subtitle = "200 machos amostrados por fêmea") +
+           subtitle = "200 males sampled per female") +
       theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
             plot.subtitle = element_text(size = 10, hjust = 0.5),
             plot.title.position = "plot",
@@ -320,7 +320,7 @@ if(file.exists(arquivo)) {
 
     p_right_clean <- p_right +
       labs(title = "A_max = 10",
-           subtitle = "10 machos amostrados por fêmea",
+           subtitle = "10 males sampled per female",
            y = NULL) +
       theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
             plot.subtitle = element_text(size = 10, hjust = 0.5),
@@ -330,8 +330,8 @@ if(file.exists(arquivo)) {
 
     p_combinado <- (p_left_clean | p_right_clean) +
       plot_annotation(
-        title    = "ESPIADINHA 7: Trajetórias topológicas sob níveis contrastantes de A_max",
-        subtitle = "Linhas = médias por geração entre todas as réplicas | Eixo Y consistente entre painéis"
+        title    = "ESPIADINHA 7: Topological trajectories under contrasting A_max levels",
+        subtitle = "Lines = averages per generation across all replicates | Consistent Y axis across panels"
       )
 
     print(p_combinado)
@@ -354,7 +354,7 @@ if(file.exists(arquivo)) {
   if (!is.null(p_evo_left) && !is.null(p_evo_right)) {
     p_evo_left_clean  <- p_evo_left  +
       labs(title = "A_max = 200",
-           subtitle = "200 machos amostrados por fêmea") +
+           subtitle = "200 males sampled per female") +
       theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
             plot.subtitle = element_text(size = 10, hjust = 0.5),
             plot.title.position = "plot",
@@ -362,7 +362,7 @@ if(file.exists(arquivo)) {
 
     p_evo_right_clean <- p_evo_right +
       labs(title = "A_max = 10",
-           subtitle = "10 machos amostrados por fêmea",
+           subtitle = "10 males sampled per female",
            y = NULL) +
       theme(plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
             plot.subtitle = element_text(size = 10, hjust = 0.5),
@@ -372,8 +372,8 @@ if(file.exists(arquivo)) {
 
     p_evo_combinado <- (p_evo_left_clean | p_evo_right_clean) +
       plot_annotation(
-        title    = "ESPIADINHA 8: Trajetórias evolutivas (média e variância do traço masculino)",
-        subtitle = "Linha tracejada cinza = φ = 5.0 (ótimo ecológico) | Eixo Y consistente entre painéis"
+        title    = "ESPIADINHA 8: Evolutionary trajectories (mean and variance of male trait)",
+        subtitle = "Gray dashed line = φ = 5.0 (ecological optimum) | Consistent Y axis across panels"
       )
 
     print(p_evo_combinado)
@@ -467,15 +467,15 @@ if(file.exists(arquivo)) {
     facet_grid(Metrica ~ k_label, scales = "free_y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title = "ESPIADINHA 9: Efeito da Poliandria (k) na Topologia",
-         subtitle = "A_max=200 | sel.nat=TRUE | cada coluna = nível de poliandria",
+    labs(title = "ESPIADINHA 9: Effect of Polyandry (k) on Topology",
+         subtitle = "A_max=200 | sel.nat=TRUE | each column = polyandry level",
          x = expression(sigma[p]), y = "Metric Value", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
 
   p_k_evo <- df_k %>%
     pivot_longer(cols = c(zbar_males, varz_males), names_to = "Metrica", values_to = "Valor") %>%
     mutate(Metrica = ifelse(Metrica == "zbar_males",
-                            "1. Mean Trait (z̄)", "2. Variância do traço (Var z)")) %>%
+                            "1. Mean Trait (z̄)", "2. Trait Variance (Var z)")) %>%
     ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
     geom_smooth(method = "loess", formula = y~x, alpha = 0.15) +
@@ -483,7 +483,7 @@ if(file.exists(arquivo)) {
     facet_grid(Metrica ~ k_label, scales = "free_y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title = "ESPIADINHA 9b: Efeito da Poliandria (k) na Evolução do Traço",
+    labs(title = "ESPIADINHA 9b: Effect of Polyandry (k) on Trait Evolution",
          subtitle = "A_max=200 | sel.nat=TRUE",
          x = expression(sigma[p]), y = "Evolutionary Value", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
@@ -516,7 +516,7 @@ if(file.exists(arquivo)) {
     facet_grid(Metrica ~ ns_label, scales = "free_y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title = "ESPIADINHA 10: Efeito da Seleção Natural na Topologia da Rede",
+    labs(title = "ESPIADINHA 10: Effect of Natural Selection on Network Topology",
          subtitle = "A_max=200 | k=10 | left=with viability, right=without viability (V_j=1)",
          x = expression(sigma[p]), y = "Metric Value", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
@@ -524,7 +524,7 @@ if(file.exists(arquivo)) {
   p_ns_evo <- df_ns %>%
     pivot_longer(cols = c(zbar_males, varz_males), names_to = "Metrica", values_to = "Valor") %>%
     mutate(Metrica = ifelse(Metrica == "zbar_males",
-                            "1. Mean Trait (z̄)", "2. Variância do traço (Var z)")) %>%
+                            "1. Mean Trait (z̄)", "2. Trait Variance (Var z)")) %>%
     ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
     geom_smooth(method = "loess", formula = y~x, alpha = 0.15) +
@@ -532,7 +532,7 @@ if(file.exists(arquivo)) {
     facet_grid(Metrica ~ ns_label, scales = "free_y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title = "ESPIADINHA 10b: Efeito da Seleção Natural na Evolução do Traço",
+    labs(title = "ESPIADINHA 10b: Effect of Natural Selection on Trait Evolution",
          subtitle = "A_max=200 | k=10",
          x = expression(sigma[p]), y = "Evolutionary Value", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
@@ -614,10 +614,10 @@ if(file.exists(arquivo)) {
     facet_grid(Variavel ~ Cenario_Ecol, scales = "free_y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title    = sprintf("Fase 4: Efeito do Custo de Busca sobre a Média e a Variância do Traço (Gen %d)", GEN_FINAL),
+    labs(title    = sprintf("Phase 4: Effect of Search Cost on Trait Mean and Variance (Gen %d)", GEN_FINAL),
          subtitle = "Panels left to right: A_max = 200, 40, 10 (males sampled per female)",
          x = expression(paste("Preference Variation (", sigma[p], ")")),
-         y = "Valor Fenotípico / Genético", color = "", fill = "") +
+         y = "Phenotypic / Genetic Value", color = "", fill = "") +
     guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
     tema_master
 
