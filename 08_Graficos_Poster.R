@@ -123,7 +123,8 @@ p_topo <- ggplot(df_topo,
     y        = "Metric Value",
     color    = "", fill = ""
   ) +
-  guides(color = guide_legend(override.aes = list(size = 4, alpha = 1))) +
+  guides(color = guide_legend(override.aes = list(size = 4, alpha = 1, shape = 19)),
+         fill  = "none") +
   tema_poster
 
 # =====================================================================
@@ -187,7 +188,8 @@ p_dumb <- ggplot(df_tabela_dumb) +
                        GEN_FINAL),
     x = "Mean Metric Value", y = "", color = ""
   ) +
-  guides(color = guide_legend(override.aes = list(size = 4))) +
+  guides(color = guide_legend(override.aes = list(size = 4, shape = 19)),
+         fill  = "none") +
   tema_poster
 
 # =====================================================================
@@ -230,7 +232,8 @@ p_ruido <- ggplot(df_ruido_poster,
     y        = "Phenotypic / Genetic Value",
     color    = "", fill = ""
   ) +
-  guides(color = guide_legend(override.aes = list(size = 4, alpha = 1))) +
+  guides(color = guide_legend(override.aes = list(size = 4, alpha = 1, shape = 19)),
+         fill  = "none") +
   tema_poster
 
 # =====================================================================
@@ -267,7 +270,7 @@ p_traj <- ggplot(df_traj,
     color = "", fill = ""
   ) +
   guides(
-    color = guide_legend(override.aes = list(size = 3, alpha = 1)),
+    color = guide_legend(override.aes = list(size = 3, alpha = 1, shape = 19)),
     fill  = "none"
   ) +
   tema_poster
