@@ -639,35 +639,40 @@ if(nrow(df_parcial) > 0) {
   p_fase4_topo <- construir_plot_assinatura(df_gen50, K_BASE, subtitulo_base)
 
   # ---------------------------------------------------------------------
-  # PLOT B: RUÍDO ECOLÓGICO (A_max: 200, 40, 10)
+  # FUNÇÃO HELPER: Plot B — Média e Variância do Traço por A_max e k
+  # Reutilizável no loop de k=5/10/20 (igual a Plot A e Plot E)
   # ---------------------------------------------------------------------
-  df_ruido <- df_gen50 %>%
-    mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
-                                 levels = c("A_max: 200", "A_max: 40", "A_max: 10"))) %>%
-    pivot_longer(cols = c(zbar_males, varz_males),
-                 names_to = "Variavel", values_to = "Valor") %>%
-    mutate(Variavel = ifelse(Variavel == "zbar_males",
-                             "1. Mean (Exaggeration)", "2. Genetic Diversity (Var z)"))
+  construir_plot_ruido <- function(df_gen50_x, k_val, subtitulo_x) {
+    df_r <- df_gen50_x %>%
+      mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
+                                   levels = c("A_max: 200", "A_max: 40", "A_max: 10"))) %>%
+      pivot_longer(cols = c(zbar_males, varz_males),
+                   names_to = "Variavel", values_to = "Valor") %>%
+      mutate(Variavel = ifelse(Variavel == "zbar_males",
+                               "1. Mean Ornament (z̅)", "2. Genetic Diversity (Var z)"))
 
-  p_fase4_ruido <- ggplot(df_ruido, aes(x = sigma_p, y = Valor,
-                                         color = tipo_selecao, fill = tipo_selecao)) +
-    geom_hline(data = filter(df_ruido, Variavel == "1. Mean (Exaggeration)"),
-               aes(yintercept = 5.0), linetype = "dashed", alpha = 0.6) +
-    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
-    annotate("text", x = 1.0, y = Inf, label = "σp = σz", hjust = -0.15, vjust = 1.8,
-             color = "red", size = 3.0, fontface = "italic") +
-    geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2,
-                show.legend = FALSE) +
-    geom_jitter(alpha = 0.2, width = 0.05, size = 1) +
-    facet_grid(Variavel ~ Cenario_Ecol, scales = "free_y") +
-    scale_color_manual(values = cores_4, labels = labels_4) +
-    scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title    = sprintf("Phase 4: Effect of Search Cost on Trait Mean and Variance (Gen %d)", GEN_FINAL),
-         subtitle = "Panels left to right: A_max = 200, 40, 10 (males sampled per female)",
-         x = expression(paste("Preference Variation (", sigma[p], ")")),
-         y = "Phenotypic / Genetic Value", color = "", fill = "") +
-    guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
-    tema_master
+    ggplot(df_r, aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
+      geom_hline(data = filter(df_r, Variavel == "1. Mean Ornament (z̅)"),
+                 aes(yintercept = 5.0), linetype = "dashed", alpha = 0.6) +
+      geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
+      annotate("text", x = 1.0, y = Inf, label = "σp = σz", hjust = -0.15, vjust = 1.8,
+               color = "red", size = 3.0, fontface = "italic") +
+      geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2,
+                  show.legend = FALSE) +
+      geom_jitter(alpha = 0.2, width = 0.05, size = 1) +
+      facet_grid(Variavel ~ Cenario_Ecol, scales = "free_y") +
+      scale_color_manual(values = cores_4, labels = labels_4) +
+      scale_fill_manual(values = cores_4, labels = labels_4) +
+      labs(title    = sprintf("Phase 4: Preference Shapes Trait Mean and Variance (k = %d, Gen %d)",
+                              k_val, GEN_FINAL),
+           subtitle = subtitulo_x,
+           x = expression(paste("Preference Variation (", sigma[p], ")")),
+           y = "Phenotypic / Genetic Value", color = "", fill = "") +
+      guides(color = guide_legend(override.aes = list(size = 3, alpha = 1))) +
+      tema_master
+  }
+
+  p_fase4_ruido <- construir_plot_ruido(df_gen50, K_BASE, subtitulo_base)
 
   # ---------------------------------------------------------------------
   # PLOT C: PROVA CAUSAL (A_max = 200, sigma_p = 2.0)
@@ -796,9 +801,8 @@ if(nrow(df_parcial) > 0) {
   cat(sprintf("\nGráficos A, B, C, D, E (%s) salvos em: %s\n", sufixo_ns, dir_graficos))
 
   # =====================================================================
-  # PLOTS A e E PARA k = 5 e k = 20 (efeito da poliandria na assinatura)
-  # O baseline acima (Plot A e Plot E "sem sufixo") usa k = 10 (K_BASE).
-  # Aqui geramos as mesmas figuras para k = 5 e k = 20, para comparação.
+  # PLOTS A, B e E PARA k = 5, 10, 20 (efeito da poliandria)
+  # Plot B agora também gerado por k, para mostrar no HTML na mesma seção
   # =====================================================================
   for (k_val in c(5L, 10L, 20L)) {
     df_base_k  <- df_parcial %>% filter(k_fixo == k_val, selecao_natural == NS_BASE)
@@ -806,23 +810,24 @@ if(nrow(df_parcial) > 0) {
       mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
                                    levels = c("A_max: 200", "A_max: 40", "A_max: 10")))
 
-    val_reps_k     <- length(unique(df_base_k$replica[!is.na(df_base_k$replica)]))
-    n_completos_k  <- length(unique(paste(df_base_k$tipo_selecao, df_base_k$sigma_p,
-                                          df_base_k$encounters_n, df_base_k$replica)))
+    val_reps_k  <- length(unique(df_base_k$replica[!is.na(df_base_k$replica)]))
     subtitulo_k <- sprintf("Parameters: %d Generations | N=200 | k=%d | Replicates: %d",
                            GEN_FINAL, k_val, val_reps_k)
 
     df_tabela_k <- construir_df_tabela(df_base_k)
 
     p_topo_k    <- construir_plot_assinatura(df_gen50_k, k_val, subtitulo_k)
+    p_ruido_k   <- construir_plot_ruido(df_gen50_k, k_val, subtitulo_k)
     p_dumbell_k <- construir_plot_dumbell(df_tabela_k, k_val)
 
     ggsave(file.path(dir_graficos, sprintf("Fase4_PlotA_AssinaturaTopologica%s_k%d.png", sufixo_ns, k_val)),
            plot = p_topo_k,    width = 10, height = 8, dpi = 300, bg = "white")
+    ggsave(file.path(dir_graficos, sprintf("Fase4_PlotB_RuidoEcologico%s_k%d.png", sufixo_ns, k_val)),
+           plot = p_ruido_k,   width = 12, height = 7, dpi = 300, bg = "white")
     ggsave(file.path(dir_graficos, sprintf("Fase4_PlotE_Dumbell_Gen1vsGenFinal%s_k%d.png", sufixo_ns, k_val)),
            plot = p_dumbell_k, width = 12, height = 6, dpi = 300, bg = "white")
   }
-  cat(sprintf("\nGráficos A e E para k=5,10,20 (%s) salvos em: %s\n", sufixo_ns, dir_graficos))
+  cat(sprintf("\nGráficos A, B e E para k=5,10,20 (%s) salvos em: %s\n", sufixo_ns, dir_graficos))
 
   # =====================================================================
   # BLOCO E: MODELOS LINEARES (LMs) — ESTATÍSTICA OFICIAL
