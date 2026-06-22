@@ -204,11 +204,11 @@ df_ruido_poster <- df_k5 %>%
                            "1. Male Trait Mean (z̅)",
                            "2. Male Trait Variance (Var z)"))
 
-# Linhas de referência por painel: φ=5 para média, Var z=1 para variância
+# Linha de referência só para o painel de média (φ=5); Var z escala livre nos dados
 df_refs_ruido <- data.frame(
-  Variavel   = c("1. Male Trait Mean (z̅)", "2. Male Trait Variance (Var z)"),
-  yintercept = c(5.0, 1.0),
-  label      = c("φ = 5 (initial mean)", "Var z = 1 (initial)")
+  Variavel   = "1. Male Trait Mean (z̅)",
+  yintercept = 5.0,
+  label      = "φ = 5 (initial mean)"
 )
 
 p_ruido <- ggplot(df_ruido_poster,
