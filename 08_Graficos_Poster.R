@@ -191,6 +191,49 @@ p_dumb <- ggplot(df_tabela_dumb) +
   tema_poster
 
 # =====================================================================
+# PLOT 2b: EFEITO DO CUSTO DE BUSCA — Média e Variância do Traço (A_max=200)
+# =====================================================================
+df_ruido_poster <- df_k5 %>%
+  filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
+  drop_na(zbar_males, varz_males) %>%
+  pivot_longer(cols = c(zbar_males, varz_males),
+               names_to = "Variavel", values_to = "Valor") %>%
+  mutate(Variavel = ifelse(Variavel == "zbar_males",
+                           "1. Mean Ornament (z̅)",
+                           "2. Genetic Diversity (Var z)"))
+
+p_ruido <- ggplot(df_ruido_poster,
+                  aes(x = sigma_p, y = Valor,
+                      color = tipo_selecao, fill = tipo_selecao)) +
+  geom_hline(data = filter(df_ruido_poster, Variavel == "1. Mean Ornament (z̅)"),
+             aes(yintercept = 5.0), linetype = "dashed",
+             color = "gray50", linewidth = 0.8) +
+  annotate("text", x = 0.3, y = 5,
+           label = "φ = 5 (initial optimum)", hjust = 0, vjust = -0.5,
+           color = "gray50", size = 3.5, fontface = "italic") +
+  geom_vline(xintercept = 1.0, linetype = "dashed",
+             color = "red", linewidth = 1) +
+  annotate("text", x = 1.0, y = Inf,
+           label = "σp = σz", hjust = -0.15, vjust = 2,
+           color = "red", size = 4.5, fontface = "italic") +
+  geom_smooth(method = "loess", formula = y ~ x,
+              alpha = 0.15, linewidth = 1.5, show.legend = FALSE) +
+  geom_jitter(alpha = 0.25, width = 0.05, size = 1.8) +
+  facet_wrap(~Variavel, scales = "free_y", ncol = 2) +
+  scale_color_manual(values = cores_4, labels = labels_4) +
+  scale_fill_manual(values  = cores_4, labels = labels_4) +
+  labs(
+    title    = sprintf("Female Preference Shapes Trait Mean and Variance (A_max = %d, k = %d, Gen %d)",
+                       AMAX_POSTER, K_POSTER, GEN_FINAL),
+    subtitle = sprintf("%d replicates", val_reps),
+    x        = expression(paste("Female Preference Variation (", sigma[p], ")")),
+    y        = "Phenotypic / Genetic Value",
+    color    = "", fill = ""
+  ) +
+  guides(color = guide_legend(override.aes = list(size = 4, alpha = 1))) +
+  tema_poster
+
+# =====================================================================
 # PLOT 3: TRAJETÓRIA EVOLUTIVA DO TRAÇO MASCULINO
 # =====================================================================
 df_traj <- df_k5 %>%
@@ -235,12 +278,14 @@ p_traj <- ggplot(df_traj,
 plots <- list(
   Poster_Plot1_TopologicalSignature = p_topo,
   Poster_Plot2_Dumbbell             = p_dumb,
+  Poster_Plot2b_TraitMeanVariance   = p_ruido,
   Poster_Plot3_Trajectory           = p_traj
 )
 
 dims <- list(
   Poster_Plot1_TopologicalSignature = c(13, 6),
   Poster_Plot2_Dumbbell             = c(13, 5),
+  Poster_Plot2b_TraitMeanVariance   = c(13, 6),
   Poster_Plot3_Trajectory           = c(11, 5)
 )
 

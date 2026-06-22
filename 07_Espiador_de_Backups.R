@@ -42,9 +42,16 @@ if(nrow(df_parcial) > 0) {
               paste(sort(unique(df_parcial$k_fixo)), collapse=", "),
               paste(unique(df_parcial$selecao_natural), collapse=", ")))
 
-  # Baseline para Espiadinhas 1-8: k=10, sel.nat=TRUE (cenário principal)
+  # Gera figuras para AMBAS condições de seleção natural
+  # _semNS = sem seleção natural (preferência feminina pura)
+  # _comNS = com seleção natural (viabilidade ativa)
   K_BASE  <- 10L
-  NS_BASE <- FALSE  # sem seleção natural — consistente com o texto do HTML
+
+  for (NS_BASE in c(FALSE, TRUE)) {   # loop: sem NS e com NS
+
+  sufixo_ns <- ifelse(NS_BASE, "_comNS", "_semNS")
+  cat(sprintf("\n>>> Gerando gráficos para NS=%s (sufixo: %s)\n", NS_BASE, sufixo_ns))
+
   df_base <- df_parcial %>%
     filter(k_fixo == K_BASE, selecao_natural == NS_BASE)
   cat(sprintf("Baseline (k=%d, sel.nat=%s): %d linhas\n", K_BASE, NS_BASE, nrow(df_base)))
@@ -148,12 +155,12 @@ if(nrow(df_parcial) > 0) {
   print(p_is)
 
   # Salvar espiadinhas 1-6 como PNG
-  ggsave(file.path(dir_espiadinhas, "Espiadinha1_VarZ.png"),        p_varz, width=10, height=5, dpi=200, bg="white")
-  ggsave(file.path(dir_espiadinhas, "Espiadinha2_Modularidade.png"), p_mod,  width=10, height=5, dpi=200, bg="white")
-  ggsave(file.path(dir_espiadinhas, "Espiadinha3_MediaTraco.png"),  p_zbar, width=10, height=5, dpi=200, bg="white")
-  ggsave(file.path(dir_espiadinhas, "Espiadinha4_Aninhamento.png"), p_nest, width=10, height=5, dpi=200, bg="white")
-  ggsave(file.path(dir_espiadinhas, "Espiadinha5_Centralizacao.png"), p_cent, width=10, height=5, dpi=200, bg="white")
-  ggsave(file.path(dir_espiadinhas, "Espiadinha6_Is.png"),         p_is,   width=10, height=5, dpi=200, bg="white")
+  ggsave(file.path(dir_espiadinhas, paste0("Espiadinha1_VarZ",          sufixo_ns, ".png")), p_varz, width=10, height=5, dpi=200, bg="white")
+  ggsave(file.path(dir_espiadinhas, paste0("Espiadinha2_Modularidade",  sufixo_ns, ".png")), p_mod,  width=10, height=5, dpi=200, bg="white")
+  ggsave(file.path(dir_espiadinhas, paste0("Espiadinha3_MediaTraco",    sufixo_ns, ".png")), p_zbar, width=10, height=5, dpi=200, bg="white")
+  ggsave(file.path(dir_espiadinhas, paste0("Espiadinha4_Aninhamento",   sufixo_ns, ".png")), p_nest, width=10, height=5, dpi=200, bg="white")
+  ggsave(file.path(dir_espiadinhas, paste0("Espiadinha5_Centralizacao", sufixo_ns, ".png")), p_cent, width=10, height=5, dpi=200, bg="white")
+  ggsave(file.path(dir_espiadinhas, paste0("Espiadinha6_Is",            sufixo_ns, ".png")), p_is,   width=10, height=5, dpi=200, bg="white")
 
   cat("\n>>> CHECKPOINT 1: Espiadinhas 1-6 OK\n")
 
@@ -223,7 +230,7 @@ if(nrow(df_parcial) > 0) {
   # =====================================================================
   trajetoria_evolutiva <- function(amax, num_espiadinha) {
     df_traj <- df_parcial %>%
-      filter(encounters_n == amax, sigma_p %in% c(0.5, 2.0)) %>%
+      filter(selecao_natural == NS_BASE, encounters_n == amax, sigma_p %in% c(0.5, 2.0)) %>%
       drop_na() %>%
       group_by(generation, tipo_selecao, sigma_p) %>%
       summarise(zbar_males = mean(zbar_males, na.rm = TRUE),
@@ -268,7 +275,7 @@ if(nrow(df_parcial) > 0) {
   # =====================================================================
   trajetoria_dois_sigmas <- function(amax, num_espiadinha) {
     df_traj <- df_parcial %>%
-      filter(encounters_n == amax, sigma_p %in% c(0.5, 2.0)) %>%
+      filter(selecao_natural == NS_BASE, encounters_n == amax, sigma_p %in% c(0.5, 2.0)) %>%
       drop_na() %>%
       group_by(generation, tipo_selecao, sigma_p) %>%
       summarise(across(c(Modularity, Nestedness, I_s, Centralization),
@@ -344,7 +351,7 @@ if(nrow(df_parcial) > 0) {
       )
 
     print(p_combinado)
-    ggsave(file.path(dir_espiadinhas, "Espiadinha7_Topologia_Amax.png"),
+    ggsave(file.path(dir_espiadinhas, paste0("Espiadinha7_Topologia_Amax", sufixo_ns, ".png")),
            p_combinado, width=14, height=10, dpi=200, bg="white")
   } else {
     if (!is.null(p_left))  print(p_left)
@@ -386,7 +393,7 @@ if(nrow(df_parcial) > 0) {
       )
 
     print(p_evo_combinado)
-    ggsave(file.path(dir_espiadinhas, "Espiadinha8_Trajetorias_Evolutivas.png"),
+    ggsave(file.path(dir_espiadinhas, paste0("Espiadinha8_Trajetorias_Evolutivas", sufixo_ns, ".png")),
            p_evo_combinado, width = 14, height = 10, dpi = 200, bg = "white")
   } else {
     if (!is.null(p_evo_left))  print(p_evo_left)
@@ -433,8 +440,8 @@ if(nrow(df_parcial) > 0) {
   # Imprime no console em formato legível
   print(df_tabela, n = Inf, width = Inf)
 
-  out_csv <- file.path(dir_dados_out, sprintf("Tabela_Gen1_vs_Gen%d_k%d_NS%s.csv",
-                                              GEN_FINAL, K_BASE, NS_BASE))
+  out_csv <- file.path(dir_dados_out, sprintf("Tabela_Gen1_vs_Gen%d_k%d%s.csv",
+                                              GEN_FINAL, K_BASE, sufixo_ns))
   write.csv(df_tabela, out_csv, row.names = FALSE)
   cat(sprintf("\nTabela salva em: %s\n", out_csv))
 
@@ -461,7 +468,7 @@ if(nrow(df_parcial) > 0) {
   # A_max=200, sel.nat=TRUE, geração final — comparando k=5, 10, 20
   # =====================================================================
   df_k <- df_parcial %>%
-    filter(encounters_n == 200, selecao_natural == TRUE, generation == GEN_FINAL) %>%
+    filter(encounters_n == 200, selecao_natural == NS_BASE, generation == GEN_FINAL) %>%
     drop_na() %>%
     mutate(k_label = factor(paste0("k = ", k_fixo),
                             levels = paste0("k = ", c(5, 10, 20))))
@@ -499,9 +506,9 @@ if(nrow(df_parcial) > 0) {
 
   print(p_k_topo)
   print(p_k_evo)
-  ggsave(file.path(dir_espiadinhas, "Espiadinha9a_Poliandria_Topologia.png"),
+  ggsave(file.path(dir_espiadinhas, paste0("Espiadinha9a_Poliandria_Topologia", sufixo_ns, ".png")),
          p_k_topo, width = 12, height = 7, dpi = 200, bg = "white")
-  ggsave(file.path(dir_espiadinhas, "Espiadinha9b_Poliandria_Evolucao.png"),
+  ggsave(file.path(dir_espiadinhas, paste0("Espiadinha9b_Poliandria_Evolucao", sufixo_ns, ".png")),
          p_k_evo,  width = 12, height = 7, dpi = 200, bg = "white")
   cat(">>> CHECKPOINT 6: Espiadinha 9 OK\n")
 
@@ -548,9 +555,9 @@ if(nrow(df_parcial) > 0) {
 
   print(p_ns_topo)
   print(p_ns_evo)
-  ggsave(file.path(dir_espiadinhas, "Espiadinha10a_SelNat_Topologia.png"),
+  ggsave(file.path(dir_espiadinhas, paste0("Espiadinha10a_SelNat_Topologia", sufixo_ns, ".png")),
          p_ns_topo, width = 10, height = 7, dpi = 200, bg = "white")
-  ggsave(file.path(dir_espiadinhas, "Espiadinha10b_SelNat_Evolucao.png"),
+  ggsave(file.path(dir_espiadinhas, paste0("Espiadinha10b_SelNat_Evolucao", sufixo_ns, ".png")),
          p_ns_evo,  width = 10, height = 7, dpi = 200, bg = "white")
   cat(">>> CHECKPOINT 7: Espiadinha 10 OK\n")
 
@@ -776,17 +783,17 @@ if(nrow(df_parcial) > 0) {
   print(p_fase4_causal)
   print(p_fase4_dumbell)
 
-  ggsave(file.path(dir_graficos, "Fase4_PlotA_AssinaturaTopologica.png"),
+  ggsave(file.path(dir_graficos, paste0("Fase4_PlotA_AssinaturaTopologica",  sufixo_ns, ".png")),
          plot = p_fase4_topo,       width = 10, height = 8,  dpi = 300, bg = "white")
-  ggsave(file.path(dir_graficos, "Fase4_PlotD_TopologiaAmax.png"),
+  ggsave(file.path(dir_graficos, paste0("Fase4_PlotD_TopologiaAmax",         sufixo_ns, ".png")),
          plot = p_fase4_topo_amax,  width = 12, height = 7,  dpi = 300, bg = "white")
-  ggsave(file.path(dir_graficos, "Fase4_PlotB_RuidoEcologico.png"),
+  ggsave(file.path(dir_graficos, paste0("Fase4_PlotB_RuidoEcologico",        sufixo_ns, ".png")),
          plot = p_fase4_ruido,      width = 12, height = 7,  dpi = 300, bg = "white")
-  ggsave(file.path(dir_graficos, "Fase4_PlotC_ProvaCausal.png"),
+  ggsave(file.path(dir_graficos, paste0("Fase4_PlotC_ProvaCausal",           sufixo_ns, ".png")),
          plot = p_fase4_causal,     width = 10, height = 5,  dpi = 300, bg = "white")
-  ggsave(file.path(dir_graficos, "Fase4_PlotE_Dumbell_Gen1vsGenFinal.png"),
+  ggsave(file.path(dir_graficos, paste0("Fase4_PlotE_Dumbell_Gen1vsGenFinal", sufixo_ns, ".png")),
          plot = p_fase4_dumbell,    width = 12, height = 6,  dpi = 300, bg = "white")
-  cat(sprintf("\nGráficos A, B, C, D, E salvos em: %s\n", dir_graficos))
+  cat(sprintf("\nGráficos A, B, C, D, E (%s) salvos em: %s\n", sufixo_ns, dir_graficos))
 
   # =====================================================================
   # PLOTS A e E PARA k = 5 e k = 20 (efeito da poliandria na assinatura)
@@ -810,12 +817,12 @@ if(nrow(df_parcial) > 0) {
     p_topo_k    <- construir_plot_assinatura(df_gen50_k, k_val, subtitulo_k)
     p_dumbell_k <- construir_plot_dumbell(df_tabela_k, k_val)
 
-    ggsave(file.path(dir_graficos, sprintf("Fase4_PlotA_AssinaturaTopologica_k%d.png", k_val)),
+    ggsave(file.path(dir_graficos, sprintf("Fase4_PlotA_AssinaturaTopologica%s_k%d.png", sufixo_ns, k_val)),
            plot = p_topo_k,    width = 10, height = 8, dpi = 300, bg = "white")
-    ggsave(file.path(dir_graficos, sprintf("Fase4_PlotE_Dumbell_Gen1vsGenFinal_k%d.png", k_val)),
+    ggsave(file.path(dir_graficos, sprintf("Fase4_PlotE_Dumbell_Gen1vsGenFinal%s_k%d.png", sufixo_ns, k_val)),
            plot = p_dumbell_k, width = 12, height = 6, dpi = 300, bg = "white")
   }
-  cat(sprintf("\nGráficos A e E para k=5 e k=20 salvos em: %s\n", dir_graficos))
+  cat(sprintf("\nGráficos A e E para k=5,10,20 (%s) salvos em: %s\n", sufixo_ns, dir_graficos))
 
   # =====================================================================
   # BLOCO E: MODELOS LINEARES (LMs) — ESTATÍSTICA OFICIAL
@@ -879,9 +886,11 @@ if(nrow(df_parcial) > 0) {
   # MODELO SEGMENTADO: Tipping Point em sigma_p = 1.0
   # =====================================================================
   cat("\n--- MODELO SEGMENTADO: Var(z) ~ sigma_p com breakpoint em 1.0 ---\n")
-  modelo_geral      <- lm(varz_males ~ sigma_p, data = df_gen50)  # baseline k=10, NS=TRUE
+  modelo_geral      <- lm(varz_males ~ sigma_p, data = df_gen50)
   modelo_segmentado <- segmented(modelo_geral, seg.Z = ~sigma_p, psi = 1.0)
   print(summary(modelo_segmentado))
+
+  }  # end for (NS_BASE in c(FALSE, TRUE))
 
 } else {
   cat("O arquivo de backup ainda não foi criado. Espere a simulação rodar mais um pouco!\n")
