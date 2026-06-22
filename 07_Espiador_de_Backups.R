@@ -76,7 +76,7 @@ if(nrow(df_parcial) > 0) {
     facet_wrap(~Cenario_Ecol) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, labels = labels_4) +
-    labs(title = "ESPIADINHA 1: Genetic Diversity (Var z) in Real Time",
+    labs(title = "ESPIADINHA 1: Male Trait Variance (Var z) in Real Time",
          x = expression(sigma[p]), y = "Var(z) males", color = "", fill = "") +
     theme_light() + theme(legend.position = "bottom")
 
@@ -206,8 +206,8 @@ if(nrow(df_parcial) > 0) {
     pivot_longer(cols = c(zbar_males, varz_males),
                  names_to = "Metrica", values_to = "Valor") %>%
     mutate(Metrica = case_when(
-      Metrica == "zbar_males" ~ "1. Mean Trait (z̄)",
-      Metrica == "varz_males" ~ "2. Trait Variance (Var z)"
+      Metrica == "zbar_males" ~ "1. Male Trait Mean (z̅)",
+      Metrica == "varz_males" ~ "2. Male Trait Variance (Var z)"
     ))
 
   limites_evo <- df_global_evo %>%
@@ -239,8 +239,8 @@ if(nrow(df_parcial) > 0) {
       pivot_longer(cols = c(zbar_males, varz_males),
                    names_to = "Metrica", values_to = "Valor") %>%
       mutate(Metrica = case_when(
-        Metrica == "zbar_males" ~ "1. Mean Trait (z̄)",
-        Metrica == "varz_males" ~ "2. Trait Variance (Var z)"
+        Metrica == "zbar_males" ~ "1. Male Trait Mean (z̅)",
+        Metrica == "varz_males" ~ "2. Male Trait Variance (Var z)"
       ),
       sigma_label = factor(sprintf("σp = %.1f", sigma_p),
                            levels = c("σp = 0.5", "σp = 2.0")))
@@ -252,7 +252,7 @@ if(nrow(df_parcial) > 0) {
     }
 
     # Linha horizontal em φ=5 só para a métrica de média
-    df_phi <- data.frame(Metrica = "1. Mean Trait (z̄)", yintercept = 5.0)
+    df_phi <- data.frame(Metrica = "1. Male Trait Mean (z̅)", yintercept = 5.0)
 
     ggplot(df_traj, aes(x = generation, y = Valor, color = tipo_selecao)) +
       geom_blank(data = df_limites_evo) +
@@ -491,7 +491,7 @@ if(nrow(df_parcial) > 0) {
   p_k_evo <- df_k %>%
     pivot_longer(cols = c(zbar_males, varz_males), names_to = "Metrica", values_to = "Valor") %>%
     mutate(Metrica = ifelse(Metrica == "zbar_males",
-                            "1. Mean Trait (z̄)", "2. Trait Variance (Var z)")) %>%
+                            "1. Male Trait Mean (z̅)", "2. Male Trait Variance (Var z)")) %>%
     ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
     geom_smooth(method = "loess", formula = y~x, alpha = 0.15) +
@@ -540,7 +540,7 @@ if(nrow(df_parcial) > 0) {
   p_ns_evo <- df_ns %>%
     pivot_longer(cols = c(zbar_males, varz_males), names_to = "Metrica", values_to = "Valor") %>%
     mutate(Metrica = ifelse(Metrica == "zbar_males",
-                            "1. Mean Trait (z̄)", "2. Trait Variance (Var z)")) %>%
+                            "1. Male Trait Mean (z̅)", "2. Male Trait Variance (Var z)")) %>%
     ggplot(aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
     geom_smooth(method = "loess", formula = y~x, alpha = 0.15) +

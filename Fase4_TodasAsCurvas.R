@@ -202,11 +202,11 @@ p_fase4_topo <- df_gen_final %>% filter(encounters_n == 200) %>%
 df_ruido <- df_gen_final %>% mutate(Cenario_Ecol = factor(paste0("A_max: ", encounters_n),
                                                       levels = c("A_max: 200", "A_max: 40", "A_max: 10"))) %>%
   pivot_longer(cols = c(zbar_males, varz_males), names_to = "Variavel", values_to = "Valor") %>%
-  mutate(Variavel = ifelse(Variavel == "zbar_males", "1. Mean Ornament (zbar)", "2. Genetic Diversity (Var z)"))
+  mutate(Variavel = ifelse(Variavel == "zbar_males", "1. Male Trait Mean (z̅)", "2. Male Trait Variance (Var z)"))
 
 p_fase4_ruido <- ggplot(df_ruido, aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
   # 5.0 ES la variable \phi de nuestro modelo ecológico! 
-  geom_hline(data = filter(df_ruido, Variavel == "1. Mean Ornament (zbar)"), aes(yintercept = 5.0), linetype = "dashed", alpha = 0.6) +
+  geom_hline(data = filter(df_ruido, Variavel == "1. Male Trait Mean (z̅)"), aes(yintercept = 5.0), linetype = "dashed", alpha = 0.6) +
   geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
   geom_smooth(method = "loess", formula = y~x, alpha = 0.15, linewidth = 1.2, show.legend = FALSE) +
   geom_jitter(alpha = 0.2, width = 0.05, size = 1) +
