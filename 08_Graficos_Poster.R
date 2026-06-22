@@ -29,7 +29,7 @@ dir.create(dir_poster, recursive = TRUE, showWarnings = FALSE)
 
 # ── CONSTANTES ────────────────────────────────────────────────────────
 K_POSTER    <- 5L
-NS_POSTER   <- TRUE    # com seleção natural (igual NS_BASE do Script 07)
+NS_POSTER   <- FALSE   # sem seleção natural (efeito puro da preferência feminina)
 SP_POSTER   <- 2.0     # sigma_p para dumbbell e trajetória
 AMAX_POSTER <- 200     # cenário ideal
 GEN_FINAL   <- max(df$generation, na.rm = TRUE)
