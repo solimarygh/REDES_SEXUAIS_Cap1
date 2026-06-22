@@ -118,8 +118,24 @@ De novo, lembra que cada figura abaixo tem abas para $k=5$, $k=10$ e $k=20$ (pol
 ## Métricas vs σp (Geração Final) {.tabset}
 
 ```{r fase4-plotA, results='asis'}
-for (k_val in c( 5, 10,20)) {
-  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotA_AssinaturaTopologica_k%d.png", k_val))
+for (k_val in c(5, 10, 20)) {
+  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotA_AssinaturaTopologica_semNS_k%d.png", k_val))
+  cat(sprintf("\n### k = %d\n\n", k_val))
+  if (file.exists(img)) {
+    cat(sprintf("![](%s)\n\n", img))
+  } else {
+    cat("\n*Gráfico não encontrado. Rode o Script 07 (Espiador de Backups) primeiro.*\n")
+  }
+}
+```
+
+## Preferência e Traço Masculino {.tabset}
+
+Cada painel mostra como a variação na preferência feminina ($\sigma_p$) afeta a média e a variância genética do traço masculino ($\bar{z}$ e Var $z$), para os três níveis de custo de busca ($A_{max}$). O efeito mais marcante é o da curva **Disruptiva**: a baixo $\sigma_p$, a preferência concentrada nos extremos gera um estado bistável — algumas populações derivam para $z$ alto, outras para $z$ baixo — resultando em alta variância entre réplicas (nuvem espalhada). À medida que $\sigma_p$ aumenta, as populações convergem. A curva **Sigmoide** empurra $\bar{z}$ consistentemente acima do ótimo inicial $\phi = 5$.
+
+```{r fase4-plotB, results='asis'}
+for (k_val in c(5, 10, 20)) {
+  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotB_RuidoEcologico_semNS_k%d.png", k_val))
   cat(sprintf("\n### k = %d\n\n", k_val))
   if (file.exists(img)) {
     cat(sprintf("![](%s)\n\n", img))
@@ -133,7 +149,7 @@ for (k_val in c( 5, 10,20)) {
 
 ```{r fase4-plotE, results='asis'}
 for (k_val in c(5, 10, 20)) {
-  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotE_Dumbell_Gen1vsGenFinal_k%d.png", k_val))
+  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotE_Dumbell_Gen1vsGenFinal_semNS_k%d.png", k_val))
   cat(sprintf("\n### k = %d\n\n", k_val))
   if (file.exists(img)) {
     cat(sprintf("![](%s)\n\n", img))
