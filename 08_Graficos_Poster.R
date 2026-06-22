@@ -285,20 +285,61 @@ p_traj <- ggplot(df_traj,
   tema_poster
 
 # =====================================================================
+# PLOT 3b: TRAJETÓRIA EVOLUTIVA DA VARIÂNCIA DO TRAÇO
+# =====================================================================
+df_traj_var <- df_k5 %>%
+  filter(encounters_n == AMAX_POSTER, sigma_p == SP_POSTER) %>%
+  group_by(tipo_selecao, generation) %>%
+  summarise(
+    media_varz = mean(varz_males, na.rm = TRUE),
+    sd_varz    = sd(varz_males,   na.rm = TRUE),
+    .groups = "drop"
+  )
+
+p_traj_var <- ggplot(df_traj_var,
+                     aes(x = generation, y = media_varz,
+                         color = tipo_selecao, fill = tipo_selecao)) +
+  geom_ribbon(aes(ymin = media_varz - sd_varz, ymax = media_varz + sd_varz),
+              alpha = 0.12, color = NA) +
+  geom_line(linewidth = 1.4) +
+  geom_hline(yintercept = 1, linetype = "dashed",
+             color = "gray50", linewidth = 0.8) +
+  annotate("text", x = 1, y = 1,
+           label = "Var z = 1 (initial)", hjust = 0, vjust = -0.5,
+           color = "gray50", size = 3.8, fontface = "italic") +
+  scale_color_manual(values = cores_4, labels = labels_4) +
+  scale_fill_manual(values  = cores_4, labels = labels_4) +
+  labs(
+    title    = sprintf("Evolutionary Trajectory of Male Trait Variance (σp = %.1f, k = %d, A_max = %d)",
+                       SP_POSTER, K_POSTER, AMAX_POSTER),
+    subtitle = sprintf("%d replicates  |  ribbon = ±1 SD across replicates",
+                       val_reps),
+    x = "Generation", y = "Male Trait Variance (Var z)",
+    color = "", fill = ""
+  ) +
+  guides(
+    color = guide_legend(override.aes = list(size = 3, alpha = 1, shape = 19)),
+    fill  = "none"
+  ) +
+  tema_poster
+
+# =====================================================================
 # EXPORTAR — claro e transparente
 # =====================================================================
 plots <- list(
   Poster_Plot1_TopologicalSignature = p_topo,
   Poster_Plot2_Dumbbell             = p_dumb,
   Poster_Plot2b_TraitMeanVariance   = p_ruido,
-  Poster_Plot3_Trajectory           = p_traj
+  Poster_Plot3_Trajectory           = p_traj,
+  Poster_Plot3b_TrajectoryVariance  = p_traj_var
 )
 
 dims <- list(
   Poster_Plot1_TopologicalSignature = c(13, 6),
   Poster_Plot2_Dumbbell             = c(13, 5),
   Poster_Plot2b_TraitMeanVariance   = c(13, 6),
-  Poster_Plot3_Trajectory           = c(11, 5)
+  Poster_Plot3_Trajectory           = c(11, 5),
+  Poster_Plot3b_TrajectoryVariance  = c(11, 5)
 )
 
 for (nome in names(plots)) {
