@@ -29,7 +29,7 @@ dir.create(dir_poster, recursive = TRUE, showWarnings = FALSE)
 
 # ── CONSTANTES ────────────────────────────────────────────────────────
 K_POSTER    <- 5L
-NS_POSTER   <- FALSE   # sem seleção natural
+NS_POSTER   <- TRUE    # com seleção natural (igual NS_BASE do Script 07)
 SP_POSTER   <- 2.0     # sigma_p para dumbbell e trajetória
 AMAX_POSTER <- 200     # cenário ideal
 GEN_FINAL   <- max(df$generation, na.rm = TRUE)
@@ -140,61 +140,55 @@ resumir_gen <- function(df_in, gen_label) {
     mutate(Geracao = gen_label)
 }
 
-df_gen1   <- df_k5 %>% filter(generation == 1)           %>% resumir_gen("Gen 1")
-df_genfin <- df_k5 %>% filter(generation == GEN_FINAL)   %>% resumir_gen(sprintf("Gen %d", GEN_FINAL))
-
-label_genfin <- sprintf("Gen %d", GEN_FINAL)
-
-df_dumb <- bind_rows(df_gen1, df_genfin) %>%
+# Tabela wide: Gen_inicial e Gen_final como colunas separadas (igual Script 07)
+df_tabela_dumb <- df_k5 %>%
+  filter(generation %in% c(1, GEN_FINAL),
+         encounters_n == AMAX_POSTER,
+         sigma_p == SP_POSTER) %>%
+  drop_na(Modularity, Nestedness) %>%
+  group_by(generation, tipo_selecao) %>%
+  summarise(Modularity = mean(Modularity, na.rm = TRUE),
+            Nestedness = mean(Nestedness, na.rm = TRUE),
+            .groups = "drop") %>%
   pivot_longer(cols = c(Modularity, Nestedness),
                names_to = "Metrica", values_to = "Valor") %>%
+  mutate(gen_label = ifelse(generation == 1, "Gen_inicial", "Gen_final")) %>%
+  dplyr::select(-generation) %>%
+  pivot_wider(names_from = gen_label, values_from = Valor) %>%
   mutate(
+    Delta = Gen_final - Gen_inicial,
     tipo_label = factor(
-      recode(tipo_selecao, "uniform"="Random","gaussian"="Gaussian",
-             "sigmoid"="Sigmoid","u-shaped"="U-shaped"),
+      recode(tipo_selecao, "uniform"="Random", "gaussian"="Gaussian",
+             "sigmoid"="Sigmoid", "u-shaped"="U-shaped"),
       levels = c("U-shaped","Sigmoid","Gaussian","Random")),
-    Geracao = factor(Geracao, levels = c("Gen 1", label_genfin)),
     Metrica = ifelse(Metrica == "Modularity", "1. Modularity", "2. Nestedness (NODF)")
   )
 
-df_delta <- df_dumb %>%
-  group_by(tipo_selecao, tipo_label, Metrica) %>%
-  summarise(
-    delta = diff(Valor[order(Geracao)]),
-    x_pos = Valor[Geracao == label_genfin],
-    .groups = "drop"
-  ) %>%
-  mutate(label = sprintf("%+.3f", delta),
-         cor   = cores_4[tipo_selecao])
-
-p_dumb <- ggplot(df_dumb,
-                 aes(x = Valor, y = tipo_label, color = tipo_selecao)) +
-  geom_line(aes(group = tipo_label), linewidth = 1.2, color = "gray75") +
-  geom_point(aes(shape = Geracao, fill = tipo_selecao),
-             size = 5, stroke = 1.2) +
-  geom_text(data = df_delta,
-            aes(x = x_pos, y = tipo_label, label = label, color = tipo_selecao),
-            hjust = -0.3, size = 4, fontface = "bold", inherit.aes = FALSE) +
-  scale_shape_manual(values = c("Gen 1" = 21, "placeholder" = 19),
-                     breaks = c("Gen 1", label_genfin)) +
-  scale_color_manual(values = cores_4, guide = "none") +
-  scale_fill_manual(values  = cores_4, guide = "none") +
+p_dumb <- ggplot(df_tabela_dumb) +
+  geom_segment(aes(x = Gen_inicial, xend = Gen_final,
+                   y = tipo_label,  yend = tipo_label,
+                   color = tipo_selecao),
+               linewidth = 1.8, alpha = 0.7) +
+  # Gen 1 — círculo ABERTO (fill branco)
+  geom_point(aes(x = Gen_inicial, y = tipo_label, color = tipo_selecao),
+             size = 5, shape = 21, fill = "white", stroke = 2) +
+  # Gen Final — círculo FECHADO (fill colorido)
+  geom_point(aes(x = Gen_final, y = tipo_label, color = tipo_selecao),
+             size = 5) +
+  geom_text(aes(x = (Gen_inicial + Gen_final) / 2, y = tipo_label,
+                label = sprintf("%+.3f", Delta), color = tipo_selecao),
+            hjust = 0.5, vjust = -0.7, size = 4, fontface = "bold") +
   facet_wrap(~Metrica, scales = "free_x", ncol = 2) +
+  scale_color_manual(values = cores_4, labels = labels_4) +
   labs(
-    title    = sprintf("Evolutionary Change in Network Structure (σp = %.1f, k = %d)",
-                       SP_POSTER, K_POSTER),
-    subtitle = sprintf("Open circle = Gen 1  |  Filled = Gen %d  |  Label = Δ",
+    title    = sprintf("Evolutionary Change in Network Structure (σp = %.1f, k = %d, A_max = %d)",
+                       SP_POSTER, K_POSTER, AMAX_POSTER),
+    subtitle = sprintf("Open circle = Gen 1  |  Filled circle = Gen %d  |  Label = Δ",
                        GEN_FINAL),
-    x = "Mean Metric Value", y = "", shape = ""
+    x = "Mean Metric Value", y = "", color = ""
   ) +
-  guides(shape = guide_legend(override.aes = list(size = 4, fill = "gray50"))) +
+  guides(color = guide_legend(override.aes = list(size = 4))) +
   tema_poster
-
-# ── Corrigir o shape manual para incluir o label dinâmico
-p_dumb <- p_dumb +
-  scale_shape_manual(
-    values = setNames(c(21, 19), c("Gen 1", label_genfin))
-  )
 
 # =====================================================================
 # PLOT 3: TRAJETÓRIA EVOLUTIVA DO TRAÇO MASCULINO
