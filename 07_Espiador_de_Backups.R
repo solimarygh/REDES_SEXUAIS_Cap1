@@ -178,7 +178,7 @@ if(nrow(df_parcial) > 0) {
     mutate(Metrica = case_when(
       Metrica == "Modularity"     ~ "1. Modularity",
       Metrica == "Nestedness"     ~ "2. Nestedness",
-      Metrica == "I_s"            ~ "3. Oportunidade de Seleção (Is)",
+      Metrica == "I_s"            ~ "3. Sel. Opportunity (Is)",
       Metrica == "Centralization" ~ "4. Centralization"
     ))
 
@@ -286,7 +286,7 @@ if(nrow(df_parcial) > 0) {
       mutate(Metrica = case_when(
         Metrica == "Modularity"     ~ "1. Modularity",
         Metrica == "Nestedness"     ~ "2. Nestedness",
-        Metrica == "I_s"            ~ "3. Oportunidade de Seleção (Is)",
+        Metrica == "I_s"            ~ "3. Sel. Opportunity (Is)",
         Metrica == "Centralization" ~ "4. Centralization"
       ),
       sigma_label = factor(sprintf("σp = %.1f", sigma_p),
