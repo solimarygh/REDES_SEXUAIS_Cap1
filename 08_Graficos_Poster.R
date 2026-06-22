@@ -204,15 +204,24 @@ df_ruido_poster <- df_k5 %>%
                            "1. Mean Ornament (z̅)",
                            "2. Genetic Diversity (Var z)"))
 
+# Linhas de referência por painel: φ=5 para média, Var z=1 para variância
+df_refs_ruido <- data.frame(
+  Variavel   = c("1. Mean Ornament (z̅)", "2. Genetic Diversity (Var z)"),
+  yintercept = c(5.0, 1.0),
+  label      = c("φ = 5 (initial mean)", "Var z = 1 (initial)")
+)
+
 p_ruido <- ggplot(df_ruido_poster,
                   aes(x = sigma_p, y = Valor,
                       color = tipo_selecao, fill = tipo_selecao)) +
-  geom_hline(data = filter(df_ruido_poster, Variavel == "1. Mean Ornament (z̅)"),
-             aes(yintercept = 5.0), linetype = "dashed",
-             color = "gray50", linewidth = 0.8) +
-  annotate("text", x = 0.3, y = 5,
-           label = "φ = 5 (initial optimum)", hjust = 0, vjust = -0.5,
-           color = "gray50", size = 3.5, fontface = "italic") +
+  geom_hline(data = df_refs_ruido,
+             aes(yintercept = yintercept),
+             linetype = "dashed", color = "gray50", linewidth = 0.8,
+             inherit.aes = FALSE) +
+  geom_text(data = df_refs_ruido,
+            aes(x = 0.3, y = yintercept, label = label),
+            hjust = 0, vjust = -0.5, color = "gray50", size = 3.5,
+            fontface = "italic", inherit.aes = FALSE) +
   geom_vline(xintercept = 1.0, linetype = "dashed",
              color = "red", linewidth = 1) +
   annotate("text", x = 1.0, y = Inf,
@@ -229,7 +238,7 @@ p_ruido <- ggplot(df_ruido_poster,
                        AMAX_POSTER, K_POSTER, GEN_FINAL),
     subtitle = sprintf("%d replicates", val_reps),
     x        = expression(paste("Female Preference Variation (", sigma[p], ")")),
-    y        = "Phenotypic / Genetic Value",
+    y        = NULL,
     color    = "", fill = ""
   ) +
   guides(color = guide_legend(override.aes = list(size = 4, alpha = 1, shape = 19)),
