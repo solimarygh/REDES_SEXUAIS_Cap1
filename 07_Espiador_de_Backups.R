@@ -44,7 +44,7 @@ if(nrow(df_parcial) > 0) {
 
   # Baseline para Espiadinhas 1-8: k=10, sel.nat=TRUE (cenário principal)
   K_BASE  <- 10L
-  NS_BASE <- TRUE
+  NS_BASE <- FALSE  # sem seleção natural — consistente com o texto do HTML
   df_base <- df_parcial %>%
     filter(k_fixo == K_BASE, selecao_natural == NS_BASE)
   cat(sprintf("Baseline (k=%d, sel.nat=%s): %d linhas\n", K_BASE, NS_BASE, nrow(df_base)))
