@@ -201,12 +201,12 @@ df_ruido_poster <- df_k5 %>%
   pivot_longer(cols = c(zbar_males, varz_males),
                names_to = "Variavel", values_to = "Valor") %>%
   mutate(Variavel = ifelse(Variavel == "zbar_males",
-                           "1. Mean Ornament (z̅)",
-                           "2. Genetic Diversity (Var z)"))
+                           "1. Male Trait Mean (z̅)",
+                           "2. Male Trait Variance (Var z)"))
 
 # Linhas de referência por painel: φ=5 para média, Var z=1 para variância
 df_refs_ruido <- data.frame(
-  Variavel   = c("1. Mean Ornament (z̅)", "2. Genetic Diversity (Var z)"),
+  Variavel   = c("1. Male Trait Mean (z̅)", "2. Male Trait Variance (Var z)"),
   yintercept = c(5.0, 1.0),
   label      = c("φ = 5 (initial mean)", "Var z = 1 (initial)")
 )

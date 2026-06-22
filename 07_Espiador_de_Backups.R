@@ -649,10 +649,10 @@ if(nrow(df_parcial) > 0) {
       pivot_longer(cols = c(zbar_males, varz_males),
                    names_to = "Variavel", values_to = "Valor") %>%
       mutate(Variavel = ifelse(Variavel == "zbar_males",
-                               "1. Mean Ornament (z̅)", "2. Genetic Diversity (Var z)"))
+                               "1. Male Trait Mean (z̅)", "2. Male Trait Variance (Var z)"))
 
     ggplot(df_r, aes(x = sigma_p, y = Valor, color = tipo_selecao, fill = tipo_selecao)) +
-      geom_hline(data = filter(df_r, Variavel == "1. Mean Ornament (z̅)"),
+      geom_hline(data = filter(df_r, Variavel == "1. Male Trait Mean (z̅)"),
                  aes(yintercept = 5.0), linetype = "dashed", alpha = 0.6) +
       geom_vline(xintercept = 1.0, linetype = "dashed", color = "red", linewidth = 1) +
       annotate("text", x = 1.0, y = Inf, label = "σp = σz", hjust = -0.15, vjust = 1.8,
