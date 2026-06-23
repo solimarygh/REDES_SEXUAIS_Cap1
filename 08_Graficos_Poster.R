@@ -543,8 +543,8 @@ make_row_label <- function(txt, bg_color) {
           plot.margin = margin(0, 4, 0, 4))
 }
 
-lbl_rede  <- make_row_label("NETWORK\nARCHITECTURE", "#2C3E50")
-lbl_traco <- make_row_label("MALE TRAIT\nEVOLUTION",  "#6B3A8C")
+lbl_rede  <- make_row_label("NETWORK ARCHITECTURE", "#2C3E50")
+lbl_traco <- make_row_label("MALE TRAIT EVOLUTION",  "#6B3A8C")
 
 # Legenda unificada: mesma chave visual para todos os tipos de painel
 guias_cor <- guides(
@@ -794,7 +794,7 @@ p_rob_mod <- ggplot(df_robusto,
   labs(title    = "A  ·  Network Modularity vs Sampling Effort",
        subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                           SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
-       x = "Max Males Sampled per Female  (A_max)",
+       x = "Maximum number of Males sampled per Female (A_max)",
        y = "Modularity",
        color = "") +
   guias_cor +
@@ -820,7 +820,7 @@ p_rob_z <- ggplot(df_robusto,
   labs(title    = "B  ·  Male Trait Mean vs Sampling Effort",
        subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                           SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
-       x = "Max Males Sampled per Female  (A_max)",
+       x = "Maximum number of Males sampled per Female (A_max)",
        y = expression(bold(paste("Male Trait Mean (", bar(z), ")"))),
        color = "") +
   guias_cor +
@@ -847,7 +847,7 @@ p_rob_varz <- ggplot(df_robusto,
   labs(title    = "C  ·  Male Trait Variance vs Sampling Effort",
        subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                           SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
-       x = "Max Males Sampled per Female  (A_max)",
+       x = "Maximum number of Males sampled per Female (A_max)",
        y = "Male Trait Variance (Var z)",
        color = "") +
   guias_cor +
