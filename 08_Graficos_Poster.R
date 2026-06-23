@@ -587,7 +587,8 @@ df_traj_low <- df_tLow %>%          # df_tLow = sigma_p == SP_LOW_act, AMAX_POST
 
 df_zbar_D <- df_k5 %>%
   filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
-  drop_na(zbar_males)
+  drop_na(zbar_males) %>%
+  mutate(metric_label = "Male Trait\nMean (z)")
 
 # Limites Y compartilhados — calculados de A e D para garantir escalas comparáveis
 ylim_mod_A  <- range(df_topo$Valor[df_topo$Metrica == "1. Modularity"],        na.rm = TRUE)
@@ -648,7 +649,7 @@ make_traj <- function(df_in, titulo, subtitulo, ylim_z = NULL) {
     scale_fill_manual(values  = cores_4, labels = labels_4) +
     labs(title = titulo, subtitle = subtitulo,
          x = "Generation",
-         y = expression(paste("Mean Male Trait (", bar(z), ")")),
+         y = expression(bold(paste("Male Trait Mean (", bar(z), ")"))),
          color = "", fill = "") +
     guias_cor +
     tema_2x3
@@ -663,6 +664,9 @@ p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
                             color = tipo_selecao, fill = tipo_selecao)) +
   geom_vline(xintercept = 1.0, linetype = "dashed", color = "red",
              linewidth = 0.8, alpha = 0.5) +
+  annotate("text", x = 1.05, y = Inf,
+           label = "sigma[p] == sigma[z]", parse = TRUE,
+           hjust = 0, vjust = 1.5, color = "red", size = 3.2, fontface = "italic") +
   geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
               linewidth = 1.4, show.legend = FALSE) +
   geom_jitter(alpha = 0.22, width = 0.05, size = 1.8) +
@@ -713,19 +717,25 @@ p_D <- ggplot(df_zbar_D, aes(x = sigma_p, y = zbar_males,
            size = 3.5, fontface = "italic") +
   geom_vline(xintercept = 1.0, linetype = "dashed", color = "red",
              linewidth = 0.8, alpha = 0.5) +
+  annotate("text", x = 1.05, y = Inf,
+           label = "sigma[p] == sigma[z]", parse = TRUE,
+           hjust = 0, vjust = 1.5, color = "red", size = 3.2, fontface = "italic") +
   geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
               linewidth = 1.4, show.legend = FALSE) +
   geom_jitter(alpha = 0.22, width = 0.05, size = 1.8) +
+  facet_wrap(~metric_label, strip.position = "left") +
   scale_color_manual(values = cores_4, labels = labels_4) +
   scale_fill_manual(values  = cores_4, labels = labels_4) +
   labs(title    = "D  ·  Male Trait Mean at Generation 100",
        subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates",
                           K_POSTER, AMAX_POSTER, val_reps),
        x = expression(paste("Preference Variation (", sigma[p], ")")),
-       y = expression(paste("Mean Male Trait (", bar(z), ")")),
-       color = "", fill = "") +
+       y = NULL, color = "", fill = "") +
   guias_cor +
-  tema_2x3
+  tema_2x3 +
+  theme(strip.placement = "outside",
+        strip.text.y.left = element_text(color = "white", face = "bold",
+                                         size = 12, angle = 90))
 
 # E: Trajetória de z̄ — σp = 0.5
 p_E <- make_traj(
