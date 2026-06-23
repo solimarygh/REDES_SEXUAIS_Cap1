@@ -533,7 +533,7 @@ for (i in seq_len(nrow(comb_rob))) {
          y = "Male Trait Variance (Var z)", color = "") +
     guias_cor + tema_2x3
 
-  p_robusto <- p_rob_mod | p_rob_nest | p_rob_z | p_rob_varz
+  p_robusto <- p_rob_mod / p_rob_nest / p_rob_z / p_rob_varz
 
   lbl_titulo_rob <- ggplot() +
     annotate("text", x = 0.5, y = 0.85,
@@ -556,7 +556,7 @@ for (i in seq_len(nrow(comb_rob))) {
     plot_layout(heights = c(0.22, 1))
 
   path_rob <- file.path(dir_poster, sprintf("Poster_Robustez_%s.png", sufixo_rob))
-  png(path_rob, width = 28, height = 8.5, units = "in", res = 300, bg = bg_poster)
+  png(path_rob, width = 10, height = 28, units = "in", res = 300, bg = bg_poster)
   print(fig_robusto)
   dev.off()
   cat(sprintf("  → Robustez  : %s\n", basename(path_rob)))
