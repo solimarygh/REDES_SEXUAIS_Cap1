@@ -758,7 +758,85 @@ dev.off()
 
 cat(sprintf("Grid 2×3 salvo em: %s\n", path_2x3))
 
+# =====================================================================
+# POSTER: ROBUSTEZ — Assimetria de Resiliência Ecológica
+# X = A_max (10 | 40 | 200), fixando σp = 2.0 e Gen Final
+# A: Modularity  |  B: Male Trait Mean (z̄)
+# Hipótese: modularidade colapsa com baixo A_max; runaway persiste
+# =====================================================================
+
+df_robusto <- df_k5 %>%
+  filter(generation == GEN_FINAL, sigma_p == SP_POSTER) %>%
+  drop_na(Modularity, zbar_males) %>%
+  mutate(Amax_f = factor(encounters_n,
+                         levels = c(10, 40, 200),
+                         labels = c("10", "40", "200")))
+
+df_rob_med <- df_robusto %>%
+  group_by(tipo_selecao, Amax_f) %>%
+  summarise(mod_mean = mean(Modularity,  na.rm = TRUE),
+            z_mean   = mean(zbar_males,  na.rm = TRUE),
+            .groups  = "drop")
+
+# ── Painel A: Modularity ──────────────────────────────────────────
+p_rob_mod <- ggplot(df_robusto,
+                    aes(x = Amax_f, color = tipo_selecao)) +
+  geom_jitter(aes(y = Modularity),
+              alpha = 0.2, width = 0.15, size = 1.8) +
+  geom_line(data = df_rob_med,
+            aes(y = mod_mean, group = tipo_selecao),
+            linewidth = 1.6) +
+  geom_point(data = df_rob_med,
+             aes(y = mod_mean),
+             size = 5, shape = 19) +
+  scale_color_manual(values = cores_4, labels = labels_4) +
+  labs(title    = "A  ·  Network Modularity vs Sampling Effort",
+       subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
+                          SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
+       x = "Max Males Sampled per Female  (A_max)",
+       y = "Modularity",
+       color = "") +
+  guias_cor +
+  tema_2x3
+
+# ── Painel B: Male Trait Mean (z̄) ────────────────────────────────
+p_rob_z <- ggplot(df_robusto,
+                  aes(x = Amax_f, color = tipo_selecao)) +
+  geom_hline(yintercept = 5.0, linetype = "dashed",
+             color = "gray50", linewidth = 0.8) +
+  annotate("text", x = -Inf, y = 5.0, label = "φ = 5  (initial)",
+           hjust = -0.1, vjust = -0.55, color = "gray50",
+           size = 3.5, fontface = "italic") +
+  geom_jitter(aes(y = zbar_males),
+              alpha = 0.2, width = 0.15, size = 1.8) +
+  geom_line(data = df_rob_med,
+            aes(y = z_mean, group = tipo_selecao),
+            linewidth = 1.6) +
+  geom_point(data = df_rob_med,
+             aes(y = z_mean),
+             size = 5, shape = 19) +
+  scale_color_manual(values = cores_4, labels = labels_4) +
+  labs(title    = "B  ·  Male Trait Mean vs Sampling Effort",
+       subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
+                          SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
+       x = "Max Males Sampled per Female  (A_max)",
+       y = expression(paste("Mean Male Trait (", bar(z), ")")),
+       color = "") +
+  guias_cor +
+  tema_2x3
+
+# ── Montagem ─────────────────────────────────────────────────────
+p_robusto <- p_rob_mod | p_rob_z
+
+path_rob <- file.path(dir_poster, "Poster_Robustez_white.png")
+png(path_rob, width = 14, height = 7, units = "in", res = 300, bg = "white")
+print(p_robusto)
+dev.off()
+
+cat(sprintf("Robustez salvo em: %s\n", path_rob))
+
 print(p_topo)
 print(p_dumb)
 print(p_traj)
 print(grid_2x3)
+print(p_robusto)
