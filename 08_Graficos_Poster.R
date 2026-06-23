@@ -528,10 +528,7 @@ tema_2x3 <- theme_light(base_size = 14) +
     plot.subtitle    = element_text(color = "gray45", size = 10),
     axis.title       = element_text(face = "bold",  size = 12),
     axis.text        = element_text(size = 10),
-    legend.position  = "bottom",
-    legend.text      = element_text(size = 12),
-    legend.title     = element_blank(),
-    legend.key.width = unit(1.5, "cm"),
+    legend.position  = "none",
     plot.margin      = margin(8, 12, 8, 12)
   )
 
@@ -711,14 +708,13 @@ p_F <- make_traj(
 
 # ── Montagem ──────────────────────────────────────────────────────
 # widths aplicados por fila (não no grid externo) para garantir propagação correta
-larg_faixa <- 0.013   # faixa colorida estreita (~1/4 do valor anterior)
+larg_faixa <- 0.08    # faixa colorida com texto legível
 layout_linha <- plot_layout(widths = c(larg_faixa, 1.3, 1, 1))
 
 row_rede  <- (lbl_rede  | p_A | p_B | p_C) + layout_linha
 row_traco <- (lbl_traco | p_D | p_E | p_F) + layout_linha
 
 grid_2x3 <- row_rede / row_traco +
-  plot_layout(guides = "collect") +
   plot_annotation(
     title    = "How Female Preference Shapes Network Architecture and Trait Evolution",
     subtitle = sprintf("k = %d  |  A_max = %d  |  without natural selection  |  %d replicates",
