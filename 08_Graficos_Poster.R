@@ -491,9 +491,7 @@ grid_4x4 <- (
   (p_N1 | p_N2 | p_N3 | p_N4) /
   (p_Z1 | p_Z2 | p_Z3 | p_Z4) /
   (p_V1 | p_V2 | p_V3 | p_V4)
-) +
-  plot_layout(guides = "collect") &
-  theme(legend.position = "bottom")
+) + plot_layout(guides = "collect")
 
 grid_4x4 <- grid_4x4 +
   plot_annotation(
