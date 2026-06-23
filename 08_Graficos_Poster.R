@@ -612,7 +612,7 @@ make_dumbbell <- function(df_in, titulo, subtitulo,
                  size = 5.5) +
       geom_text(aes(x = tipo_label, y = (Gen_inicial + Gen_final) / 2,
                     label = sprintf("%+.3f", Delta), color = tipo_selecao),
-                hjust = -0.8, vjust = 0.5, size = 5.0, fontface = "bold") +
+                hjust = -0.2, vjust = 0.5, size = 6.0, fontface = "bold") +
       scale_color_manual(values = cores_4, labels = labels_4) +
       labs(x = "", y = y_label, color = "") +
       guias_cor +
@@ -766,8 +766,8 @@ row_traco <- (lbl_traco | p_D | p_E | p_F) + layout_linha
 grid_2x3 <- row_rede / row_traco +
   plot_layout(heights = c(2, 1)) +
   plot_annotation(
-    title    = "How Female Preference Shapes Network Architecture and Trait Evolution",
-    subtitle = sprintf("k = %d  |  A_max = %d  |  without natural selection  |  %d replicates",
+    title    = "How female preference shapes Network architecture and Trait evolution?",
+    subtitle = sprintf("Max. Number of males to copulate = %d  |  Max. number of sampled males = %d  |  Without natural selection  |  %d replicates",
                        K_POSTER, AMAX_POSTER, val_reps)
   )
 
@@ -888,3 +888,4 @@ print(p_dumb)
 print(p_traj)
 print(grid_2x3)
 print(p_robusto)
+
