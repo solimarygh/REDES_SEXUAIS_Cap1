@@ -396,8 +396,10 @@ grid_2x3 <- row_rede / row_traco +
   plot_layout(heights = c(2, 1)) +
   plot_annotation(
     title    = "How female preference shapes network architecture and trait evolution?",
-    subtitle = sprintf("Max. number of males to copulate = %d  |  Max. number of sampled males = %d  |  Without natural selection  |  %d replicates",
-                       K_POSTER, AMAX_POSTER, val_reps)
+    subtitle = sprintf("Max. number of males to copulate = %d  |  Max. number of sampled males = %d  |  %s  |  %d replicates",
+                       K_POSTER, AMAX_POSTER,
+                       if (NS_POSTER) "With natural selection" else "Without natural selection",
+                       val_reps)
   )
 
 path_2x3 <- file.path(dir_poster, sprintf("Poster_Grid2x3_%s.png", sufixo))
