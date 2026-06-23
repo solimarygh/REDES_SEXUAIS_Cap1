@@ -182,39 +182,39 @@ make_traj <- function(df_in, titulo, subtitulo, ylim_z = NULL) {
   p
 }
 
-# ── Aranha mascote (patas nas cores das 4 curvas de preferência) ──────
-lbl_aranha <- ggplot() +
-  # Patas esquerdas — 2 por cor, de cima para baixo
-  annotate("segment", x=0.42, xend=0.08, y=0.64, yend=0.82, linewidth=2.2, color="gray55") +
-  annotate("segment", x=0.42, xend=0.10, y=0.59, yend=0.44, linewidth=2.2, color="gray55") +
-  annotate("segment", x=0.42, xend=0.10, y=0.64, yend=0.82, linewidth=2.2, color="#E6B800") +
-  annotate("segment", x=0.42, xend=0.12, y=0.59, yend=0.44, linewidth=2.2, color="#E6B800") +
-  annotate("segment", x=0.42, xend=0.14, y=0.64, yend=0.82, linewidth=2.2, color="#3BA273") +
-  annotate("segment", x=0.42, xend=0.16, y=0.59, yend=0.44, linewidth=2.2, color="#3BA273") +
-  annotate("segment", x=0.42, xend=0.18, y=0.64, yend=0.82, linewidth=2.2, color="#9932CC") +
-  annotate("segment", x=0.42, xend=0.20, y=0.59, yend=0.44, linewidth=2.2, color="#9932CC") +
-  # Patas direitas — espelhadas
-  annotate("segment", x=0.58, xend=0.92, y=0.64, yend=0.82, linewidth=2.2, color="gray55") +
-  annotate("segment", x=0.58, xend=0.90, y=0.59, yend=0.44, linewidth=2.2, color="gray55") +
-  annotate("segment", x=0.58, xend=0.90, y=0.64, yend=0.82, linewidth=2.2, color="#E6B800") +
-  annotate("segment", x=0.58, xend=0.88, y=0.59, yend=0.44, linewidth=2.2, color="#E6B800") +
-  annotate("segment", x=0.58, xend=0.86, y=0.64, yend=0.82, linewidth=2.2, color="#3BA273") +
-  annotate("segment", x=0.58, xend=0.84, y=0.59, yend=0.44, linewidth=2.2, color="#3BA273") +
-  annotate("segment", x=0.58, xend=0.82, y=0.64, yend=0.82, linewidth=2.2, color="#9932CC") +
-  annotate("segment", x=0.58, xend=0.80, y=0.59, yend=0.44, linewidth=2.2, color="#9932CC") +
-  # Abdômen
-  annotate("point", x=0.50, y=0.32, size=22, color="#4A1570") +
-  annotate("point", x=0.50, y=0.32, size=17, color="#9932CC") +
-  annotate("point", x=0.50, y=0.32, size=7,  color="#CC66FF", alpha=0.6) +
-  # Cefalotórax
-  annotate("point", x=0.50, y=0.58, size=13, color="#4A1570") +
-  annotate("point", x=0.50, y=0.58, size=10, color="#9932CC") +
-  # Olhos
-  annotate("point", x=c(0.46, 0.54), y=c(0.63, 0.63), size=3.0, color="white") +
-  annotate("point", x=c(0.46, 0.54), y=c(0.63, 0.63), size=1.2, color="#1A1A2E") +
-  xlim(0, 1) + ylim(0, 1) + theme_void() +
-  theme(plot.background = element_rect(fill = bg_poster, color = NA),
-        plot.margin = margin(4, 4, 4, 4))
+# ── Aranha mascote — descomente para ativar ───────────────────────────
+# lbl_aranha <- ggplot() +
+#   # Patas esquerdas — 2 por cor, de cima para baixo
+#   annotate("segment", x=0.42, xend=0.08, y=0.64, yend=0.82, linewidth=2.2, color="gray55") +
+#   annotate("segment", x=0.42, xend=0.10, y=0.59, yend=0.44, linewidth=2.2, color="gray55") +
+#   annotate("segment", x=0.42, xend=0.10, y=0.64, yend=0.82, linewidth=2.2, color="#E6B800") +
+#   annotate("segment", x=0.42, xend=0.12, y=0.59, yend=0.44, linewidth=2.2, color="#E6B800") +
+#   annotate("segment", x=0.42, xend=0.14, y=0.64, yend=0.82, linewidth=2.2, color="#3BA273") +
+#   annotate("segment", x=0.42, xend=0.16, y=0.59, yend=0.44, linewidth=2.2, color="#3BA273") +
+#   annotate("segment", x=0.42, xend=0.18, y=0.64, yend=0.82, linewidth=2.2, color="#9932CC") +
+#   annotate("segment", x=0.42, xend=0.20, y=0.59, yend=0.44, linewidth=2.2, color="#9932CC") +
+#   # Patas direitas — espelhadas
+#   annotate("segment", x=0.58, xend=0.92, y=0.64, yend=0.82, linewidth=2.2, color="gray55") +
+#   annotate("segment", x=0.58, xend=0.90, y=0.59, yend=0.44, linewidth=2.2, color="gray55") +
+#   annotate("segment", x=0.58, xend=0.90, y=0.64, yend=0.82, linewidth=2.2, color="#E6B800") +
+#   annotate("segment", x=0.58, xend=0.88, y=0.59, yend=0.44, linewidth=2.2, color="#E6B800") +
+#   annotate("segment", x=0.58, xend=0.86, y=0.64, yend=0.82, linewidth=2.2, color="#3BA273") +
+#   annotate("segment", x=0.58, xend=0.84, y=0.59, yend=0.44, linewidth=2.2, color="#3BA273") +
+#   annotate("segment", x=0.58, xend=0.82, y=0.64, yend=0.82, linewidth=2.2, color="#9932CC") +
+#   annotate("segment", x=0.58, xend=0.80, y=0.59, yend=0.44, linewidth=2.2, color="#9932CC") +
+#   # Abdômen
+#   annotate("point", x=0.50, y=0.32, size=22, color="#4A1570") +
+#   annotate("point", x=0.50, y=0.32, size=17, color="#9932CC") +
+#   annotate("point", x=0.50, y=0.32, size=7,  color="#CC66FF", alpha=0.6) +
+#   # Cefalotórax
+#   annotate("point", x=0.50, y=0.58, size=13, color="#4A1570") +
+#   annotate("point", x=0.50, y=0.58, size=10, color="#9932CC") +
+#   # Olhos
+#   annotate("point", x=c(0.46, 0.54), y=c(0.63, 0.63), size=3.0, color="white") +
+#   annotate("point", x=c(0.46, 0.54), y=c(0.63, 0.63), size=1.2, color="#1A1A2E") +
+#   xlim(0, 1) + ylim(0, 1) + theme_void() +
+#   theme(plot.background = element_rect(fill = bg_poster, color = NA),
+#         plot.margin = margin(4, 4, 4, 4))
 
 # =====================================================================
 # LOOP 1 — Grid 2×3: um gráfico por combinação K × NS × AMAX
@@ -414,9 +414,9 @@ for (i in seq_len(nrow(comb_2x3))) {
     xlim(0, 1) + ylim(0, 1) + theme_void() +
     theme(plot.background = element_rect(fill = bg_poster, color = NA))
 
-  lbl_header_2x3 <- (lbl_aranha | lbl_titulo) + plot_layout(widths = c(0.12, 1))
+  # lbl_header_2x3 <- (lbl_aranha | lbl_titulo) + plot_layout(widths = c(0.12, 1))
 
-  grid_2x3 <- lbl_header_2x3 / (row_rede / row_traco + plot_layout(heights = c(2, 1))) +
+  grid_2x3 <- lbl_titulo / (row_rede / row_traco + plot_layout(heights = c(2, 1))) +
     plot_layout(heights = c(0.14, 1))
 
   path_2x3 <- file.path(dir_poster, sprintf("Poster_Grid2x3_%s.png", sufixo))
@@ -550,9 +550,9 @@ for (i in seq_len(nrow(comb_rob))) {
     xlim(0, 1) + ylim(0, 1) + theme_void() +
     theme(plot.background = element_rect(fill = bg_poster, color = NA))
 
-  lbl_header_rob <- (lbl_aranha | lbl_titulo_rob) + plot_layout(widths = c(0.12, 1))
+  # lbl_header_rob <- (lbl_aranha | lbl_titulo_rob) + plot_layout(widths = c(0.12, 1))
 
-  fig_robusto <- lbl_header_rob / p_robusto +
+  fig_robusto <- lbl_titulo_rob / p_robusto +
     plot_layout(heights = c(0.22, 1))
 
   path_rob <- file.path(dir_poster, sprintf("Poster_Robustez_%s.png", sufixo_rob))
