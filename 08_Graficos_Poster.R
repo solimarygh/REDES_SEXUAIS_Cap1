@@ -715,6 +715,7 @@ row_rede  <- (lbl_rede  | p_A | p_B | p_C) + layout_linha
 row_traco <- (lbl_traco | p_D | p_E | p_F) + layout_linha
 
 grid_2x3 <- row_rede / row_traco +
+  plot_layout(heights = c(2, 1)) +
   plot_annotation(
     title    = "How Female Preference Shapes Network Architecture and Trait Evolution",
     subtitle = sprintf("k = %d  |  A_max = %d  |  without natural selection  |  %d replicates",
