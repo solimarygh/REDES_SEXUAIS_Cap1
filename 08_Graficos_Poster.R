@@ -515,19 +515,20 @@ cat(sprintf("Grid 4×4 salvo em: %s\n", path_grid))
 # Fila 2 (roxo):        MALE TRAIT EVOLUTION
 # =====================================================================
 
-tema_2x3 <- theme_light(base_size = 14) +
+tema_2x3 <- theme_light(base_size = 18) +
   theme(
     plot.background  = element_rect(fill = "white",   color = NA),
     panel.background = element_rect(fill = "#FAFAFA", color = NA),
     panel.grid.major = element_line(color = "#E8E8E8", linewidth = 0.4),
     panel.grid.minor = element_blank(),
     strip.background = element_rect(fill = "#2C3E50"),
-    strip.text       = element_text(color = "white", face = "bold", size = 13),
-    plot.title       = element_text(face = "bold",  size = 14, color = "#1A1A2E",
+    strip.text       = element_text(color = "white", face = "bold", size = 16),
+    plot.title       = element_text(face = "bold",  size = 18, color = "#1A1A2E",
                                     margin = margin(b = 3)),
-    plot.subtitle    = element_text(color = "gray45", size = 10),
-    axis.title       = element_text(face = "bold",  size = 12),
-    axis.text        = element_text(size = 10),
+    plot.subtitle    = element_text(color = "gray45", size = 13),
+    axis.title       = element_text(face = "bold",  size = 15),
+    axis.text        = element_text(size = 13),
+    axis.text.x      = element_text(size = 13, face = "bold"),
     legend.position  = "none",
     plot.margin      = margin(8, 12, 8, 12)
   )
@@ -535,7 +536,7 @@ tema_2x3 <- theme_light(base_size = 14) +
 make_row_label <- function(txt, bg_color) {
   ggplot() +
     annotate("text", x = 0.5, y = 0.5, label = txt,
-             angle = 90, size = 4.5, fontface = "bold",
+             angle = 90, size = 6.0, fontface = "bold",
              color = "white", lineheight = 0.9) +
     xlim(0, 1) + ylim(0, 1) +
     theme_void() +
@@ -611,7 +612,7 @@ make_dumbbell <- function(df_in, titulo, subtitulo,
                  size = 5.5) +
       geom_text(aes(x = tipo_label, y = (Gen_inicial + Gen_final) / 2,
                     label = sprintf("%+.3f", Delta), color = tipo_selecao),
-                hjust = -0.8, vjust = 0.5, size = 4.0, fontface = "bold") +
+                hjust = -0.8, vjust = 0.5, size = 5.0, fontface = "bold") +
       scale_color_manual(values = cores_4, labels = labels_4) +
       labs(x = "", y = y_label, color = "") +
       guias_cor +
@@ -644,7 +645,7 @@ make_traj <- function(df_in, titulo, subtitulo, ylim_z = NULL) {
                color = "gray50", linewidth = 0.8) +
     annotate("text", x = 1, y = 5, label = "φ = 5  (initial)",
              hjust = 0, vjust = -0.55, color = "gray50",
-             size = 3.5, fontface = "italic") +
+             size = 4.5, fontface = "italic") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values  = cores_4, labels = labels_4) +
     labs(title = titulo, subtitle = subtitulo,
@@ -666,7 +667,7 @@ p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
              linewidth = 0.8, alpha = 0.5) +
   annotate("text", x = 1.05, y = Inf,
            label = "sigma[p] == sigma[z]", parse = TRUE,
-           hjust = 0, vjust = 1.5, color = "red", size = 3.2, fontface = "italic") +
+           hjust = 0, vjust = 1.5, color = "red", size = 4.2, fontface = "italic") +
   geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
               linewidth = 1.4, show.legend = FALSE) +
   geom_jitter(alpha = 0.22, width = 0.05, size = 1.8) +
@@ -687,7 +688,7 @@ p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
   tema_2x3 +
   theme(strip.placement = "outside",
         strip.text.y.left = element_text(color = "white", face = "bold",
-                                         size = 12, angle = 90))
+                                         size = 15, angle = 90))
 
 # B: Dumbbell σp = 0.5  (weak preference)
 p_B <- make_dumbbell(
@@ -714,12 +715,12 @@ p_D <- ggplot(df_zbar_D, aes(x = sigma_p, y = zbar_males,
              color = "gray50", linewidth = 0.8) +
   annotate("text", x = 0.25, y = 5.0, label = "φ = 5  (initial mean)",
            hjust = 0, vjust = -0.55, color = "gray50",
-           size = 3.5, fontface = "italic") +
+           size = 4.5, fontface = "italic") +
   geom_vline(xintercept = 1.0, linetype = "dashed", color = "red",
              linewidth = 0.8, alpha = 0.5) +
   annotate("text", x = 1.05, y = Inf,
            label = "sigma[p] == sigma[z]", parse = TRUE,
-           hjust = 0, vjust = 1.5, color = "red", size = 3.2, fontface = "italic") +
+           hjust = 0, vjust = 1.5, color = "red", size = 4.2, fontface = "italic") +
   geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
               linewidth = 1.4, show.legend = FALSE) +
   geom_jitter(alpha = 0.22, width = 0.05, size = 1.8) +
@@ -735,7 +736,7 @@ p_D <- ggplot(df_zbar_D, aes(x = sigma_p, y = zbar_males,
   tema_2x3 +
   theme(strip.placement = "outside",
         strip.text.y.left = element_text(color = "white", face = "bold",
-                                         size = 12, angle = 90))
+                                         size = 15, angle = 90))
 
 # E: Trajetória de z̄ — σp = 0.5
 p_E <- make_traj(
@@ -825,7 +826,7 @@ p_rob_z <- ggplot(df_robusto,
              color = "gray50", linewidth = 0.8) +
   annotate("text", x = -Inf, y = 5.0, label = "φ = 5  (initial)",
            hjust = -0.1, vjust = -0.55, color = "gray50",
-           size = 3.5, fontface = "italic") +
+           size = 4.5, fontface = "italic") +
   geom_jitter(aes(y = zbar_males),
               alpha = 0.2, width = 0.15, size = 1.8) +
   geom_line(data = df_rob_med,
@@ -851,7 +852,7 @@ p_rob_varz <- ggplot(df_robusto,
              color = "gray50", linewidth = 0.8) +
   annotate("text", x = -Inf, y = 1.0, label = "Var z = 1  (initial)",
            hjust = -0.1, vjust = -0.55, color = "gray50",
-           size = 3.5, fontface = "italic") +
+           size = 4.5, fontface = "italic") +
   geom_jitter(aes(y = varz_males),
               alpha = 0.2, width = 0.15, size = 1.8) +
   geom_line(data = df_rob_med,
