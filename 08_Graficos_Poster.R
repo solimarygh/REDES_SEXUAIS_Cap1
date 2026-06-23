@@ -766,9 +766,13 @@ row_traco <- (lbl_traco | p_D | p_E | p_F) + layout_linha
 grid_2x3 <- row_rede / row_traco +
   plot_layout(heights = c(2, 1)) +
   plot_annotation(
-    title    = "How female preference shapes Network architecture and Trait evolution?",
-    subtitle = sprintf("Max. Number of males to copulate = %d  |  Max. number of sampled males = %d  |  Without natural selection  |  %d replicates",
-                       K_POSTER, AMAX_POSTER, val_reps)
+    title    = "How female preference shapes network architecture and trait evolution?",
+    subtitle = sprintf("Max. number of males to copulate = %d  |  Max. number of sampled males = %d  |  Without natural selection  |  %d replicates",
+                       K_POSTER, AMAX_POSTER, val_reps),
+    theme    = theme(
+      plot.title    = element_text(size = 26, face = "bold", color = "#1A1A2E"),
+      plot.subtitle = element_text(size = 18, color = "gray45")
+    )
   )
 
 path_2x3 <- file.path(dir_poster, "Poster_Grid2x3_white.png")
