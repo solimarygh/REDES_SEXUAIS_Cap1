@@ -216,24 +216,6 @@ lbl_aranha <- ggplot() +
   theme(plot.background = element_rect(fill = bg_poster, color = NA),
         plot.margin = margin(4, 4, 4, 4))
 
-# ── Bolha de saudação ─────────────────────────────────────────────────
-lbl_fala <- ggplot() +
-  annotate("label", x = 0.5, y = 0.5,
-           label = paste(
-             "Hi! Welcome! This poster shows results from an",
-             "Individual-Based Model (IBM), a computer simulation",
-             "where each animal has its own traits and preferences.",
-             "They meet, choose partners, reproduce, and pass",
-             "their traits to offspring, generation after generation.",
-             "Come see how female choice shapes evolution!",
-             sep = "\n"),
-           hjust = 0.5, vjust = 0.5, size = 4.2,
-           fill = "white", color = "#1A1A2E",
-           label.r = unit(0.5, "lines"), label.size = 0.6) +
-  xlim(0, 1) + ylim(0, 1) + theme_void() +
-  theme(plot.background = element_rect(fill = bg_poster, color = NA),
-        plot.margin = margin(4, 8, 4, 4))
-
 # =====================================================================
 # LOOP 1 — Grid 2×3: um gráfico por combinação K × NS × AMAX
 # =====================================================================
@@ -432,7 +414,7 @@ for (i in seq_len(nrow(comb_2x3))) {
     xlim(0, 1) + ylim(0, 1) + theme_void() +
     theme(plot.background = element_rect(fill = bg_poster, color = NA))
 
-  lbl_header_2x3 <- (lbl_aranha | lbl_fala | lbl_titulo) + plot_layout(widths = c(0.10, 0.38, 1))
+  lbl_header_2x3 <- (lbl_aranha | lbl_titulo) + plot_layout(widths = c(0.12, 1))
 
   grid_2x3 <- lbl_header_2x3 / (row_rede / row_traco + plot_layout(heights = c(2, 1))) +
     plot_layout(heights = c(0.14, 1))
@@ -568,7 +550,7 @@ for (i in seq_len(nrow(comb_rob))) {
     xlim(0, 1) + ylim(0, 1) + theme_void() +
     theme(plot.background = element_rect(fill = bg_poster, color = NA))
 
-  lbl_header_rob <- (lbl_aranha | lbl_fala | lbl_titulo_rob) + plot_layout(widths = c(0.10, 0.38, 1))
+  lbl_header_rob <- (lbl_aranha | lbl_titulo_rob) + plot_layout(widths = c(0.12, 1))
 
   fig_robusto <- lbl_header_rob / p_robusto +
     plot_layout(heights = c(0.22, 1))
