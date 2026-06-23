@@ -183,25 +183,25 @@ make_traj <- function(df_in, titulo, subtitulo, ylim_z = NULL) {
 }
 
 # =====================================================================
-# LOOP — gera um par de figuras por combinação K × NS × AMAX
+# LOOP 1 — Grid 2×3: um gráfico por combinação K × NS × AMAX
 # =====================================================================
 
-combinacoes <- expand.grid(
+comb_2x3 <- expand.grid(
   K    = K_vals,
   NS   = NS_vals,
   AMAX = AMAX_vals,
   stringsAsFactors = FALSE
 )
-cat(sprintf("\nTotal de combinações: %d\n\n", nrow(combinacoes)))
+cat(sprintf("\nGrid 2×3 — total de combinações: %d\n\n", nrow(comb_2x3)))
 
-for (i in seq_len(nrow(combinacoes))) {
+for (i in seq_len(nrow(comb_2x3))) {
 
-  K_POSTER    <- as.integer(combinacoes$K[i])
-  NS_POSTER   <- combinacoes$NS[i]
-  AMAX_POSTER <- combinacoes$AMAX[i]
+  K_POSTER    <- as.integer(comb_2x3$K[i])
+  NS_POSTER   <- comb_2x3$NS[i]
+  AMAX_POSTER <- comb_2x3$AMAX[i]
 
   cat(sprintf("[%d/%d]  k = %d  |  NS = %-5s  |  Amax = %d\n",
-              i, nrow(combinacoes), K_POSTER, NS_POSTER, AMAX_POSTER))
+              i, nrow(comb_2x3), K_POSTER, NS_POSTER, AMAX_POSTER))
 
   # ── Filtrar dados ──────────────────────────────────────────────────
   df_k5    <- df %>% filter(k_fixo == K_POSTER, selecao_natural == NS_POSTER)
@@ -389,7 +389,43 @@ for (i in seq_len(nrow(combinacoes))) {
   dev.off()
   cat(sprintf("  → Grid 2×3  : %s\n", basename(path_2x3)))
 
-  # ── Robustez ───────────────────────────────────────────────────────
+} # fim do loop Grid 2×3
+cat(sprintf("\nGrid 2×3 concluído. %d figuras salvas em %s\n",
+            nrow(comb_2x3), dir_poster))
+
+# =====================================================================
+# LOOP 2 — Robustez: um gráfico por combinação K × NS (sem AMAX)
+# =====================================================================
+
+comb_rob <- expand.grid(
+  K  = K_vals,
+  NS = NS_vals,
+  stringsAsFactors = FALSE
+)
+cat(sprintf("\nRobustez — total de combinações: %d\n\n", nrow(comb_rob)))
+
+for (i in seq_len(nrow(comb_rob))) {
+
+  K_POSTER  <- as.integer(comb_rob$K[i])
+  NS_POSTER <- comb_rob$NS[i]
+
+  cat(sprintf("[%d/%d]  k = %d  |  NS = %-5s\n",
+              i, nrow(comb_rob), K_POSTER, NS_POSTER))
+
+  df_k5    <- df %>% filter(k_fixo == K_POSTER, selecao_natural == NS_POSTER)
+  val_reps <- length(unique(df_k5$replica[!is.na(df_k5$replica)]))
+
+  if (nrow(df_k5) == 0) {
+    cat("  → Sem dados para esta combinação, pulando.\n")
+    next
+  }
+
+  sufixo_rob <- sprintf("k%d_spH%s_%s_%s",
+                        K_POSTER,
+                        sub("\\.", "", sprintf("%.1f", SP_POSTER)),
+                        if (NS_POSTER) "comNS" else "semNS",
+                        if (FUNDO_ESCURO) "escuro" else "claro")
+
   df_robusto <- df_k5 %>%
     filter(generation == GEN_FINAL, sigma_p == SP_POSTER) %>%
     drop_na(Modularity, zbar_males, varz_males) %>%
@@ -450,12 +486,12 @@ for (i in seq_len(nrow(combinacoes))) {
 
   p_robusto <- p_rob_mod | p_rob_z | p_rob_varz
 
-  path_rob <- file.path(dir_poster, sprintf("Poster_Robustez_%s.png", sufixo))
+  path_rob <- file.path(dir_poster, sprintf("Poster_Robustez_%s.png", sufixo_rob))
   png(path_rob, width = 21, height = 7, units = "in", res = 300, bg = bg_poster)
   print(p_robusto)
   dev.off()
   cat(sprintf("  → Robustez  : %s\n", basename(path_rob)))
 
-} # fim do loop
-cat(sprintf("\nConcluído. %d pares de figuras salvos em %s\n",
-            nrow(combinacoes), dir_poster))
+} # fim do loop Robustez
+cat(sprintf("\nRobustez concluído. %d figuras salvas em %s\n",
+            nrow(comb_rob), dir_poster))
