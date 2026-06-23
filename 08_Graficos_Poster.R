@@ -30,11 +30,14 @@ dir.create(dir_poster, recursive = TRUE, showWarnings = FALSE)
 # PARÂMETROS — altere aqui para explorar diferentes cenários
 # =====================================================================
 
-K_POSTER    <- 5L      # número de cópulas por fêmea (k)
-NS_POSTER   <- FALSE   # FALSE = sem seleção natural | TRUE = com seleção natural
-SP_POSTER   <- 2.0     # σp "forte" — coluna direita do grid (C/F) e Robustez
-SP_LOW      <- 0.5     # σp "fraco" — coluna central do grid (B/E)
-AMAX_POSTER <- 200     # A_max usado nos gráficos A/D/B/C/E/F e Robustez
+# Iteração automática — todos os valores serão combinados (expand.grid)
+K_vals    <- c(5L, 10L, 20L)   # cópulas por fêmea
+NS_vals   <- c(FALSE, TRUE)    # FALSE = sem seleção natural | TRUE = com
+AMAX_vals <- c(200, 40, 10)   # max. machos amostrados por fêmea
+
+# Fixos — mudar manualmente conforme necessário
+SP_POSTER <- 2.0   # σp "forte" — coluna direita do grid (C/F) e Robustez
+SP_LOW    <- 0.5   # σp "fraco" — coluna central do grid (B/E)
 
 # =====================================================================
 # TEMA DO POSTER — mude FUNDO_ESCURO para adaptar ao fundo do poster
@@ -97,114 +100,10 @@ labels_4 <- c("uniform"  = "Random",
                "sigmoid"  = "Sigmoid",
                "u-shaped" = "Disruptive")
 
-# =====================================================================
-# DADOS FILTRADOS E DERIVADOS
-# =====================================================================
-
-df_k5     <- df %>% filter(k_fixo == K_POSTER, selecao_natural == NS_POSTER)
 GEN_FINAL <- max(df$generation, na.rm = TRUE)
-val_reps  <- length(unique(df$replica[!is.na(df$replica)]))
-
-# σp disponíveis mais próximos de SP_LOW e SP_POSTER
-sp_vals     <- sort(unique(df_k5$sigma_p))
-SP_LOW_act  <- sp_vals[which.min(abs(sp_vals - SP_LOW))]
-SP_HIGH_act <- sp_vals[which.min(abs(sp_vals - SP_POSTER))]
-cat(sprintf("σp fraco = %.2f  |  σp forte = %.2f\n", SP_LOW_act, SP_HIGH_act))
-
-# Sufixo com parâmetros — garante que arquivos de cenários diferentes não se sobreponham
-sufixo <- sprintf("k%d_amax%d_spL%s_spH%s_%s_%s",
-                  K_POSTER,
-                  AMAX_POSTER,
-                  sub("\\.", "", sprintf("%.1f", SP_LOW_act)),
-                  sub("\\.", "", sprintf("%.1f", SP_POSTER)),
-                  if (NS_POSTER) "comNS" else "semNS",
-                  if (FUNDO_ESCURO) "escuro" else "claro")
-
-# ── Dados para Panel A: topologia final ───────────────────────────────
-df_topo <- df_k5 %>%
-  filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
-  drop_na(Modularity, Nestedness) %>%
-  pivot_longer(cols = c(Modularity, Nestedness),
-               names_to = "Metrica", values_to = "Valor") %>%
-  mutate(Metrica = ifelse(Metrica == "Modularity",
-                          "1. Modularity", "2. Nestedness (NODF)"))
-
-# ── Dados para Panel B: dumbbell σp fraco ────────────────────────────
-df_dumb_low <- df_k5 %>%
-  filter(generation %in% c(1, GEN_FINAL),
-         encounters_n == AMAX_POSTER,
-         sigma_p == SP_LOW_act) %>%
-  drop_na(Modularity, Nestedness) %>%
-  group_by(generation, tipo_selecao) %>%
-  summarise(Modularity = mean(Modularity, na.rm = TRUE),
-            Nestedness = mean(Nestedness, na.rm = TRUE),
-            .groups = "drop") %>%
-  pivot_longer(cols = c(Modularity, Nestedness),
-               names_to = "Metrica", values_to = "Valor") %>%
-  mutate(gen_label = ifelse(generation == 1, "Gen_inicial", "Gen_final")) %>%
-  dplyr::select(-generation) %>%
-  pivot_wider(names_from = gen_label, values_from = Valor) %>%
-  mutate(
-    Delta      = Gen_final - Gen_inicial,
-    tipo_label = factor(
-      dplyr::recode(tipo_selecao, "uniform" = "Random", "gaussian" = "Gaussian",
-                                  "sigmoid" = "Sigmoid", "u-shaped" = "U-shaped"),
-      levels = c("U-shaped", "Sigmoid", "Gaussian", "Random")),
-    Metrica    = ifelse(Metrica == "Modularity", "1. Modularity", "2. Nestedness (NODF)")
-  )
-
-# ── Dados para Panel C: dumbbell σp forte ────────────────────────────
-df_tabela_dumb <- df_k5 %>%
-  filter(generation %in% c(1, GEN_FINAL),
-         encounters_n == AMAX_POSTER,
-         sigma_p == SP_POSTER) %>%
-  drop_na(Modularity, Nestedness) %>%
-  group_by(generation, tipo_selecao) %>%
-  summarise(Modularity = mean(Modularity, na.rm = TRUE),
-            Nestedness = mean(Nestedness, na.rm = TRUE),
-            .groups = "drop") %>%
-  pivot_longer(cols = c(Modularity, Nestedness),
-               names_to = "Metrica", values_to = "Valor") %>%
-  mutate(gen_label = ifelse(generation == 1, "Gen_inicial", "Gen_final")) %>%
-  dplyr::select(-generation) %>%
-  pivot_wider(names_from = gen_label, values_from = Valor) %>%
-  mutate(
-    Delta      = Gen_final - Gen_inicial,
-    tipo_label = factor(
-      dplyr::recode(tipo_selecao, "uniform" = "Random", "gaussian" = "Gaussian",
-                                  "sigmoid" = "Sigmoid", "u-shaped" = "U-shaped"),
-      levels = c("U-shaped", "Sigmoid", "Gaussian", "Random")),
-    Metrica    = ifelse(Metrica == "Modularity", "1. Modularity", "2. Nestedness (NODF)")
-  )
-
-# ── Dados para Panel D: z̄ vs σp (Gen final) ──────────────────────────
-df_zbar_D <- df_k5 %>%
-  filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
-  drop_na(zbar_males) %>%
-  mutate(metric_label = "Male Trait\nMean (z)")
-
-# ── Dados para Panels E e F: trajetórias ──────────────────────────────
-df_traj_low <- df_k5 %>%
-  filter(sigma_p == SP_LOW_act, encounters_n == AMAX_POSTER) %>%
-  group_by(tipo_selecao, generation) %>%
-  summarise(media_z = mean(zbar_males, na.rm = TRUE),
-            sd_z    = sd(zbar_males,   na.rm = TRUE),
-            .groups = "drop")
-
-df_traj <- df_k5 %>%
-  filter(sigma_p == SP_POSTER, encounters_n == AMAX_POSTER) %>%
-  group_by(tipo_selecao, generation) %>%
-  summarise(media_z = mean(zbar_males, na.rm = TRUE),
-            sd_z    = sd(zbar_males,   na.rm = TRUE),
-            .groups = "drop")
-
-# ── Limites Y compartilhados (escala comparável entre colunas) ────────
-ylim_mod_A  <- range(df_topo$Valor[df_topo$Metrica == "1. Modularity"],        na.rm = TRUE)
-ylim_nest_A <- range(df_topo$Valor[df_topo$Metrica == "2. Nestedness (NODF)"], na.rm = TRUE)
-ylim_z_D    <- range(df_zbar_D$zbar_males, na.rm = TRUE)
 
 # =====================================================================
-# FUNÇÕES AUXILIARES
+# FUNÇÕES AUXILIARES (independentes dos parâmetros de iteração)
 # =====================================================================
 
 make_row_label <- function(txt, bg_color) {
@@ -284,238 +183,279 @@ make_traj <- function(df_in, titulo, subtitulo, ylim_z = NULL) {
 }
 
 # =====================================================================
-# GRID 2×3 — PAINÉIS
+# LOOP — gera um par de figuras por combinação K × NS × AMAX
 # =====================================================================
 
-# ── Panel A: Topologia final (Mod + Nestedness vs σp) ─────────────────
-p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
-                            color = tipo_selecao, fill = tipo_selecao)) +
-  geom_vline(xintercept = 1.0, linetype = "dashed", color = "red",
-             linewidth = 0.8, alpha = 0.5) +
-  annotate("text", x = 1.05, y = Inf,
-           label = "sigma[p] == sigma[z]", parse = TRUE,
-           hjust = 0, vjust = 1.5, color = "red", size = 4.2, fontface = "italic") +
-  geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
-              linewidth = 1.4, show.legend = FALSE) +
-  geom_jitter(alpha = 0.22, width = 0.05, size = 1.8) +
-  facet_wrap(~Metrica, scales = "free_y", ncol = 1,
-             strip.position = "left",
-             labeller = as_labeller(c(
-               "1. Modularity"        = "Modularity",
-               "2. Nestedness (NODF)" = "Nestedness (NODF)"
-             ))) +
-  scale_color_manual(values = cores_4, labels = labels_4) +
-  scale_fill_manual(values  = cores_4, labels = labels_4) +
-  labs(title    = "A  ·  Network Topology at Generation 100",
-       subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates",
-                          K_POSTER, AMAX_POSTER, val_reps),
-       x = expression(bold(paste("Preference Variation (", sigma[p], ")"))),
-       y = NULL, color = "", fill = "") +
-  guias_cor +
-  tema_2x3 +
-  theme(strip.placement = "outside",
-        strip.text.y.left = element_text(color = "white", face = "bold",
-                                         size = 15, angle = 90))
-
-# ── Panel B: Dumbbell σp fraco ────────────────────────────────────────
-p_B <- make_dumbbell(
-  df_dumb_low,
-  titulo    = sprintf("B  ·  Network Change: Gen 1 → %d  (σp = %.1f)", GEN_FINAL, SP_LOW_act),
-  subtitulo = "○ = Gen 1    ● = Gen 100    |    Label = Δ",
-  ylim_mod  = ylim_mod_A,
-  ylim_nest = ylim_nest_A
+combinacoes <- expand.grid(
+  K    = K_vals,
+  NS   = NS_vals,
+  AMAX = AMAX_vals,
+  stringsAsFactors = FALSE
 )
+cat(sprintf("\nTotal de combinações: %d\n\n", nrow(combinacoes)))
 
-# ── Panel C: Dumbbell σp forte ────────────────────────────────────────
-p_C <- make_dumbbell(
-  df_tabela_dumb,
-  titulo    = sprintf("C  ·  Network Change: Gen 1 → %d  (σp = %.1f)", GEN_FINAL, SP_POSTER),
-  subtitulo = "○ = Gen 1    ● = Gen 100    |    Label = Δ",
-  ylim_mod  = ylim_mod_A,
-  ylim_nest = ylim_nest_A
-)
+for (i in seq_len(nrow(combinacoes))) {
 
-# ── Panel D: z̄ vs σp (Gen final) ──────────────────────────────────────
-p_D <- ggplot(df_zbar_D, aes(x = sigma_p, y = zbar_males,
+  K_POSTER    <- as.integer(combinacoes$K[i])
+  NS_POSTER   <- combinacoes$NS[i]
+  AMAX_POSTER <- combinacoes$AMAX[i]
+
+  cat(sprintf("[%d/%d]  k = %d  |  NS = %-5s  |  Amax = %d\n",
+              i, nrow(combinacoes), K_POSTER, NS_POSTER, AMAX_POSTER))
+
+  # ── Filtrar dados ──────────────────────────────────────────────────
+  df_k5    <- df %>% filter(k_fixo == K_POSTER, selecao_natural == NS_POSTER)
+  val_reps <- length(unique(df_k5$replica[!is.na(df_k5$replica)]))
+
+  if (nrow(df_k5) == 0) {
+    cat("  → Sem dados para esta combinação, pulando.\n")
+    next
+  }
+
+  # ── σp disponíveis ─────────────────────────────────────────────────
+  sp_vals     <- sort(unique(df_k5$sigma_p))
+  SP_LOW_act  <- sp_vals[which.min(abs(sp_vals - SP_LOW))]
+  SP_HIGH_act <- sp_vals[which.min(abs(sp_vals - SP_POSTER))]
+
+  # ── Sufixo do arquivo ──────────────────────────────────────────────
+  sufixo <- sprintf("k%d_amax%d_spL%s_spH%s_%s_%s",
+                    K_POSTER, AMAX_POSTER,
+                    sub("\\.", "", sprintf("%.1f", SP_LOW_act)),
+                    sub("\\.", "", sprintf("%.1f", SP_POSTER)),
+                    if (NS_POSTER) "comNS" else "semNS",
+                    if (FUNDO_ESCURO) "escuro" else "claro")
+
+  # ── Dados para os painéis ──────────────────────────────────────────
+  prep_dumb <- function(df_in, sp_val) {
+    df_in %>%
+      filter(generation %in% c(1, GEN_FINAL),
+             encounters_n == AMAX_POSTER, sigma_p == sp_val) %>%
+      drop_na(Modularity, Nestedness) %>%
+      group_by(generation, tipo_selecao) %>%
+      summarise(Modularity = mean(Modularity, na.rm = TRUE),
+                Nestedness = mean(Nestedness, na.rm = TRUE),
+                .groups = "drop") %>%
+      pivot_longer(cols = c(Modularity, Nestedness),
+                   names_to = "Metrica", values_to = "Valor") %>%
+      mutate(gen_label = ifelse(generation == 1, "Gen_inicial", "Gen_final")) %>%
+      dplyr::select(-generation) %>%
+      pivot_wider(names_from = gen_label, values_from = Valor) %>%
+      mutate(
+        Delta      = Gen_final - Gen_inicial,
+        tipo_label = factor(
+          dplyr::recode(tipo_selecao, "uniform" = "Random", "gaussian" = "Gaussian",
+                                      "sigmoid" = "Sigmoid", "u-shaped" = "U-shaped"),
+          levels = c("U-shaped", "Sigmoid", "Gaussian", "Random")),
+        Metrica = ifelse(Metrica == "Modularity", "1. Modularity", "2. Nestedness (NODF)")
+      )
+  }
+
+  df_topo <- df_k5 %>%
+    filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
+    drop_na(Modularity, Nestedness) %>%
+    pivot_longer(cols = c(Modularity, Nestedness),
+                 names_to = "Metrica", values_to = "Valor") %>%
+    mutate(Metrica = ifelse(Metrica == "Modularity",
+                            "1. Modularity", "2. Nestedness (NODF)"))
+
+  df_dumb_low    <- prep_dumb(df_k5, SP_LOW_act)
+  df_tabela_dumb <- prep_dumb(df_k5, SP_POSTER)
+
+  df_zbar_D <- df_k5 %>%
+    filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
+    drop_na(zbar_males) %>%
+    mutate(metric_label = "Male Trait\nMean (z)")
+
+  prep_traj <- function(df_in, sp_val) {
+    df_in %>%
+      filter(sigma_p == sp_val, encounters_n == AMAX_POSTER) %>%
+      group_by(tipo_selecao, generation) %>%
+      summarise(media_z = mean(zbar_males, na.rm = TRUE),
+                sd_z    = sd(zbar_males,   na.rm = TRUE),
+                .groups = "drop")
+  }
+  df_traj_low <- prep_traj(df_k5, SP_LOW_act)
+  df_traj     <- prep_traj(df_k5, SP_POSTER)
+
+  ylim_mod_A  <- range(df_topo$Valor[df_topo$Metrica == "1. Modularity"],        na.rm = TRUE)
+  ylim_nest_A <- range(df_topo$Valor[df_topo$Metrica == "2. Nestedness (NODF)"], na.rm = TRUE)
+  ylim_z_D    <- range(df_zbar_D$zbar_males, na.rm = TRUE)
+
+  # ── Painéis A-F ────────────────────────────────────────────────────
+  p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
                               color = tipo_selecao, fill = tipo_selecao)) +
-  geom_hline(yintercept = 5.0, linetype = "dashed",
-             color = cor_ref, linewidth = 0.8) +
-  annotate("text", x = 0.25, y = 5.0, label = "φ = 5  (initial mean)",
-           hjust = 0, vjust = -0.55, color = cor_ref,
-           size = 4.5, fontface = "italic") +
-  geom_vline(xintercept = 1.0, linetype = "dashed", color = "red",
-             linewidth = 0.8, alpha = 0.5) +
-  annotate("text", x = 1.05, y = Inf,
-           label = "sigma[p] == sigma[z]", parse = TRUE,
-           hjust = 0, vjust = 1.5, color = "red", size = 4.2, fontface = "italic") +
-  geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
-              linewidth = 1.4, show.legend = FALSE) +
-  geom_jitter(alpha = 0.22, width = 0.05, size = 1.8) +
-  facet_wrap(~metric_label, strip.position = "left") +
-  scale_color_manual(values = cores_4, labels = labels_4) +
-  scale_fill_manual(values  = cores_4, labels = labels_4) +
-  labs(title    = "D  ·  Male Trait Mean at Generation 100",
-       subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates",
-                          K_POSTER, AMAX_POSTER, val_reps),
-       x = expression(bold(paste("Preference Variation (", sigma[p], ")"))),
-       y = NULL, color = "", fill = "") +
-  guias_cor +
-  tema_2x3 +
-  theme(strip.placement   = "outside",
-        strip.background  = element_rect(fill = "#6B3A8C"),
-        strip.text.y.left = element_text(color = "white", face = "bold",
-                                         size = 15, angle = 90))
+    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red",
+               linewidth = 0.8, alpha = 0.5) +
+    annotate("text", x = 1.05, y = Inf,
+             label = "sigma[p] == sigma[z]", parse = TRUE,
+             hjust = 0, vjust = 1.5, color = "red", size = 4.2, fontface = "italic") +
+    geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
+                linewidth = 1.4, show.legend = FALSE) +
+    geom_jitter(alpha = 0.22, width = 0.05, size = 1.8) +
+    facet_wrap(~Metrica, scales = "free_y", ncol = 1,
+               strip.position = "left",
+               labeller = as_labeller(c(
+                 "1. Modularity"        = "Modularity",
+                 "2. Nestedness (NODF)" = "Nestedness (NODF)"
+               ))) +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values  = cores_4, labels = labels_4) +
+    labs(title    = "A  ·  Network Topology at Generation 100",
+         subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates",
+                            K_POSTER, AMAX_POSTER, val_reps),
+         x = expression(bold(paste("Preference Variation (", sigma[p], ")"))),
+         y = NULL, color = "", fill = "") +
+    guias_cor + tema_2x3 +
+    theme(strip.placement = "outside",
+          strip.text.y.left = element_text(color = "white", face = "bold",
+                                           size = 15, angle = 90))
 
-# ── Panel E: Trajetória z̄ — σp fraco ─────────────────────────────────
-p_E <- make_traj(
-  df_traj_low,
-  titulo    = sprintf("E  ·  Trait Trajectory  (σp = %.1f)", SP_LOW_act),
-  subtitulo = sprintf("%d replicates  |  Ribbon = ±1 SD", val_reps),
-  ylim_z    = ylim_z_D
-)
+  p_B <- make_dumbbell(df_dumb_low,
+    titulo    = sprintf("B  ·  Network Change: Gen 1 → %d  (σp = %.1f)", GEN_FINAL, SP_LOW_act),
+    subtitulo = "○ = Gen 1    ● = Gen 100    |    Label = Δ",
+    ylim_mod = ylim_mod_A, ylim_nest = ylim_nest_A)
 
-# ── Panel F: Trajetória z̄ — σp forte ──────────────────────────────────
-p_F <- make_traj(
-  df_traj,
-  titulo    = sprintf("F  ·  Trait Trajectory  (σp = %.1f)", SP_POSTER),
-  subtitulo = sprintf("%d replicates  |  Ribbon = ±1 SD", val_reps),
-  ylim_z    = ylim_z_D
-)
+  p_C <- make_dumbbell(df_tabela_dumb,
+    titulo    = sprintf("C  ·  Network Change: Gen 1 → %d  (σp = %.1f)", GEN_FINAL, SP_POSTER),
+    subtitulo = "○ = Gen 1    ● = Gen 100    |    Label = Δ",
+    ylim_mod = ylim_mod_A, ylim_nest = ylim_nest_A)
 
-# =====================================================================
-# GRID 2×3 — MONTAGEM E EXPORTAÇÃO
-# =====================================================================
+  p_D <- ggplot(df_zbar_D, aes(x = sigma_p, y = zbar_males,
+                                color = tipo_selecao, fill = tipo_selecao)) +
+    geom_hline(yintercept = 5.0, linetype = "dashed",
+               color = cor_ref, linewidth = 0.8) +
+    annotate("text", x = 0.25, y = 5.0, label = "φ = 5  (initial mean)",
+             hjust = 0, vjust = -0.55, color = cor_ref,
+             size = 4.5, fontface = "italic") +
+    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red",
+               linewidth = 0.8, alpha = 0.5) +
+    annotate("text", x = 1.05, y = Inf,
+             label = "sigma[p] == sigma[z]", parse = TRUE,
+             hjust = 0, vjust = 1.5, color = "red", size = 4.2, fontface = "italic") +
+    geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
+                linewidth = 1.4, show.legend = FALSE) +
+    geom_jitter(alpha = 0.22, width = 0.05, size = 1.8) +
+    facet_wrap(~metric_label, strip.position = "left") +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values  = cores_4, labels = labels_4) +
+    labs(title    = "D  ·  Male Trait Mean at Generation 100",
+         subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates",
+                            K_POSTER, AMAX_POSTER, val_reps),
+         x = expression(bold(paste("Preference Variation (", sigma[p], ")"))),
+         y = NULL, color = "", fill = "") +
+    guias_cor + tema_2x3 +
+    theme(strip.placement   = "outside",
+          strip.background  = element_rect(fill = "#6B3A8C"),
+          strip.text.y.left = element_text(color = "white", face = "bold",
+                                           size = 15, angle = 90))
 
-larg_faixa   <- 0.08
-layout_linha <- plot_layout(widths = c(larg_faixa, 1.3, 1, 1))
+  p_E <- make_traj(df_traj_low,
+    titulo    = sprintf("E  ·  Trait Trajectory  (σp = %.1f)", SP_LOW_act),
+    subtitulo = sprintf("%d replicates  |  Ribbon = ±1 SD", val_reps),
+    ylim_z    = ylim_z_D)
 
-row_rede  <- (lbl_rede  | p_A | p_B | p_C) + layout_linha
-row_traco <- (lbl_traco | p_D | p_E | p_F) + layout_linha
+  p_F <- make_traj(df_traj,
+    titulo    = sprintf("F  ·  Trait Trajectory  (σp = %.1f)", SP_POSTER),
+    subtitulo = sprintf("%d replicates  |  Ribbon = ±1 SD", val_reps),
+    ylim_z    = ylim_z_D)
 
-# Cabeçalho com título e subtítulo — painel independente para controle total do tamanho
-lbl_titulo <- ggplot() +
-  annotate("text", x = 0.5, y = 0.68,
-           label = "How female preference shapes network architecture and trait evolution?",
-           size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
-           color = cor_titulo) +
-  annotate("text", x = 0.5, y = 0.32,
-           label = sprintf("Max. number of males to copulate = %d  |  Max. number of sampled males = %d  |  %s  |  %d replicates",
-                           K_POSTER, AMAX_POSTER,
-                           if (NS_POSTER) "With natural selection" else "Without natural selection",
-                           val_reps),
-           size = 5.5, hjust = 0.5, vjust = 1,
-           color = if (FUNDO_ESCURO) "#AAAAAA" else "gray45") +
-  xlim(0, 1) + ylim(0, 1) +
-  theme_void() +
-  theme(plot.background = element_rect(fill = bg_poster, color = NA))
+  # ── Grid 2×3 ───────────────────────────────────────────────────────
+  larg_faixa   <- 0.08
+  layout_linha <- plot_layout(widths = c(larg_faixa, 1.3, 1, 1))
+  row_rede  <- (lbl_rede  | p_A | p_B | p_C) + layout_linha
+  row_traco <- (lbl_traco | p_D | p_E | p_F) + layout_linha
 
-grid_2x3 <- lbl_titulo / (row_rede / row_traco + plot_layout(heights = c(2, 1))) +
-  plot_layout(heights = c(0.12, 1))
+  lbl_titulo <- ggplot() +
+    annotate("text", x = 0.5, y = 0.68,
+             label = "How female preference shapes network architecture and trait evolution?",
+             size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
+             color = cor_titulo) +
+    annotate("text", x = 0.5, y = 0.32,
+             label = sprintf("Max. number of males to copulate = %d  |  Max. number of sampled males = %d  |  %s  |  %d replicates",
+                             K_POSTER, AMAX_POSTER,
+                             if (NS_POSTER) "With natural selection" else "Without natural selection",
+                             val_reps),
+             size = 5.5, hjust = 0.5, vjust = 1,
+             color = if (FUNDO_ESCURO) "#AAAAAA" else "gray45") +
+    xlim(0, 1) + ylim(0, 1) + theme_void() +
+    theme(plot.background = element_rect(fill = bg_poster, color = NA))
 
-path_2x3 <- file.path(dir_poster, sprintf("Poster_Grid2x3_%s.png", sufixo))
-png(path_2x3, width = 26, height = 14, units = "in", res = 300, bg = bg_poster)
-print(grid_2x3)
-dev.off()
-cat(sprintf("Grid 2×3 salvo em: %s\n", path_2x3))
+  grid_2x3 <- lbl_titulo / (row_rede / row_traco + plot_layout(heights = c(2, 1))) +
+    plot_layout(heights = c(0.12, 1))
 
-# =====================================================================
-# ROBUSTEZ — Assimetria ecológica: A_max afeta estrutura mas não runaway
-# X = A_max (10 | 40 | 200), fixando σp = SP_POSTER e Gen Final
-# =====================================================================
+  path_2x3 <- file.path(dir_poster, sprintf("Poster_Grid2x3_%s.png", sufixo))
+  png(path_2x3, width = 26, height = 14, units = "in", res = 300, bg = bg_poster)
+  print(grid_2x3)
+  dev.off()
+  cat(sprintf("  → Grid 2×3  : %s\n", basename(path_2x3)))
 
-df_robusto <- df_k5 %>%
-  filter(generation == GEN_FINAL, sigma_p == SP_POSTER) %>%
-  drop_na(Modularity, zbar_males, varz_males) %>%
-  mutate(Amax_f = factor(encounters_n,
-                         levels = c(10, 40, 200),
-                         labels = c("10", "40", "200")))
+  # ── Robustez ───────────────────────────────────────────────────────
+  df_robusto <- df_k5 %>%
+    filter(generation == GEN_FINAL, sigma_p == SP_POSTER) %>%
+    drop_na(Modularity, zbar_males, varz_males) %>%
+    mutate(Amax_f = factor(encounters_n,
+                           levels = c(10, 40, 200),
+                           labels = c("10", "40", "200")))
 
-df_rob_med <- df_robusto %>%
-  group_by(tipo_selecao, Amax_f) %>%
-  summarise(mod_mean  = mean(Modularity,  na.rm = TRUE),
-            z_mean    = mean(zbar_males,  na.rm = TRUE),
-            varz_mean = mean(varz_males,  na.rm = TRUE),
-            .groups   = "drop")
+  df_rob_med <- df_robusto %>%
+    group_by(tipo_selecao, Amax_f) %>%
+    summarise(mod_mean  = mean(Modularity,  na.rm = TRUE),
+              z_mean    = mean(zbar_males,  na.rm = TRUE),
+              varz_mean = mean(varz_males,  na.rm = TRUE),
+              .groups   = "drop")
 
-# ── Painel A: Modularity vs A_max ─────────────────────────────────────
-p_rob_mod <- ggplot(df_robusto,
-                    aes(x = Amax_f, color = tipo_selecao)) +
-  geom_jitter(aes(y = Modularity),
-              alpha = 0.2, width = 0.15, size = 1.8) +
-  geom_line(data = df_rob_med,
-            aes(y = mod_mean, group = tipo_selecao),
-            linewidth = 1.6) +
-  geom_point(data = df_rob_med,
-             aes(y = mod_mean),
-             size = 5, shape = 19) +
-  scale_color_manual(values = cores_4, labels = labels_4) +
-  labs(title    = "A  ·  Network Modularity vs Sampling Effort",
-       subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
-                          SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
-       x = "Maximum number of males sampled per female (A_max)",
-       y = "Modularity",
-       color = "") +
-  guias_cor +
-  tema_2x3
+  p_rob_mod <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
+    geom_jitter(aes(y = Modularity), alpha = 0.2, width = 0.15, size = 1.8) +
+    geom_line(data = df_rob_med, aes(y = mod_mean, group = tipo_selecao), linewidth = 1.6) +
+    geom_point(data = df_rob_med, aes(y = mod_mean), size = 5, shape = 19) +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    labs(title    = "A  ·  Network Modularity vs Sampling Effort",
+         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
+                            SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
+         x = "Maximum number of males sampled per female (A_max)",
+         y = "Modularity", color = "") +
+    guias_cor + tema_2x3
 
-# ── Painel B: Male Trait Mean vs A_max ────────────────────────────────
-p_rob_z <- ggplot(df_robusto,
-                  aes(x = Amax_f, color = tipo_selecao)) +
-  geom_hline(yintercept = 5.0, linetype = "dashed",
-             color = cor_ref, linewidth = 0.8) +
-  annotate("text", x = -Inf, y = 5.0, label = "φ = 5  (initial)",
-           hjust = -0.1, vjust = -0.55, color = cor_ref,
-           size = 4.5, fontface = "italic") +
-  geom_jitter(aes(y = zbar_males),
-              alpha = 0.2, width = 0.15, size = 1.8) +
-  geom_line(data = df_rob_med,
-            aes(y = z_mean, group = tipo_selecao),
-            linewidth = 1.6) +
-  geom_point(data = df_rob_med,
-             aes(y = z_mean),
-             size = 5, shape = 19) +
-  scale_color_manual(values = cores_4, labels = labels_4) +
-  labs(title    = "B  ·  Male Trait Mean vs Sampling Effort",
-       subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
-                          SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
-       x = "Maximum number of males sampled per female (A_max)",
-       y = expression(bold(paste("Male Trait Mean (", bar(z), ")"))),
-       color = "") +
-  guias_cor +
-  tema_2x3
+  p_rob_z <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
+    geom_hline(yintercept = 5.0, linetype = "dashed", color = cor_ref, linewidth = 0.8) +
+    annotate("text", x = -Inf, y = 5.0, label = "φ = 5  (initial)",
+             hjust = -0.1, vjust = -0.55, color = cor_ref, size = 4.5, fontface = "italic") +
+    geom_jitter(aes(y = zbar_males), alpha = 0.2, width = 0.15, size = 1.8) +
+    geom_line(data = df_rob_med, aes(y = z_mean, group = tipo_selecao), linewidth = 1.6) +
+    geom_point(data = df_rob_med, aes(y = z_mean), size = 5, shape = 19) +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    labs(title    = "B  ·  Male Trait Mean vs Sampling Effort",
+         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
+                            SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
+         x = "Maximum number of males sampled per female (A_max)",
+         y = expression(bold(paste("Male Trait Mean (", bar(z), ")"))),
+         color = "") +
+    guias_cor + tema_2x3
 
-# ── Painel C: Male Trait Variance vs A_max ────────────────────────────
-p_rob_varz <- ggplot(df_robusto,
-                     aes(x = Amax_f, color = tipo_selecao)) +
-  geom_hline(yintercept = 1.0, linetype = "dashed",
-             color = cor_ref, linewidth = 0.8) +
-  annotate("text", x = -Inf, y = 1.0, label = "Var z = 1  (initial)",
-           hjust = -0.1, vjust = -0.55, color = cor_ref,
-           size = 4.5, fontface = "italic") +
-  geom_jitter(aes(y = varz_males),
-              alpha = 0.2, width = 0.15, size = 1.8) +
-  geom_line(data = df_rob_med,
-            aes(y = varz_mean, group = tipo_selecao),
-            linewidth = 1.6) +
-  geom_point(data = df_rob_med,
-             aes(y = varz_mean),
-             size = 5, shape = 19) +
-  scale_color_manual(values = cores_4, labels = labels_4) +
-  coord_cartesian(ylim = c(NA, 0.15)) +
-  labs(title    = "C  ·  Male Trait Variance vs Sampling Effort",
-       subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
-                          SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
-       x = "Maximum number of males sampled per female (A_max)",
-       y = "Male Trait Variance (Var z)",
-       color = "") +
-  guias_cor +
-  tema_2x3
+  p_rob_varz <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
+    geom_hline(yintercept = 1.0, linetype = "dashed", color = cor_ref, linewidth = 0.8) +
+    annotate("text", x = -Inf, y = 1.0, label = "Var z = 1  (initial)",
+             hjust = -0.1, vjust = -0.55, color = cor_ref, size = 4.5, fontface = "italic") +
+    geom_jitter(aes(y = varz_males), alpha = 0.2, width = 0.15, size = 1.8) +
+    geom_line(data = df_rob_med, aes(y = varz_mean, group = tipo_selecao), linewidth = 1.6) +
+    geom_point(data = df_rob_med, aes(y = varz_mean), size = 5, shape = 19) +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    coord_cartesian(ylim = c(NA, 0.15)) +
+    labs(title    = "C  ·  Male Trait Variance vs Sampling Effort",
+         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
+                            SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
+         x = "Maximum number of males sampled per female (A_max)",
+         y = "Male Trait Variance (Var z)", color = "") +
+    guias_cor + tema_2x3
 
-# ── Montagem e exportação ─────────────────────────────────────────────
-p_robusto <- p_rob_mod | p_rob_z | p_rob_varz
+  p_robusto <- p_rob_mod | p_rob_z | p_rob_varz
 
-path_rob <- file.path(dir_poster, sprintf("Poster_Robustez_%s.png", sufixo))
-png(path_rob, width = 21, height = 7, units = "in", res = 300, bg = bg_poster)
-print(p_robusto)
-dev.off()
-cat(sprintf("Robustez salvo em: %s\n", path_rob))
+  path_rob <- file.path(dir_poster, sprintf("Poster_Robustez_%s.png", sufixo))
+  png(path_rob, width = 21, height = 7, units = "in", res = 300, bg = bg_poster)
+  print(p_robusto)
+  dev.off()
+  cat(sprintf("  → Robustez  : %s\n", basename(path_rob)))
+
+} # fim do loop
+cat(sprintf("\nConcluído. %d pares de figuras salvos em %s\n",
+            nrow(combinacoes), dir_poster))
