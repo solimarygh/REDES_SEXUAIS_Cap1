@@ -216,8 +216,7 @@ p_ruido <- ggplot(df_ruido_poster,
                       color = tipo_selecao, fill = tipo_selecao)) +
   geom_hline(data = df_refs_ruido,
              aes(yintercept = yintercept),
-             linetype = "dashed", color = "gray50", linewidth = 0.8,
-             inherit.aes = FALSE) +
+             linetype = "dashed", color = "gray50", linewidth = 0.8) +
   geom_text(data = df_refs_ruido,
             aes(x = 0.3, y = yintercept, label = label),
             hjust = 0, vjust = -0.5, color = "gray50", size = 3.5,
@@ -497,11 +496,7 @@ grid_4x4 <- grid_4x4 +
   plot_annotation(
     title    = "Sexual Selection on Interaction Networks: Overview",
     subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates  |  without natural selection",
-                       K_POSTER, AMAX_POSTER, val_reps),
-    theme = theme(
-      plot.title    = element_text(face = "bold", size = 20, hjust = 0.5),
-      plot.subtitle = element_text(color = "gray40", size = 13, hjust = 0.5)
-    )
+                       K_POSTER, AMAX_POSTER, val_reps)
   )
 
 ggsave(file.path(dir_poster, "Poster_Grid4x4_white.png"),
