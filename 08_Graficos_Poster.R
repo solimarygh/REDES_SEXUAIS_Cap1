@@ -397,11 +397,7 @@ grid_2x3 <- row_rede / row_traco +
   plot_annotation(
     title    = "How female preference shapes network architecture and trait evolution?",
     subtitle = sprintf("Max. number of males to copulate = %d  |  Max. number of sampled males = %d  |  Without natural selection  |  %d replicates",
-                       K_POSTER, AMAX_POSTER, val_reps),
-    theme    = theme(
-      plot.title    = element_text(size = 26, face = "bold", color = cor_titulo),
-      plot.subtitle = element_text(size = 18, color = if (FUNDO_ESCURO) "#AAAAAA" else "gray45")
-    )
+                       K_POSTER, AMAX_POSTER, val_reps)
   )
 
 path_2x3 <- file.path(dir_poster, sprintf("Poster_Grid2x3_%s.png", sufixo))
