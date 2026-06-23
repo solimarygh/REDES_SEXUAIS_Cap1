@@ -767,16 +767,17 @@ cat(sprintf("Grid 2×3 salvo em: %s\n", path_2x3))
 
 df_robusto <- df_k5 %>%
   filter(generation == GEN_FINAL, sigma_p == SP_POSTER) %>%
-  drop_na(Modularity, zbar_males) %>%
+  drop_na(Modularity, zbar_males, varz_males) %>%
   mutate(Amax_f = factor(encounters_n,
                          levels = c(10, 40, 200),
                          labels = c("10", "40", "200")))
 
 df_rob_med <- df_robusto %>%
   group_by(tipo_selecao, Amax_f) %>%
-  summarise(mod_mean = mean(Modularity,  na.rm = TRUE),
-            z_mean   = mean(zbar_males,  na.rm = TRUE),
-            .groups  = "drop")
+  summarise(mod_mean  = mean(Modularity,  na.rm = TRUE),
+            z_mean    = mean(zbar_males,  na.rm = TRUE),
+            varz_mean = mean(varz_males,  na.rm = TRUE),
+            .groups   = "drop")
 
 # ── Painel A: Modularity ──────────────────────────────────────────
 p_rob_mod <- ggplot(df_robusto,
@@ -825,11 +826,37 @@ p_rob_z <- ggplot(df_robusto,
   guias_cor +
   tema_2x3
 
+# ── Painel C: Male Trait Variance (Var z) ────────────────────────
+p_rob_varz <- ggplot(df_robusto,
+                     aes(x = Amax_f, color = tipo_selecao)) +
+  geom_hline(yintercept = 1.0, linetype = "dashed",
+             color = "gray50", linewidth = 0.8) +
+  annotate("text", x = -Inf, y = 1.0, label = "Var z = 1  (initial)",
+           hjust = -0.1, vjust = -0.55, color = "gray50",
+           size = 3.5, fontface = "italic") +
+  geom_jitter(aes(y = varz_males),
+              alpha = 0.2, width = 0.15, size = 1.8) +
+  geom_line(data = df_rob_med,
+            aes(y = varz_mean, group = tipo_selecao),
+            linewidth = 1.6) +
+  geom_point(data = df_rob_med,
+             aes(y = varz_mean),
+             size = 5, shape = 19) +
+  scale_color_manual(values = cores_4, labels = labels_4) +
+  labs(title    = "C  ·  Male Trait Variance vs Sampling Effort",
+       subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
+                          SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
+       x = "Max Males Sampled per Female  (A_max)",
+       y = "Male Trait Variance (Var z)",
+       color = "") +
+  guias_cor +
+  tema_2x3
+
 # ── Montagem ─────────────────────────────────────────────────────
-p_robusto <- p_rob_mod | p_rob_z
+p_robusto <- p_rob_mod | p_rob_z | p_rob_varz
 
 path_rob <- file.path(dir_poster, "Poster_Robustez_white.png")
-png(path_rob, width = 14, height = 7, units = "in", res = 300, bg = "white")
+png(path_rob, width = 21, height = 7, units = "in", res = 300, bg = "white")
 print(p_robusto)
 dev.off()
 
