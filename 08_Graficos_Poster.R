@@ -111,6 +111,15 @@ SP_LOW_act  <- sp_vals[which.min(abs(sp_vals - SP_LOW))]
 SP_HIGH_act <- sp_vals[which.min(abs(sp_vals - SP_POSTER))]
 cat(sprintf("σp fraco = %.2f  |  σp forte = %.2f\n", SP_LOW_act, SP_HIGH_act))
 
+# Sufixo com parâmetros — garante que arquivos de cenários diferentes não se sobreponham
+sufixo <- sprintf("k%d_amax%d_spL%s_spH%s_%s_%s",
+                  K_POSTER,
+                  AMAX_POSTER,
+                  sub("\\.", "", sprintf("%.1f", SP_LOW_act)),
+                  sub("\\.", "", sprintf("%.1f", SP_POSTER)),
+                  if (NS_POSTER) "comNS" else "semNS",
+                  if (FUNDO_ESCURO) "escuro" else "claro")
+
 # ── Dados para Panel A: topologia final ───────────────────────────────
 df_topo <- df_k5 %>%
   filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
@@ -395,7 +404,7 @@ grid_2x3 <- row_rede / row_traco +
     )
   )
 
-path_2x3 <- file.path(dir_poster, "Poster_Grid2x3_white.png")
+path_2x3 <- file.path(dir_poster, sprintf("Poster_Grid2x3_%s.png", sufixo))
 png(path_2x3, width = 26, height = 14, units = "in", res = 300, bg = bg_poster)
 print(grid_2x3)
 dev.off()
@@ -497,7 +506,7 @@ p_rob_varz <- ggplot(df_robusto,
 # ── Montagem e exportação ─────────────────────────────────────────────
 p_robusto <- p_rob_mod | p_rob_z | p_rob_varz
 
-path_rob <- file.path(dir_poster, "Poster_Robustez_white.png")
+path_rob <- file.path(dir_poster, sprintf("Poster_Robustez_%s.png", sufixo))
 png(path_rob, width = 21, height = 7, units = "in", res = 300, bg = bg_poster)
 print(p_robusto)
 dev.off()
