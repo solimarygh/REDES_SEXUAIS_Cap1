@@ -392,15 +392,25 @@ layout_linha <- plot_layout(widths = c(larg_faixa, 1.3, 1, 1))
 row_rede  <- (lbl_rede  | p_A | p_B | p_C) + layout_linha
 row_traco <- (lbl_traco | p_D | p_E | p_F) + layout_linha
 
-grid_2x3 <- row_rede / row_traco +
-  plot_layout(heights = c(2, 1)) +
-  plot_annotation(
-    title    = "How female preference shapes network architecture and trait evolution?",
-    subtitle = sprintf("Max. number of males to copulate = %d  |  Max. number of sampled males = %d  |  %s  |  %d replicates",
-                       K_POSTER, AMAX_POSTER,
-                       if (NS_POSTER) "With natural selection" else "Without natural selection",
-                       val_reps)
-  )
+# Cabeçalho com título e subtítulo — painel independente para controle total do tamanho
+lbl_titulo <- ggplot() +
+  annotate("text", x = 0.5, y = 0.68,
+           label = "How female preference shapes network architecture and trait evolution?",
+           size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
+           color = cor_titulo) +
+  annotate("text", x = 0.5, y = 0.32,
+           label = sprintf("Max. number of males to copulate = %d  |  Max. number of sampled males = %d  |  %s  |  %d replicates",
+                           K_POSTER, AMAX_POSTER,
+                           if (NS_POSTER) "With natural selection" else "Without natural selection",
+                           val_reps),
+           size = 5.5, hjust = 0.5, vjust = 1,
+           color = if (FUNDO_ESCURO) "#AAAAAA" else "gray45") +
+  xlim(0, 1) + ylim(0, 1) +
+  theme_void() +
+  theme(plot.background = element_rect(fill = bg_poster, color = NA))
+
+grid_2x3 <- lbl_titulo / (row_rede / row_traco + plot_layout(heights = c(2, 1))) +
+  plot_layout(heights = c(0.12, 1))
 
 path_2x3 <- file.path(dir_poster, sprintf("Poster_Grid2x3_%s.png", sufixo))
 png(path_2x3, width = 26, height = 14, units = "in", res = 300, bg = bg_poster)
