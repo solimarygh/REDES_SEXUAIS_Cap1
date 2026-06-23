@@ -549,6 +549,13 @@ make_row_label <- function(txt, bg_color) {
 lbl_rede  <- make_row_label("NETWORK\nARCHITECTURE", "#2C3E50")
 lbl_traco <- make_row_label("MALE TRAIT\nEVOLUTION",  "#6B3A8C")
 
+# Legenda unificada: mesma chave visual para todos os tipos de painel
+guias_cor <- guides(
+  color = guide_legend(override.aes = list(size = 4, shape = 19,
+                                           linetype = 1, linewidth = 1.2, alpha = 1)),
+  fill  = "none"
+)
+
 # ── Dados novos: dumbbell e trajetória para SP_LOW_act ────────────
 # SP_LOW_act definido na seção Grid 4×4 acima
 
@@ -603,8 +610,7 @@ make_dumbbell <- function(df_in, titulo, subtitulo) {
     scale_color_manual(values = cores_4, labels = labels_4) +
     labs(title = titulo, subtitle = subtitulo,
          x = "Mean Metric Value", y = "", color = "") +
-    guides(color = guide_legend(override.aes = list(size = 4, shape = 19, linetype = 0)),
-           fill  = "none") +
+    guias_cor +
     tema_2x3
 }
 
@@ -626,8 +632,7 @@ make_traj <- function(df_in, titulo, subtitulo) {
          x = "Generation",
          y = expression(paste("Mean Male Trait (", bar(z), ")")),
          color = "", fill = "") +
-    guides(color = guide_legend(override.aes = list(size = 4, alpha = 1, shape = 19)),
-           fill  = "none") +
+    guias_cor +
     tema_2x3
 }
 
@@ -649,8 +654,7 @@ p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
                           K_POSTER, AMAX_POSTER, val_reps),
        x = expression(paste("Preference Variation (", sigma[p], ")")),
        y = "Metric Value", color = "", fill = "") +
-  guides(color = guide_legend(override.aes = list(size = 4, alpha = 1, shape = 19)),
-         fill  = "none") +
+  guias_cor +
   tema_2x3
 
 # B: Dumbbell σp = 0.5  (weak preference)
@@ -688,8 +692,7 @@ p_D <- ggplot(df_zbar_D, aes(x = sigma_p, y = zbar_males,
        x = expression(paste("Preference Variation (", sigma[p], ")")),
        y = expression(paste("Mean Male Trait (", bar(z), ")")),
        color = "", fill = "") +
-  guides(color = guide_legend(override.aes = list(size = 4, alpha = 1, shape = 19)),
-         fill  = "none") +
+  guias_cor +
   tema_2x3
 
 # E: Trajetória de z̄ — σp = 0.5
@@ -707,9 +710,15 @@ p_F <- make_traj(
 )
 
 # ── Montagem ──────────────────────────────────────────────────────
-grid_2x3 <- (lbl_rede  | p_A | p_B | p_C) /
-             (lbl_traco | p_D | p_E | p_F) +
-  plot_layout(widths = c(0.05, 1.3, 1, 1), guides = "collect") +
+# widths aplicados por fila (não no grid externo) para garantir propagação correta
+larg_faixa <- 0.013   # faixa colorida estreita (~1/4 do valor anterior)
+layout_linha <- plot_layout(widths = c(larg_faixa, 1.3, 1, 1))
+
+row_rede  <- (lbl_rede  | p_A | p_B | p_C) + layout_linha
+row_traco <- (lbl_traco | p_D | p_E | p_F) + layout_linha
+
+grid_2x3 <- row_rede / row_traco +
+  plot_layout(guides = "collect") +
   plot_annotation(
     title    = "How Female Preference Shapes Network Architecture and Trait Evolution",
     subtitle = sprintf("k = %d  |  A_max = %d  |  without natural selection  |  %d replicates",
