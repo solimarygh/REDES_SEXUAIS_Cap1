@@ -352,10 +352,166 @@ for (nome in names(plots)) {
          plot = plots[[nome]], width = w, height = h, dpi = 300, bg = "transparent")
 }
 
-cat(sprintf("\n6 arquivos PNG salvos em: %s\n", dir_poster))
+cat(sprintf("\n5 plots individuais salvos em: %s\n", dir_poster))
 cat("  (_white = fundo branco | _transparent = fundo transparente)\n")
 cat("  Para tema escuro: mude 'tema_poster <- tema_poster_escuro' e rode novamente.\n")
+
+# =====================================================================
+# POSTER 4×4: Grid Comparativo Completo
+# Filas : Modularity | Nestedness | z̄ | Var z
+# Colunas: Gen 1 | Gen Final | Traj σp baixo | Traj σp alto
+# =====================================================================
+
+SP_LOW  <- 0.5       # σp "baixo" para colunas de trajetória
+SP_HIGH <- SP_POSTER  # σp "alto"  (2.0)
+
+# Usar o valor de σp disponível mais próximo
+sp_vals_k5  <- sort(unique(df_k5$sigma_p))
+SP_LOW_act  <- sp_vals_k5[which.min(abs(sp_vals_k5 - SP_LOW))]
+SP_HIGH_act <- sp_vals_k5[which.min(abs(sp_vals_k5 - SP_HIGH))]
+cat(sprintf("Grid 4×4: σp baixo = %.2f | σp alto = %.2f\n", SP_LOW_act, SP_HIGH_act))
+
+# ── Dados base ────────────────────────────────────────────────────
+df_g1    <- df_k5 %>% filter(generation == 1,         encounters_n == AMAX_POSTER)
+df_gFin  <- df_k5 %>% filter(generation == GEN_FINAL,  encounters_n == AMAX_POSTER)
+df_tLow  <- df_k5 %>% filter(sigma_p == SP_LOW_act,    encounters_n == AMAX_POSTER)
+df_tHigh <- df_k5 %>% filter(sigma_p == SP_HIGH_act,   encounters_n == AMAX_POSTER)
+
+# ── Tema compacto ─────────────────────────────────────────────────
+tema_grid <- theme_light(base_size = 12) +
+  theme(
+    plot.background  = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "#F7F7F7", color = NA),
+    panel.grid.major = element_line(color = "#E0E0E0", linewidth = 0.3),
+    panel.grid.minor = element_blank(),
+    plot.title       = element_text(face = "bold", size = 12, hjust = 0.5,
+                                    margin = margin(b = 4)),
+    axis.title       = element_text(face = "bold", size = 10),
+    axis.text        = element_text(size = 8),
+    legend.position  = "bottom",
+    legend.text      = element_text(size = 11),
+    legend.key.width = unit(1.2, "cm"),
+    plot.margin      = margin(3, 5, 3, 5)
+  )
+
+# ── Função: painel de snapshot (X = σp, gen fixo) ─────────────────
+f_snap <- function(df_in, metrica_col, titulo = NULL,
+                   y_label = NULL, x_label = NULL, ref_y = NULL) {
+  df_p <- df_in %>%
+    mutate(Valor = .data[[metrica_col]]) %>%
+    drop_na(Valor)
+  p <- ggplot(df_p, aes(x = sigma_p, y = Valor,
+                         color = tipo_selecao, fill = tipo_selecao)) +
+    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red",
+               linewidth = 0.5, alpha = 0.6) +
+    geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
+                linewidth = 1.0, show.legend = FALSE) +
+    geom_jitter(alpha = 0.2, width = 0.05, size = 0.9) +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values  = cores_4, labels = labels_4) +
+    labs(title = titulo, x = x_label, y = y_label, color = "", fill = "") +
+    guides(color = guide_legend(override.aes = list(size = 3, alpha = 1, shape = 19)),
+           fill = "none") +
+    tema_grid
+  if (!is.null(ref_y))
+    p <- p + geom_hline(yintercept = ref_y, linetype = "dashed",
+                        color = "gray50", linewidth = 0.6)
+  p
+}
+
+# ── Função: painel de trajetória (X = geração, σp fixo) ───────────
+f_traj <- function(df_in, metrica_col, titulo = NULL,
+                   y_label = NULL, x_label = NULL, ref_y = NULL) {
+  df_t <- df_in %>%
+    drop_na(all_of(metrica_col)) %>%
+    group_by(tipo_selecao, generation) %>%
+    summarise(media  = mean(.data[[metrica_col]], na.rm = TRUE),
+              sd_val = sd(.data[[metrica_col]],   na.rm = TRUE),
+              .groups = "drop")
+  p <- ggplot(df_t, aes(x = generation, y = media,
+                         color = tipo_selecao, fill = tipo_selecao)) +
+    geom_ribbon(aes(ymin = media - sd_val, ymax = media + sd_val),
+                alpha = 0.12, color = NA) +
+    geom_line(linewidth = 1.0) +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values  = cores_4, labels = labels_4) +
+    labs(title = titulo, x = x_label, y = y_label, color = "", fill = "") +
+    guides(color = guide_legend(override.aes = list(size = 3, alpha = 1, shape = 19)),
+           fill = "none") +
+    tema_grid
+  if (!is.null(ref_y))
+    p <- p + geom_hline(yintercept = ref_y, linetype = "dashed",
+                        color = "gray50", linewidth = 0.6)
+  p
+}
+
+# ── Rótulos ───────────────────────────────────────────────────────
+hdr1 <- "Gen 1"
+hdr2 <- sprintf("Gen %d", GEN_FINAL)
+hdr3 <- sprintf("Traj  σp = %.1f", SP_LOW_act)
+hdr4 <- sprintf("Traj  σp = %.1f", SP_HIGH_act)
+
+ylb_M <- "Modularity"
+ylb_N <- "Nestedness\n(NODF)"
+ylb_Z <- "z̄  (Trait Mean)"
+ylb_V <- "Var z\n(Trait Var)"
+
+xlb_sp  <- expression(sigma[p])
+xlb_gen <- "Generation"
+
+# ── 16 painéis ────────────────────────────────────────────────────
+
+# Fila 1: Modularity
+p_M1 <- f_snap(df_g1,    "Modularity", titulo = hdr1, y_label = ylb_M)
+p_M2 <- f_snap(df_gFin,  "Modularity", titulo = hdr2)
+p_M3 <- f_traj(df_tLow,  "Modularity", titulo = hdr3)
+p_M4 <- f_traj(df_tHigh, "Modularity", titulo = hdr4)
+
+# Fila 2: Nestedness
+p_N1 <- f_snap(df_g1,    "Nestedness", y_label = ylb_N)
+p_N2 <- f_snap(df_gFin,  "Nestedness")
+p_N3 <- f_traj(df_tLow,  "Nestedness")
+p_N4 <- f_traj(df_tHigh, "Nestedness")
+
+# Fila 3: z̄
+p_Z1 <- f_snap(df_g1,    "zbar_males", y_label = ylb_Z, ref_y = 5.0)
+p_Z2 <- f_snap(df_gFin,  "zbar_males",                  ref_y = 5.0)
+p_Z3 <- f_traj(df_tLow,  "zbar_males",                  ref_y = 5.0)
+p_Z4 <- f_traj(df_tHigh, "zbar_males",                  ref_y = 5.0)
+
+# Fila 4: Var z — única fila com rótulos X
+p_V1 <- f_snap(df_g1,    "varz_males", y_label = ylb_V, x_label = xlb_sp,  ref_y = 1.0)
+p_V2 <- f_snap(df_gFin,  "varz_males",                  x_label = xlb_sp,  ref_y = 1.0)
+p_V3 <- f_traj(df_tLow,  "varz_males",                  x_label = xlb_gen, ref_y = 1.0)
+p_V4 <- f_traj(df_tHigh, "varz_males",                  x_label = xlb_gen, ref_y = 1.0)
+
+# ── Montagem patchwork ────────────────────────────────────────────
+grid_4x4 <- (
+  (p_M1 | p_M2 | p_M3 | p_M4) /
+  (p_N1 | p_N2 | p_N3 | p_N4) /
+  (p_Z1 | p_Z2 | p_Z3 | p_Z4) /
+  (p_V1 | p_V2 | p_V3 | p_V4)
+) +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
+
+grid_4x4 <- grid_4x4 +
+  plot_annotation(
+    title    = "Sexual Selection on Interaction Networks: Overview",
+    subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates  |  without natural selection",
+                       K_POSTER, AMAX_POSTER, val_reps),
+    theme = theme(
+      plot.title    = element_text(face = "bold", size = 20, hjust = 0.5),
+      plot.subtitle = element_text(color = "gray40", size = 13, hjust = 0.5)
+    )
+  )
+
+ggsave(file.path(dir_poster, "Poster_Grid4x4_white.png"),
+       plot = grid_4x4, width = 26, height = 22, dpi = 300, bg = "white")
+
+cat("Grid 4×4 salvo em: Poster_Grid4x4_white.png\n")
 
 print(p_topo)
 print(p_dumb)
 print(p_traj)
+print(grid_4x4)
