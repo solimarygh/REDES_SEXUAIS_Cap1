@@ -821,7 +821,7 @@ p_rob_z <- ggplot(df_robusto,
        subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                           SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
        x = "Max Males Sampled per Female  (A_max)",
-       y = expression(paste("Male Trait Mean (", bar(z), ")")),
+       y = expression(bold(paste("Male Trait Mean (", bar(z), ")"))),
        color = "") +
   guias_cor +
   tema_2x3
@@ -843,6 +843,7 @@ p_rob_varz <- ggplot(df_robusto,
              aes(y = varz_mean),
              size = 5, shape = 19) +
   scale_color_manual(values = cores_4, labels = labels_4) +
+  coord_cartesian(ylim = c(NA, 0.25)) +
   labs(title    = "C  ·  Male Trait Variance vs Sampling Effort",
        subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                           SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
