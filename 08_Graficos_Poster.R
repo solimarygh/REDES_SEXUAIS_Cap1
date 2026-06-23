@@ -485,24 +485,26 @@ p_V3 <- f_traj(df_tLow,  "varz_males",                  x_label = xlb_gen, ref_y
 p_V4 <- f_traj(df_tHigh, "varz_males",                  x_label = xlb_gen, ref_y = 1.0)
 
 # ── Montagem patchwork ────────────────────────────────────────────
-grid_4x4 <- (
-  (p_M1 | p_M2 | p_M3 | p_M4) /
-  (p_N1 | p_N2 | p_N3 | p_N4) /
-  (p_Z1 | p_Z2 | p_Z3 | p_Z4) /
-  (p_V1 | p_V2 | p_V3 | p_V4)
-) + plot_layout(guides = "collect")
-
-grid_4x4 <- grid_4x4 +
+grid_4x4 <- wrap_plots(
+  p_M1, p_M2, p_M3, p_M4,
+  p_N1, p_N2, p_N3, p_N4,
+  p_Z1, p_Z2, p_Z3, p_Z4,
+  p_V1, p_V2, p_V3, p_V4,
+  ncol = 4
+) +
+  plot_layout(guides = "collect") +
   plot_annotation(
     title    = "Sexual Selection on Interaction Networks: Overview",
     subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates  |  without natural selection",
                        K_POSTER, AMAX_POSTER, val_reps)
   )
 
-ggsave(file.path(dir_poster, "Poster_Grid4x4_white.png"),
-       plot = grid_4x4, width = 26, height = 22, dpi = 300, bg = "white")
+path_grid <- file.path(dir_poster, "Poster_Grid4x4_white.png")
+png(path_grid, width = 26, height = 22, units = "in", res = 300, bg = "white")
+print(grid_4x4)
+dev.off()
 
-cat("Grid 4×4 salvo em: Poster_Grid4x4_white.png\n")
+cat(sprintf("Grid 4×4 salvo em: %s\n", path_grid))
 
 print(p_topo)
 print(p_dumb)
