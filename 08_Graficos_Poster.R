@@ -507,35 +507,38 @@ dev.off()
 cat(sprintf("Grid 4×4 salvo em: %s\n", path_grid))
 
 # =====================================================================
-# POSTER 2×2: Grid Principal — História Clara
-# Fila 1 (azul): NETWORK ARCHITECTURE — Topologia final | Dumbbell
-# Fila 2 (roxo): MALE TRAIT EVOLUTION — z̄ vs σp | Trajetória
+# POSTER 2×3: Grid Principal — História Clara
+# Col A/D : Padrão geral vs σp  (visão completa)
+# Col B/E : σp = 0.5  (preferência estreita — efeitos fracos)
+# Col C/F : σp = 2.0  (preferência ampla  — efeitos fortes)
+# Fila 1 (azul escuro): NETWORK ARCHITECTURE
+# Fila 2 (roxo):        MALE TRAIT EVOLUTION
 # =====================================================================
 
-tema_2x2 <- theme_light(base_size = 15) +
+tema_2x3 <- theme_light(base_size = 14) +
   theme(
     plot.background  = element_rect(fill = "white",   color = NA),
     panel.background = element_rect(fill = "#FAFAFA", color = NA),
     panel.grid.major = element_line(color = "#E8E8E8", linewidth = 0.4),
     panel.grid.minor = element_blank(),
     strip.background = element_rect(fill = "#2C3E50"),
-    strip.text       = element_text(color = "white", face = "bold", size = 14),
-    plot.title       = element_text(face = "bold",  size = 15, color = "#1A1A2E",
+    strip.text       = element_text(color = "white", face = "bold", size = 13),
+    plot.title       = element_text(face = "bold",  size = 14, color = "#1A1A2E",
                                     margin = margin(b = 3)),
-    plot.subtitle    = element_text(color = "gray45", size = 11),
-    axis.title       = element_text(face = "bold",  size = 13),
-    axis.text        = element_text(size = 11),
+    plot.subtitle    = element_text(color = "gray45", size = 10),
+    axis.title       = element_text(face = "bold",  size = 12),
+    axis.text        = element_text(size = 10),
     legend.position  = "bottom",
-    legend.text      = element_text(size = 13),
+    legend.text      = element_text(size = 12),
     legend.title     = element_blank(),
-    legend.key.width = unit(1.6, "cm"),
-    plot.margin      = margin(10, 14, 10, 14)
+    legend.key.width = unit(1.5, "cm"),
+    plot.margin      = margin(8, 12, 8, 12)
   )
 
 make_row_label <- function(txt, bg_color) {
   ggplot() +
     annotate("text", x = 0.5, y = 0.5, label = txt,
-             angle = 90, size = 4.8, fontface = "bold",
+             angle = 90, size = 4.5, fontface = "bold",
              color = "white", lineheight = 0.9) +
     xlim(0, 1) + ylim(0, 1) +
     theme_void() +
@@ -546,8 +549,91 @@ make_row_label <- function(txt, bg_color) {
 lbl_rede  <- make_row_label("NETWORK\nARCHITECTURE", "#2C3E50")
 lbl_traco <- make_row_label("MALE TRAIT\nEVOLUTION",  "#6B3A8C")
 
-# ── Painel A: Topologia final (Mod + Nestedness vs σp) ───────────
-# df_topo já está computado acima (pivot_longer de Modularity/Nestedness)
+# ── Dados novos: dumbbell e trajetória para SP_LOW_act ────────────
+# SP_LOW_act definido na seção Grid 4×4 acima
+
+df_dumb_low <- df_k5 %>%
+  filter(generation %in% c(1, GEN_FINAL),
+         encounters_n == AMAX_POSTER,
+         sigma_p == SP_LOW_act) %>%
+  drop_na(Modularity, Nestedness) %>%
+  group_by(generation, tipo_selecao) %>%
+  summarise(Modularity = mean(Modularity, na.rm = TRUE),
+            Nestedness = mean(Nestedness, na.rm = TRUE),
+            .groups = "drop") %>%
+  pivot_longer(cols = c(Modularity, Nestedness),
+               names_to = "Metrica", values_to = "Valor") %>%
+  mutate(gen_label = ifelse(generation == 1, "Gen_inicial", "Gen_final")) %>%
+  dplyr::select(-generation) %>%
+  pivot_wider(names_from = gen_label, values_from = Valor) %>%
+  mutate(
+    Delta      = Gen_final - Gen_inicial,
+    tipo_label = factor(
+      dplyr::recode(tipo_selecao, "uniform" = "Random",  "gaussian" = "Gaussian",
+                                  "sigmoid" = "Sigmoid", "u-shaped" = "U-shaped"),
+      levels = c("U-shaped", "Sigmoid", "Gaussian", "Random")),
+    Metrica    = ifelse(Metrica == "Modularity", "1. Modularity", "2. Nestedness (NODF)")
+  )
+
+df_traj_low <- df_tLow %>%          # df_tLow = sigma_p == SP_LOW_act, AMAX_POSTER
+  group_by(tipo_selecao, generation) %>%
+  summarise(media_z = mean(zbar_males, na.rm = TRUE),
+            sd_z    = sd(zbar_males,   na.rm = TRUE),
+            .groups = "drop")
+
+df_zbar_D <- df_k5 %>%
+  filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
+  drop_na(zbar_males)
+
+# ── Função auxiliar: dumbbell ─────────────────────────────────────
+make_dumbbell <- function(df_in, titulo, subtitulo) {
+  ggplot(df_in) +
+    geom_segment(aes(x = Gen_inicial, xend = Gen_final,
+                     y = tipo_label,  yend = tipo_label,
+                     color = tipo_selecao),
+                 linewidth = 2.2, alpha = 0.75) +
+    geom_point(aes(x = Gen_inicial, y = tipo_label, color = tipo_selecao),
+               size = 5.5, shape = 21, fill = "white", stroke = 2.2) +
+    geom_point(aes(x = Gen_final,   y = tipo_label, color = tipo_selecao),
+               size = 5.5) +
+    geom_text(aes(x = (Gen_inicial + Gen_final) / 2, y = tipo_label,
+                  label = sprintf("%+.3f", Delta), color = tipo_selecao),
+              hjust = 0.5, vjust = -0.9, size = 4.0, fontface = "bold") +
+    facet_wrap(~Metrica, scales = "free_x", ncol = 2) +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    labs(title = titulo, subtitle = subtitulo,
+         x = "Mean Metric Value", y = "", color = "") +
+    guides(color = guide_legend(override.aes = list(size = 4, shape = 19, linetype = 0)),
+           fill  = "none") +
+    tema_2x3
+}
+
+# ── Função auxiliar: trajetória de z̄ ──────────────────────────────
+make_traj <- function(df_in, titulo, subtitulo) {
+  ggplot(df_in, aes(x = generation, y = media_z,
+                    color = tipo_selecao, fill = tipo_selecao)) +
+    geom_ribbon(aes(ymin = media_z - sd_z, ymax = media_z + sd_z),
+                alpha = 0.12, color = NA) +
+    geom_line(linewidth = 1.5) +
+    geom_hline(yintercept = 5, linetype = "dashed",
+               color = "gray50", linewidth = 0.8) +
+    annotate("text", x = 1, y = 5, label = "φ = 5  (initial)",
+             hjust = 0, vjust = -0.55, color = "gray50",
+             size = 3.5, fontface = "italic") +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values  = cores_4, labels = labels_4) +
+    labs(title = titulo, subtitle = subtitulo,
+         x = "Generation",
+         y = expression(paste("Mean Male Trait (", bar(z), ")")),
+         color = "", fill = "") +
+    guides(color = guide_legend(override.aes = list(size = 4, alpha = 1, shape = 19)),
+           fill  = "none") +
+    tema_2x3
+}
+
+# ── Painéis ───────────────────────────────────────────────────────
+
+# A: Topologia final (Mod + Nestedness vs σp)
 p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
                             color = tipo_selecao, fill = tipo_selecao)) +
   geom_vline(xintercept = 1.0, linetype = "dashed", color = "red",
@@ -565,43 +651,30 @@ p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
        y = "Metric Value", color = "", fill = "") +
   guides(color = guide_legend(override.aes = list(size = 4, alpha = 1, shape = 19)),
          fill  = "none") +
-  tema_2x2
+  tema_2x3
 
-# ── Painel B: Dumbbell Gen1 → GenFinal ───────────────────────────
-# df_tabela_dumb já está computado acima
-p_B <- ggplot(df_tabela_dumb) +
-  geom_segment(aes(x = Gen_inicial, xend = Gen_final,
-                   y = tipo_label,  yend = tipo_label,
-                   color = tipo_selecao),
-               linewidth = 2.2, alpha = 0.75) +
-  geom_point(aes(x = Gen_inicial, y = tipo_label, color = tipo_selecao),
-             size = 5.5, shape = 21, fill = "white", stroke = 2.2) +
-  geom_point(aes(x = Gen_final,   y = tipo_label, color = tipo_selecao),
-             size = 5.5) +
-  geom_text(aes(x = (Gen_inicial + Gen_final) / 2, y = tipo_label,
-                label = sprintf("%+.3f", Delta), color = tipo_selecao),
-            hjust = 0.5, vjust = -0.9, size = 4.2, fontface = "bold") +
-  facet_wrap(~Metrica, scales = "free_x", ncol = 2) +
-  scale_color_manual(values = cores_4, labels = labels_4) +
-  labs(title    = sprintf("B  ·  Evolutionary Change in Network Structure  (σp = %.1f)", SP_POSTER),
-       subtitle = "○ = Gen 1    ● = Gen 100    |    Label = Δ",
-       x = "Mean Metric Value", y = "", color = "") +
-  guides(color = guide_legend(override.aes = list(size = 4, shape = 19, linetype = 0)),
-         fill  = "none") +
-  tema_2x2
+# B: Dumbbell σp = 0.5  (weak preference)
+p_B <- make_dumbbell(
+  df_dumb_low,
+  titulo    = sprintf("B  ·  Network Change: Gen 1 → %d  (σp = %.1f)", GEN_FINAL, SP_LOW_act),
+  subtitulo = "○ = Gen 1    ● = Gen 100    |    Label = Δ"
+)
 
-# ── Painel C: z̄ vs σp (Gen final) ───────────────────────────────
-df_zbar_C <- df_k5 %>%
-  filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
-  drop_na(zbar_males)
+# C: Dumbbell σp = 2.0  (strong preference)
+p_C <- make_dumbbell(
+  df_tabela_dumb,
+  titulo    = sprintf("C  ·  Network Change: Gen 1 → %d  (σp = %.1f)", GEN_FINAL, SP_POSTER),
+  subtitulo = "○ = Gen 1    ● = Gen 100    |    Label = Δ"
+)
 
-p_C <- ggplot(df_zbar_C, aes(x = sigma_p, y = zbar_males,
+# D: z̄ vs σp (Gen final)
+p_D <- ggplot(df_zbar_D, aes(x = sigma_p, y = zbar_males,
                               color = tipo_selecao, fill = tipo_selecao)) +
   geom_hline(yintercept = 5.0, linetype = "dashed",
              color = "gray50", linewidth = 0.8) +
   annotate("text", x = 0.25, y = 5.0, label = "φ = 5  (initial mean)",
            hjust = 0, vjust = -0.55, color = "gray50",
-           size = 3.8, fontface = "italic") +
+           size = 3.5, fontface = "italic") +
   geom_vline(xintercept = 1.0, linetype = "dashed", color = "red",
              linewidth = 0.8, alpha = 0.5) +
   geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
@@ -609,7 +682,7 @@ p_C <- ggplot(df_zbar_C, aes(x = sigma_p, y = zbar_males,
   geom_jitter(alpha = 0.22, width = 0.05, size = 1.8) +
   scale_color_manual(values = cores_4, labels = labels_4) +
   scale_fill_manual(values  = cores_4, labels = labels_4) +
-  labs(title    = "C  ·  Male Trait Mean at Generation 100",
+  labs(title    = "D  ·  Male Trait Mean at Generation 100",
        subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates",
                           K_POSTER, AMAX_POSTER, val_reps),
        x = expression(paste("Preference Variation (", sigma[p], ")")),
@@ -617,49 +690,40 @@ p_C <- ggplot(df_zbar_C, aes(x = sigma_p, y = zbar_males,
        color = "", fill = "") +
   guides(color = guide_legend(override.aes = list(size = 4, alpha = 1, shape = 19)),
          fill  = "none") +
-  tema_2x2
+  tema_2x3
 
-# ── Painel D: Trajetória de z̄ ────────────────────────────────────
-# df_traj já está computado acima (media_z, sd_z por tipo_selecao e generation)
-p_D <- ggplot(df_traj, aes(x = generation, y = media_z,
-                            color = tipo_selecao, fill = tipo_selecao)) +
-  geom_ribbon(aes(ymin = media_z - sd_z, ymax = media_z + sd_z),
-              alpha = 0.12, color = NA) +
-  geom_line(linewidth = 1.5) +
-  geom_hline(yintercept = 5, linetype = "dashed",
-             color = "gray50", linewidth = 0.8) +
-  annotate("text", x = 1, y = 5, label = "φ = 5  (initial mean)",
-           hjust = 0, vjust = -0.55, color = "gray50",
-           size = 3.8, fontface = "italic") +
-  scale_color_manual(values = cores_4, labels = labels_4) +
-  scale_fill_manual(values  = cores_4, labels = labels_4) +
-  labs(title    = sprintf("D  ·  Evolutionary Trajectory  (σp = %.1f)", SP_POSTER),
-       subtitle = sprintf("%d replicates  |  Ribbon = ±1 SD across replicates", val_reps),
-       x = "Generation",
-       y = expression(paste("Mean Male Trait (", bar(z), ")")),
-       color = "", fill = "") +
-  guides(color = guide_legend(override.aes = list(size = 4, alpha = 1, shape = 19)),
-         fill  = "none") +
-  tema_2x2
+# E: Trajetória de z̄ — σp = 0.5
+p_E <- make_traj(
+  df_traj_low,
+  titulo    = sprintf("E  ·  Trait Trajectory  (σp = %.1f)", SP_LOW_act),
+  subtitulo = sprintf("%d replicates  |  Ribbon = ±1 SD", val_reps)
+)
+
+# F: Trajetória de z̄ — σp = 2.0
+p_F <- make_traj(
+  df_traj,
+  titulo    = sprintf("F  ·  Trait Trajectory  (σp = %.1f)", SP_POSTER),
+  subtitulo = sprintf("%d replicates  |  Ribbon = ±1 SD", val_reps)
+)
 
 # ── Montagem ──────────────────────────────────────────────────────
-grid_2x2 <- (lbl_rede  | p_A | p_B) /
-             (lbl_traco | p_C | p_D) +
-  plot_layout(widths = c(0.05, 1, 1), guides = "collect") +
+grid_2x3 <- (lbl_rede  | p_A | p_B | p_C) /
+             (lbl_traco | p_D | p_E | p_F) +
+  plot_layout(widths = c(0.05, 1.3, 1, 1), guides = "collect") +
   plot_annotation(
     title    = "How Female Preference Shapes Network Architecture and Trait Evolution",
     subtitle = sprintf("k = %d  |  A_max = %d  |  without natural selection  |  %d replicates",
                        K_POSTER, AMAX_POSTER, val_reps)
   )
 
-path_2x2 <- file.path(dir_poster, "Poster_Grid2x2_white.png")
-png(path_2x2, width = 20, height = 13, units = "in", res = 300, bg = "white")
-print(grid_2x2)
+path_2x3 <- file.path(dir_poster, "Poster_Grid2x3_white.png")
+png(path_2x3, width = 26, height = 14, units = "in", res = 300, bg = "white")
+print(grid_2x3)
 dev.off()
 
-cat(sprintf("Grid 2×2 salvo em: %s\n", path_2x2))
+cat(sprintf("Grid 2×3 salvo em: %s\n", path_2x3))
 
 print(p_topo)
 print(p_dumb)
 print(p_traj)
-print(grid_2x2)
+print(grid_2x3)
