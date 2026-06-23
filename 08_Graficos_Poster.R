@@ -501,7 +501,7 @@ for (i in seq_len(nrow(comb_rob))) {
 
   lbl_titulo_rob <- ggplot() +
     annotate("text", x = 0.5, y = 0.72,
-             label = "Simulating real-world ecological search costs: what is the effect of restricting the number of males a female can sample?",
+             label = "Simulating real-world ecological search costs: what happens when females can only assess a fraction of available males?",
              size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
              color = cor_titulo) +
     annotate("text", x = 0.5, y = 0.22,
