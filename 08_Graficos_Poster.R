@@ -140,7 +140,7 @@ make_dumbbell <- function(df_in, titulo, subtitulo,
                  size = 5.5) +
       geom_text(aes(x = tipo_label, y = (Gen_inicial + Gen_final) / 2,
                     label = sprintf("%+.3f", Delta), color = tipo_selecao),
-                hjust = -0.2, vjust = 0.5, size = 6.0, fontface = "bold") +
+                hjust = -0.2, vjust = 0.5, size = 4.5, fontface = "bold") +
       scale_color_manual(values = cores_4, labels = labels_4) +
       labs(x = "", y = y_label, color = "") +
       guias_cor +
@@ -395,7 +395,7 @@ for (i in seq_len(nrow(comb_2x3))) {
 
   # ── Grid 2×3 ───────────────────────────────────────────────────────
   larg_faixa   <- 0.08
-  layout_linha <- plot_layout(widths = c(larg_faixa, 1.3, 1, 1))
+  layout_linha <- plot_layout(widths = c(larg_faixa, 1.3, 0.65, 0.65))
   row_rede  <- (lbl_rede  | p_A | p_B | p_C) + layout_linha
   row_traco <- (lbl_traco | p_D | p_E | p_F) + layout_linha
 
