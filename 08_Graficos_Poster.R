@@ -592,21 +592,21 @@ df_zbar_D <- df_k5 %>%
 # ── Função auxiliar: dumbbell ─────────────────────────────────────
 make_dumbbell <- function(df_in, titulo, subtitulo) {
   ggplot(df_in) +
-    geom_segment(aes(x = Gen_inicial, xend = Gen_final,
-                     y = tipo_label,  yend = tipo_label,
+    geom_segment(aes(y = Gen_inicial, yend = Gen_final,#mudando
+                     x = tipo_label,  xend = tipo_label, #mudando
                      color = tipo_selecao),
                  linewidth = 2.2, alpha = 0.75) +
-    geom_point(aes(x = Gen_inicial, y = tipo_label, color = tipo_selecao),
+    geom_point(aes(y = Gen_inicial, x = tipo_label, color = tipo_selecao),
                size = 5.5, shape = 21, fill = "white", stroke = 2.2) +
-    geom_point(aes(x = Gen_final,   y = tipo_label, color = tipo_selecao),
+    geom_point(aes(y = Gen_final,   x = tipo_label, color = tipo_selecao),
                size = 5.5) +
-    geom_text(aes(x = (Gen_inicial + Gen_final) / 2, y = tipo_label,
+    geom_text(aes(y = (Gen_inicial + Gen_final) / 2, x = tipo_label,
                   label = sprintf("%+.3f", Delta), color = tipo_selecao),
-              hjust = 0.5, vjust = -0.9, size = 4.0, fontface = "bold") +
-    facet_wrap(~Metrica, scales = "free_x", ncol = 2) +
+              vjust = 0.5, hjust = -0.9, size = 4.0, fontface = "bold") +
+    facet_wrap(Metrica~, scales = "free_x", ncol = 2) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     labs(title = titulo, subtitle = subtitulo,
-         x = "Mean Metric Value", y = "", color = "") +
+         y = "Mean Metric Value", x = "", color = "") +
     guias_cor +
     tema_2x3
 }
