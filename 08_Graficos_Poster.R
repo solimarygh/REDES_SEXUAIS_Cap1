@@ -431,7 +431,7 @@ for (i in seq_len(nrow(comb_rob))) {
     drop_na(Modularity, Nestedness, zbar_males, varz_males) %>%
     mutate(Amax_f = factor(encounters_n,
                            levels = c(10, 40, 200),
-                           labels = c("10", "40", "200")))
+                           labels = c("10 (5%)", "40 (20%)", "200 (100%)")))
 
   df_rob_med <- df_robusto %>%
     group_by(tipo_selecao, Amax_f) %>%
