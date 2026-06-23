@@ -499,9 +499,28 @@ for (i in seq_len(nrow(comb_rob))) {
 
   p_robusto <- p_rob_mod | p_rob_nest | p_rob_z | p_rob_varz
 
+  lbl_titulo_rob <- ggplot() +
+    annotate("text", x = 0.5, y = 0.68,
+             label = "How female preference shapes network architecture and trait evolution?",
+             size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
+             color = cor_titulo) +
+    annotate("text", x = 0.5, y = 0.32,
+             label = sprintf(
+               "Simulating real-world ecological search costs: what is the effect of restricting the number of males a female can sample?  |  Matings per female (k) = %d  |  %s  |  %d replicates",
+               K_POSTER,
+               if (NS_POSTER) "With natural selection" else "Without natural selection",
+               val_reps),
+             size = 5.5, hjust = 0.5, vjust = 1,
+             color = if (FUNDO_ESCURO) "#AAAAAA" else "gray45") +
+    xlim(0, 1) + ylim(0, 1) + theme_void() +
+    theme(plot.background = element_rect(fill = bg_poster, color = NA))
+
+  fig_robusto <- lbl_titulo_rob / p_robusto +
+    plot_layout(heights = c(0.15, 1))
+
   path_rob <- file.path(dir_poster, sprintf("Poster_Robustez_%s.png", sufixo_rob))
-  png(path_rob, width = 28, height = 7, units = "in", res = 300, bg = bg_poster)
-  print(p_robusto)
+  png(path_rob, width = 28, height = 8.5, units = "in", res = 300, bg = bg_poster)
+  print(fig_robusto)
   dev.off()
   cat(sprintf("  → Robustez  : %s\n", basename(path_rob)))
 
