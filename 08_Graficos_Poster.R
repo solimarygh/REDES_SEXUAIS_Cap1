@@ -264,7 +264,7 @@ for (i in seq_len(nrow(combinacoes))) {
   df_zbar_D <- df_k5 %>%
     filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
     drop_na(zbar_males) %>%
-    mutate(metric_label = "Male Trait\nMean (z)")
+    mutate(metric_label = "bold(paste('Male Trait Mean (', bar(z), ')'))")
 
   prep_traj <- function(df_in, sp_val) {
     df_in %>%
@@ -335,7 +335,7 @@ for (i in seq_len(nrow(combinacoes))) {
     geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
                 linewidth = 1.4, show.legend = FALSE) +
     geom_jitter(alpha = 0.22, width = 0.05, size = 1.8) +
-    facet_wrap(~metric_label, strip.position = "left") +
+    facet_wrap(~metric_label, strip.position = "left", labeller = label_parsed) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values  = cores_4, labels = labels_4) +
     labs(title    = "D  ·  Male Trait Mean at Generation 100",
@@ -371,7 +371,7 @@ for (i in seq_len(nrow(combinacoes))) {
              size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
              color = cor_titulo) +
     annotate("text", x = 0.5, y = 0.32,
-             label = sprintf("Max. number of males to copulate = %d  |  Max. number of sampled males = %d  |  %s  |  %d replicates",
+             label = sprintf("Matings per female (k) = %d  |  Max. males sampled per female (A_max) = %d  |  %s  |  %d replicates",
                              K_POSTER, AMAX_POSTER,
                              if (NS_POSTER) "With natural selection" else "Without natural selection",
                              val_reps),
