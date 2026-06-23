@@ -30,7 +30,7 @@ dir.create(dir_poster, recursive = TRUE, showWarnings = FALSE)
 # PARÂMETROS — altere aqui para explorar diferentes cenários
 # =====================================================================
 
-K_POSTER    <- 5L      # número de cópulas por macho (k)
+K_POSTER    <- 5L      # número de cópulas por fêmea (k)
 NS_POSTER   <- FALSE   # FALSE = sem seleção natural | TRUE = com seleção natural
 SP_POSTER   <- 2.0     # σp "forte" — coluna direita do grid (C/F) e Robustez
 SP_LOW      <- 0.5     # σp "fraco" — coluna central do grid (B/E)
