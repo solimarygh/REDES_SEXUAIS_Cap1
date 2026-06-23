@@ -643,7 +643,7 @@ p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
   geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
               linewidth = 1.4, show.legend = FALSE) +
   geom_jitter(alpha = 0.22, width = 0.05, size = 1.8) +
-  facet_wrap(~Metrica, scales = "free_y", ncol = 2) +
+  facet_wrap(~Metrica, scales = "free_y", ncol = 1) +
   scale_color_manual(values = cores_4, labels = labels_4) +
   scale_fill_manual(values  = cores_4, labels = labels_4) +
   labs(title    = "A  ·  Network Topology at Generation 100",
