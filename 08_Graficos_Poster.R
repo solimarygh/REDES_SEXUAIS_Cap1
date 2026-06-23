@@ -682,7 +682,7 @@ p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
   labs(title    = "A  ·  Network Topology at Generation 100",
        subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates",
                           K_POSTER, AMAX_POSTER, val_reps),
-       x = expression(paste("Preference Variation (", sigma[p], ")")),
+       x = expression(bold(paste("Preference Variation (", sigma[p], ")"))),
        y = NULL, color = "", fill = "") +
   guias_cor +
   tema_2x3 +
@@ -730,13 +730,14 @@ p_D <- ggplot(df_zbar_D, aes(x = sigma_p, y = zbar_males,
   labs(title    = "D  ·  Male Trait Mean at Generation 100",
        subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates",
                           K_POSTER, AMAX_POSTER, val_reps),
-       x = expression(paste("Preference Variation (", sigma[p], ")")),
+       x = expression(bold(paste("Preference Variation (", sigma[p], ")"))),
        y = NULL, color = "", fill = "") +
   guias_cor +
   tema_2x3 +
-  theme(strip.placement = "outside",
-        strip.text.y.left = element_text(color = "white", face = "bold",
-                                         size = 15, angle = 90))
+  theme(strip.placement    = "outside",
+        strip.background   = element_rect(fill = "#6B3A8C"),
+        strip.text.y.left  = element_text(color = "white", face = "bold",
+                                          size = 15, angle = 90))
 
 # E: Trajetória de z̄ — σp = 0.5
 p_E <- make_traj(
