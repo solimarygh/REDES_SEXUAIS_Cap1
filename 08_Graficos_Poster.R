@@ -589,24 +589,24 @@ df_zbar_D <- df_k5 %>%
   filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
   drop_na(zbar_males)
 
-# ── Função auxiliar: dumbbell ─────────────────────────────────────
+# ── Função auxiliar: dumbbell (eixos trocados, Mod acima, Nest abaixo) ──
 make_dumbbell <- function(df_in, titulo, subtitulo) {
   ggplot(df_in) +
-    geom_segment(aes(y = Gen_inicial, yend = Gen_final,#mudando
-                     x = tipo_label,  xend = tipo_label, #mudando
+    geom_segment(aes(x = tipo_label, xend = tipo_label,
+                     y = Gen_inicial,  yend = Gen_final,
                      color = tipo_selecao),
                  linewidth = 2.2, alpha = 0.75) +
-    geom_point(aes(y = Gen_inicial, x = tipo_label, color = tipo_selecao),
+    geom_point(aes(x = tipo_label, y = Gen_inicial, color = tipo_selecao),
                size = 5.5, shape = 21, fill = "white", stroke = 2.2) +
-    geom_point(aes(y = Gen_final,   x = tipo_label, color = tipo_selecao),
+    geom_point(aes(x = tipo_label, y = Gen_final, color = tipo_selecao),
                size = 5.5) +
-    geom_text(aes(y = (Gen_inicial + Gen_final) / 2, x = tipo_label,
+    geom_text(aes(x = tipo_label, y = (Gen_inicial + Gen_final) / 2,
                   label = sprintf("%+.3f", Delta), color = tipo_selecao),
-              vjust = 0.5, hjust = -0.9, size = 4.0, fontface = "bold") +
-    facet_wrap(Metrica~, scales = "free_x", ncol = 2) +
+              hjust = -0.8, vjust = 0.5, size = 4.0, fontface = "bold") +
+    facet_wrap(~Metrica, scales = "free_y", ncol = 1) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     labs(title = titulo, subtitle = subtitulo,
-         y = "Mean Metric Value", x = "", color = "") +
+         x = "", y = "Mean Metric Value", color = "") +
     guias_cor +
     tema_2x3
 }
