@@ -536,11 +536,11 @@ for (i in seq_len(nrow(comb_rob))) {
   p_robusto <- p_rob_mod | p_rob_nest | p_rob_z | p_rob_varz
 
   lbl_titulo_rob <- ggplot() +
-    annotate("text", x = 0.5, y = 0.72,
+    annotate("text", x = 0.5, y = 0.85,
              label = "What happens when females can only assess a fraction of available males?",
              size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
              color = cor_titulo) +
-    annotate("text", x = 0.5, y = 0.22,
+    annotate("text", x = 0.5, y = 0.45,
              label = sprintf("Matings per female (k) = %d  |  %s  |  %d replicates",
                              K_POSTER,
                              if (NS_POSTER) "With natural selection" else "Without natural selection",
