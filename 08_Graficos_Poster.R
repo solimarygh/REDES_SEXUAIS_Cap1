@@ -821,7 +821,7 @@ p_rob_z <- ggplot(df_robusto,
        subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                           SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
        x = "Max Males Sampled per Female  (A_max)",
-       y = expression(paste("Mean Male Trait (", bar(z), ")")),
+       y = expression(paste("Male Trait Mean (", bar(z), ")")),
        color = "") +
   guias_cor +
   tema_2x3
