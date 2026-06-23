@@ -589,31 +589,52 @@ df_zbar_D <- df_k5 %>%
   filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
   drop_na(zbar_males)
 
-# ── Função auxiliar: dumbbell (eixos trocados, Mod acima, Nest abaixo) ──
-make_dumbbell <- function(df_in, titulo, subtitulo) {
-  ggplot(df_in) +
-    geom_segment(aes(x = tipo_label, xend = tipo_label,
-                     y = Gen_inicial,  yend = Gen_final,
-                     color = tipo_selecao),
-                 linewidth = 2.2, alpha = 0.75) +
-    geom_point(aes(x = tipo_label, y = Gen_inicial, color = tipo_selecao),
-               size = 5.5, shape = 21, fill = "white", stroke = 2.2) +
-    geom_point(aes(x = tipo_label, y = Gen_final, color = tipo_selecao),
-               size = 5.5) +
-    geom_text(aes(x = tipo_label, y = (Gen_inicial + Gen_final) / 2,
-                  label = sprintf("%+.3f", Delta), color = tipo_selecao),
-              hjust = -0.8, vjust = 0.5, size = 4.0, fontface = "bold") +
-    facet_wrap(~Metrica, scales = "free_y", ncol = 1) +
-    scale_color_manual(values = cores_4, labels = labels_4) +
-    labs(title = titulo, subtitle = subtitulo,
-         x = "", y = "Mean Metric Value", color = "") +
-    guias_cor +
-    tema_2x3
+# Limites Y compartilhados — calculados de A e D para garantir escalas comparáveis
+ylim_mod_A  <- range(df_topo$Valor[df_topo$Metrica == "1. Modularity"],        na.rm = TRUE)
+ylim_nest_A <- range(df_topo$Valor[df_topo$Metrica == "2. Nestedness (NODF)"], na.rm = TRUE)
+ylim_z_D    <- range(df_zbar_D$zbar_males, na.rm = TRUE)
+
+# ── Função auxiliar: dumbbell — dois sub-plots empilhados com ylim fixo ──
+make_dumbbell <- function(df_in, titulo, subtitulo,
+                           ylim_mod = NULL, ylim_nest = NULL) {
+
+  plot_metric <- function(df_m, y_label, ylim_m) {
+    p <- ggplot(df_m) +
+      geom_segment(aes(x = tipo_label, xend = tipo_label,
+                       y = Gen_inicial,  yend = Gen_final,
+                       color = tipo_selecao),
+                   linewidth = 2.2, alpha = 0.75) +
+      geom_point(aes(x = tipo_label, y = Gen_inicial, color = tipo_selecao),
+                 size = 5.5, shape = 21, fill = "white", stroke = 2.2) +
+      geom_point(aes(x = tipo_label, y = Gen_final, color = tipo_selecao),
+                 size = 5.5) +
+      geom_text(aes(x = tipo_label, y = (Gen_inicial + Gen_final) / 2,
+                    label = sprintf("%+.3f", Delta), color = tipo_selecao),
+                hjust = -0.8, vjust = 0.5, size = 4.0, fontface = "bold") +
+      scale_color_manual(values = cores_4, labels = labels_4) +
+      labs(x = "", y = y_label, color = "") +
+      guias_cor +
+      tema_2x3
+    if (!is.null(ylim_m)) p <- p + coord_cartesian(ylim = ylim_m)
+    p
+  }
+
+  p_mod <- plot_metric(
+    df_in %>% filter(Metrica == "1. Modularity"),
+    "Modularity", ylim_mod
+  ) + labs(title = titulo, subtitle = subtitulo)
+
+  p_nest <- plot_metric(
+    df_in %>% filter(Metrica == "2. Nestedness (NODF)"),
+    "Nestedness (NODF)", ylim_nest
+  )
+
+  p_mod / p_nest
 }
 
-# ── Função auxiliar: trajetória de z̄ ──────────────────────────────
-make_traj <- function(df_in, titulo, subtitulo) {
-  ggplot(df_in, aes(x = generation, y = media_z,
+# ── Função auxiliar: trajetória de z̄ com ylim opcional ────────────
+make_traj <- function(df_in, titulo, subtitulo, ylim_z = NULL) {
+  p <- ggplot(df_in, aes(x = generation, y = media_z,
                     color = tipo_selecao, fill = tipo_selecao)) +
     geom_ribbon(aes(ymin = media_z - sd_z, ymax = media_z + sd_z),
                 alpha = 0.12, color = NA) +
@@ -631,6 +652,8 @@ make_traj <- function(df_in, titulo, subtitulo) {
          color = "", fill = "") +
     guias_cor +
     tema_2x3
+  if (!is.null(ylim_z)) p <- p + coord_cartesian(ylim = ylim_z)
+  p
 }
 
 # ── Painéis ───────────────────────────────────────────────────────
@@ -658,14 +681,18 @@ p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
 p_B <- make_dumbbell(
   df_dumb_low,
   titulo    = sprintf("B  ·  Network Change: Gen 1 → %d  (σp = %.1f)", GEN_FINAL, SP_LOW_act),
-  subtitulo = "○ = Gen 1    ● = Gen 100    |    Label = Δ"
+  subtitulo = "○ = Gen 1    ● = Gen 100    |    Label = Δ",
+  ylim_mod  = ylim_mod_A,
+  ylim_nest = ylim_nest_A
 )
 
 # C: Dumbbell σp = 2.0  (strong preference)
 p_C <- make_dumbbell(
   df_tabela_dumb,
   titulo    = sprintf("C  ·  Network Change: Gen 1 → %d  (σp = %.1f)", GEN_FINAL, SP_POSTER),
-  subtitulo = "○ = Gen 1    ● = Gen 100    |    Label = Δ"
+  subtitulo = "○ = Gen 1    ● = Gen 100    |    Label = Δ",
+  ylim_mod  = ylim_mod_A,
+  ylim_nest = ylim_nest_A
 )
 
 # D: z̄ vs σp (Gen final)
@@ -696,14 +723,16 @@ p_D <- ggplot(df_zbar_D, aes(x = sigma_p, y = zbar_males,
 p_E <- make_traj(
   df_traj_low,
   titulo    = sprintf("E  ·  Trait Trajectory  (σp = %.1f)", SP_LOW_act),
-  subtitulo = sprintf("%d replicates  |  Ribbon = ±1 SD", val_reps)
+  subtitulo = sprintf("%d replicates  |  Ribbon = ±1 SD", val_reps),
+  ylim_z    = ylim_z_D
 )
 
 # F: Trajetória de z̄ — σp = 2.0
 p_F <- make_traj(
   df_traj,
   titulo    = sprintf("F  ·  Trait Trajectory  (σp = %.1f)", SP_POSTER),
-  subtitulo = sprintf("%d replicates  |  Ribbon = ±1 SD", val_reps)
+  subtitulo = sprintf("%d replicates  |  Ribbon = ±1 SD", val_reps),
+  ylim_z    = ylim_z_D
 )
 
 # ── Montagem ──────────────────────────────────────────────────────
