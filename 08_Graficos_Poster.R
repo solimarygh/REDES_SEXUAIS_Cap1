@@ -666,16 +666,24 @@ p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
   geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
               linewidth = 1.4, show.legend = FALSE) +
   geom_jitter(alpha = 0.22, width = 0.05, size = 1.8) +
-  facet_wrap(~Metrica, scales = "free_y", ncol = 1) +
+  facet_wrap(~Metrica, scales = "free_y", ncol = 1,
+             strip.position = "left",
+             labeller = as_labeller(c(
+               "1. Modularity"       = "Modularity",
+               "2. Nestedness (NODF)" = "Nestedness\n(NODF)"
+             ))) +
   scale_color_manual(values = cores_4, labels = labels_4) +
   scale_fill_manual(values  = cores_4, labels = labels_4) +
   labs(title    = "A  ·  Network Topology at Generation 100",
        subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates",
                           K_POSTER, AMAX_POSTER, val_reps),
        x = expression(paste("Preference Variation (", sigma[p], ")")),
-       y = "Metric Value", color = "", fill = "") +
+       y = NULL, color = "", fill = "") +
   guias_cor +
-  tema_2x3
+  tema_2x3 +
+  theme(strip.placement = "outside",
+        strip.text.y.left = element_text(color = "white", face = "bold",
+                                         size = 12, angle = 90))
 
 # B: Dumbbell σp = 0.5  (weak preference)
 p_B <- make_dumbbell(
