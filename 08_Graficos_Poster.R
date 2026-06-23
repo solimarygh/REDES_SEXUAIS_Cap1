@@ -675,7 +675,7 @@ p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
              strip.position = "left",
              labeller = as_labeller(c(
                "1. Modularity"       = "Modularity",
-               "2. Nestedness (NODF)" = "Nestedness\n(NODF)"
+               "2. Nestedness (NODF)" = "Nestedness (NODF)"
              ))) +
   scale_color_manual(values = cores_4, labels = labels_4) +
   scale_fill_manual(values  = cores_4, labels = labels_4) +
