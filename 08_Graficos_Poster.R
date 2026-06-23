@@ -428,7 +428,7 @@ for (i in seq_len(nrow(comb_rob))) {
 
   df_robusto <- df_k5 %>%
     filter(generation == GEN_FINAL, sigma_p == SP_POSTER) %>%
-    drop_na(Modularity, zbar_males, varz_males) %>%
+    drop_na(Modularity, Nestedness, zbar_males, varz_males) %>%
     mutate(Amax_f = factor(encounters_n,
                            levels = c(10, 40, 200),
                            labels = c("10", "40", "200")))
@@ -436,6 +436,7 @@ for (i in seq_len(nrow(comb_rob))) {
   df_rob_med <- df_robusto %>%
     group_by(tipo_selecao, Amax_f) %>%
     summarise(mod_mean  = mean(Modularity,  na.rm = TRUE),
+              nest_mean = mean(Nestedness,  na.rm = TRUE),
               z_mean    = mean(zbar_males,  na.rm = TRUE),
               varz_mean = mean(varz_males,  na.rm = TRUE),
               .groups   = "drop")
@@ -452,6 +453,18 @@ for (i in seq_len(nrow(comb_rob))) {
          y = "Modularity", color = "") +
     guias_cor + tema_2x3
 
+  p_rob_nest <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
+    geom_jitter(aes(y = Nestedness), alpha = 0.2, width = 0.15, size = 1.8) +
+    geom_line(data = df_rob_med, aes(y = nest_mean, group = tipo_selecao), linewidth = 1.6) +
+    geom_point(data = df_rob_med, aes(y = nest_mean), size = 5, shape = 19) +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    labs(title    = "B  ·  Network Nestedness vs Sampling Effort",
+         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
+                            SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
+         x = "Maximum number of males sampled per female (A_max)",
+         y = "Nestedness (NODF)", color = "") +
+    guias_cor + tema_2x3
+
   p_rob_z <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
     geom_hline(yintercept = 5.0, linetype = "dashed", color = cor_ref, linewidth = 0.8) +
     annotate("text", x = -Inf, y = 5.0, label = "φ = 5  (initial)",
@@ -460,7 +473,7 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_line(data = df_rob_med, aes(y = z_mean, group = tipo_selecao), linewidth = 1.6) +
     geom_point(data = df_rob_med, aes(y = z_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
-    labs(title    = "B  ·  Male Trait Mean vs Sampling Effort",
+    labs(title    = "C  ·  Male Trait Mean vs Sampling Effort",
          subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                             SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
          x = "Maximum number of males sampled per female (A_max)",
@@ -477,17 +490,17 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_point(data = df_rob_med, aes(y = varz_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     coord_cartesian(ylim = c(NA, 0.15)) +
-    labs(title    = "C  ·  Male Trait Variance vs Sampling Effort",
+    labs(title    = "D  ·  Male Trait Variance vs Sampling Effort",
          subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                             SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
          x = "Maximum number of males sampled per female (A_max)",
          y = "Male Trait Variance (Var z)", color = "") +
     guias_cor + tema_2x3
 
-  p_robusto <- p_rob_mod | p_rob_z | p_rob_varz
+  p_robusto <- p_rob_mod | p_rob_nest | p_rob_z | p_rob_varz
 
   path_rob <- file.path(dir_poster, sprintf("Poster_Robustez_%s.png", sufixo_rob))
-  png(path_rob, width = 21, height = 7, units = "in", res = 300, bg = bg_poster)
+  png(path_rob, width = 28, height = 7, units = "in", res = 300, bg = bg_poster)
   print(p_robusto)
   dev.off()
   cat(sprintf("  → Robustez  : %s\n", basename(path_rob)))
