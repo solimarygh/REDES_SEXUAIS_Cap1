@@ -88,11 +88,12 @@ cor_titulo <- if (FUNDO_ESCURO) "#E8E8FF"        else "#1A1A2E"
 
 tema_rob <- tema_2x3 +
   theme(
-    plot.title    = element_text(size = 24, face = "bold"),
-    plot.subtitle = element_text(size = 17),
-    axis.title    = element_text(size = 20, face = "bold"),
-    axis.text     = element_text(size = 17),
-    axis.text.x   = element_text(size = 17, face = "bold")
+    plot.title    = element_text(size = 26, face = "bold"),
+    plot.subtitle = element_blank(),
+    axis.title    = element_text(size = 22, face = "bold"),
+    axis.text     = element_text(size = 19),
+    axis.text.x   = element_text(size = 19, face = "bold"),
+    plot.margin   = margin(8, 12, 22, 12)
   )
 
 # =====================================================================
@@ -490,9 +491,7 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_line(data = df_rob_med, aes(y = mod_mean, group = tipo_selecao), linewidth = 1.6) +
     geom_point(data = df_rob_med, aes(y = mod_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
-    labs(title    = "A  ·  Network Modularity vs Sampling Effort",
-         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d",
-                            SP_POSTER, GEN_FINAL, K_POSTER),
+    labs(title = "A  ·  Network Modularity vs Sampling Effort",
          x = NULL,
          y = "Modularity", color = "") +
     guias_cor + tema_rob
@@ -502,9 +501,7 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_line(data = df_rob_med, aes(y = nest_mean, group = tipo_selecao), linewidth = 1.6) +
     geom_point(data = df_rob_med, aes(y = nest_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
-    labs(title    = "B  ·  Network Nestedness vs Sampling Effort",
-         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d",
-                            SP_POSTER, GEN_FINAL, K_POSTER),
+    labs(title = "B  ·  Network Nestedness vs Sampling Effort",
          x = NULL,
          y = "Nestedness (NODF)", color = "") +
     guias_cor + tema_rob
@@ -517,9 +514,7 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_line(data = df_rob_med, aes(y = z_mean, group = tipo_selecao), linewidth = 1.6) +
     geom_point(data = df_rob_med, aes(y = z_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
-    labs(title    = "C  ·  Male Trait Mean vs Sampling Effort",
-         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d",
-                            SP_POSTER, GEN_FINAL, K_POSTER),
+    labs(title = "C  ·  Male Trait Mean vs Sampling Effort",
          x = NULL,
          y = expression(bold(paste("Male Trait Mean (", bar(z), ")"))),
          color = "") +
@@ -534,9 +529,7 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_point(data = df_rob_med, aes(y = varz_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     coord_cartesian(ylim = c(NA, 0.15)) +
-    labs(title    = "D  ·  Male Trait Variance vs Sampling Effort",
-         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d",
-                            SP_POSTER, GEN_FINAL, K_POSTER),
+    labs(title = "D  ·  Male Trait Variance vs Sampling Effort",
          x = "Maximum number of males sampled per female (A_max)",
          y = "Male Trait Variance (Var z)", color = "") +
     guias_cor + tema_rob
@@ -548,9 +541,9 @@ for (i in seq_len(nrow(comb_rob))) {
              label = "What happens when females can only assess\na fraction of available males?",
              size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
              lineheight = 0.9, color = cor_titulo) +
-    annotate("text", x = 0.5, y = 0.18,
-             label = sprintf("Matings per female (k) = %d  |  %s",
-                             K_POSTER,
+    annotate("text", x = 0.5, y = 0.38,
+             label = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %s",
+                             SP_POSTER, GEN_FINAL, K_POSTER,
                              if (NS_POSTER) "With natural selection" else "Without natural selection"),
              size = 5.5, hjust = 0.5, vjust = 1,
              color = if (FUNDO_ESCURO) "#AAAAAA" else "gray45") +
