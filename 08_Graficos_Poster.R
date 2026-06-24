@@ -491,7 +491,7 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_line(data = df_rob_med, aes(y = mod_mean, group = tipo_selecao), linewidth = 1.6) +
     geom_point(data = df_rob_med, aes(y = mod_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
-    labs(title = "A  ·  Network Modularity vs Sampling Effort",
+    labs(title = "A",
          x = NULL,
          y = "Modularity", color = "") +
     guias_cor + tema_rob
@@ -501,7 +501,7 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_line(data = df_rob_med, aes(y = nest_mean, group = tipo_selecao), linewidth = 1.6) +
     geom_point(data = df_rob_med, aes(y = nest_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
-    labs(title = "B  ·  Network Nestedness vs Sampling Effort",
+    labs(title = "B",
          x = NULL,
          y = "Nestedness (NODF)", color = "") +
     guias_cor + tema_rob
@@ -514,7 +514,7 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_line(data = df_rob_med, aes(y = z_mean, group = tipo_selecao), linewidth = 1.6) +
     geom_point(data = df_rob_med, aes(y = z_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
-    labs(title = "C  ·  Male Trait Mean vs Sampling Effort",
+    labs(title = "C",
          x = NULL,
          y = expression(bold(paste("Male Trait Mean (", bar(z), ")"))),
          color = "") +
@@ -529,7 +529,7 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_point(data = df_rob_med, aes(y = varz_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     coord_cartesian(ylim = c(NA, 0.15)) +
-    labs(title = "D  ·  Male Trait Variance vs Sampling Effort",
+    labs(title = "D",
          x = "Maximum number of males sampled per female (A_max)",
          y = "Male Trait Variance (Var z)", color = "") +
     guias_cor + tema_rob
