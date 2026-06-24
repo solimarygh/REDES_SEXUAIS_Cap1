@@ -485,8 +485,8 @@ for (i in seq_len(nrow(comb_rob))) {
     labs(title    = "A  ·  Network Modularity vs Sampling Effort",
          subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                             SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
-         x = "Maximum number of males sampled per female (A_max)",
-         y = NULL, color = "") +
+         x = NULL,
+         y = "Modularity", color = "") +
     guias_cor + tema_2x3
 
   p_rob_nest <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
@@ -497,8 +497,8 @@ for (i in seq_len(nrow(comb_rob))) {
     labs(title    = "B  ·  Network Nestedness vs Sampling Effort",
          subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                             SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
-         x = "Maximum number of males sampled per female (A_max)",
-         y = NULL, color = "") +
+         x = NULL,
+         y = "Nestedness (NODF)", color = "") +
     guias_cor + tema_2x3
 
   p_rob_z <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
@@ -512,8 +512,8 @@ for (i in seq_len(nrow(comb_rob))) {
     labs(title    = "C  ·  Male Trait Mean vs Sampling Effort",
          subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                             SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
-         x = "Maximum number of males sampled per female (A_max)",
-         y = NULL,
+         x = NULL,
+         y = expression(bold(paste("Male Trait Mean (", bar(z), ")"))),
          color = "") +
     guias_cor + tema_2x3
 
