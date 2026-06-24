@@ -83,8 +83,17 @@ tema_2x3_escuro <- theme_dark(base_size = 18) +
 
 tema_2x3  <- if (FUNDO_ESCURO) tema_2x3_escuro else tema_2x3_claro
 bg_poster  <- if (FUNDO_ESCURO) "#1A1A2E"       else "white"
-cor_ref    <- if (FUNDO_ESCURO) "gray70"         else "gray50"   # φ=5 / Var z=1 labels
-cor_titulo <- if (FUNDO_ESCURO) "#E8E8FF"        else "#1A1A2E"  # outer annotation title
+cor_ref    <- if (FUNDO_ESCURO) "gray70"         else "gray50"
+cor_titulo <- if (FUNDO_ESCURO) "#E8E8FF"        else "#1A1A2E"
+
+tema_rob <- tema_2x3 +
+  theme(
+    plot.title    = element_text(size = 24, face = "bold"),
+    plot.subtitle = element_text(size = 17),
+    axis.title    = element_text(size = 20, face = "bold"),
+    axis.text     = element_text(size = 17),
+    axis.text.x   = element_text(size = 17, face = "bold")
+  )
 
 # =====================================================================
 # PALETA DE CORES
@@ -486,7 +495,7 @@ for (i in seq_len(nrow(comb_rob))) {
                             SP_POSTER, GEN_FINAL, K_POSTER),
          x = NULL,
          y = "Modularity", color = "") +
-    guias_cor + tema_2x3
+    guias_cor + tema_rob
 
   p_rob_nest <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
     geom_jitter(aes(y = Nestedness), alpha = 0.2, width = 0.15, size = 1.8) +
@@ -498,7 +507,7 @@ for (i in seq_len(nrow(comb_rob))) {
                             SP_POSTER, GEN_FINAL, K_POSTER),
          x = NULL,
          y = "Nestedness (NODF)", color = "") +
-    guias_cor + tema_2x3
+    guias_cor + tema_rob
 
   p_rob_z <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
     geom_hline(yintercept = 5.0, linetype = "dashed", color = cor_ref, linewidth = 0.8) +
@@ -514,7 +523,7 @@ for (i in seq_len(nrow(comb_rob))) {
          x = NULL,
          y = expression(bold(paste("Male Trait Mean (", bar(z), ")"))),
          color = "") +
-    guias_cor + tema_2x3
+    guias_cor + tema_rob
 
   p_rob_varz <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
     geom_hline(yintercept = 1.0, linetype = "dashed", color = cor_ref, linewidth = 0.8) +
@@ -530,7 +539,7 @@ for (i in seq_len(nrow(comb_rob))) {
                             SP_POSTER, GEN_FINAL, K_POSTER),
          x = "Maximum number of males sampled per female (A_max)",
          y = "Male Trait Variance (Var z)", color = "") +
-    guias_cor + tema_2x3
+    guias_cor + tema_rob
 
   p_robusto <- p_rob_mod / p_rob_nest / p_rob_z / p_rob_varz
 
