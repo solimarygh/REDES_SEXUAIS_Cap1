@@ -540,20 +540,21 @@ for (i in seq_len(nrow(comb_rob))) {
              label = "What happens when females can only assess\na fraction of available males?",
              size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
              lineheight = 0.9, color = cor_titulo) +
-    annotate("text", x = 0.5, y = 0.22,
+    annotate("text", x = 0.5, y = 0.05,
              label = sprintf("Matings per female (k) = %d  |  %s  |  %d replicates",
                              K_POSTER,
                              if (NS_POSTER) "With natural selection" else "Without natural selection",
                              val_reps),
-             size = 5.5, hjust = 0.5, vjust = 1,
+             size = 5.5, hjust = 0.5, vjust = 0,
              color = if (FUNDO_ESCURO) "#AAAAAA" else "gray45") +
     xlim(0, 1) + ylim(0, 1) + theme_void() +
-    theme(plot.background = element_rect(fill = bg_poster, color = NA))
+    theme(plot.background = element_rect(fill = bg_poster, color = NA),
+          plot.margin = margin(0, 0, 0, 0))
 
   # lbl_header_rob <- (lbl_aranha | lbl_titulo_rob) + plot_layout(widths = c(0.12, 1))
 
   fig_robusto <- lbl_titulo_rob / p_robusto +
-    plot_layout(heights = c(0.14, 1))
+    plot_layout(heights = c(0.10, 1))
 
   path_rob <- file.path(dir_poster, sprintf("Poster_Robustez_%s.png", sufixo_rob))
   png(path_rob, width = 10, height = 28, units = "in", res = 300, bg = bg_poster)
