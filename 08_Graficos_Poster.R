@@ -546,6 +546,7 @@ for (i in seq_len(nrow(comb_rob))) {
                aes(y = varz_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     coord_cartesian(ylim = c(NA, 0.15)) +
+    facet_wrap(~slbl, strip.position = "left") +
     labs(title = "D",
          x = "Maximum number of males sampled per female (A_max)",
          y = NULL, color = "") +
