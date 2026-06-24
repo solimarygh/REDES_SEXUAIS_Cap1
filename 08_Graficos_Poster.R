@@ -335,8 +335,8 @@ for (i in seq_len(nrow(comb_2x3))) {
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values  = cores_4, labels = labels_4) +
     labs(title    = "A  ·  Network Topology at Generation 100",
-         subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates",
-                            K_POSTER, AMAX_POSTER, val_reps),
+         subtitle = sprintf("k = %d  |  A_max = %d",
+                            K_POSTER, AMAX_POSTER),
          x = expression(bold(paste("Preference Variation (", sigma[p], ")"))),
          y = NULL, color = "", fill = "") +
     guias_cor + tema_2x3 +
@@ -373,8 +373,8 @@ for (i in seq_len(nrow(comb_2x3))) {
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values  = cores_4, labels = labels_4) +
     labs(title    = "D  ·  Male Trait Mean at Generation 100",
-         subtitle = sprintf("k = %d  |  A_max = %d  |  %d replicates",
-                            K_POSTER, AMAX_POSTER, val_reps),
+         subtitle = sprintf("k = %d  |  A_max = %d",
+                            K_POSTER, AMAX_POSTER),
          x = expression(bold(paste("Preference Variation (", sigma[p], ")"))),
          y = NULL, color = "", fill = "") +
     guias_cor + tema_2x3 +
@@ -385,12 +385,12 @@ for (i in seq_len(nrow(comb_2x3))) {
 
   p_E <- make_traj(df_traj_low,
     titulo    = sprintf("E  ·  Trait Trajectory  (σp = %.1f)", SP_LOW_act),
-    subtitulo = sprintf("%d replicates  |  Ribbon = ±1 SD", val_reps),
+    subtitulo = "Ribbon = ±1 SD",
     ylim_z    = ylim_z_D)
 
   p_F <- make_traj(df_traj,
     titulo    = sprintf("F  ·  Trait Trajectory  (σp = %.1f)", SP_POSTER),
-    subtitulo = sprintf("%d replicates  |  Ribbon = ±1 SD", val_reps),
+    subtitulo = "Ribbon = ±1 SD",
     ylim_z    = ylim_z_D)
 
   # ── Grid 2×3 ───────────────────────────────────────────────────────
@@ -405,10 +405,9 @@ for (i in seq_len(nrow(comb_2x3))) {
              size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
              color = cor_titulo) +
     annotate("text", x = 0.5, y = 0.32,
-             label = sprintf("Matings per female (k) = %d  |  Max. males sampled per female (A_max) = %d  |  %s  |  %d replicates",
+             label = sprintf("Matings per female (k) = %d  |  Max. males sampled per female (A_max) = %d  |  %s",
                              K_POSTER, AMAX_POSTER,
-                             if (NS_POSTER) "With natural selection" else "Without natural selection",
-                             val_reps),
+                             if (NS_POSTER) "With natural selection" else "Without natural selection"),
              size = 5.5, hjust = 0.5, vjust = 1,
              color = if (FUNDO_ESCURO) "#AAAAAA" else "gray45") +
     xlim(0, 1) + ylim(0, 1) + theme_void() +
@@ -483,8 +482,8 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_point(data = df_rob_med, aes(y = mod_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     labs(title    = "A  ·  Network Modularity vs Sampling Effort",
-         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
-                            SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
+         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d",
+                            SP_POSTER, GEN_FINAL, K_POSTER),
          x = NULL,
          y = "Modularity", color = "") +
     guias_cor + tema_2x3
@@ -495,8 +494,8 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_point(data = df_rob_med, aes(y = nest_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     labs(title    = "B  ·  Network Nestedness vs Sampling Effort",
-         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
-                            SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
+         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d",
+                            SP_POSTER, GEN_FINAL, K_POSTER),
          x = NULL,
          y = "Nestedness (NODF)", color = "") +
     guias_cor + tema_2x3
@@ -510,8 +509,8 @@ for (i in seq_len(nrow(comb_rob))) {
     geom_point(data = df_rob_med, aes(y = z_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     labs(title    = "C  ·  Male Trait Mean vs Sampling Effort",
-         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
-                            SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
+         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d",
+                            SP_POSTER, GEN_FINAL, K_POSTER),
          x = NULL,
          y = expression(bold(paste("Male Trait Mean (", bar(z), ")"))),
          color = "") +
@@ -527,8 +526,8 @@ for (i in seq_len(nrow(comb_rob))) {
     scale_color_manual(values = cores_4, labels = labels_4) +
     coord_cartesian(ylim = c(NA, 0.15)) +
     labs(title    = "D  ·  Male Trait Variance vs Sampling Effort",
-         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
-                            SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
+         subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d",
+                            SP_POSTER, GEN_FINAL, K_POSTER),
          x = "Maximum number of males sampled per female (A_max)",
          y = "Male Trait Variance (Var z)", color = "") +
     guias_cor + tema_2x3
@@ -541,10 +540,9 @@ for (i in seq_len(nrow(comb_rob))) {
              size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
              lineheight = 0.9, color = cor_titulo) +
     annotate("text", x = 0.5, y = 0.18,
-             label = sprintf("Matings per female (k) = %d  |  %s  |  %d replicates",
+             label = sprintf("Matings per female (k) = %d  |  %s",
                              K_POSTER,
-                             if (NS_POSTER) "With natural selection" else "Without natural selection",
-                             val_reps),
+                             if (NS_POSTER) "With natural selection" else "Without natural selection"),
              size = 5.5, hjust = 0.5, vjust = 1,
              color = if (FUNDO_ESCURO) "#AAAAAA" else "gray45") +
     xlim(0, 1) + ylim(0, 1) + theme_void() +
