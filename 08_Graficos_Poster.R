@@ -420,7 +420,7 @@ for (i in seq_len(nrow(comb_2x3))) {
     plot_layout(heights = c(0.14, 1))
 
   path_2x3 <- file.path(dir_poster, sprintf("Poster_Grid2x3_%s.png", sufixo))
-  png(path_2x3, width = 19.5, height = 14, units = "in", res = 300, bg = bg_poster)
+  png(path_2x3, width = 19.5, height = 14.5, units = "in", res = 300, bg = bg_poster)
   print(grid_2x3)
   dev.off()
   cat(sprintf("  → Grid 2×3  : %s\n", basename(path_2x3)))
