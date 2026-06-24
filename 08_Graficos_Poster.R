@@ -486,7 +486,7 @@ for (i in seq_len(nrow(comb_rob))) {
          subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                             SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
          x = "Maximum number of males sampled per female (A_max)",
-         y = "Modularity", color = "") +
+         y = NULL, color = "") +
     guias_cor + tema_2x3
 
   p_rob_nest <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
@@ -498,7 +498,7 @@ for (i in seq_len(nrow(comb_rob))) {
          subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                             SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
          x = "Maximum number of males sampled per female (A_max)",
-         y = "Nestedness (NODF)", color = "") +
+         y = NULL, color = "") +
     guias_cor + tema_2x3
 
   p_rob_z <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
@@ -513,7 +513,7 @@ for (i in seq_len(nrow(comb_rob))) {
          subtitle = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %d replicates",
                             SP_POSTER, GEN_FINAL, K_POSTER, val_reps),
          x = "Maximum number of males sampled per female (A_max)",
-         y = expression(bold(paste("Male Trait Mean (", bar(z), ")"))),
+         y = NULL,
          color = "") +
     guias_cor + tema_2x3
 
@@ -536,11 +536,11 @@ for (i in seq_len(nrow(comb_rob))) {
   p_robusto <- p_rob_mod / p_rob_nest / p_rob_z / p_rob_varz
 
   lbl_titulo_rob <- ggplot() +
-    annotate("text", x = 0.5, y = 0.85,
-             label = "What happens when females can only assess a fraction of available males?",
+    annotate("text", x = 0.5, y = 0.95,
+             label = "What happens when females can only assess\na fraction of available males?",
              size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
-             color = cor_titulo) +
-    annotate("text", x = 0.5, y = 0.45,
+             lineheight = 0.9, color = cor_titulo) +
+    annotate("text", x = 0.5, y = 0.22,
              label = sprintf("Matings per female (k) = %d  |  %s  |  %d replicates",
                              K_POSTER,
                              if (NS_POSTER) "With natural selection" else "Without natural selection",
@@ -553,7 +553,7 @@ for (i in seq_len(nrow(comb_rob))) {
   # lbl_header_rob <- (lbl_aranha | lbl_titulo_rob) + plot_layout(widths = c(0.12, 1))
 
   fig_robusto <- lbl_titulo_rob / p_robusto +
-    plot_layout(heights = c(0.22, 1))
+    plot_layout(heights = c(0.14, 1))
 
   path_rob <- file.path(dir_poster, sprintf("Poster_Robustez_%s.png", sufixo_rob))
   png(path_rob, width = 10, height = 28, units = "in", res = 300, bg = bg_poster)
