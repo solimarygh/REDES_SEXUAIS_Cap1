@@ -486,53 +486,73 @@ for (i in seq_len(nrow(comb_rob))) {
               varz_mean = mean(varz_males,  na.rm = TRUE),
               .groups   = "drop")
 
-  p_rob_mod <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
+  p_rob_mod <- ggplot(df_robusto %>% mutate(slbl = "Modularity"),
+                      aes(x = Amax_f, color = tipo_selecao)) +
     geom_jitter(aes(y = Modularity), alpha = 0.2, width = 0.15, size = 1.8) +
-    geom_line(data = df_rob_med, aes(y = mod_mean, group = tipo_selecao), linewidth = 1.6) +
-    geom_point(data = df_rob_med, aes(y = mod_mean), size = 5, shape = 19) +
+    geom_line(data = df_rob_med %>% mutate(slbl = "Modularity"),
+              aes(y = mod_mean, group = tipo_selecao), linewidth = 1.6) +
+    geom_point(data = df_rob_med %>% mutate(slbl = "Modularity"),
+               aes(y = mod_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
-    labs(title = "A",
-         x = NULL,
-         y = "Modularity", color = "") +
-    guias_cor + tema_rob
+    facet_wrap(~slbl, strip.position = "left") +
+    labs(title = "A", x = NULL, y = NULL, color = "") +
+    guias_cor + tema_rob +
+    theme(strip.placement   = "outside",
+          strip.background  = element_rect(fill = "#2C3E50"),
+          strip.text.y.left = element_text(color = "white", face = "bold", size = 17, angle = 90))
 
-  p_rob_nest <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
+  p_rob_nest <- ggplot(df_robusto %>% mutate(slbl = "Nestedness (NODF)"),
+                       aes(x = Amax_f, color = tipo_selecao)) +
     geom_jitter(aes(y = Nestedness), alpha = 0.2, width = 0.15, size = 1.8) +
-    geom_line(data = df_rob_med, aes(y = nest_mean, group = tipo_selecao), linewidth = 1.6) +
-    geom_point(data = df_rob_med, aes(y = nest_mean), size = 5, shape = 19) +
+    geom_line(data = df_rob_med %>% mutate(slbl = "Nestedness (NODF)"),
+              aes(y = nest_mean, group = tipo_selecao), linewidth = 1.6) +
+    geom_point(data = df_rob_med %>% mutate(slbl = "Nestedness (NODF)"),
+               aes(y = nest_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
-    labs(title = "B",
-         x = NULL,
-         y = "Nestedness (NODF)", color = "") +
-    guias_cor + tema_rob
+    facet_wrap(~slbl, strip.position = "left") +
+    labs(title = "B", x = NULL, y = NULL, color = "") +
+    guias_cor + tema_rob +
+    theme(strip.placement   = "outside",
+          strip.background  = element_rect(fill = "#2C3E50"),
+          strip.text.y.left = element_text(color = "white", face = "bold", size = 17, angle = 90))
 
-  p_rob_z <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
+  p_rob_z <- ggplot(df_robusto %>% mutate(slbl = "bold(paste('Male Trait Mean (', bar(z), ')'))"),
+                    aes(x = Amax_f, color = tipo_selecao)) +
     geom_hline(yintercept = 5.0, linetype = "dashed", color = cor_ref, linewidth = 0.8) +
     annotate("text", x = -Inf, y = 5.0, label = "φ = 5  (initial)",
              hjust = -0.1, vjust = -0.55, color = cor_ref, size = 4.5, fontface = "italic") +
     geom_jitter(aes(y = zbar_males), alpha = 0.2, width = 0.15, size = 1.8) +
-    geom_line(data = df_rob_med, aes(y = z_mean, group = tipo_selecao), linewidth = 1.6) +
-    geom_point(data = df_rob_med, aes(y = z_mean), size = 5, shape = 19) +
+    geom_line(data = df_rob_med %>% mutate(slbl = "bold(paste('Male Trait Mean (', bar(z), ')'))"),
+              aes(y = z_mean, group = tipo_selecao), linewidth = 1.6) +
+    geom_point(data = df_rob_med %>% mutate(slbl = "bold(paste('Male Trait Mean (', bar(z), ')'))"),
+               aes(y = z_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
-    labs(title = "C",
-         x = NULL,
-         y = expression(bold(paste("Male Trait Mean (", bar(z), ")"))),
-         color = "") +
-    guias_cor + tema_rob
+    facet_wrap(~slbl, strip.position = "left", labeller = label_parsed) +
+    labs(title = "C", x = NULL, y = NULL, color = "") +
+    guias_cor + tema_rob +
+    theme(strip.placement   = "outside",
+          strip.background  = element_rect(fill = "#6B3A8C"),
+          strip.text.y.left = element_text(color = "white", face = "bold", size = 17, angle = 90))
 
-  p_rob_varz <- ggplot(df_robusto, aes(x = Amax_f, color = tipo_selecao)) +
+  p_rob_varz <- ggplot(df_robusto %>% mutate(slbl = "Male Trait Variance (Var z)"),
+                       aes(x = Amax_f, color = tipo_selecao)) +
     geom_hline(yintercept = 1.0, linetype = "dashed", color = cor_ref, linewidth = 0.8) +
     annotate("text", x = -Inf, y = 1.0, label = "Var z = 1  (initial)",
              hjust = -0.1, vjust = -0.55, color = cor_ref, size = 4.5, fontface = "italic") +
     geom_jitter(aes(y = varz_males), alpha = 0.2, width = 0.15, size = 1.8) +
-    geom_line(data = df_rob_med, aes(y = varz_mean, group = tipo_selecao), linewidth = 1.6) +
-    geom_point(data = df_rob_med, aes(y = varz_mean), size = 5, shape = 19) +
+    geom_line(data = df_rob_med %>% mutate(slbl = "Male Trait Variance (Var z)"),
+              aes(y = varz_mean, group = tipo_selecao), linewidth = 1.6) +
+    geom_point(data = df_rob_med %>% mutate(slbl = "Male Trait Variance (Var z)"),
+               aes(y = varz_mean), size = 5, shape = 19) +
     scale_color_manual(values = cores_4, labels = labels_4) +
     coord_cartesian(ylim = c(NA, 0.15)) +
     labs(title = "D",
          x = "Maximum number of males sampled per female (A_max)",
-         y = "Male Trait Variance (Var z)", color = "") +
-    guias_cor + tema_rob
+         y = NULL, color = "") +
+    guias_cor + tema_rob +
+    theme(strip.placement   = "outside",
+          strip.background  = element_rect(fill = "#6B3A8C"),
+          strip.text.y.left = element_text(color = "white", face = "bold", size = 17, angle = 90))
 
   p_robusto <- p_rob_mod / p_rob_nest / p_rob_z / p_rob_varz
 
