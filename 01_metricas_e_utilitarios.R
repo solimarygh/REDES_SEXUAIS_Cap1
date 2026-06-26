@@ -380,7 +380,7 @@ simulate_evolution <- function(
     
     # CORREÇÃO: Salvamos a Média e a Variância apenas dos machos que SOBREVIVERAM (male_z_surv)!!!
     out[[t]] <- data.frame(
-      generation = t, tipo_selecao = tipo_selecao, sigma_p = sigma_p, encounters_n = encounters_n,
+      generation = t, tipo_selecao = tipo_selecao, sigma_p = sigma_p, sigma_z_init = sigma_z_init, encounters_n = encounters_n,
       k_fixo = ifelse(is.null(k_fixo), NA_integer_, as.integer(k_fixo)),
       selecao_natural = selecao_natural,
       zbar_males = mean(male_z_surv), varz_males = var(male_z_surv), metrics
