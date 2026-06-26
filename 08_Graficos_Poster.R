@@ -9,8 +9,8 @@ library(ggplot2)
 library(patchwork)
 
 # ── CARREGAR DADOS ────────────────────────────────────────────────────
-arquivo_backup <- "Resultados_Artigo/Fase5_MiudoV2/Dados/backup_lista_fase5_miudov2.rds"
-arquivo_final  <- "Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds"
+arquivo_backup <- "Resultados_Artigo/Fase_MachoVariando/Dados/backup_MachoVariando.rds"
+arquivo_final  <- "Resultados_Artigo/Fase_MachoVariando/Dados/resultados_MachoVariando.rds"
 
 if (file.exists(arquivo_backup)) {
   lista <- readRDS(arquivo_backup)
