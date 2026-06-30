@@ -43,7 +43,7 @@ for (tipo in names(cores_4)) {
     return_details  = TRUE
   )
 
-  M <- res$M_final
+  M <- res$Matriz_M_Gen50
   # colSums(M) = grau de cada fêmea (quantos machos distintos ela acasalou)
   grau_femeas <- colSums(M)
 
