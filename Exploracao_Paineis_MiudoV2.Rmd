@@ -50,7 +50,7 @@ ordem_k      <- c(5, 10, 20)
 
 ## Lembrando detalhes do modelo
 
--   **População:** 200 machos e 200 fêmeas, evoluindo por 100 gerações, com 30 réplicas (repetições independentes) por cenário. No futuro serão 100 réplicas.
+-   **População:** 200 machos e 200 fêmeas, evoluindo por 100 gerações, com 100 réplicas (repetições independentes) por cenário.
 -   **O traço e a preferência:** cada macho tem um traço $z$ (ex.: tamanho de um ornamento); cada fêmea tem uma preferência $p$ por um determinado valor de $z$.
 -   **Quatro curvas de preferência:**
     -   **Aleatória** — as fêmeas não discriminam entre machos (referência nula, sem seleção sexual).
@@ -76,7 +76,7 @@ A cada nova geração, os valores de preferência $p$ das fêmeas são re-sortea
 Cada macho sobrevive com probabilidade $V_j = \exp\!\bigl(-\gamma(z_j - \phi)^2\bigr)$. Muido, seguindo nossa ultima conversa, nestes resultados essa etapa é **desligada** ($V_j = 1$ para todos os machos), isolando o efeito puro da escolha feminina sobre a estrutura da rede.
 
 **4. Formação da rede de acasalamentos**
-Cada fêmea $i$ amostra $A_{max}$ machos aleatoriamente da população (de sobreviventes se há selecao por viavilidade). Para cada macho $j$ amostrado (lembrando que podem ser 5, 10 ou 20), calcula a probabilidade de aceite $P_{ij}$ conforme a curva de preferência:
+Cada fêmea $i$ amostra $A_{max}$ machos aleatoriamente da população (de sobreviventes se há selecao por viavilidade). **A amostragem é com reposição** — a fêmea pode reencontrar o mesmo macho —, de modo que mesmo com $A_{max}=200$ ela avalia em média ~126 machos *distintos*, e não os 200. Para cada macho $j$ amostrado, calcula a probabilidade de aceite $P_{ij}$ conforme a curva de preferência:
 
 | Curva | Função $P_{ij}$ |
 |:------|:----------------|
@@ -98,6 +98,7 @@ O pool de juvenis é então amostrado aleatoriamente para preencher as 200 vagas
 
 -   **Modularidade** ($Q \in [0,1]$; `igraph::cluster_louvain()` + `igraph::modularity()`): o quanto a rede se divide em grupos de machos e fêmeas que acasalam preferencialmente entre si.
 -   **Aninhamento (NODF)** ($\in [0,100]$; `bipartite::nested(M, method = "NODF")`): o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares". Como esperado, valores maiores de $k$ (mais parceiros por fêmea) tendem a aumentar o aninhamento da rede.
+    - *Detalhe importante para interpretar o NODF:* como o grau das fêmeas é ancorado em $k$, o aninhamento das **linhas** é ≈0 e praticamente todo o sinal vem da variação no grau dos **machos** (colunas). Além disso, o grau **realizado** de cada fêmea pode ser *menor que* $k$: ela avalia um número finito de machos (com reposição) e aceita probabilisticamente, cruzando no mínimo com 1 (regra de escape). É justamente essa variação em torno de $k$ que permite ao NODF assumir valores $> 0$. Por isso os valores observados são pequenos em escala absoluta (tipicamente $<8$ numa escala 0–100), mas ainda assim informativos e comparáveis entre cenários.
 -   **Centralização** ($\in [0,1]$; `igraph::centr_degree(g, mode = "all")`): o quanto os acasalamentos se concentram em poucos indivíduos. Valores altos = poucos indivíduos concentram a maioria das ligações.
 -   **$I_s$** (oportunidade de seleção sexual, $\geq 0$; `var(k)/mean(k)^2` em R base, onde $k$ = nº de parceiras por macho): mede a variação no sucesso reprodutivo dos machos, quanto maior, mais desigual é a distribuição de cópulas.
 -   **Tribos** (nº inteiro $\geq 1$; autovalores $\approx 0$ de `igraph::laplacian_matrix()`): número de subpopulações completamente isoladas reprodutivamente (sem nenhuma ligação entre elas).
@@ -155,6 +156,110 @@ for (k_val in c(5, 10, 20)) {
     cat(sprintf("![](%s)\n\n", img))
   } else {
     cat("\n*Gráfico não encontrado. Rode o Script 07 (Espiador de Backups) primeiro.*\n")
+  }
+}
+```
+
+------------------------------------------------------------------------
+
+# Experimento Inverso: Machos Variando (σz varia, σp = 1.0) {.tabset}
+
+Enquanto a Fase 4 varia a **variação de preferência feminina** ($\sigma_p$) mantendo fixa a variação do traço masculino ($\sigma_z=1.0$), este experimento faz o **inverso**: fixa $\sigma_p=1.0$ e varia $\sigma_z$ (a variação genética inicial do traço dos machos) nos mesmos níveis $\{0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0\}$. A pergunta: quando a heterogeneidade está do lado dos **machos** (e não das fêmeas), a topologia da rede e a evolução do traço respondem da mesma forma?
+
+> ⚙️ Estes painéis leem os **dados ativos** (`backup_MachoVariando.rds`) — ou seja, o que já foi simulado até agora. Como as réplicas são preenchidas em rodadas sucessivas, todos os cenários já aparecem (com menos réplicas). Basta re-knitar para atualizar conforme mais simulações completam.
+
+```{r mv-setup}
+suppressPackageStartupMessages({library(dplyr); library(tidyr); library(ggplot2)})
+mv_backup <- "Resultados_Artigo/Fase_MachoVariando/Dados/backup_MachoVariando.rds"
+mv_ok <- file.exists(mv_backup)
+cores_mv  <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
+labels_mv <- c("uniform"="Aleatória","gaussian"="Gaussiana","sigmoid"="Sigmoide","u-shaped"="Disruptiva")
+if (mv_ok) {
+  lst_mv <- readRDS(mv_backup)
+  ok_mv  <- !vapply(lst_mv, is.null, logical(1))
+  df_mv  <- dplyr::bind_rows(lst_mv[ok_mv])
+  n_done <- sum(ok_mv); n_tot <- length(lst_mv)
+}
+```
+
+```{r mv-progress, results='asis'}
+if (!mv_ok) {
+  cat("\n*Ainda não há dados. Rode `source(\"Fase_MachoVariando.R\")` para gerar o backup.*\n")
+} else {
+  cat(sprintf("\n> **Progresso:** %s de %s cenários (%.1f%%). Réplicas presentes: %s.\n\n",
+              format(n_done, big.mark="."), format(n_tot, big.mark="."),
+              100*n_done/n_tot, paste(range(df_mv$replica), collapse="–")))
+}
+```
+
+## Métricas vs σz (Geração Final) {.tabset}
+
+Paralelo ao Plot A da Fase 4, mas com $\sigma_z$ no eixo x (cenário limpo: $A_{max}=200$, sem seleção natural). A linha vermelha marca $\sigma_z=\sigma_p=1.0$. Pontos = réplicas individuais; linha = média por curva.
+
+```{r mv-metricas, results='asis', fig.width=10, fig.height=8}
+if (mv_ok) {
+  gfin <- max(df_mv$generation)
+  base_m <- df_mv %>%
+    filter(generation==gfin, encounters_n==200, selecao_natural==FALSE) %>%
+    tidyr::drop_na(Modularity, Nestedness, I_s, Centralization)
+  for (kk in c(5,10,20)) {
+    cat(sprintf("\n### k = %d\n\n", kk))
+    sub <- base_m %>% filter(k_fixo==kk)
+    if (nrow(sub) < 8) { cat("\n*Sem dados suficientes ainda para este k.*\n\n"); next }
+    long <- sub %>%
+      pivot_longer(c(Modularity,Nestedness,I_s,Centralization),
+                   names_to="Metrica", values_to="Valor") %>%
+      mutate(Metrica = recode(Metrica, Modularity="1. Modularity", Nestedness="2. Nestedness",
+                              I_s="3. Is", Centralization="4. Centralization"))
+    med <- long %>% group_by(tipo_selecao, sigma_z_init, Metrica) %>%
+      summarise(m=mean(Valor), .groups="drop")
+    p <- ggplot(long, aes(sigma_z_init, Valor, color=tipo_selecao)) +
+      geom_vline(xintercept=1.0, linetype="dashed", color="red") +
+      geom_jitter(alpha=0.12, width=0.03, height=0, size=0.8) +
+      geom_line(data=med, aes(y=m), linewidth=1.1) +
+      geom_point(data=med, aes(y=m), size=1.8) +
+      facet_wrap(~Metrica, scales="free_y", ncol=2) +
+      scale_color_manual(values=cores_mv, labels=labels_mv) +
+      labs(title=sprintf("Machos Variando — Assinatura Topológica (A_max=200, sem NS, k=%d)", kk),
+           x=expression(paste("Variação do traço masculino (", sigma[z], ")")),
+           y="Valor da métrica", color="") +
+      theme_light(base_size=13) + theme(legend.position="bottom")
+    print(p); cat("\n\n")
+  }
+}
+```
+
+## Traço Masculino vs σz (Geração Final) {.tabset}
+
+Como a média ($\bar{z}$) e a variância (Var $z$) do traço masculino respondem à sua própria variação inicial, para cada curva de preferência. Linha tracejada horizontal = ótimo inicial $\phi=5$.
+
+```{r mv-traits, results='asis', fig.width=10, fig.height=5}
+if (mv_ok) {
+  gfin <- max(df_mv$generation)
+  base_t <- df_mv %>% filter(generation==gfin, encounters_n==200, selecao_natural==FALSE)
+  hl <- data.frame(V="1. Média do traço (z-bar)", y=5)
+  for (kk in c(5,10,20)) {
+    cat(sprintf("\n### k = %d\n\n", kk))
+    sub <- base_t %>% filter(k_fixo==kk)
+    if (nrow(sub) < 8) { cat("\n*Sem dados suficientes ainda.*\n\n"); next }
+    long <- sub %>%
+      pivot_longer(c(zbar_males,varz_males), names_to="V", values_to="Valor") %>%
+      mutate(V = ifelse(V=="zbar_males","1. Média do traço (z-bar)","2. Variância do traço (Var z)"))
+    med <- long %>% group_by(tipo_selecao, sigma_z_init, V) %>%
+      summarise(m=mean(Valor), .groups="drop")
+    p <- ggplot(long, aes(sigma_z_init, Valor, color=tipo_selecao)) +
+      geom_hline(data=hl, aes(yintercept=y), linetype="dashed", alpha=0.5, inherit.aes=FALSE) +
+      geom_vline(xintercept=1.0, linetype="dashed", color="red") +
+      geom_jitter(alpha=0.12, width=0.03, height=0, size=0.8) +
+      geom_line(data=med, aes(y=m), linewidth=1.1) +
+      geom_point(data=med, aes(y=m), size=1.8) +
+      facet_wrap(~V, scales="free_y") +
+      scale_color_manual(values=cores_mv, labels=labels_mv) +
+      labs(title=sprintf("Machos Variando — Evolução do traço (A_max=200, sem NS, k=%d)", kk),
+           x=expression(paste("Variação do traço masculino (", sigma[z], ")")),
+           y="Valor fenotípico / genético", color="") +
+      theme_light(base_size=13) + theme(legend.position="bottom")
+    print(p); cat("\n\n")
   }
 }
 ```
