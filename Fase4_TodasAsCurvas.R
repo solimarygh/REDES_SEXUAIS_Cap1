@@ -260,67 +260,72 @@ cat("\nPreparando dados para os Modelos Lineares...\n")
 # Dividimos em "Abaixo do Limiar" e "Acima do Limiar", usando 1.0 como 
 # ponto de ancoragem (dobradiça) para ambos os modelos!
 
-df_stats_low <- df_gen_final %>%  
-  filter(sigma_p <= 1.0) %>% # <-- O 1.0 FICA AQUI (Ponto Máximo)
+# NOTA: os LMs usam apenas os cenários SEM seleção natural (selecao_natural == FALSE),
+# coerentes com as figuras do artigo. Além disso, a poliandria (k) entra como
+# covariável (f_k), já que o desenho cruza k = {5, 10, 20}.
+df_stats_low <- df_gen_final %>%
+  filter(sigma_p <= 1.0, selecao_natural == FALSE) %>% # <-- O 1.0 FICA AQUI (Ponto Máximo)
   drop_na(Modularity, Nestedness, Centralization, I_s, varz_males, zbar_males) %>%
   mutate(
     z_Modularity     = as.numeric(scale(Modularity)),
     z_Nestedness     = as.numeric(scale(Nestedness)),
     z_Centralization = as.numeric(scale(Centralization)),
     z_SigmaP         = as.numeric(scale(sigma_p)),
-    f_encounters     = factor(encounters_n)
+    f_encounters     = factor(encounters_n),
+    f_k              = factor(k_fixo)
   )
 
-df_stats_high <- df_gen_final %>%  
-  filter(sigma_p >= 1.0) %>% # <-- E O 1.0 FICA AQUI TAMBÉM (Linha Base)
+df_stats_high <- df_gen_final %>%
+  filter(sigma_p >= 1.0, selecao_natural == FALSE) %>% # <-- E O 1.0 FICA AQUI TAMBÉM (Linha Base)
   drop_na(Modularity, Nestedness, Centralization, I_s, varz_males, zbar_males) %>%
   mutate(
     z_Modularity     = as.numeric(scale(Modularity)),
     z_Nestedness     = as.numeric(scale(Nestedness)),
     z_Centralization = as.numeric(scale(Centralization)),
     z_SigmaP         = as.numeric(scale(sigma_p)),
-    f_encounters     = factor(encounters_n)
+    f_encounters     = factor(encounters_n),
+    f_k              = factor(k_fixo)
   )
 
 # -----------------------------------------------------------------------
 # MODELO 1: A Topologia resgatando a Diversidade Genética
 # -----------------------------------------------------------------------
 cat("\n--- MODELO 1a (sigma_p <= 1.0): Modularidade e Diversidade Genética ---\n")
-mod1a <- lm(varz_males ~ z_Modularity * tipo_selecao + z_SigmaP + f_encounters, data = df_stats_low)
+mod1a <- lm(varz_males ~ z_Modularity * tipo_selecao + z_SigmaP + f_encounters + f_k, data = df_stats_low)
 print(summary(mod1a))
 
 cat("\n--- MODELO 1b (sigma_p > 1.0): Modularidade e Diversidade Genética ---\n")
-mod1b <- lm(varz_males ~ z_Modularity * tipo_selecao + z_SigmaP + f_encounters, data = df_stats_high)
+mod1b <- lm(varz_males ~ z_Modularity * tipo_selecao + z_SigmaP + f_encounters + f_k, data = df_stats_high)
 print(summary(mod1b))
 
 # -----------------------------------------------------------------------
 # MODELO 2: A Topologia gerando o Exagero do Traço
 # -----------------------------------------------------------------------
 cat("\n--- MODELO 2a (sigma_p <= 1.0): Aninhamento e Exagero do Traço ---\n")
-mod2a <- lm(zbar_males ~ z_Nestedness * tipo_selecao + z_SigmaP + f_encounters, data = df_stats_low)
+mod2a <- lm(zbar_males ~ z_Nestedness * tipo_selecao + z_SigmaP + f_encounters + f_k, data = df_stats_low)
 print(summary(mod2a))
 
 cat("\n--- MODELO 2b (sigma_p > 1.0): Aninhamento e Exagero do Traço ---\n")
-mod2b <- lm(zbar_males ~ z_Nestedness * tipo_selecao + z_SigmaP + f_encounters, data = df_stats_high)
+mod2b <- lm(zbar_males ~ z_Nestedness * tipo_selecao + z_SigmaP + f_encounters + f_k, data = df_stats_high)
 print(summary(mod2b))
 
 # -----------------------------------------------------------------------
 # MODELO 3: A Origem da Oportunidade de Seleção (Is)
 # -----------------------------------------------------------------------
 cat("\n--- MODELO 3a (sigma_p <= 1.0): Is ~ Centralização + Modularidade ---\n")
-mod3a <- lm(I_s ~ z_Centralization + z_Modularity + z_SigmaP + tipo_selecao + f_encounters, data = df_stats_low)
+mod3a <- lm(I_s ~ z_Centralization + z_Modularity + z_SigmaP + tipo_selecao + f_encounters + f_k, data = df_stats_low)
 print(summary(mod3a))
 
 cat("\n--- MODELO 3b (sigma_p > 1.0): Is ~ Centralização + Modularidade ---\n")
-mod3b <- lm(I_s ~ z_Centralization + z_Modularity + z_SigmaP + tipo_selecao + f_encounters, data = df_stats_high)
+mod3b <- lm(I_s ~ z_Centralization + z_Modularity + z_SigmaP + tipo_selecao + f_encounters + f_k, data = df_stats_high)
 print(summary(mod3b))
 
 ######
 
 #######conceptualmente es evaluar un sistema "Piecewise", porque la biología cambia sus leyes de la física justo en el umbral donde el comportamiento de la hembra supera a la genética del macho 
 
-# 1. Haces un modelo lineal general
-modelo_general <- lm(varz_males ~ sigma_p, data = df_gen_final)
+# 1. Haces un modelo lineal general (só cenários SEM seleção natural, coerente com os LMs)
+modelo_general <- lm(varz_males ~ sigma_p, data = filter(df_gen_final, selecao_natural == FALSE))
 
 # 2. Le dices a R: "Rómpeme esta línea en dos, exactamente en sigma_p = 1.0"
 modelo_segmentado <- segmented(modelo_general, seg.Z = ~sigma_p, psi = 1.0)
