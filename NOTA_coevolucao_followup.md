@@ -13,6 +13,8 @@
 
 Cada indivíduo (macho E fêmea) passa a carregar **dois genótipos**: o traço `z` (expresso nos machos) e a preferência `p` (expressa nas fêmeas). O acasalamento assortativo faz `z` e `p` ficarem **geneticamente correlacionados** — e essa covariância é o motor do runaway. Por isso é essencial que cada filhote herde `z` e `p` **do mesmo par de pais, mantidos pareados**.
 
+> **Precedente que já existe no motor atual:** as fêmeas **já carregam um `z` não expresso** (`female_z_gen`) — elas o transmitem aos filhotes mas não o exibem, e só o `z` dos machos entra na escolha. Ver `01_metricas_e_utilitarios.R`: inicialização (~linha 345, `female_z_gen1`), herança (~308/311, o `z` da mãe entra no filhote), evolução (~397). Fazer os machos carregarem uma `p` não expressa é **simétrico** a isso — o motor já faz metade do truque.
+
 ## Mudanças concretas no motor
 
 ### 1. `simulate_evolution` — assinatura
@@ -81,10 +83,30 @@ female_z_gen <- off$female_z_next; female_p_gen <- off$female_p_next
 
 ## O que medir (para detectar runaway)
 
-Além das métricas de rede atuais, salvar por geração:
-- `pbar = mean(female_p)` e `zbar = mean(male_z_surv)` → no runaway **sobem juntos**.
-- `cov_zp = cov(z, p)` na população → a assinatura genética do Fisher.
-- Trajetórias `zbar` e `pbar` vs geração: divergência sustentada = runaway; retorno a φ = estável.
+> **A grandeza central NÃO é a característica de cada sexo — é a COVARIÂNCIA genética entre elas.**
+> Na teoria de Lande (1981) / Kirkpatrick (1982), o acasalamento assortativo cria uma associação
+> estatística (desequilíbrio de ligação / covariância genética) entre os genes de preferência `p` e de
+> traço `z`. É **essa covariância** que permite a seleção sobre o traço "arrastar" a preferência (e
+> vice-versa) → evolução correlacionada / runaway. As médias por sexo são *resultado*; a covariância é o
+> *motor*. Portanto o foco da análise é `cov(z, p)`, não `mean` de um sexo isolado.
+
+Salvar por geração:
+
+- **`cov_zp`** — a grandeza-chave. Calculada **por indivíduo, na população inteira** (cada um tem seu par `(z, p)`):
+  ```r
+  pool <- rbind(data.frame(z = male_z_gen,   p = male_p_gen),
+                data.frame(z = female_z_gen, p = female_p_gen))
+  cov_zp <- cov(pool$z, pool$p)
+  ```
+  `cov_zp` cresce e se mantém > 0 → o Fisher está operando; fica ≈ 0 → sem runaway.
+- **`zbar` e `pbar`** — médias **genotípicas poolizadas** (machos + fêmeas juntos), pois `z` e `p` são
+  genótipos carregados pelos dois sexos: `mean(c(male_z_gen, female_z_gen))`, idem para `p`. (A preferência
+  *expressa* na conduta é `female_p`; numericamente ≈ à poolizada, pois `p` herda de ambos os pais sem viés de sexo.)
+- **Trajetórias** `zbar` e `pbar` vs geração: divergência sustentada e conjunta = runaway; retorno a φ = estável.
+
+> ⚠️ Só dá para medir `cov_zp` de verdade se `z` e `p` forem herdados **pareados** por indivíduo (ver
+> `produce_offspring` acima). Embaralhar `z` e `p` separadamente zera `cov_zp` artificialmente — o runaway
+> sumiria por *bug*, não por biologia.
 
 ## Cuidados
 
