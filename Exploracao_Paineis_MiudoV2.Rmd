@@ -119,6 +119,8 @@ Temos **dois experimentos complementares** que fazem a mesma pergunta por lados 
 
 > ⚠️ **Não confundir os dois.** Cada gráfico traz no título se é **FÊMEA VARIANDO (σp)** ou **MACHO VARIANDO (σz)**, e o eixo x diz qual variação está sendo percorrida. Parte A e Parte B são **conjuntos de dados distintos** (`.rds` diferentes).
 
+> 🔎 **Um detalhe que muda a interpretação: σp e σz NÃO são simétricos.** A variação de preferência **σp é re-imposta a cada geração** (as preferências são re-sorteadas de $N(\phi, \sigma_p)$ — é uma propriedade *permanente* da população). Já **σz é apenas a condição inicial** (Geração 1): depois, o traço masculino **evolui sozinho** (herança + seleção), então a variância dos machos *não* fica presa no valor inicial. Consequência prática ao ler os painéis: na **Parte A** o efeito de σp tende a ser **sustentado** ao longo do gradiente; na **Parte B**, o efeito de σz pode **se diluir** ao longo das gerações. *(No modelo de co-evolução — próximo passo — a preferência passaria a ser herdável e σp deixaria de ser permanente, tornando os dois lados simétricos.)*
+
 ```{r painel-setup}
 suppressPackageStartupMessages({library(dplyr); library(tidyr); library(ggplot2)})
 
