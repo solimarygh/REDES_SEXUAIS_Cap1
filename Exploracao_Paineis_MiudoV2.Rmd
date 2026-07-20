@@ -110,161 +110,164 @@ Veja que dá para navegar use as abas (tabs) para alternar entre $A_{max}$, curv
 
 ------------------------------------------------------------------------
 
-# Resultados Fase 4: Forma da rede e Mudança Evolutiva {.tabset}
+# Os dois experimentos, lado a lado
 
-Estes gráficos usam o conjunto completo de réplicas da última versao (todas as combinações de k e seleção natural) para mostrar especialmete como Modularidade, Aninhamento variam com σp na geração final, e como essas métricas mudam ao longo do tempo evolutivo (Geração 1 → Geração final). #tenho mais graficos, mas por enquanto queria focar nas redes que mostrarei mais na frente.
+Temos **dois experimentos complementares** que fazem a mesma pergunta por lados opostos do sistema. Ambos usam exatamente as **mesmas métricas, cores e escala**, e a **linha vermelha em σ = 1.0** marca o ponto de referência onde as duas variações se igualam (na Geração 1). Assim dá para compará-los diretamente — **só muda quem carrega a heterogeneidade**:
 
-De novo, lembra que cada figura abaixo tem abas para $k=5$, $k=10$ e $k=20$ (poliandria fixa: nº de parceiros por fêmea), y aqui quando o numero de machos não é especificado é pq é $A_{max}=200$. Mais um detalhe: a linha vermelha em $\sigma_p = 1.0$ marca o limiar inicial onde $\sigma_p = \sigma_z$ (Geração 1). Note que $\sigma_z$ dos machos evolui ao longo das gerações (veja abaixo os histogramas dos traits).
+- 🔵 **Parte A — Variação da fêmea (σp):** varia a variação de preferência feminina; o traço masculino começa fixo (σz = 1.0). *Experimento principal (completo).*
+- 🟣 **Parte B — Variação do macho (σz):** varia a variação do traço masculino; a preferência feminina fica fixa (σp = 1.0). *Experimento inverso (parcial).*
 
-## Métricas vs σp (Geração Final) {.tabset}
+> ⚠️ **Não confundir os dois.** Cada gráfico traz no título se é **FÊMEA VARIANDO (σp)** ou **MACHO VARIANDO (σz)**, e o eixo x diz qual variação está sendo percorrida. Parte A e Parte B são **conjuntos de dados distintos** (`.rds` diferentes).
 
-```{r fase4-plotA, results='asis'}
-for (k_val in c(5, 10, 20)) {
-  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotA_AssinaturaTopologica_semNS_k%d.png", k_val))
-  cat(sprintf("\n### k = %d\n\n", k_val))
-  if (file.exists(img)) {
-    cat(sprintf("![](%s)\n\n", img))
-  } else {
-    cat("\n*Gráfico não encontrado. Rode o Script 07 (Espiador de Backups) primeiro.*\n")
-  }
-}
-```
-
-## Preferência e Traço Masculino {.tabset}
-
-Cada painel mostra como a variação na preferência feminina ($\sigma_p$) afeta a média e a variância genética do traço masculino ($\bar{z}$ e Var $z$), para os três níveis de custo de busca ($A_{max}$). O efeito mais marcante é o da curva **Disruptiva**: a baixo $\sigma_p$, a preferência concentrada nos extremos gera um estado bistável — algumas populações derivam para $z$ alto, outras para $z$ baixo — resultando em alta variância entre réplicas (nuvem espalhada). À medida que $\sigma_p$ aumenta, as populações convergem. A curva **Sigmoide** empurra $\bar{z}$ consistentemente acima do ótimo inicial $\phi = 5$.
-
-```{r fase4-plotB, results='asis'}
-for (k_val in c(5, 10, 20)) {
-  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotB_RuidoEcologico_semNS_k%d.png", k_val))
-  cat(sprintf("\n### k = %d\n\n", k_val))
-  if (file.exists(img)) {
-    cat(sprintf("![](%s)\n\n", img))
-  } else {
-    cat("\n*Gráfico não encontrado. Rode o Script 07 (Espiador de Backups) primeiro.*\n")
-  }
-}
-```
-
-## Mudança Gen 1 → Gen Final {.tabset}
-
-```{r fase4-plotE, results='asis'}
-for (k_val in c(5, 10, 20)) {
-  img <- file.path(fase4_graficos_dir, sprintf("Fase4_PlotE_Dumbell_Gen1vsGenFinal_semNS_k%d.png", k_val))
-  cat(sprintf("\n### k = %d\n\n", k_val))
-  if (file.exists(img)) {
-    cat(sprintf("![](%s)\n\n", img))
-  } else {
-    cat("\n*Gráfico não encontrado. Rode o Script 07 (Espiador de Backups) primeiro.*\n")
-  }
-}
-```
-
-------------------------------------------------------------------------
-
-# Experimento Inverso: Machos Variando (σz varia, σp = 1.0) {.tabset}
-
-Enquanto a Fase 4 varia a **variação de preferência feminina** ($\sigma_p$) mantendo fixa a variação do traço masculino ($\sigma_z=1.0$), este experimento faz o **inverso**: fixa $\sigma_p=1.0$ e varia $\sigma_z$ (a variação genética inicial do traço dos machos) nos mesmos níveis $\{0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0\}$. A pergunta: quando a heterogeneidade está do lado dos **machos** (e não das fêmeas), a topologia da rede e a evolução do traço respondem da mesma forma?
-
-> ⚙️ Estes painéis leem os **dados ativos** (`backup_MachoVariando.rds`) — ou seja, o que já foi simulado até agora. Como as réplicas são preenchidas em rodadas sucessivas, todos os cenários já aparecem (com menos réplicas). Basta re-knitar para atualizar conforme mais simulações completam.
-
-```{r mv-setup}
+```{r painel-setup}
 suppressPackageStartupMessages({library(dplyr); library(tidyr); library(ggplot2)})
-mv_backup <- "Resultados_Artigo/Fase_MachoVariando/Dados/backup_MachoVariando.rds"
-mv_ok <- file.exists(mv_backup)
-cores_mv  <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
-labels_mv <- c("uniform"="Aleatória","gaussian"="Gaussiana","sigmoid"="Sigmoide","u-shaped"="Disruptiva")
-if (mv_ok) {
-  lst_mv <- readRDS(mv_backup)
-  ok_mv  <- !vapply(lst_mv, is.null, logical(1))
-  df_mv  <- dplyr::bind_rows(lst_mv[ok_mv])
-  n_done <- sum(ok_mv); n_tot <- length(lst_mv)
+
+cores_4  <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
+labels_4 <- c("uniform"="Aleatória","gaussian"="Gaussiana","sigmoid"="Sigmoide","u-shaped"="Disruptiva")
+
+# Lê o primeiro caminho que existir; aceita lista (backup) ou data.frame (final)
+carregar <- function(paths) {
+  hit <- paths[file.exists(paths)]
+  if (length(hit) == 0) return(NULL)
+  obj <- readRDS(hit[1])
+  if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
 }
-```
 
-```{r mv-progress, results='asis'}
-if (!mv_ok) {
-  cat("\n*Ainda não há dados. Rode `source(\"Fase_MachoVariando.R\")` para gerar o backup.*\n")
-} else {
-  cat(sprintf("\n> **Progresso:** %s de %s cenários (%.1f%%). Réplicas presentes: %s.\n\n",
-              format(n_done, big.mark="."), format(n_tot, big.mark="."),
-              100*n_done/n_tot, paste(range(df_mv$replica), collapse="–")))
-}
-```
+# 🔵 FÊMEA (σp) — experimento principal (completo)
+df_fem <- carregar(c("Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds",
+                     "Resultados_Artigo/Fase5_MiudoV2/Dados/backup_lista_fase5_miudov2.rds"))
 
-## Métricas vs σz (Geração Final) {.tabset}
+# 🟣 MACHO (σz) — experimento inverso (parcial)
+mac_backup <- "Resultados_Artigo/Fase_MachoVariando/Dados/backup_MachoVariando.rds"
+df_mac <- carregar(c("Resultados_Artigo/Fase_MachoVariando/Dados/resultados_MachoVariando.rds", mac_backup))
+mac_prog <- if (file.exists(mac_backup)) {
+  l <- readRDS(mac_backup); ok <- !vapply(l, is.null, logical(1)); list(done=sum(ok), tot=length(l))
+} else NULL
 
-Paralelo ao Plot A da Fase 4, mas com $\sigma_z$ no eixo x (cenário limpo: $A_{max}=200$, sem seleção natural). A linha vermelha marca $\sigma_z=\sigma_p=1.0$. Pontos = réplicas individuais; linha = média por curva.
-
-```{r mv-metricas, results='asis', fig.width=10, fig.height=8}
-if (mv_ok) {
-  gfin <- max(df_mv$generation)
-  base_m <- df_mv %>%
-    filter(generation==gfin, encounters_n==200, selecao_natural==FALSE) %>%
+# ── Função COMPARTILHADA: painel de métricas (Mod, NODF, Is, Cent) ──
+# xvar = "sigma_p" (fêmea) ou "sigma_z_init" (macho). O resto é idêntico.
+plot_metricas <- function(df, xvar, xlab, titulo, kk) {
+  if (is.null(df) || !all(c(xvar, "k_fixo") %in% names(df))) return(NULL)
+  sub <- df %>%
+    filter(generation == max(generation), encounters_n == 200,
+           selecao_natural == FALSE, k_fixo == kk) %>%
+    mutate(xval = .data[[xvar]]) %>%
     tidyr::drop_na(Modularity, Nestedness, I_s, Centralization)
-  for (kk in c(5,10,20)) {
-    cat(sprintf("\n### k = %d\n\n", kk))
-    sub <- base_m %>% filter(k_fixo==kk)
-    if (nrow(sub) < 8) { cat("\n*Sem dados suficientes ainda para este k.*\n\n"); next }
-    long <- sub %>%
-      pivot_longer(c(Modularity,Nestedness,I_s,Centralization),
-                   names_to="Metrica", values_to="Valor") %>%
-      mutate(Metrica = recode(Metrica, Modularity="1. Modularity", Nestedness="2. Nestedness",
-                              I_s="3. Is", Centralization="4. Centralization"))
-    med <- long %>% group_by(tipo_selecao, sigma_z_init, Metrica) %>%
-      summarise(m=mean(Valor), .groups="drop")
-    p <- ggplot(long, aes(sigma_z_init, Valor, color=tipo_selecao)) +
-      geom_vline(xintercept=1.0, linetype="dashed", color="red") +
-      geom_jitter(alpha=0.12, width=0.03, height=0, size=0.8) +
-      geom_line(data=med, aes(y=m), linewidth=1.1) +
-      geom_point(data=med, aes(y=m), size=1.8) +
-      facet_wrap(~Metrica, scales="free_y", ncol=2) +
-      scale_color_manual(values=cores_mv, labels=labels_mv) +
-      labs(title=sprintf("Machos Variando — Assinatura Topológica (A_max=200, sem NS, k=%d)", kk),
-           x=expression(paste("Variação do traço masculino (", sigma[z], ")")),
-           y="Valor da métrica", color="") +
-      theme_light(base_size=13) + theme(legend.position="bottom")
+  if (nrow(sub) < 8) return(NULL)
+  long <- sub %>%
+    pivot_longer(c(Modularity, Nestedness, I_s, Centralization),
+                 names_to = "Metrica", values_to = "Valor") %>%
+    mutate(Metrica = recode(Metrica, Modularity="1. Modularity", Nestedness="2. Nestedness",
+                            I_s="3. Is", Centralization="4. Centralization"))
+  med <- long %>% group_by(tipo_selecao, xval, Metrica) %>% summarise(m = mean(Valor), .groups = "drop")
+  ggplot(long, aes(xval, Valor, color = tipo_selecao)) +
+    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
+    geom_jitter(alpha = 0.12, width = 0.03, height = 0, size = 0.8) +
+    geom_line(data = med, aes(y = m), linewidth = 1.1) +
+    geom_point(data = med, aes(y = m), size = 1.8) +
+    facet_wrap(~Metrica, scales = "free_y", ncol = 2) +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    labs(title = titulo, x = xlab, y = "Valor da métrica", color = "") +
+    theme_light(base_size = 13) + theme(legend.position = "bottom")
+}
+
+# ── Função COMPARTILHADA: painel do traço (média e variância) ──
+plot_traco <- function(df, xvar, xlab, titulo, kk) {
+  if (is.null(df) || !all(c(xvar, "k_fixo") %in% names(df))) return(NULL)
+  sub <- df %>%
+    filter(generation == max(generation), encounters_n == 200,
+           selecao_natural == FALSE, k_fixo == kk) %>%
+    mutate(xval = .data[[xvar]])
+  if (nrow(sub) < 8) return(NULL)
+  long <- sub %>%
+    pivot_longer(c(zbar_males, varz_males), names_to = "V", values_to = "Valor") %>%
+    mutate(V = ifelse(V == "zbar_males", "1. Média do traço (z-bar)", "2. Variância do traço (Var z)"))
+  med <- long %>% group_by(tipo_selecao, xval, V) %>% summarise(m = mean(Valor), .groups = "drop")
+  hl <- data.frame(V = "1. Média do traço (z-bar)", y = 5)
+  ggplot(long, aes(xval, Valor, color = tipo_selecao)) +
+    geom_hline(data = hl, aes(yintercept = y), linetype = "dashed", alpha = 0.5, inherit.aes = FALSE) +
+    geom_vline(xintercept = 1.0, linetype = "dashed", color = "red") +
+    geom_jitter(alpha = 0.12, width = 0.03, height = 0, size = 0.8) +
+    geom_line(data = med, aes(y = m), linewidth = 1.1) +
+    geom_point(data = med, aes(y = m), size = 1.8) +
+    facet_wrap(~V, scales = "free_y") +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    labs(title = titulo, x = xlab, y = "Valor fenotípico / genético", color = "") +
+    theme_light(base_size = 13) + theme(legend.position = "bottom")
+}
+
+# ── Driver: gera as abas por k (5, 10, 20) ──
+render_k <- function(fun, df, xvar, xlab, titulo_fmt) {
+  for (kk in c(5, 10, 20)) {
+    cat(sprintf("\n#### k = %d\n\n", kk))
+    p <- fun(df, xvar, xlab, sprintf(titulo_fmt, kk), kk)
+    if (is.null(p)) { cat("\n*Sem dados suficientes ainda para este k.*\n\n"); next }
     print(p); cat("\n\n")
   }
+}
+
+xlab_fem <- expression(paste("Variação da preferência feminina (", sigma[p], ")"))
+xlab_mac <- expression(paste("Variação do traço masculino (", sigma[z], ")"))
+```
+
+## 🔵 Parte A — Variação da fêmea (σp)
+
+> **Experimento principal.** Varia **σp** (variação de preferência *entre* fêmeas); o traço masculino começa **fixo (σz = 1.0)**. Cenário limpo: $A_{max}=200$, sem seleção natural.
+
+```{r fem-progress, results='asis'}
+if (is.null(df_fem)) {
+  cat("\n*Sem dados de σp. Rode `Fase4_TodasAsCurvas.R` primeiro.*\n")
+} else {
+  cat(sprintf("\n> **Dados:** %d réplicas · geração final %d · **experimento completo**.\n\n",
+              length(unique(df_fem$replica)), max(df_fem$generation)))
 }
 ```
 
-## Traço Masculino vs σz (Geração Final) {.tabset}
+### Métricas vs σp {.tabset}
 
-Como a média ($\bar{z}$) e a variância (Var $z$) do traço masculino respondem à sua própria variação inicial, para cada curva de preferência. Linha tracejada horizontal = ótimo inicial $\phi=5$.
+```{r fem-metricas, results='asis', fig.width=10, fig.height=8}
+render_k(plot_metricas, df_fem, "sigma_p", xlab_fem,
+         "FÊMEA VARIANDO (σp varia | σz=1.0) — Métricas · A_max=200 · sem NS · k=%d")
+```
 
-```{r mv-traits, results='asis', fig.width=10, fig.height=5}
-if (mv_ok) {
-  gfin <- max(df_mv$generation)
-  base_t <- df_mv %>% filter(generation==gfin, encounters_n==200, selecao_natural==FALSE)
-  hl <- data.frame(V="1. Média do traço (z-bar)", y=5)
-  for (kk in c(5,10,20)) {
-    cat(sprintf("\n### k = %d\n\n", kk))
-    sub <- base_t %>% filter(k_fixo==kk)
-    if (nrow(sub) < 8) { cat("\n*Sem dados suficientes ainda.*\n\n"); next }
-    long <- sub %>%
-      pivot_longer(c(zbar_males,varz_males), names_to="V", values_to="Valor") %>%
-      mutate(V = ifelse(V=="zbar_males","1. Média do traço (z-bar)","2. Variância do traço (Var z)"))
-    med <- long %>% group_by(tipo_selecao, sigma_z_init, V) %>%
-      summarise(m=mean(Valor), .groups="drop")
-    p <- ggplot(long, aes(sigma_z_init, Valor, color=tipo_selecao)) +
-      geom_hline(data=hl, aes(yintercept=y), linetype="dashed", alpha=0.5, inherit.aes=FALSE) +
-      geom_vline(xintercept=1.0, linetype="dashed", color="red") +
-      geom_jitter(alpha=0.12, width=0.03, height=0, size=0.8) +
-      geom_line(data=med, aes(y=m), linewidth=1.1) +
-      geom_point(data=med, aes(y=m), size=1.8) +
-      facet_wrap(~V, scales="free_y") +
-      scale_color_manual(values=cores_mv, labels=labels_mv) +
-      labs(title=sprintf("Machos Variando — Evolução do traço (A_max=200, sem NS, k=%d)", kk),
-           x=expression(paste("Variação do traço masculino (", sigma[z], ")")),
-           y="Valor fenotípico / genético", color="") +
-      theme_light(base_size=13) + theme(legend.position="bottom")
-    print(p); cat("\n\n")
-  }
+### Traço masculino vs σp {.tabset}
+
+```{r fem-traco, results='asis', fig.width=10, fig.height=5}
+render_k(plot_traco, df_fem, "sigma_p", xlab_fem,
+         "FÊMEA VARIANDO (σp varia | σz=1.0) — Traço · A_max=200 · sem NS · k=%d")
+```
+
+## 🟣 Parte B — Variação do macho (σz)
+
+> **Experimento inverso.** Varia **σz** (variação do traço masculino); a preferência feminina fica **fixa (σp = 1.0)**. Mesmas métricas e escala da Parte A — **só o eixo x muda**.
+
+```{r mac-progress, results='asis'}
+if (is.null(df_mac)) {
+  cat("\n*Ainda não há dados de σz. Rode `Fase_MachoVariando.R` para gerar o backup.*\n")
+} else if (!is.null(mac_prog)) {
+  cat(sprintf("\n> **Progresso:** %s de %s cenários (%.1f%%) — **parcial**; atualiza sozinho ao re-knitar.\n\n",
+              format(mac_prog$done, big.mark="."), format(mac_prog$tot, big.mark="."),
+              100 * mac_prog$done / mac_prog$tot))
 }
+```
+
+### Métricas vs σz {.tabset}
+
+```{r mac-metricas, results='asis', fig.width=10, fig.height=8}
+render_k(plot_metricas, df_mac, "sigma_z_init", xlab_mac,
+         "MACHO VARIANDO (σz varia | σp=1.0) — Métricas · A_max=200 · sem NS · k=%d")
+```
+
+### Traço masculino vs σz {.tabset}
+
+```{r mac-traco, results='asis', fig.width=10, fig.height=5}
+render_k(plot_traco, df_mac, "sigma_z_init", xlab_mac,
+         "MACHO VARIANDO (σz varia | σp=1.0) — Traço · A_max=200 · sem NS · k=%d")
 ```
 
 ------------------------------------------------------------------------
+
+> ℹ️ As seções de **redes representativas e histogramas** abaixo referem-se ao experimento de **variação da fêmea (σp)**.
 
 # Redes Comparativas: k × σp (uma figura por curva de preferencia) {.tabset}
 
