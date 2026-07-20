@@ -9,8 +9,8 @@ library(ggplot2)
 library(patchwork)
 
 # ── CARREGAR DADOS ────────────────────────────────────────────────────
-arquivo_backup <- "Resultados_Artigo/Fase5_MiudoV2/Dados/backup_lista_fase5_miudov2.rds"
-arquivo_final  <- "Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds"
+arquivo_backup <- "Resultados_Artigo/Fase_MachoVariando/Dados/backup_MachoVariando.rds"
+arquivo_final  <- "Resultados_Artigo/Fase_MachoVariando/Dados/resultados_MachoVariando.rds"
 
 if (file.exists(arquivo_backup)) {
   lista <- readRDS(arquivo_backup)
@@ -36,8 +36,8 @@ NS_vals   <- c(FALSE, TRUE)    # FALSE = sem seleção natural | TRUE = com
 AMAX_vals <- c(200, 40, 10)   # max. machos amostrados por fêmea
 
 # Fixos — mudar manualmente conforme necessário
-SP_POSTER <- 2.0   # σp "forte" — coluna direita do grid (C/F) e Robustez
-SP_LOW    <- 0.5   # σp "fraco" — coluna central do grid (B/E)
+SZ_POSTER <- 2.0   # σz "forte" — coluna direita do grid (C/F) e Robustez
+SZ_LOW    <- 0.5   # σz "fraco" — coluna central do grid (B/E)
 
 # =====================================================================
 # TEMA DO POSTER — mude FUNDO_ESCURO para adaptar ao fundo do poster
@@ -257,15 +257,15 @@ for (i in seq_len(nrow(comb_2x3))) {
   }
 
   # ── σp disponíveis ─────────────────────────────────────────────────
-  sp_vals     <- sort(unique(df_k5$sigma_p))
-  SP_LOW_act  <- sp_vals[which.min(abs(sp_vals - SP_LOW))]
-  SP_HIGH_act <- sp_vals[which.min(abs(sp_vals - SP_POSTER))]
+  sz_vals     <- sort(unique(df_k5$sigma_z_init))
+  SZ_LOW_act  <- sz_vals[which.min(abs(sz_vals - SZ_LOW))]
+  SZ_HIGH_act <- sz_vals[which.min(abs(sz_vals - SZ_POSTER))]
 
   # ── Sufixo do arquivo ──────────────────────────────────────────────
   sufixo <- sprintf("k%d_amax%d_spL%s_spH%s_%s_%s",
                     K_POSTER, AMAX_POSTER,
-                    sub("\\.", "", sprintf("%.1f", SP_LOW_act)),
-                    sub("\\.", "", sprintf("%.1f", SP_POSTER)),
+                    sub("\\.", "", sprintf("%.1f", SZ_LOW_act)),
+                    sub("\\.", "", sprintf("%.1f", SZ_POSTER)),
                     if (NS_POSTER) "comNS" else "semNS",
                     if (FUNDO_ESCURO) "escuro" else "claro")
 
@@ -273,7 +273,7 @@ for (i in seq_len(nrow(comb_2x3))) {
   prep_dumb <- function(df_in, sp_val) {
     df_in %>%
       filter(generation %in% c(1, GEN_FINAL),
-             encounters_n == AMAX_POSTER, sigma_p == sp_val) %>%
+             encounters_n == AMAX_POSTER, sigma_z_init == sz_val) %>%
       drop_na(Modularity, Nestedness) %>%
       group_by(generation, tipo_selecao) %>%
       summarise(Modularity = mean(Modularity, na.rm = TRUE),
@@ -302,8 +302,8 @@ for (i in seq_len(nrow(comb_2x3))) {
     mutate(Metrica = ifelse(Metrica == "Modularity",
                             "1. Modularity", "2. Nestedness (NODF)"))
 
-  df_dumb_low    <- prep_dumb(df_k5, SP_LOW_act)
-  df_tabela_dumb <- prep_dumb(df_k5, SP_POSTER)
+  df_dumb_low    <- prep_dumb(df_k5, SZ_LOW_act)
+  df_tabela_dumb <- prep_dumb(df_k5, SZ_POSTER)
 
   df_zbar_D <- df_k5 %>%
     filter(generation == GEN_FINAL, encounters_n == AMAX_POSTER) %>%
@@ -312,26 +312,26 @@ for (i in seq_len(nrow(comb_2x3))) {
 
   prep_traj <- function(df_in, sp_val) {
     df_in %>%
-      filter(sigma_p == sp_val, encounters_n == AMAX_POSTER) %>%
+      filter(sigma_z_init == sz_val, encounters_n == AMAX_POSTER) %>%
       group_by(tipo_selecao, generation) %>%
       summarise(media_z = mean(zbar_males, na.rm = TRUE),
                 sd_z    = sd(zbar_males,   na.rm = TRUE),
                 .groups = "drop")
   }
-  df_traj_low <- prep_traj(df_k5, SP_LOW_act)
-  df_traj     <- prep_traj(df_k5, SP_POSTER)
+  df_traj_low <- prep_traj(df_k5, SZ_LOW_act)
+  df_traj     <- prep_traj(df_k5, SZ_POSTER)
 
   ylim_mod_A  <- range(df_topo$Valor[df_topo$Metrica == "1. Modularity"],        na.rm = TRUE)
   ylim_nest_A <- range(df_topo$Valor[df_topo$Metrica == "2. Nestedness (NODF)"], na.rm = TRUE)
   ylim_z_D    <- range(df_zbar_D$zbar_males, na.rm = TRUE)
 
   # ── Painéis A-F ────────────────────────────────────────────────────
-  p_A <- ggplot(df_topo, aes(x = sigma_p, y = Valor,
+  p_A <- ggplot(df_topo, aes(x = sigma_z_init, y = Valor,
                               color = tipo_selecao, fill = tipo_selecao)) +
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red",
                linewidth = 0.8, alpha = 0.5) +
     annotate("text", x = 1.05, y = Inf,
-             label = "sigma[p] == sigma[z]", parse = TRUE,
+             label = "sigma[z] == sigma[p]", parse = TRUE,
              hjust = 0, vjust = 1.5, color = "red", size = 4.2, fontface = "italic") +
     geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
                 linewidth = 1.4, show.legend = FALSE) +
@@ -347,7 +347,7 @@ for (i in seq_len(nrow(comb_2x3))) {
     labs(title    = "A  ·  Network Topology at Generation 100",
          subtitle = sprintf("k = %d  |  A_max = %d",
                             K_POSTER, AMAX_POSTER),
-         x = expression(bold(paste("Preference Variation (", sigma[p], ")"))),
+         x = expression(bold(paste("Male Trait Variation (", sigma[z], ")"))),
          y = NULL, color = "", fill = "") +
     guias_cor + tema_2x3 +
     theme(strip.placement = "outside",
@@ -355,16 +355,16 @@ for (i in seq_len(nrow(comb_2x3))) {
                                            size = 15, angle = 90))
 
   p_B <- make_dumbbell(df_dumb_low,
-    titulo    = sprintf("B  ·  Network Change: Gen 1 → %d  (σp = %.1f)", GEN_FINAL, SP_LOW_act),
+    titulo    = sprintf("B  ·  Network Change: Gen 1 → %d  (σz = %.1f)", GEN_FINAL, SZ_LOW_act),
     subtitulo = "○ = Gen 1    ● = Gen 100    |    Label = Δ",
     ylim_mod = ylim_mod_A, ylim_nest = ylim_nest_A)
 
   p_C <- make_dumbbell(df_tabela_dumb,
-    titulo    = sprintf("C  ·  Network Change: Gen 1 → %d  (σp = %.1f)", GEN_FINAL, SP_POSTER),
+    titulo    = sprintf("C  ·  Network Change: Gen 1 → %d  (σz = %.1f)", GEN_FINAL, SZ_POSTER),
     subtitulo = "○ = Gen 1    ● = Gen 100    |    Label = Δ",
     ylim_mod = ylim_mod_A, ylim_nest = ylim_nest_A)
 
-  p_D <- ggplot(df_zbar_D, aes(x = sigma_p, y = zbar_males,
+  p_D <- ggplot(df_zbar_D, aes(x = sigma_z_init, y = zbar_males,
                                 color = tipo_selecao, fill = tipo_selecao)) +
     geom_hline(yintercept = 5.0, linetype = "dashed",
                color = cor_ref, linewidth = 0.8) +
@@ -374,7 +374,7 @@ for (i in seq_len(nrow(comb_2x3))) {
     geom_vline(xintercept = 1.0, linetype = "dashed", color = "red",
                linewidth = 0.8, alpha = 0.5) +
     annotate("text", x = 1.05, y = Inf,
-             label = "sigma[p] == sigma[z]", parse = TRUE,
+             label = "sigma[z] == sigma[p]", parse = TRUE,
              hjust = 0, vjust = 1.5, color = "red", size = 4.2, fontface = "italic") +
     geom_smooth(method = "loess", formula = y ~ x, alpha = 0.15,
                 linewidth = 1.4, show.legend = FALSE) +
@@ -385,7 +385,7 @@ for (i in seq_len(nrow(comb_2x3))) {
     labs(title    = "D  ·  Male Trait Mean at Generation 100",
          subtitle = sprintf("k = %d  |  A_max = %d",
                             K_POSTER, AMAX_POSTER),
-         x = expression(bold(paste("Preference Variation (", sigma[p], ")"))),
+         x = expression(bold(paste("Male Trait Variation (", sigma[z], ")"))),
          y = NULL, color = "", fill = "") +
     guias_cor + tema_2x3 +
     theme(strip.placement   = "outside",
@@ -394,12 +394,12 @@ for (i in seq_len(nrow(comb_2x3))) {
                                            size = 15, angle = 90))
 
   p_E <- make_traj(df_traj_low,
-    titulo    = sprintf("E  ·  Trait Trajectory  (σp = %.1f)", SP_LOW_act),
+    titulo    = sprintf("E  ·  Trait Trajectory  (σz = %.1f)", SZ_LOW_act),
     subtitulo = "Ribbon = ±1 SD",
     ylim_z    = ylim_z_D)
 
   p_F <- make_traj(df_traj,
-    titulo    = sprintf("F  ·  Trait Trajectory  (σp = %.1f)", SP_POSTER),
+    titulo    = sprintf("F  ·  Trait Trajectory  (σz = %.1f)", SZ_POSTER),
     subtitulo = "Ribbon = ±1 SD",
     ylim_z    = ylim_z_D)
 
@@ -467,12 +467,12 @@ for (i in seq_len(nrow(comb_rob))) {
 
   sufixo_rob <- sprintf("k%d_spH%s_%s_%s",
                         K_POSTER,
-                        sub("\\.", "", sprintf("%.1f", SP_POSTER)),
+                        sub("\\.", "", sprintf("%.1f", SZ_POSTER)),
                         if (NS_POSTER) "comNS" else "semNS",
                         if (FUNDO_ESCURO) "escuro" else "claro")
 
   df_robusto <- df_k5 %>%
-    filter(generation == GEN_FINAL, sigma_p == SP_POSTER) %>%
+    filter(generation == GEN_FINAL, sigma_z_init == SZ_POSTER) %>%
     drop_na(Modularity, Nestedness, zbar_males, varz_males) %>%
     mutate(Amax_f = factor(encounters_n,
                            levels = c(200, 40, 10),
@@ -563,8 +563,8 @@ for (i in seq_len(nrow(comb_rob))) {
              size = 9.0, fontface = "bold", hjust = 0.5, vjust = 1,
              lineheight = 0.9, color = cor_titulo) +
     annotate("text", x = 0.5, y = 0.38,
-             label = sprintf("σp = %.1f  |  Gen %d  |  k = %d  |  %s",
-                             SP_POSTER, GEN_FINAL, K_POSTER,
+             label = sprintf("σz = %.1f  |  Gen %d  |  k = %d  |  %s",
+                             SZ_POSTER, GEN_FINAL, K_POSTER,
                              if (NS_POSTER) "With natural selection" else "Without natural selection"),
              size = 5.5, hjust = 0.5, vjust = 1,
              color = if (FUNDO_ESCURO) "#AAAAAA" else "gray45") +
