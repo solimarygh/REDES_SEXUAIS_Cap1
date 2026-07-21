@@ -157,9 +157,9 @@ niveis_var <- function(df, var_col, alvo_low = 0.5, alvo_high = 2.0) {
 #   Coluna 1: métrica vs parâmetro na geração final  (antigo "Métricas vs σp")
 #   Colunas 2-3: trajetória ao longo das gerações em nível baixo / alto
 #   x é livre por coluna (σ na col.1; geração nas cols. 2-3); y compartilhado por linha.
-plot_grid <- function(df, var_col, var_lab, kk, amax, quais, titulo) {
+plot_grid <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo) {
   if (is.null(df) || !all(c(var_col, names(quais), "k_fixo") %in% names(df))) return(NULL)
-  base <- df %>% filter(k_fixo == kk, encounters_n == amax, selecao_natural == FALSE)
+  base <- df %>% filter(k_fixo == kk, encounters_n == amax, selecao_natural == ns)
   if (nrow(base) < 20) return(NULL)
   gfin  <- max(base$generation)
   nv    <- niveis_var(df, var_col)
@@ -199,16 +199,21 @@ plot_grid <- function(df, var_col, var_lab, kk, amax, quais, titulo) {
           plot.caption = element_text(hjust = 0, face = "italic"))
 }
 
-# ── Driver: abas ANINHADAS — A_max (externo) → k (interno) ──
+# ── Driver: abas ANINHADAS — Seleção natural → A_max → k ──
 render_grid <- function(df, var_col, var_lab, quais, rotulo) {
-  for (amax in c(200, 40, 10)) {
-    cat(sprintf("\n#### A_max = %d {.tabset}\n\n", amax))
-    for (kk in c(5, 10, 20)) {
-      cat(sprintf("\n##### k = %d\n\n", kk))
-      p <- plot_grid(df, var_col, var_lab, kk, amax, quais,
-                     sprintf("%s · A_max=%d · k=%d · sem NS", rotulo, amax, kk))
-      if (is.null(p)) { cat("\n*Sem dados suficientes para esta combinação.*\n\n"); next }
-      print(p); cat("\n\n")
+  for (ns in c(FALSE, TRUE)) {
+    cat(sprintf("\n#### %s {.tabset}\n\n",
+                if (ns) "Com seleção natural" else "Sem seleção natural"))
+    for (amax in c(200, 40, 10)) {
+      cat(sprintf("\n##### A_max = %d {.tabset}\n\n", amax))
+      for (kk in c(5, 10, 20)) {
+        cat(sprintf("\n###### k = %d\n\n", kk))
+        p <- plot_grid(df, var_col, var_lab, kk, amax, ns, quais,
+                       sprintf("%s · %s · A_max=%d · k=%d", rotulo,
+                               if (ns) "com NS" else "sem NS", amax, kk))
+        if (is.null(p)) { cat("\n*Sem dados suficientes para esta combinação.*\n\n"); next }
+        print(p); cat("\n\n")
+      }
     }
   }
 }
@@ -220,7 +225,7 @@ quais_traco    <- c(zbar_males = "Média do traço (z-bar)", varz_males = "Vari�
 
 ## 🔵 Parte A — Variação da fêmea (σp)
 
-> **Experimento principal.** Varia **σp** (variação de preferência *entre* fêmeas); o traço masculino começa **fixo (σz = 1.0)**. Cenário limpo: $A_{max}=200$, sem seleção natural.
+> **Experimento principal.** Varia **σp** (variação de preferência *entre* fêmeas); o traço masculino começa **fixo (σz = 1.0)**. Nas grades abaixo, as abas deixam explorar **seleção natural (com/sem)**, **A_max** e **k**.
 
 ```{r fem-progress, results='asis'}
 if (is.null(df_fem)) {
