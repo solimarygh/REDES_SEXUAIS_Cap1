@@ -174,6 +174,13 @@ plot_grid <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo, cor_fai
     summarise(m = mean(v, na.rm = TRUE), s = sd(v, na.rm = TRUE), .groups = "drop") %>%
     mutate(panel = lab_p1)
 
+  # réplicas cruas na coluna 1 (nuvem tênue, mostra a dispersão — estilo painel A do pôster)
+  d1_raw <- base %>% filter(generation == gfin) %>%
+    pivot_longer(all_of(mcols), names_to = "q", values_to = "v") %>%
+    mutate(q     = factor(quais[q], levels = unname(quais)),
+           xval  = .data[[var_col]],
+           panel = factor(lab_p1, levels = c(lab_p1, lab_p2, lab_p3)))
+
   d23 <- base %>% filter(.data[[var_col]] %in% nv) %>%
     mutate(panel = ifelse(.data[[var_col]] == nv["low"], lab_p2, lab_p3)) %>%
     pivot_longer(all_of(mcols), names_to = "q", values_to = "v") %>%
@@ -188,10 +195,12 @@ plot_grid <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo, cor_fai
 
   ggplot(dat, aes(xval, m, color = tipo_selecao)) +
     geom_vline(data = vl, aes(xintercept = x), linetype = "dashed", color = "red", alpha = 0.5) +
+    geom_jitter(data = d1_raw, aes(y = v), width = 0.03, height = 0, alpha = 0.10, size = 0.6) +
     geom_ribbon(data = traj, aes(ymin = m - s, ymax = m + s, fill = tipo_selecao),
                 alpha = 0.13, color = NA) +
     geom_line(linewidth = 0.9) +
-    geom_point(data = subset(dat, panel == lab_p1), size = 1.7) +
+    geom_point(data = subset(dat, panel == lab_p1), size = 2.2, shape = 21,
+               fill = "white", stroke = 1.1) +
     geom_point(data = subset(traj, xval %% 10 == 0 | xval == 1), size = 1.2) +
     facet_grid(q ~ panel, scales = "free", switch = "y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
