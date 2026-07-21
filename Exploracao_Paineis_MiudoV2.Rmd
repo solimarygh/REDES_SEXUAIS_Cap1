@@ -210,6 +210,61 @@ render_k <- function(fun, df, xvar, xlab, titulo_fmt) {
 
 xlab_fem <- expression(paste("Variação da preferência feminina (", sigma[p], ")"))
 xlab_mac <- expression(paste("Variação do traço masculino (", sigma[z], ")"))
+
+# ── Evolução por geração (estilo Grid do pôster, colunas 2 e 3) ──
+# Níveis "baixo" e "alto" do parâmetro que varia em cada experimento
+niveis_var <- function(df, var_col, alvo_low = 0.5, alvo_high = 2.0) {
+  vals <- sort(unique(df[[var_col]]))
+  c(low = vals[which.min(abs(vals - alvo_low))],
+    high = vals[which.min(abs(vals - alvo_high))])
+}
+
+# Grade de trajetórias: (quantidade × nível baixo/alto). quais = coluna->rótulo
+plot_evol <- function(df, var_col, var_lab, kk, amax, quais, titulo) {
+  if (is.null(df) || !all(c(var_col, names(quais), "k_fixo") %in% names(df))) return(NULL)
+  nv <- niveis_var(df, var_col)
+  if (unname(nv["low"]) == unname(nv["high"])) return(NULL)
+  rot_low  <- sprintf("%s baixo = %.1f", var_lab, nv["low"])
+  rot_high <- sprintf("%s alto = %.1f",  var_lab, nv["high"])
+  sub <- df %>%
+    filter(k_fixo == kk, encounters_n == amax, selecao_natural == FALSE,
+           .data[[var_col]] %in% nv)
+  if (nrow(sub) < 20) return(NULL)
+  sub <- sub %>%
+    mutate(nivel = factor(ifelse(.data[[var_col]] == nv["low"], rot_low, rot_high),
+                          levels = c(rot_low, rot_high)))
+  long <- sub %>%
+    pivot_longer(all_of(names(quais)), names_to = "q", values_to = "valor") %>%
+    mutate(q = factor(quais[q], levels = unname(quais)))
+  med <- long %>%
+    group_by(tipo_selecao, generation, q, nivel) %>%
+    summarise(m = mean(valor, na.rm = TRUE), .groups = "drop")
+  ggplot(med, aes(generation, m, color = tipo_selecao)) +
+    geom_line(linewidth = 0.9) +
+    facet_grid(q ~ nivel, scales = "free_y", switch = "y") +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    labs(title = titulo, x = "Geração", y = NULL, color = "") +
+    theme_light(base_size = 12) +
+    theme(legend.position = "bottom", strip.placement = "outside",
+          strip.text.y.left = element_text(angle = 0, face = "bold"))
+}
+
+# Driver: uma aba por combinação k × A_max
+render_evol <- function(df, var_col, var_lab, quais, rotulo) {
+  combos <- expand.grid(kk = c(5, 10, 20), amax = c(200, 40, 10))
+  for (r in seq_len(nrow(combos))) {
+    kk <- combos$kk[r]; amax <- combos$amax[r]
+    cat(sprintf("\n#### k = %d · A_max = %d\n\n", kk, amax))
+    p <- plot_evol(df, var_col, var_lab, kk, amax, quais,
+                   sprintf("%s · k=%d · A_max=%d · sem NS", rotulo, kk, amax))
+    if (is.null(p)) { cat("\n*Sem dados suficientes para esta combinação.*\n\n"); next }
+    print(p); cat("\n\n")
+  }
+}
+
+quais_metricas <- c(Modularity = "1. Modularity", Nestedness = "2. Nestedness (NODF)",
+                    I_s = "3. Opportunity (Is)", Centralization = "4. Centralization")
+quais_traco    <- c(zbar_males = "Média do traço (z-bar)", varz_males = "Variância do traço (Var z)")
 ```
 
 ## 🔵 Parte A — Variação da fêmea (σp)
@@ -239,6 +294,22 @@ render_k(plot_traco, df_fem, "sigma_p", xlab_fem,
          "FÊMEA VARIANDO (σp varia | σz=1.0) — Traço · A_max=200 · sem NS · k=%d")
 ```
 
+### 🕸️ Evolução das métricas de rede — σp baixo vs alto {.tabset}
+
+Trajetória média (Gen 1 → final) de cada métrica ao longo das gerações, contrastando **σp baixo vs alto** (colunas), uma aba por combinação de $k$ e $A_{max}$. É a "coluna 2 vs 3" do pôster, agora para as **4 métricas** (Modularity, Nestedness, Is, Centralization).
+
+```{r fem-evol-metricas, results='asis', fig.width=11, fig.height=9}
+render_evol(df_fem, "sigma_p", "σp", quais_metricas, "FÊMEA VARIANDO — Métricas de rede")
+```
+
+### 📈 Evolução do traço z — σp baixo vs alto {.tabset}
+
+Mesma ideia, para a **média** e a **variância** do traço masculino.
+
+```{r fem-evol-traco, results='asis', fig.width=11, fig.height=5}
+render_evol(df_fem, "sigma_p", "σp", quais_traco, "FÊMEA VARIANDO — Traço z")
+```
+
 ## 🟣 Parte B — Variação do macho (σz)
 
 > **Experimento inverso.** Varia **σz** (variação do traço masculino); a preferência feminina fica **fixa (σp = 1.0)**. Mesmas métricas e escala da Parte A — **só o eixo x muda**.
@@ -265,6 +336,20 @@ render_k(plot_metricas, df_mac, "sigma_z_init", xlab_mac,
 ```{r mac-traco, results='asis', fig.width=10, fig.height=5}
 render_k(plot_traco, df_mac, "sigma_z_init", xlab_mac,
          "MACHO VARIANDO (σz varia | σp=1.0) — Traço · A_max=200 · sem NS · k=%d")
+```
+
+### 🕸️ Evolução das métricas de rede — σz baixo vs alto {.tabset}
+
+Igual à Parte A, mas contrastando **σz baixo vs alto** (a preferência fica fixa em σp = 1.0). Uma aba por combinação de $k$ e $A_{max}$.
+
+```{r mac-evol-metricas, results='asis', fig.width=11, fig.height=9}
+render_evol(df_mac, "sigma_z_init", "σz", quais_metricas, "MACHO VARIANDO — Métricas de rede")
+```
+
+### 📈 Evolução do traço z — σz baixo vs alto {.tabset}
+
+```{r mac-evol-traco, results='asis', fig.width=11, fig.height=5}
+render_evol(df_mac, "sigma_z_init", "σz", quais_traco, "MACHO VARIANDO — Traço z")
 ```
 
 ------------------------------------------------------------------------
