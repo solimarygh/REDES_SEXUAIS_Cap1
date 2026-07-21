@@ -157,7 +157,7 @@ niveis_var <- function(df, var_col, alvo_low = 0.5, alvo_high = 2.0) {
 #   Coluna 1: métrica vs parâmetro na geração final  (antigo "Métricas vs σp")
 #   Colunas 2-3: trajetória ao longo das gerações em nível baixo / alto
 #   x é livre por coluna (σ na col.1; geração nas cols. 2-3); y compartilhado por linha.
-plot_grid <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo) {
+plot_grid <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo, cor_faixa = "#2C3E50") {
   if (is.null(df) || !all(c(var_col, names(quais), "k_fixo") %in% names(df))) return(NULL)
   base <- df %>% filter(k_fixo == kk, encounters_n == amax, selecao_natural == ns)
   if (nrow(base) < 20) return(NULL)
@@ -171,36 +171,44 @@ plot_grid <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo) {
   d1 <- base %>% filter(generation == gfin) %>%
     pivot_longer(all_of(mcols), names_to = "q", values_to = "v") %>%
     group_by(tipo_selecao, q, xval = .data[[var_col]]) %>%
-    summarise(m = mean(v, na.rm = TRUE), .groups = "drop") %>%
+    summarise(m = mean(v, na.rm = TRUE), s = sd(v, na.rm = TRUE), .groups = "drop") %>%
     mutate(panel = lab_p1)
 
   d23 <- base %>% filter(.data[[var_col]] %in% nv) %>%
     mutate(panel = ifelse(.data[[var_col]] == nv["low"], lab_p2, lab_p3)) %>%
     pivot_longer(all_of(mcols), names_to = "q", values_to = "v") %>%
     group_by(tipo_selecao, q, xval = generation, panel) %>%
-    summarise(m = mean(v, na.rm = TRUE), .groups = "drop")
+    summarise(m = mean(v, na.rm = TRUE), s = sd(v, na.rm = TRUE), .groups = "drop")
 
   dat <- bind_rows(d1, d23) %>%
     mutate(q = factor(quais[q], levels = unname(quais)),
            panel = factor(panel, levels = c(lab_p1, lab_p2, lab_p3)))
-  vl <- data.frame(panel = factor(lab_p1, levels = c(lab_p1, lab_p2, lab_p3)), x = 1.0)
+  vl   <- data.frame(panel = factor(lab_p1, levels = c(lab_p1, lab_p2, lab_p3)), x = 1.0)
+  traj <- subset(dat, panel != lab_p1)   # colunas 2-3 (trajetórias) recebem sombra ±1 SD
 
   ggplot(dat, aes(xval, m, color = tipo_selecao)) +
     geom_vline(data = vl, aes(xintercept = x), linetype = "dashed", color = "red", alpha = 0.5) +
+    geom_ribbon(data = traj, aes(ymin = m - s, ymax = m + s, fill = tipo_selecao),
+                alpha = 0.13, color = NA) +
     geom_line(linewidth = 0.9) +
-    geom_point(data = subset(dat, panel == lab_p1), size = 1.4) +
+    geom_point(data = subset(dat, panel == lab_p1), size = 1.7) +
     facet_grid(q ~ panel, scales = "free", switch = "y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_fill_manual(values = cores_4, guide = "none") +
     labs(title = titulo, x = NULL, y = NULL, color = "",
-         caption = "Col 1: eixo x = variacao (geracao final). Cols 2-3: eixo x = geracao. Linha vermelha (col 1) = sigma ref = 1.0.") +
+         caption = "Col 1: x = variacao (geracao final), pontos = media por replica. Cols 2-3: x = geracao, sombra = ±1 SD entre replicas. Linha vermelha (col 1) = sigma ref = 1.0.") +
     theme_light(base_size = 12) +
-    theme(legend.position = "bottom", strip.placement = "outside",
-          strip.text.y.left = element_text(angle = 0, face = "bold"),
-          plot.caption = element_text(hjust = 0, face = "italic"))
+    theme(legend.position  = "bottom",
+          strip.placement  = "outside",
+          strip.background = element_rect(fill = cor_faixa, color = NA),
+          strip.text       = element_text(color = "white", face = "bold"),
+          strip.text.y.left = element_text(color = "white", face = "bold", angle = 90),
+          plot.title       = element_text(face = "bold"),
+          plot.caption     = element_text(hjust = 0, face = "italic"))
 }
 
 # ── Driver: abas ANINHADAS — Seleção natural → A_max → k ──
-render_grid <- function(df, var_col, var_lab, quais, rotulo) {
+render_grid <- function(df, var_col, var_lab, quais, rotulo, cor_faixa = "#2C3E50") {
   for (ns in c(FALSE, TRUE)) {
     cat(sprintf("\n#### %s {.tabset}\n\n",
                 if (ns) "Com seleção natural" else "Sem seleção natural"))
@@ -210,7 +218,7 @@ render_grid <- function(df, var_col, var_lab, quais, rotulo) {
         cat(sprintf("\n###### k = %d\n\n", kk))
         p <- plot_grid(df, var_col, var_lab, kk, amax, ns, quais,
                        sprintf("%s · %s · A_max=%d · k=%d", rotulo,
-                               if (ns) "com NS" else "sem NS", amax, kk))
+                               if (ns) "com NS" else "sem NS", amax, kk), cor_faixa)
         if (is.null(p)) { cat("\n*Sem dados suficientes para esta combinação.*\n\n"); next }
         print(p); cat("\n\n")
       }
@@ -249,7 +257,7 @@ render_grid(df_fem, "sigma_p", "σp", quais_metricas, "FÊMEA VARIANDO — Métr
 Mesma grade, para a **média** (z-bar) e a **variância** (Var z) do traço masculino.
 
 ```{r fem-grid-traco, results='asis', fig.width=12, fig.height=5.5}
-render_grid(df_fem, "sigma_p", "σp", quais_traco, "FÊMEA VARIANDO — Traço z")
+render_grid(df_fem, "sigma_p", "σp", quais_traco, "FÊMEA VARIANDO — Traço z", cor_faixa = "#6B3A8C")
 ```
 
 ## 🟣 Parte B — Variação do macho (σz)
@@ -277,7 +285,7 @@ render_grid(df_mac, "sigma_z_init", "σz", quais_metricas, "MACHO VARIANDO — M
 ### 📈 Traço z — gradiente + evolução {.tabset}
 
 ```{r mac-grid-traco, results='asis', fig.width=12, fig.height=5.5}
-render_grid(df_mac, "sigma_z_init", "σz", quais_traco, "MACHO VARIANDO — Traço z")
+render_grid(df_mac, "sigma_z_init", "σz", quais_traco, "MACHO VARIANDO — Traço z", cor_faixa = "#6B3A8C")
 ```
 
 ------------------------------------------------------------------------
