@@ -199,16 +199,17 @@ plot_grid <- function(df, var_col, var_lab, kk, amax, quais, titulo) {
           plot.caption = element_text(hjust = 0, face = "italic"))
 }
 
-# ── Driver: uma aba por combinação k × A_max ──
+# ── Driver: abas ANINHADAS — A_max (externo) → k (interno) ──
 render_grid <- function(df, var_col, var_lab, quais, rotulo) {
-  combos <- expand.grid(kk = c(5, 10, 20), amax = c(200, 40, 10))
-  for (r in seq_len(nrow(combos))) {
-    kk <- combos$kk[r]; amax <- combos$amax[r]
-    cat(sprintf("\n#### k = %d · A_max = %d\n\n", kk, amax))
-    p <- plot_grid(df, var_col, var_lab, kk, amax, quais,
-                   sprintf("%s · k=%d · A_max=%d · sem NS", rotulo, kk, amax))
-    if (is.null(p)) { cat("\n*Sem dados suficientes para esta combinação.*\n\n"); next }
-    print(p); cat("\n\n")
+  for (amax in c(200, 40, 10)) {
+    cat(sprintf("\n#### A_max = %d {.tabset}\n\n", amax))
+    for (kk in c(5, 10, 20)) {
+      cat(sprintf("\n##### k = %d\n\n", kk))
+      p <- plot_grid(df, var_col, var_lab, kk, amax, quais,
+                     sprintf("%s · A_max=%d · k=%d · sem NS", rotulo, amax, kk))
+      if (is.null(p)) { cat("\n*Sem dados suficientes para esta combinação.*\n\n"); next }
+      print(p); cat("\n\n")
+    }
   }
 }
 
