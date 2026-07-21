@@ -195,18 +195,20 @@ plot_grid <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo, cor_fai
 
   ggplot(dat, aes(xval, m, color = tipo_selecao)) +
     geom_vline(data = vl, aes(xintercept = x), linetype = "dashed", color = "red", alpha = 0.5) +
-    geom_jitter(data = d1_raw, aes(y = v), width = 0.03, height = 0, alpha = 0.10, size = 0.6) +
+    # Coluna 1: nuvem de réplicas + tendência loess (estilo painel A do pôster)
+    geom_jitter(data = d1_raw, aes(y = v), width = 0.035, height = 0, alpha = 0.20, size = 1.0) +
+    geom_smooth(data = d1_raw, aes(y = v, fill = tipo_selecao), method = "loess",
+                formula = y ~ x, linewidth = 1.2, alpha = 0.15, show.legend = FALSE) +
+    # Colunas 2-3: trajetória média + sombra ±1 SD + pontos
     geom_ribbon(data = traj, aes(ymin = m - s, ymax = m + s, fill = tipo_selecao),
                 alpha = 0.13, color = NA) +
-    geom_line(linewidth = 0.9) +
-    geom_point(data = subset(dat, panel == lab_p1), size = 2.2, shape = 21,
-               fill = "white", stroke = 1.1) +
+    geom_line(data = traj, linewidth = 0.9) +
     geom_point(data = subset(traj, xval %% 10 == 0 | xval == 1), size = 1.2) +
     facet_grid(q ~ panel, scales = "free", switch = "y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, guide = "none") +
     labs(title = titulo, x = NULL, y = NULL, color = "",
-         caption = "Col 1: x = variacao (geracao final). Cols 2-3: x = geracao (pontos a cada 10 ger.), sombra = ±1 SD entre replicas. Pontos = media das replicas. Linha vermelha (col 1) = sigma ref = 1.0.") +
+         caption = "Col 1: x = variacao (geracao final); nuvem = replicas individuais + tendencia loess. Cols 2-3: x = geracao; linha = media, sombra = ±1 SD, pontos a cada 10 ger. Linha vermelha (col 1) = sigma ref = 1.0.") +
     theme_light(base_size = 12) +
     theme(legend.position  = "bottom",
           strip.placement  = "outside",
