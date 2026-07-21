@@ -192,11 +192,12 @@ plot_grid <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo, cor_fai
                 alpha = 0.13, color = NA) +
     geom_line(linewidth = 0.9) +
     geom_point(data = subset(dat, panel == lab_p1), size = 1.7) +
+    geom_point(data = subset(traj, xval %% 10 == 0 | xval == 1), size = 1.2) +
     facet_grid(q ~ panel, scales = "free", switch = "y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
     scale_fill_manual(values = cores_4, guide = "none") +
     labs(title = titulo, x = NULL, y = NULL, color = "",
-         caption = "Col 1: x = variacao (geracao final), pontos = media por replica. Cols 2-3: x = geracao, sombra = ±1 SD entre replicas. Linha vermelha (col 1) = sigma ref = 1.0.") +
+         caption = "Col 1: x = variacao (geracao final). Cols 2-3: x = geracao (pontos a cada 10 ger.), sombra = ±1 SD entre replicas. Pontos = media das replicas. Linha vermelha (col 1) = sigma ref = 1.0.") +
     theme_light(base_size = 12) +
     theme(legend.position  = "bottom",
           strip.placement  = "outside",
