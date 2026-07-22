@@ -65,7 +65,7 @@ ordem_k      <- c(5, 10, 20)
 
 ## Os três experimentos deste projeto
 
-O **motor** (o ciclo de vida abaixo) é o **mesmo** nos três; o que muda é **o que varia**:
+Nos **dois primeiros** experimentos, o **motor** (o ciclo de vida abaixo) é exatamente o **mesmo** — só muda **o parâmetro que varia**. O **terceiro** (co-evolução) exige uma mudança no próprio motor: a preferência deixa de ser congelada e passa a ser **herdável**.
 
 **1. Variação da FÊMEA — $\sigma_p$** *(principal, completo).* Varia a variação de preferência *entre* fêmeas ($\sigma_p \in [0.2,\,2.0]$); o traço masculino começa fixo ($\sigma_z = 1.0$). Pergunta: como a heterogeneidade *nas fêmeas* molda a rede e a evolução do traço. **→ Parte A, e todas as seções de redes/histogramas deste documento.**
 
