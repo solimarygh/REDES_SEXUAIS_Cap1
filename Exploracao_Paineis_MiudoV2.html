@@ -164,7 +164,7 @@ pre code {
 <h1 class="title toc-ignore">Exploração de Resultados</h1>
 <h3 class="subtitle">Evolucao, Histogramas e Redes comparativas</h3>
 <h4 class="author">Solimary García Hernández</h4>
-<h4 class="date">19 de June de 2026</h4>
+<h4 class="date">21 de July de 2026</h4>
 
 </div>
 
@@ -187,8 +187,8 @@ longo do tempo.</p>
 <h2>Lembrando detalhes do modelo</h2>
 <ul>
 <li><strong>População:</strong> 200 machos e 200 fêmeas, evoluindo por
-100 gerações, com 30 réplicas (repetições independentes) por cenário. No
-futuro serão 100 réplicas.</li>
+100 gerações, com 100 réplicas (repetições independentes) por
+cenário.</li>
 <li><strong>O traço e a preferência:</strong> cada macho tem um traço
 <span class="math inline">\(z\)</span> (ex.: tamanho de um ornamento);
 cada fêmea tem uma preferência <span class="math inline">\(p\)</span>
@@ -250,10 +250,13 @@ a estrutura da rede.</p>
 <p><strong>4. Formação da rede de acasalamentos</strong> Cada fêmea
 <span class="math inline">\(i\)</span> amostra <span
 class="math inline">\(A_{max}\)</span> machos aleatoriamente da
-população (de sobreviventes se há selecao por viavilidade). Para cada
-macho <span class="math inline">\(j\)</span> amostrado (lembrando que
-podem ser 5, 10 ou 20), calcula a probabilidade de aceite <span
-class="math inline">\(P_{ij}\)</span> conforme a curva de
+população (de sobreviventes se há selecao por viavilidade). <strong>A
+amostragem é com reposição</strong> — a fêmea pode reencontrar o mesmo
+macho —, de modo que mesmo com <span
+class="math inline">\(A_{max}=200\)</span> ela avalia em média ~126
+machos <em>distintos</em>, e não os 200. Para cada macho <span
+class="math inline">\(j\)</span> amostrado, calcula a probabilidade de
+aceite <span class="math inline">\(P_{ij}\)</span> conforme a curva de
 preferência:</p>
 <table>
 <colgroup>
@@ -333,7 +336,22 @@ de machos e fêmeas que acasalam preferencialmente entre si.</li>
 quanto os parceiros dos machos menos “populares” são um subconjunto dos
 parceiros dos machos mais “populares”. Como esperado, valores maiores de
 <span class="math inline">\(k\)</span> (mais parceiros por fêmea) tendem
-a aumentar o aninhamento da rede.</li>
+a aumentar o aninhamento da rede.
+<ul>
+<li><em>Detalhe importante para interpretar o NODF:</em> como o grau das
+fêmeas é ancorado em <span class="math inline">\(k\)</span>, o
+aninhamento das <strong>linhas</strong> é ≈0 e praticamente todo o sinal
+vem da variação no grau dos <strong>machos</strong> (colunas). Além
+disso, o grau <strong>realizado</strong> de cada fêmea pode ser
+<em>menor que</em> <span class="math inline">\(k\)</span>: ela avalia um
+número finito de machos (com reposição) e aceita probabilisticamente,
+cruzando no mínimo com 1 (regra de escape). É justamente essa variação
+em torno de <span class="math inline">\(k\)</span> que permite ao NODF
+assumir valores <span class="math inline">\(&gt; 0\)</span>. Por isso os
+valores observados são pequenos em escala absoluta (tipicamente <span
+class="math inline">\(&lt;8\)</span> numa escala 0–100), mas ainda assim
+informativos e comparáveis entre cenários.</li>
+</ul></li>
 <li><strong>Centralização</strong> (<span class="math inline">\(\in
 [0,1]\)</span>; <code>igraph::centr_degree(g, mode = "all")</code>): o
 quanto os acasalamentos se concentram em poucos indivíduos. Valores
@@ -362,62 +380,486 @@ class="math inline">\(k\)</span>. As imagens são exibidas bem grandes
 para facilitar a exploração :)</p>
 <hr />
 </div>
-<div id="resultados-fase-4-forma-da-rede-e-mudança-evolutiva"
-class="section level1 tabset">
-<h1 class="tabset">Resultados Fase 4: Forma da rede e Mudança
-Evolutiva</h1>
-<p>Estes gráficos usam o conjunto completo de réplicas da última versao
-(todas as combinações de k e seleção natural) para mostrar especialmete
-como Modularidade, Aninhamento variam com σp na geração final, e como
-essas métricas mudam ao longo do tempo evolutivo (Geração 1 → Geração
-final). #tenho mais graficos, mas por enquanto queria focar nas redes
-que mostrarei mais na frente.</p>
-<p>De novo, lembra que cada figura abaixo tem abas para <span
-class="math inline">\(k=5\)</span>, <span
-class="math inline">\(k=10\)</span> e <span
-class="math inline">\(k=20\)</span> (poliandria fixa: nº de parceiros
-por fêmea), y aqui quando o numero de machos não é especificado é pq é
-<span class="math inline">\(A_{max}=200\)</span>. Mais um detalhe: a
-linha vermelha em <span class="math inline">\(\sigma_p = 1.0\)</span>
-marca o limiar inicial onde <span class="math inline">\(\sigma_p =
-\sigma_z\)</span> (Geração 1). Note que <span
-class="math inline">\(\sigma_z\)</span> dos machos evolui ao longo das
-gerações (veja abaixo os histogramas dos traits).</p>
-<div id="métricas-vs-σp-geração-final" class="section level2 tabset">
-<h2 class="tabset">Métricas vs σp (Geração Final)</h2>
-<div id="k-5" class="section level3">
-<h3>k = 5</h3>
-<p><img
-src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotA_AssinaturaTopologica_k5.png" /></p>
+<div id="os-dois-experimentos-lado-a-lado" class="section level1">
+<h1>Os dois experimentos, lado a lado</h1>
+<p>Temos <strong>dois experimentos complementares</strong> que fazem a
+mesma pergunta por lados opostos do sistema. Ambos usam exatamente as
+<strong>mesmas métricas, cores e escala</strong>, e a <strong>linha
+vermelha em σ = 1.0</strong> marca o ponto de referência onde as duas
+variações se igualam (na Geração 1). Assim dá para compará-los
+diretamente — <strong>só muda quem carrega a
+heterogeneidade</strong>:</p>
+<ul>
+<li>🔵 <strong>Parte A — Variação da fêmea (σp):</strong> varia a
+variação de preferência feminina; o traço masculino começa fixo (σz =
+1.0). <em>Experimento principal (completo).</em></li>
+<li>🟣 <strong>Parte B — Variação do macho (σz):</strong> varia a
+variação do traço masculino; a preferência feminina fica fixa (σp =
+1.0). <em>Experimento inverso (parcial).</em></li>
+</ul>
+<blockquote>
+<p>⚠️ <strong>Não confundir os dois.</strong> Cada gráfico traz no
+título se é <strong>FÊMEA VARIANDO (σp)</strong> ou <strong>MACHO
+VARIANDO (σz)</strong>, e o eixo x diz qual variação está sendo
+percorrida. Parte A e Parte B são <strong>conjuntos de dados
+distintos</strong> (<code>.rds</code> diferentes).</p>
+</blockquote>
+<blockquote>
+<p>🔎 <strong>Um detalhe que muda a interpretação: σp e σz NÃO são
+simétricos.</strong> A variação de preferência <strong>σp é re-imposta a
+cada geração</strong> (as preferências são re-sorteadas de <span
+class="math inline">\(N(\phi, \sigma_p)\)</span> — é uma propriedade
+<em>permanente</em> da população). Já <strong>σz é apenas a condição
+inicial</strong> (Geração 1): depois, o traço masculino <strong>evolui
+sozinho</strong> (herança + seleção), então a variância dos machos
+<em>não</em> fica presa no valor inicial. Consequência prática ao ler os
+painéis: na <strong>Parte A</strong> o efeito de σp tende a ser
+<strong>sustentado</strong> ao longo do gradiente; na <strong>Parte
+B</strong>, o efeito de σz pode <strong>se diluir</strong> ao longo das
+gerações. <em>(No modelo de co-evolução — próximo passo — a preferência
+passaria a ser herdável e σp deixaria de ser permanente, tornando os
+dois lados simétricos.)</em></p>
+</blockquote>
+<div id="parte-a-variação-da-fêmea-σp" class="section level2">
+<h2>🔵 Parte A — Variação da fêmea (σp)</h2>
+<blockquote>
+<p><strong>Experimento principal.</strong> Varia <strong>σp</strong>
+(variação de preferência <em>entre</em> fêmeas); o traço masculino
+começa <strong>fixo (σz = 1.0)</strong>. Nas grades abaixo, as abas
+deixam explorar <strong>seleção natural (com/sem)</strong>,
+<strong>A_max</strong> e <strong>k</strong>.</p>
+</blockquote>
+<blockquote>
+<p><strong>Dados:</strong> 100 réplicas · geração final 100 ·
+<strong>experimento completo</strong>.</p>
+</blockquote>
+<div id="métricas-de-rede-gradiente-evolução"
+class="section level3 tabset">
+<h3 class="tabset">🕸️ Métricas de rede — gradiente + evolução</h3>
+<p>Para cada combinação de <span class="math inline">\(k\)</span> e
+<span class="math inline">\(A_{max}\)</span>: <strong>coluna 1</strong>
+= métrica vs σp na geração final (o antigo “Métricas vs σp”);
+<strong>colunas 2–3</strong> = evolução ao longo das gerações em σp
+<strong>baixo</strong> e <strong>alto</strong>. Linhas = as 4
+métricas.</p>
+<div id="sem-seleção-natural" class="section level4 tabset">
+<h4 class="tabset">Sem seleção natural</h4>
+<div id="a_max-200" class="section level5 tabset">
+<h5 class="tabset">A_max = 200</h5>
+<div id="k-5" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
 </div>
-<div id="k-10" class="section level3">
-<h3>k = 10</h3>
-<p><img
-src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotA_AssinaturaTopologica_k10.png" /></p>
+<div id="k-10" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-2.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
 </div>
-<div id="k-20" class="section level3">
-<h3>k = 20</h3>
-<p><img
-src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotA_AssinaturaTopologica_k20.png" /></p>
+<div id="k-20" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-3.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
 </div>
 </div>
-<div id="mudança-gen-1-gen-final" class="section level2 tabset">
-<h2 class="tabset">Mudança Gen 1 → Gen Final</h2>
-<div id="k-5-1" class="section level3">
-<h3>k = 5</h3>
-<p><img
-src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotE_Dumbell_Gen1vsGenFinal_k5.png" /></p>
+<div id="a_max-40" class="section level5 tabset">
+<h5 class="tabset">A_max = 40</h5>
+<div id="k-5-1" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-4.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
 </div>
-<div id="k-10-1" class="section level3">
-<h3>k = 10</h3>
-<p><img
-src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotE_Dumbell_Gen1vsGenFinal_k10.png" /></p>
+<div id="k-10-1" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-5.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
 </div>
-<div id="k-20-1" class="section level3">
-<h3>k = 20</h3>
-<p><img
-src="Resultados_Artigo/Fase5_MiudoV2/Graficos/Fase4_PlotE_Dumbell_Gen1vsGenFinal_k20.png" /></p>
+<div id="k-20-1" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-6.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-10" class="section level5 tabset">
+<h5 class="tabset">A_max = 10</h5>
+<div id="k-5-2" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-7.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-2" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-8.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-2" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-9.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+<div id="com-seleção-natural" class="section level4 tabset">
+<h4 class="tabset">Com seleção natural</h4>
+<div id="a_max-200-1" class="section level5 tabset">
+<h5 class="tabset">A_max = 200</h5>
+<div id="k-5-3" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-10.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-3" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-11.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-3" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-12.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-40-1" class="section level5 tabset">
+<h5 class="tabset">A_max = 40</h5>
+<div id="k-5-4" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-13.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-4" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-14.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-4" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-15.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-10-1" class="section level5 tabset">
+<h5 class="tabset">A_max = 10</h5>
+<div id="k-5-5" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-16.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-5" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-17.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-5" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-metricas-18.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+</div>
+<div id="traço-z-gradiente-evolução" class="section level3 tabset">
+<h3 class="tabset">📈 Traço z — gradiente + evolução</h3>
+<p>Mesma grade, para a <strong>média</strong> (z-bar) e a
+<strong>variância</strong> (Var z) do traço masculino.</p>
+<div id="sem-seleção-natural-1" class="section level4 tabset">
+<h4 class="tabset">Sem seleção natural</h4>
+<div id="a_max-200-2" class="section level5 tabset">
+<h5 class="tabset">A_max = 200</h5>
+<div id="k-5-6" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-6" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-2.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-6" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-3.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-40-2" class="section level5 tabset">
+<h5 class="tabset">A_max = 40</h5>
+<div id="k-5-7" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-4.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-7" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-5.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-7" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-6.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-10-2" class="section level5 tabset">
+<h5 class="tabset">A_max = 10</h5>
+<div id="k-5-8" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-7.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-8" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-8.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-8" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-9.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+<div id="com-seleção-natural-1" class="section level4 tabset">
+<h4 class="tabset">Com seleção natural</h4>
+<div id="a_max-200-3" class="section level5 tabset">
+<h5 class="tabset">A_max = 200</h5>
+<div id="k-5-9" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-10.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-9" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-11.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-9" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-12.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-40-3" class="section level5 tabset">
+<h5 class="tabset">A_max = 40</h5>
+<div id="k-5-10" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-13.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-10" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-14.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-10" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-15.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-10-3" class="section level5 tabset">
+<h5 class="tabset">A_max = 10</h5>
+<div id="k-5-11" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-16.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-11" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-17.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-11" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-grid-traco-18.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="parte-b-variação-do-macho-σz" class="section level2">
+<h2>🟣 Parte B — Variação do macho (σz)</h2>
+<blockquote>
+<p><strong>Experimento inverso.</strong> Varia <strong>σz</strong>
+(variação do traço masculino); a preferência feminina fica <strong>fixa
+(σp = 1.0)</strong>. Mesmas métricas e escala da Parte A — <strong>só o
+eixo x muda</strong>.</p>
+</blockquote>
+<blockquote>
+<p><strong>Progresso:</strong> 25.440 de 50.400 cenários (50.5%) —
+<strong>parcial</strong>; atualiza sozinho ao re-knitar.</p>
+</blockquote>
+<div id="métricas-de-rede-gradiente-evolução-1"
+class="section level3 tabset">
+<h3 class="tabset">🕸️ Métricas de rede — gradiente + evolução</h3>
+<p>Igual à Parte A, mas variando <strong>σz</strong> (σp fica fixo em
+1.0). Coluna 1 = métrica vs σz na geração final; colunas 2–3 = evolução
+em σz baixo e alto.</p>
+<div id="sem-seleção-natural-2" class="section level4 tabset">
+<h4 class="tabset">Sem seleção natural</h4>
+<div id="a_max-200-4" class="section level5 tabset">
+<h5 class="tabset">A_max = 200</h5>
+<div id="k-5-12" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-12" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-2.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-12" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-3.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-40-4" class="section level5 tabset">
+<h5 class="tabset">A_max = 40</h5>
+<div id="k-5-13" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-4.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-13" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-5.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-13" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-6.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-10-4" class="section level5 tabset">
+<h5 class="tabset">A_max = 10</h5>
+<div id="k-5-14" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-7.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-14" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-8.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-14" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-9.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+<div id="com-seleção-natural-2" class="section level4 tabset">
+<h4 class="tabset">Com seleção natural</h4>
+<div id="a_max-200-5" class="section level5 tabset">
+<h5 class="tabset">A_max = 200</h5>
+<div id="k-5-15" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-10.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-15" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-11.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-15" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-12.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-40-5" class="section level5 tabset">
+<h5 class="tabset">A_max = 40</h5>
+<div id="k-5-16" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-13.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-16" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-14.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-16" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-15.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-10-5" class="section level5 tabset">
+<h5 class="tabset">A_max = 10</h5>
+<div id="k-5-17" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-16.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-17" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-17.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-17" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-metricas-18.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+</div>
+<div id="traço-z-gradiente-evolução-1" class="section level3 tabset">
+<h3 class="tabset">📈 Traço z — gradiente + evolução</h3>
+<div id="sem-seleção-natural-3" class="section level4 tabset">
+<h4 class="tabset">Sem seleção natural</h4>
+<div id="a_max-200-6" class="section level5 tabset">
+<h5 class="tabset">A_max = 200</h5>
+<div id="k-5-18" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-18" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-2.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-18" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-3.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-40-6" class="section level5 tabset">
+<h5 class="tabset">A_max = 40</h5>
+<div id="k-5-19" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-4.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-19" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-5.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-19" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-6.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-10-6" class="section level5 tabset">
+<h5 class="tabset">A_max = 10</h5>
+<div id="k-5-20" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-7.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-20" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-8.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-20" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-9.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+</div>
+<div id="com-seleção-natural-3" class="section level4 tabset">
+<h4 class="tabset">Com seleção natural</h4>
+<div id="a_max-200-7" class="section level5 tabset">
+<h5 class="tabset">A_max = 200</h5>
+<div id="k-5-21" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-10.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-21" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-11.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-21" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-12.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-40-7" class="section level5 tabset">
+<h5 class="tabset">A_max = 40</h5>
+<div id="k-5-22" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-13.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-22" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-14.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-22" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-15.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="a_max-10-7" class="section level5 tabset">
+<h5 class="tabset">A_max = 10</h5>
+<div id="k-5-23" class="section level6">
+<h6>k = 5</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-16.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-10-23" class="section level6">
+<h6>k = 10</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-17.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="k-20-23" class="section level6">
+<h6>k = 20</h6>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-18.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
 <hr />
+<blockquote>
+<p>ℹ️ As seções de <strong>redes representativas e histogramas</strong>
+abaixo referem-se ao experimento de <strong>variação da fêmea
+(σp)</strong>.</p>
+</blockquote>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -428,7 +870,7 @@ preferencia)</h1>
 <p>Cada figura é uma grade 3×3: linhas = σp (2.0, 1.0, 0.5, de cima para
 baixo), colunas = k (5, 10, 20). Cada subtítulo traz Mod, NODF, Tribos e
 Comunidades.</p>
-<div id="a_max-200" class="section level2 tabset">
+<div id="a_max-200-8" class="section level2 tabset">
 <h2 class="tabset">A_max = 200</h2>
 <div id="aleatória" class="section level3">
 <h3>Aleatória</h3>
@@ -451,7 +893,7 @@ src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_sigmoi
 src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_u-shaped_Amax200_noNS.png" /></p>
 </div>
 </div>
-<div id="a_max-40" class="section level2 tabset">
+<div id="a_max-40-8" class="section level2 tabset">
 <h2 class="tabset">A_max = 40</h2>
 <div id="aleatória-1" class="section level3">
 <h3>Aleatória</h3>
@@ -474,7 +916,7 @@ src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_sigmoi
 src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_u-shaped_Amax40_noNS.png" /></p>
 </div>
 </div>
-<div id="a_max-10" class="section level2 tabset">
+<div id="a_max-10-8" class="section level2 tabset">
 <h2 class="tabset">A_max = 10</h2>
 <div id="aleatória-2" class="section level3">
 <h3>Aleatória</h3>
@@ -505,7 +947,7 @@ class="section level1 tabset">
 <p>Agora, vamos as mesmas redes mas agrupanto as 4 curvas de preferência
 (Aleatória, Gaussiana, Sigmoide, Disruptiva) para um par fixo (σp,
 k).</p>
-<div id="a_max-200-1" class="section level2 tabset">
+<div id="a_max-200-9" class="section level2 tabset">
 <h2 class="tabset">A_max = 200</h2>
 <div id="σp2.0-k5" class="section level3">
 <h3>σp=2.0, k=5</h3>
@@ -553,7 +995,7 @@ src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Ama
 src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax200_k20_noNS.png" /></p>
 </div>
 </div>
-<div id="a_max-40-1" class="section level2 tabset">
+<div id="a_max-40-9" class="section level2 tabset">
 <h2 class="tabset">A_max = 40</h2>
 <div id="σp2.0-k5-1" class="section level3">
 <h3>σp=2.0, k=5</h3>
@@ -601,7 +1043,7 @@ src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Ama
 src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Amax40_k20_noNS.png" /></p>
 </div>
 </div>
-<div id="a_max-10-1" class="section level2 tabset">
+<div id="a_max-10-9" class="section level2 tabset">
 <h2 class="tabset">A_max = 10</h2>
 <div id="σp2.0-k5-2" class="section level3">
 <h3>σp=2.0, k=5</h3>
@@ -664,7 +1106,7 @@ class="math inline">\(generation \geq 20\)</span>) daquele cenário (
 <code>encontrar_representativa()</code> no Script 06). Aqui a linha
 tracejada serve de referencia, está sempre apontando ao 5 (era o antigo
 ótimo evolutivo) ;).</p>
-<div id="a_max-200-2" class="section level2 tabset">
+<div id="a_max-200-10" class="section level2 tabset">
 <h2 class="tabset">A_max = 200</h2>
 <div id="σp2.0-k5-3" class="section level3">
 <h3>σp=2.0, k=5</h3>
@@ -721,7 +1163,7 @@ src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0
 style="width:100.0%" /></p>
 </div>
 </div>
-<div id="a_max-40-2" class="section level2 tabset">
+<div id="a_max-40-10" class="section level2 tabset">
 <h2 class="tabset">A_max = 40</h2>
 <div id="σp2.0-k5-4" class="section level3">
 <h3>σp=2.0, k=5</h3>
@@ -778,7 +1220,7 @@ src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Histogramas_sigmap0
 style="width:100.0%" /></p>
 </div>
 </div>
-<div id="a_max-10-2" class="section level2 tabset">
+<div id="a_max-10-10" class="section level2 tabset">
 <h2 class="tabset">A_max = 10</h2>
 <div id="σp2.0-k5-5" class="section level3">
 <h3>σp=2.0, k=5</h3>
