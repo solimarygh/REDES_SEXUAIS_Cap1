@@ -164,7 +164,7 @@ pre code {
 <h1 class="title toc-ignore">Exploração de Resultados</h1>
 <h3 class="subtitle">Evolucao, Histogramas e Redes comparativas</h3>
 <h4 class="author">Solimary García Hernández</h4>
-<h4 class="date">21 de July de 2026</h4>
+<h4 class="date">22 de July de 2026</h4>
 
 </div>
 
@@ -179,9 +179,13 @@ pre code {
 </style>
 <blockquote>
 <p>Este documento mostra os resultados do nosso IBM que simula, geração
-a geração, como a escolha de parceiros pelas fêmeas afeta a estrutura da
-rede de acasalamentos da população, e como essa estrutura evolui ao
-longo do tempo.</p>
+a geração, como a <strong>escolha de parceiros</strong> afeta a
+estrutura da rede de acasalamentos e a evolução do traço. Comparamos
+<strong>três cenários</strong>: variação da <strong>preferência da
+fêmea</strong> (<span class="math inline">\(\sigma_p\)</span>,
+principal), variação do <strong>traço do macho</strong> (<span
+class="math inline">\(\sigma_z\)</span>, inverso) e — como próximo passo
+— a <strong>co-evolução</strong> dos dois (preferência herdável).</p>
 </blockquote>
 <div id="lembrando-detalhes-do-modelo" class="section level2">
 <h2>Lembrando detalhes do modelo</h2>
@@ -221,6 +225,48 @@ quantos machos cada fêmea “enxerga”/avalia antes de escolher: 200
 (todos), 40 (20%) ou 10 (5%) — simula uma restrição/custo de busca.</li>
 </ul>
 </div>
+<div id="os-três-experimentos-deste-projeto" class="section level2">
+<h2>Os três experimentos deste projeto</h2>
+<p>O <strong>motor</strong> (o ciclo de vida abaixo) é o
+<strong>mesmo</strong> nos três; o que muda é <strong>o que
+varia</strong>:</p>
+<p><strong>1. Variação da FÊMEA — <span
+class="math inline">\(\sigma_p\)</span></strong> <em>(principal,
+completo).</em> Varia a variação de preferência <em>entre</em> fêmeas
+(<span class="math inline">\(\sigma_p \in [0.2,\,2.0]\)</span>); o traço
+masculino começa fixo (<span class="math inline">\(\sigma_z =
+1.0\)</span>). Pergunta: como a heterogeneidade <em>nas fêmeas</em>
+molda a rede e a evolução do traço. <strong>→ Parte A, e todas as seções
+de redes/histogramas deste documento.</strong></p>
+<p><strong>2. Variação do MACHO — <span
+class="math inline">\(\sigma_z\)</span></strong> <em>(inverso,
+parcial).</em> O que muda em relação ao anterior é <strong>apenas o eixo
+que varia</strong>: agora fixamos <span class="math inline">\(\sigma_p =
+1.0\)</span> e variamos <span class="math inline">\(\sigma_z \in
+[0.2,\,2.0]\)</span> (a variação <em>inicial</em> do traço masculino). O
+motor é <strong>idêntico</strong> — a preferência continua
+<em>congelada</em> (re-sorteada a cada geração). Detalhe importante:
+<span class="math inline">\(\sigma_z\)</span> é só a <strong>condição
+inicial</strong> (o traço depois evolui sozinho), enquanto <span
+class="math inline">\(\sigma_p\)</span> é <strong>re-imposto a cada
+geração</strong> — por isso os dois lados não são perfeitamente
+simétricos. <strong>→ Parte B.</strong></p>
+<p><strong>3. Co-evolução PREFERÊNCIA–TRAÇO —
+<em>planejado</em>.</strong> O que vai mudar no <strong>motor</strong>:
+a preferência deixa de ser congelada e passa a ser
+<strong>herdável</strong> (as filhas herdam a preferência dos pais,
+exatamente como já acontece com o traço <span
+class="math inline">\(z\)</span>). Consequências: <span
+class="math inline">\(\sigma_p\)</span> e <span
+class="math inline">\(\sigma_z\)</span> viram <strong>ambos</strong>
+condições iniciais (o sistema fica simétrico), e a grandeza central da
+análise passa a ser a <strong>covariância genética <span
+class="math inline">\(\text{cov}(z, p)\)</span></strong> — o motor do
+<em>Fisherian runaway</em> (Lande 1981 / Kirkpatrick 1982), e não as
+médias por sexo. <em>(Rascunho do motor em
+<code>Fase_Coevolucao.R</code>; notas em
+<code>NOTA_coevolucao_followup.md</code>.)</em></p>
+</div>
 <div id="ciclo-de-vida-por-geração" class="section level2">
 <h2>Ciclo de vida por geração</h2>
 <p>Cada geração <span class="math inline">\(t\)</span> segue estas
@@ -240,6 +286,15 @@ preferências na população e permite isolar o efeito da <em>forma</em> e
 da <em>largura</em> (<span class="math inline">\(\sigma_p\)</span>)
 dessa distribuição sobre a rede, sem que a preferência feminina evolua
 junto com o traço masculino <span class="math inline">\(z\)</span>.</p>
+<blockquote>
+<p><strong>Isto muda no modelo de co-evolução (planejado):</strong> lá a
+preferência <strong>deixa de ser re-sorteada</strong> e passa a ser
+<strong>herdada</strong> dos pais (como o traço <span
+class="math inline">\(z\)</span>), permitindo que preferência e traço
+evoluam juntos e que se acumule a covariância <span
+class="math inline">\(\text{cov}(z,p)\)</span>. Ver a seção <em>“Os três
+experimentos”</em> acima.</p>
+</blockquote>
 <p><strong>3. Seleção de viabilidade (opcional)</strong> Cada macho
 sobrevive com probabilidade <span class="math inline">\(V_j =
 \exp\!\bigl(-\gamma(z_j - \phi)^2\bigr)\)</span>. Muido, seguindo nossa
@@ -398,14 +453,14 @@ variação do traço masculino; a preferência feminina fica fixa (σp =
 1.0). <em>Experimento inverso (parcial).</em></li>
 </ul>
 <blockquote>
-<p>⚠️ <strong>Não confundir os dois.</strong> Cada gráfico traz no
-título se é <strong>FÊMEA VARIANDO (σp)</strong> ou <strong>MACHO
-VARIANDO (σz)</strong>, e o eixo x diz qual variação está sendo
-percorrida. Parte A e Parte B são <strong>conjuntos de dados
-distintos</strong> (<code>.rds</code> diferentes).</p>
+<p><strong>Não confundir os dois.</strong> Cada gráfico traz no título
+se é <strong>FÊMEA VARIANDO (σp)</strong> ou <strong>MACHO VARIANDO
+(σz)</strong>, e o eixo x diz qual variação está sendo percorrida. Parte
+A e Parte B são <strong>conjuntos de dados distintos</strong>
+(<code>.rds</code> diferentes).</p>
 </blockquote>
 <blockquote>
-<p>🔎 <strong>Um detalhe que muda a interpretação: σp e σz NÃO são
+<p><strong>Um detalhe que muda a interpretação: σp e σz NÃO são
 simétricos.</strong> A variação de preferência <strong>σp é re-imposta a
 cada geração</strong> (as preferências são re-sorteadas de <span
 class="math inline">\(N(\phi, \sigma_p)\)</span> — é uma propriedade
@@ -435,7 +490,7 @@ deixam explorar <strong>seleção natural (com/sem)</strong>,
 </blockquote>
 <div id="métricas-de-rede-gradiente-evolução"
 class="section level3 tabset">
-<h3 class="tabset">🕸️ Métricas de rede — gradiente + evolução</h3>
+<h3 class="tabset">Métricas de rede — gradiente + evolução</h3>
 <p>Para cada combinação de <span class="math inline">\(k\)</span> e
 <span class="math inline">\(A_{max}\)</span>: <strong>coluna 1</strong>
 = métrica vs σp na geração final (o antigo “Métricas vs σp”);
@@ -540,7 +595,7 @@ métricas.</p>
 </div>
 </div>
 <div id="traço-z-gradiente-evolução" class="section level3 tabset">
-<h3 class="tabset">📈 Traço z — gradiente + evolução</h3>
+<h3 class="tabset">Traço z — gradiente + evolução</h3>
 <p>Mesma grade, para a <strong>média</strong> (z-bar) e a
 <strong>variância</strong> (Var z) do traço masculino.</p>
 <div id="sem-seleção-natural-1" class="section level4 tabset">
@@ -650,12 +705,12 @@ métricas.</p>
 eixo x muda</strong>.</p>
 </blockquote>
 <blockquote>
-<p><strong>Progresso:</strong> 25.440 de 50.400 cenários (50.5%) —
+<p><strong>Progresso:</strong> 26.180 de 50.400 cenários (51.9%) —
 <strong>parcial</strong>; atualiza sozinho ao re-knitar.</p>
 </blockquote>
 <div id="métricas-de-rede-gradiente-evolução-1"
 class="section level3 tabset">
-<h3 class="tabset">🕸️ Métricas de rede — gradiente + evolução</h3>
+<h3 class="tabset">Métricas de rede — gradiente + evolução</h3>
 <p>Igual à Parte A, mas variando <strong>σz</strong> (σp fica fixo em
 1.0). Coluna 1 = métrica vs σz na geração final; colunas 2–3 = evolução
 em σz baixo e alto.</p>
@@ -757,7 +812,7 @@ em σz baixo e alto.</p>
 </div>
 </div>
 <div id="traço-z-gradiente-evolução-1" class="section level3 tabset">
-<h3 class="tabset">📈 Traço z — gradiente + evolução</h3>
+<h3 class="tabset">Traço z — gradiente + evolução</h3>
 <div id="sem-seleção-natural-3" class="section level4 tabset">
 <h4 class="tabset">Sem seleção natural</h4>
 <div id="a_max-200-6" class="section level5 tabset">
@@ -853,9 +908,12 @@ em σz baixo e alto.</p>
 <p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/mac-grid-traco-18.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
 <hr />
 <blockquote>
-<p>ℹ️ As seções de <strong>redes representativas e histogramas</strong>
-abaixo referem-se ao experimento de <strong>variação da fêmea
-(σp)</strong>.</p>
+<p><strong>Atenção:</strong> todas as seções a seguir — <strong>redes
+representativas e histogramas</strong> — correspondem
+<strong>exclusivamente ao experimento de variação da FÊMEA (<span
+class="math inline">\(\sigma_p\)</span>)</strong>. Ainda não há versões
+destas figuras para a variação do macho (<span
+class="math inline">\(\sigma_z\)</span>) nem para a co-evolução.</p>
 </blockquote>
 </div>
 </div>
@@ -863,10 +921,9 @@ abaixo referem-se ao experimento de <strong>variação da fêmea
 </div>
 </div>
 </div>
-<div id="redes-comparativas-k-σp-uma-figura-por-curva-de-preferencia"
+<div id="redes-comparativas-k-σp-variação-da-fêmea"
 class="section level1 tabset">
-<h1 class="tabset">Redes Comparativas: k × σp (uma figura por curva de
-preferencia)</h1>
+<h1 class="tabset">Redes Comparativas: k × σp — variação da fêmea</h1>
 <p>Cada figura é uma grade 3×3: linhas = σp (2.0, 1.0, 0.5, de cima para
 baixo), colunas = k (5, 10, 20). Cada subtítulo traz Mod, NODF, Tribos e
 Comunidades.</p>
@@ -941,9 +998,10 @@ src="Resultados_Artigo/Redes_Representativas/Graficos/Comparacao_k_sigmap_u-shap
 </div>
 </div>
 </div>
-<div id="painéis-de-redes-4-curvas-por-σp-k"
+<div id="painéis-de-redes-4-curvas-por-σp-k-variação-da-fêmea"
 class="section level1 tabset">
-<h1 class="tabset">Painéis de Redes: 4 curvas por (σp, k)</h1>
+<h1 class="tabset">Painéis de Redes: 4 curvas por (σp, k) — variação da
+fêmea</h1>
 <p>Agora, vamos as mesmas redes mas agrupanto as 4 curvas de preferência
 (Aleatória, Gaussiana, Sigmoide, Disruptiva) para um par fixo (σp,
 k).</p>
@@ -1093,9 +1151,10 @@ src="Resultados_Artigo/Redes_Representativas/Graficos/Painel_Redes_sigmap0.5_Ama
 </div>
 </div>
 </div>
-<div id="painéis-de-histogramas-evolução-em-3-atos"
+<div id="painéis-de-histogramas-evolução-em-3-atos-variação-da-fêmea"
 class="section level1 tabset">
-<h1 class="tabset">Painéis de Histogramas: Evolução em 3 Atos</h1>
+<h1 class="tabset">Painéis de Histogramas: Evolução em 3 Atos — variação
+da fêmea</h1>
 <p>Aqui cada figura mostra, para as 4 curvas de preferência, as
 distribuições de <span class="math inline">\(z\)</span> (machos) e <span
 class="math inline">\(p\)</span> (fêmeas) em três momentos: Geração 1, a
