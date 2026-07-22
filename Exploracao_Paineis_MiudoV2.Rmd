@@ -47,7 +47,7 @@ ordem_k      <- c(5, 10, 20)
 
 
 
->Este documento mostra os resultados do nosso IBM que simula, geração a geração, como a **escolha de parceiros** afeta a estrutura da rede de acasalamentos e a evolução do traço. Comparamos **três cenários**: variação da **preferência da fêmea** ($\sigma_p$, principal), variação do **traço do macho** ($\sigma_z$, inverso) e — como próximo passo — a **co-evolução** dos dois (preferência herdável).
+>Este documento mostra os resultados do nosso IBM que simula, geração a geração, como a escolha de parceiros afeta a estrutura da rede de acasalamentos e a evolução do traço. Comparamos três cenários: variação da preferência da fêmea ($\sigma_p$, principal), variação do traço do macho ($\sigma_z$, inverso) e — como próximo passo — a co-evolução dos dois (preferência herdável).
 
 ## Lembrando detalhes do modelo
 
@@ -65,13 +65,13 @@ ordem_k      <- c(5, 10, 20)
 
 ## Os três experimentos deste projeto
 
-Nos **dois primeiros** experimentos, o **motor** (o ciclo de vida abaixo) é exatamente o **mesmo** — só muda **o parâmetro que varia**. O **terceiro** (co-evolução) exige uma mudança no próprio motor: a preferência deixa de ser congelada e passa a ser **herdável**.
+Nos dois primeiros experimentos, o motor (o ciclo de vida abaixo) é exatamente o mesmo — só muda o parâmetro que varia. O terceiro (co-evolução) exige uma mudança no próprio motor: a preferência deixa de ser congelada e passa a ser herdável.
 
-**1. Variação da FÊMEA — $\sigma_p$** *(principal, completo).* Varia a variação de preferência *entre* fêmeas ($\sigma_p \in [0.2,\,2.0]$); o traço masculino começa fixo ($\sigma_z = 1.0$). Pergunta: como a heterogeneidade *nas fêmeas* molda a rede e a evolução do traço. **→ Parte A, e todas as seções de redes/histogramas deste documento.**
+**1. Variação da FÊMEA — $\sigma_p$** *(principal, completo).* Varia a variação de preferência *entre* fêmeas ($\sigma_p \in [0.2,\,2.0]$); o traço masculino começa fixo ($\sigma_z = 1.0$). Pergunta: como a heterogeneidade *nas fêmeas* molda a rede e a evolução do traço. → Parte A, e todas as seções de redes/histogramas deste documento.
 
-**2. Variação do MACHO — $\sigma_z$** *(inverso, parcial).* O que muda em relação ao anterior é **apenas o eixo que varia**: agora fixamos $\sigma_p = 1.0$ e variamos $\sigma_z \in [0.2,\,2.0]$ (a variação *inicial* do traço masculino). O motor é **idêntico** — a preferência continua *congelada* (re-sorteada a cada geração). Detalhe importante: $\sigma_z$ é só a **condição inicial** (o traço depois evolui sozinho), enquanto $\sigma_p$ é **re-imposto a cada geração** — por isso os dois lados não são perfeitamente simétricos. **→ Parte B.**
+**2. Variação do MACHO — $\sigma_z$** *(inverso, parcial).* O que muda em relação ao anterior é apenas o eixo que varia: agora fixamos $\sigma_p = 1.0$ e variamos $\sigma_z \in [0.2,\,2.0]$ (a variação *inicial* do traço masculino). O motor é idêntico — a preferência continua *congelada* (re-sorteada a cada geração). Detalhe importante: $\sigma_z$ é só a condição inicial (o traço depois evolui sozinho), enquanto $\sigma_p$ é re-imposto a cada geração — por isso os dois lados não são perfeitamente simétricos. → Parte B.
 
-**3. Co-evolução PREFERÊNCIA–TRAÇO — *planejado*.** O que vai mudar no **motor**: a preferência deixa de ser congelada e passa a ser **herdável** (as filhas herdam a preferência dos pais, exatamente como já acontece com o traço $z$). Consequências: $\sigma_p$ e $\sigma_z$ viram **ambos** condições iniciais (o sistema fica simétrico), e a grandeza central da análise passa a ser a **covariância genética $\text{cov}(z, p)$** — o motor do *Fisherian runaway* (Lande 1981 / Kirkpatrick 1982), e não as médias por sexo. *(Rascunho do motor em `Fase_Coevolucao.R`; notas em `NOTA_coevolucao_followup.md`.)*
+**3. Co-evolução PREFERÊNCIA–TRAÇO — *planejado*.** O que vai mudar no motor: a preferência deixa de ser congelada e passa a ser herdável (as filhas herdam a preferência dos pais, exatamente como já acontece com o traço $z$). Consequências: $\sigma_p$ e $\sigma_z$ viram ambos condições iniciais (o sistema fica simétrico), e a grandeza central da análise passa a ser a covariância genética $\text{cov}(z, p)$ — o motor do *Fisherian runaway* (Lande 1981 / Kirkpatrick 1982), e não as médias por sexo. *(Rascunho do motor em `Fase_Coevolucao.R`; notas em `NOTA_coevolucao_followup.md`.)*
 
 ## Ciclo de vida por geração
 
@@ -83,13 +83,13 @@ Traços iniciais são sorteados de distribuições normais centradas em $\phi = 
 **2. Re-sorteio das preferências (toda geração)**
 A cada nova geração, os valores de preferência $p$ das fêmeas são re-sorteados de $N(\phi,\, \sigma_p)$. *A preferência não é herdada*. Isso é intencional: fixa a distribuição de preferências na população e permite isolar o efeito da *forma* e da *largura* ($\sigma_p$) dessa distribuição sobre a rede, sem que a preferência feminina evolua junto com o traço masculino $z$.
 
-> **Isto muda no modelo de co-evolução (planejado):** lá a preferência **deixa de ser re-sorteada** e passa a ser **herdada** dos pais (como o traço $z$), permitindo que preferência e traço evoluam juntos e que se acumule a covariância $\text{cov}(z,p)$. Ver a seção *"Os três experimentos"* acima.
+> **Isto muda no modelo de co-evolução (planejado):** lá a preferência deixa de ser re-sorteada e passa a ser herdada dos pais (como o traço $z$), permitindo que preferência e traço evoluam juntos e que se acumule a covariância $\text{cov}(z,p)$. Ver a seção *"Os três experimentos"* acima.
 
 **3. Seleção de viabilidade (opcional)**
-Cada macho sobrevive com probabilidade $V_j = \exp\!\bigl(-\gamma(z_j - \phi)^2\bigr)$. Muido, seguindo nossa ultima conversa, nestes resultados essa etapa é **desligada** ($V_j = 1$ para todos os machos), isolando o efeito puro da escolha feminina sobre a estrutura da rede.
+Cada macho sobrevive com probabilidade $V_j = \exp\!\bigl(-\gamma(z_j - \phi)^2\bigr)$. Muido, seguindo nossa ultima conversa, nestes resultados essa etapa é desligada ($V_j = 1$ para todos os machos), isolando o efeito puro da escolha feminina sobre a estrutura da rede.
 
 **4. Formação da rede de acasalamentos**
-Cada fêmea $i$ amostra $A_{max}$ machos aleatoriamente da população (de sobreviventes se há selecao por viavilidade). **A amostragem é com reposição** — a fêmea pode reencontrar o mesmo macho —, de modo que mesmo com $A_{max}=200$ ela avalia em média ~126 machos *distintos*, e não os 200. Para cada macho $j$ amostrado, calcula a probabilidade de aceite $P_{ij}$ conforme a curva de preferência:
+Cada fêmea $i$ amostra $A_{max}$ machos aleatoriamente da população (de sobreviventes se há selecao por viavilidade). A amostragem é com reposição — a fêmea pode reencontrar o mesmo macho —, de modo que mesmo com $A_{max}=200$ ela avalia em média ~126 machos *distintos*, e não os 200. Para cada macho $j$ amostrado, calcula a probabilidade de aceite $P_{ij}$ conforme a curva de preferência:
 
 | Curva | Função $P_{ij}$ |
 |:------|:----------------|
@@ -100,10 +100,10 @@ Cada fêmea $i$ amostra $A_{max}$ machos aleatoriamente da população (de sobre
 
 onde $s_i \sim N(2,\, 0.2)$ é a intensidade de discriminação da fêmea $i$, quanto maior $s_i$, mais seletiva ela é (no trabalho da Cris, ela viu que não foi tao relevante, mas podemos brincar com esss valor depois). A variação entre fêmeas é pequena (CV = 10%), de modo que $s_i \approx 2$ para todas na prática; no futuro, esse parâmetro poderia ser explorado como eixo adicional do modelo. Se terminar sem nenhuma cópula, aceita o último macho avaliado (regra de escape).
 
-O resultado de cada geração é a **matriz de acasalamentos** $M$ (machos × fêmeas, binária): $M_{ji} = 1$ se o macho $j$ acasalou com a fêmea $i$. Essa é a rede bipartita sobre a qual calculamos as métricas.
+O resultado de cada geração é a matriz de acasalamentos $M$ (machos × fêmeas, binária): $M_{ji} = 1$ se o macho $j$ acasalou com a fêmea $i$. Essa é a rede bipartita sobre a qual calculamos as métricas.
 
 **5. Fecundidade e herança**
-Cada fêmea que acasalou produz $F = 50$ filhotes (a poliandria **não aumenta** a fecundidade). A paternidade de cada filhote é distribuída aleatoriamente entre os parceiros da mãe (*fair raffle* / competição espermática neutra). O traço do filhote segue herança de ponto médio com uma peq mutação:
+Cada fêmea que acasalou produz $F = 50$ filhotes (a poliandria não aumenta a fecundidade). A paternidade de cada filhote é distribuída aleatoriamente entre os parceiros da mãe (*fair raffle* / competição espermática neutra). O traço do filhote segue herança de ponto médio com uma peq mutação:
 $$z_{\text{filho}} = \frac{z_{\text{pai}} + z_{\text{mãe}}}{2} + \varepsilon, \quad \varepsilon \sim N(0,\, 0.2)$$
 O pool de juvenis é então amostrado aleatoriamente para preencher as 200 vagas de machos e as 200 vagas de fêmeas (capacidade de carga fixa).
 
@@ -111,7 +111,7 @@ O pool de juvenis é então amostrado aleatoriamente para preencher as 200 vagas
 
 -   **Modularidade** ($Q \in [0,1]$; `igraph::cluster_louvain()` + `igraph::modularity()`): o quanto a rede se divide em grupos de machos e fêmeas que acasalam preferencialmente entre si.
 -   **Aninhamento (NODF)** ($\in [0,100]$; `bipartite::nested(M, method = "NODF")`): o quanto os parceiros dos machos menos "populares" são um subconjunto dos parceiros dos machos mais "populares". Como esperado, valores maiores de $k$ (mais parceiros por fêmea) tendem a aumentar o aninhamento da rede.
-    - *Detalhe importante para interpretar o NODF:* como o grau das fêmeas é ancorado em $k$, o aninhamento das **linhas** é ≈0 e praticamente todo o sinal vem da variação no grau dos **machos** (colunas). Além disso, o grau **realizado** de cada fêmea pode ser *menor que* $k$: ela avalia um número finito de machos (com reposição) e aceita probabilisticamente, cruzando no mínimo com 1 (regra de escape). É justamente essa variação em torno de $k$ que permite ao NODF assumir valores $> 0$. Por isso os valores observados são pequenos em escala absoluta (tipicamente $<8$ numa escala 0–100), mas ainda assim informativos e comparáveis entre cenários.
+    - *Detalhe importante para interpretar o NODF:* como o grau das fêmeas é ancorado em $k$, o aninhamento das linhas é ≈0 e praticamente todo o sinal vem da variação no grau dos machos (colunas). Além disso, o grau realizado de cada fêmea pode ser *menor que* $k$: ela avalia um número finito de machos (com reposição) e aceita probabilisticamente, cruzando no mínimo com 1 (regra de escape). É justamente essa variação em torno de $k$ que permite ao NODF assumir valores $> 0$. Por isso os valores observados são pequenos em escala absoluta (tipicamente $<8$ numa escala 0–100), mas ainda assim informativos e comparáveis entre cenários.
 -   **Centralização** ($\in [0,1]$; `igraph::centr_degree(g, mode = "all")`): o quanto os acasalamentos se concentram em poucos indivíduos. Valores altos = poucos indivíduos concentram a maioria das ligações.
 -   **$I_s$** (oportunidade de seleção sexual, $\geq 0$; `var(k)/mean(k)^2` em R base, onde $k$ = nº de parceiras por macho): mede a variação no sucesso reprodutivo dos machos, quanto maior, mais desigual é a distribuição de cópulas.
 -   **Tribos** (nº inteiro $\geq 1$; autovalores $\approx 0$ de `igraph::laplacian_matrix()`): número de subpopulações completamente isoladas reprodutivamente (sem nenhuma ligação entre elas).
@@ -125,14 +125,14 @@ Veja que dá para navegar use as abas (tabs) para alternar entre $A_{max}$, curv
 
 # Os dois experimentos, lado a lado
 
-Temos **dois experimentos complementares** que fazem a mesma pergunta por lados opostos do sistema. Ambos usam exatamente as **mesmas métricas, cores e escala**, e a **linha vermelha em σ = 1.0** marca o ponto de referência onde as duas variações se igualam (na Geração 1). Assim dá para compará-los diretamente — **só muda quem carrega a heterogeneidade**:
+Temos dois experimentos complementares que fazem a mesma pergunta por lados opostos do sistema. Ambos usam exatamente as mesmas métricas, cores e escala, e a linha vermelha em σ = 1.0 marca o ponto de referência onde as duas variações se igualam (na Geração 1). Assim dá para compará-los diretamente — só muda quem carrega a heterogeneidade:
 
-- 🔵 **Parte A — Variação da fêmea (σp):** varia a variação de preferência feminina; o traço masculino começa fixo (σz = 1.0). *Experimento principal (completo).*
-- 🟣 **Parte B — Variação do macho (σz):** varia a variação do traço masculino; a preferência feminina fica fixa (σp = 1.0). *Experimento inverso (parcial).*
+- 🔵 Parte A — Variação da fêmea (σp): varia a variação de preferência feminina; o traço masculino começa fixo (σz = 1.0). *Experimento principal (completo).*
+- 🟣 Parte B — Variação do macho (σz): varia a variação do traço masculino; a preferência feminina fica fixa (σp = 1.0). *Experimento inverso (parcial).*
 
-> **Não confundir os dois.** Cada gráfico traz no título se é **FÊMEA VARIANDO (σp)** ou **MACHO VARIANDO (σz)**, e o eixo x diz qual variação está sendo percorrida. Parte A e Parte B são **conjuntos de dados distintos** (`.rds` diferentes).
+> **Não confundir os dois.** Cada gráfico traz no título se é FÊMEA VARIANDO (σp) ou MACHO VARIANDO (σz), e o eixo x diz qual variação está sendo percorrida. Parte A e Parte B são conjuntos de dados distintos (`.rds` diferentes).
 
-> **Um detalhe que muda a interpretação: σp e σz NÃO são simétricos.** A variação de preferência **σp é re-imposta a cada geração** (as preferências são re-sorteadas de $N(\phi, \sigma_p)$ — é uma propriedade *permanente* da população). Já **σz é apenas a condição inicial** (Geração 1): depois, o traço masculino **evolui sozinho** (herança + seleção), então a variância dos machos *não* fica presa no valor inicial. Consequência prática ao ler os painéis: na **Parte A** o efeito de σp tende a ser **sustentado** ao longo do gradiente; na **Parte B**, o efeito de σz pode **se diluir** ao longo das gerações. *(No modelo de co-evolução — próximo passo — a preferência passaria a ser herdável e σp deixaria de ser permanente, tornando os dois lados simétricos.)*
+> **Um detalhe que muda a interpretação: σp e σz NÃO são simétricos.** A variação de preferência σp é re-imposta a cada geração (as preferências são re-sorteadas de $N(\phi, \sigma_p)$ — é uma propriedade *permanente* da população). Já σz é apenas a condição inicial (Geração 1): depois, o traço masculino evolui sozinho (herança + seleção), então a variância dos machos *não* fica presa no valor inicial. Consequência prática ao ler os painéis: na Parte A o efeito de σp tende a ser sustentado ao longo do gradiente; na Parte B, o efeito de σz pode se diluir ao longo das gerações. *(No modelo de co-evolução — próximo passo — a preferência passaria a ser herdável e σp deixaria de ser permanente, tornando os dois lados simétricos.)*
 
 ```{r painel-setup}
 suppressPackageStartupMessages({library(dplyr); library(tidyr); library(ggplot2)})
@@ -273,7 +273,7 @@ quais_traco    <- c(zbar_males = "Média do traço (z-bar)", varz_males = "Vari�
 
 ## 🔵 Parte A — Variação da fêmea (σp)
 
-> **Experimento principal.** Varia **σp** (variação de preferência *entre* fêmeas); o traço masculino começa **fixo (σz = 1.0)**. Nas grades abaixo, as abas deixam explorar **seleção natural (com/sem)**, **A_max** e **k**.
+> **Experimento principal.** Varia σp (variação de preferência *entre* fêmeas); o traço masculino começa fixo (σz = 1.0). Nas grades abaixo, as abas deixam explorar seleção natural (com/sem), A_max e k.
 
 ```{r fem-progress, results='asis'}
 if (is.null(df_fem)) {
@@ -286,7 +286,7 @@ if (is.null(df_fem)) {
 
 ### Métricas de rede — gradiente + evolução {.tabset}
 
-Para cada combinação de $k$ e $A_{max}$: **coluna 1** = métrica vs σp na geração final (o antigo "Métricas vs σp"); **colunas 2–3** = evolução ao longo das gerações em σp **baixo** e **alto**. Linhas = as 4 métricas.
+Para cada combinação de $k$ e $A_{max}$: coluna 1 = métrica vs σp na geração final (o antigo "Métricas vs σp"); colunas 2–3 = evolução ao longo das gerações em σp baixo e alto. Linhas = as 4 métricas.
 
 ```{r fem-grid-metricas, results='asis', fig.width=12, fig.height=9}
 render_grid(df_fem, "sigma_p", "σp", quais_metricas, "FÊMEA VARIANDO — Métricas de rede")
@@ -294,7 +294,7 @@ render_grid(df_fem, "sigma_p", "σp", quais_metricas, "FÊMEA VARIANDO — Métr
 
 ### Traço z — gradiente + evolução {.tabset}
 
-Mesma grade, para a **média** (z-bar) e a **variância** (Var z) do traço masculino.
+Mesma grade, para a média (z-bar) e a variância (Var z) do traço masculino.
 
 ```{r fem-grid-traco, results='asis', fig.width=12, fig.height=5.5}
 render_grid(df_fem, "sigma_p", "σp", quais_traco, "FÊMEA VARIANDO — Traço z", cor_faixa = "#6B3A8C")
@@ -302,7 +302,7 @@ render_grid(df_fem, "sigma_p", "σp", quais_traco, "FÊMEA VARIANDO — Traço z
 
 ## 🟣 Parte B — Variação do macho (σz)
 
-> **Experimento inverso.** Varia **σz** (variação do traço masculino); a preferência feminina fica **fixa (σp = 1.0)**. Mesmas métricas e escala da Parte A — **só o eixo x muda**.
+> **Experimento inverso.** Varia σz (variação do traço masculino); a preferência feminina fica fixa (σp = 1.0). Mesmas métricas e escala da Parte A — só o eixo x muda.
 
 ```{r mac-progress, results='asis'}
 if (is.null(df_mac)) {
@@ -316,7 +316,7 @@ if (is.null(df_mac)) {
 
 ### Métricas de rede — gradiente + evolução {.tabset}
 
-Igual à Parte A, mas variando **σz** (σp fica fixo em 1.0). Coluna 1 = métrica vs σz na geração final; colunas 2–3 = evolução em σz baixo e alto.
+Igual à Parte A, mas variando σz (σp fica fixo em 1.0). Coluna 1 = métrica vs σz na geração final; colunas 2–3 = evolução em σz baixo e alto.
 
 ```{r mac-grid-metricas, results='asis', fig.width=12, fig.height=9}
 render_grid(df_mac, "sigma_z_init", "σz", quais_metricas, "MACHO VARIANDO — Métricas de rede")
@@ -330,7 +330,7 @@ render_grid(df_mac, "sigma_z_init", "σz", quais_traco, "MACHO VARIANDO — Tra�
 
 ------------------------------------------------------------------------
 
-> **Atenção:** todas as seções a seguir — **redes representativas e histogramas** — correspondem **exclusivamente ao experimento de variação da FÊMEA ($\sigma_p$)**. Ainda não há versões destas figuras para a variação do macho ($\sigma_z$) nem para a co-evolução.
+> **Atenção:** todas as seções a seguir — redes representativas e histogramas — correspondem exclusivamente ao experimento de variação da FÊMEA ($\sigma_p$). Ainda não há versões destas figuras para a variação do macho ($\sigma_z$) nem para a co-evolução.
 
 # Redes Comparativas: k × σp — variação da fêmea {.tabset}
 
