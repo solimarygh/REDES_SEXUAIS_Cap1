@@ -166,13 +166,6 @@ niveis_var <- function(df, var_col, alvo_low = 0.5, alvo_high = 2.0) {
     high = vals[which.min(abs(vals - alvo_high))])
 }
 
-# ── Grade estilo pôster (uma figura): quantidade (linhas) × painel (colunas) ──
-#   Coluna 1: métrica vs parâmetro na geração final  (antigo "Métricas vs σp")
-#   Colunas 2-3: trajetória ao longo das gerações em nível baixo / alto
-#   x é livre por coluna (σ na col.1; geração nas cols. 2-3); y compartilhado por linha.
-library(patchwork) # Asegúrate de tener instalado e importado patchwork
-library(patchwork)
-
 # ── Grade estilo pôster (patchwork): quantidade (linhas) × painel (colunas) ──
 #   p1  (coluna 1): nuvem de réplicas + loess, na geração final (eixo x = variação)
 #   p23 (colunas 2-3): trajetória média ± SD ao longo das gerações (eixo x = geração)
@@ -190,12 +183,15 @@ plot_grid <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo, cor_fai
   lab_p3 <- sprintf("3. %s = %.1f (evolucao)", var_lab, nv["high"])
 
   # ── Coluna 1: réplicas cruas (nuvem + loess) ──
+  # amostra até 40 réplicas por (curva, q, σ) para acelerar o knit — a nuvem e o loess
+  # praticamente não mudam, mas rende muito mais rápido em muitas abas.
   d1_raw <- base %>%
     filter(generation == gfin) %>%
     pivot_longer(all_of(mcols), names_to = "q", values_to = "v") %>%
     mutate(xval  = .data[[var_col]],
            panel = factor(lab_p1, levels = lab_p1),
-           q     = factor(quais[q], levels = unname(quais)))
+           q     = factor(quais[q], levels = unname(quais))) %>%
+    group_by(tipo_selecao, q, xval) %>% slice_sample(n = 40) %>% ungroup()
 
   # ── Colunas 2-3: trajetórias (média ± SD por geração) ──
   d23 <- base %>%
@@ -258,9 +254,11 @@ render_grid <- function(df, var_col, var_lab, quais, rotulo, cor_faixa = "#2C3E5
       cat(sprintf("\n##### A_max = %d {.tabset}\n\n", amax))
       for (kk in c(5, 10, 20)) {
         cat(sprintf("\n###### k = %d\n\n", kk))
-        p <- plot_grid(df, var_col, var_lab, kk, amax, ns, quais,
-                       sprintf("%s · %s · A_max=%d · k=%d", rotulo,
-                               if (ns) "com NS" else "sem NS", amax, kk), cor_faixa)
+        p <- tryCatch(
+          plot_grid(df, var_col, var_lab, kk, amax, ns, quais,
+                    sprintf("%s · %s · A_max=%d · k=%d", rotulo,
+                            if (ns) "com NS" else "sem NS", amax, kk), cor_faixa),
+          error = function(e) NULL)   # se uma figura falhar, não derruba o knit inteiro
         if (is.null(p)) { cat("\n*Sem dados suficientes para esta combinação.*\n\n"); next }
         print(p); cat("\n\n")
       }
