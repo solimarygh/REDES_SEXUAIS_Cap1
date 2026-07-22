@@ -83,6 +83,8 @@ Traços iniciais são sorteados de distribuições normais centradas em $\phi = 
 **2. Re-sorteio das preferências (toda geração)**
 A cada nova geração, os valores de preferência $p$ das fêmeas são re-sorteados de $N(\phi,\, \sigma_p)$. *A preferência não é herdada*. Isso é intencional: fixa a distribuição de preferências na população e permite isolar o efeito da *forma* e da *largura* ($\sigma_p$) dessa distribuição sobre a rede, sem que a preferência feminina evolua junto com o traço masculino $z$.
 
+> 🔄 **Isto muda no modelo de co-evolução (planejado):** lá a preferência **deixa de ser re-sorteada** e passa a ser **herdada** dos pais (como o traço $z$), permitindo que preferência e traço evoluam juntos e que se acumule a covariância $\text{cov}(z,p)$. Ver a seção *"Os três experimentos"* acima.
+
 **3. Seleção de viabilidade (opcional)**
 Cada macho sobrevive com probabilidade $V_j = \exp\!\bigl(-\gamma(z_j - \phi)^2\bigr)$. Muido, seguindo nossa ultima conversa, nestes resultados essa etapa é **desligada** ($V_j = 1$ para todos os machos), isolando o efeito puro da escolha feminina sobre a estrutura da rede.
 
