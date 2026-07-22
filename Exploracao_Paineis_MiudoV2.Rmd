@@ -47,7 +47,7 @@ ordem_k      <- c(5, 10, 20)
 
 
 
->Este documento mostra os resultados do nosso IBM que simula, geração a geração, como a escolha de parceiros pelas fêmeas afeta a estrutura da rede de acasalamentos da população, e como essa estrutura evolui ao longo do tempo.
+>Este documento mostra os resultados do nosso IBM que simula, geração a geração, como a **escolha de parceiros** afeta a estrutura da rede de acasalamentos e a evolução do traço. Comparamos **três cenários**: variação da **preferência da fêmea** ($\sigma_p$, principal), variação do **traço do macho** ($\sigma_z$, inverso) e — como próximo passo — a **co-evolução** dos dois (preferência herdável).
 
 ## Lembrando detalhes do modelo
 
@@ -62,6 +62,16 @@ ordem_k      <- c(5, 10, 20)
 -   **$k$** — quantos parceiros cada fêmea acasala (poliandria fixa: 5, 10 ou 20).
 -   **$A_{max}$** — quantos machos cada fêmea "enxerga"/avalia antes de escolher: 200 (todos), 40 (20%) ou 10 (5%) — simula uma restrição/custo de busca.
 
+
+## Os três experimentos deste projeto
+
+O **motor** (o ciclo de vida abaixo) é o **mesmo** nos três; o que muda é **o que varia**:
+
+**1. Variação da FÊMEA — $\sigma_p$** *(principal, completo).* Varia a variação de preferência *entre* fêmeas ($\sigma_p \in [0.2,\,2.0]$); o traço masculino começa fixo ($\sigma_z = 1.0$). Pergunta: como a heterogeneidade *nas fêmeas* molda a rede e a evolução do traço. **→ Parte A, e todas as seções de redes/histogramas deste documento.**
+
+**2. Variação do MACHO — $\sigma_z$** *(inverso, parcial).* O que muda em relação ao anterior é **apenas o eixo que varia**: agora fixamos $\sigma_p = 1.0$ e variamos $\sigma_z \in [0.2,\,2.0]$ (a variação *inicial* do traço masculino). O motor é **idêntico** — a preferência continua *congelada* (re-sorteada a cada geração). Detalhe importante: $\sigma_z$ é só a **condição inicial** (o traço depois evolui sozinho), enquanto $\sigma_p$ é **re-imposto a cada geração** — por isso os dois lados não são perfeitamente simétricos. **→ Parte B.**
+
+**3. Co-evolução PREFERÊNCIA–TRAÇO — *planejado*.** O que vai mudar no **motor**: a preferência deixa de ser congelada e passa a ser **herdável** (as filhas herdam a preferência dos pais, exatamente como já acontece com o traço $z$). Consequências: $\sigma_p$ e $\sigma_z$ viram **ambos** condições iniciais (o sistema fica simétrico), e a grandeza central da análise passa a ser a **covariância genética $\text{cov}(z, p)$** — o motor do *Fisherian runaway* (Lande 1981 / Kirkpatrick 1982), e não as médias por sexo. *(Rascunho do motor em `Fase_Coevolucao.R`; notas em `NOTA_coevolucao_followup.md`.)*
 
 ## Ciclo de vida por geração
 
@@ -320,9 +330,9 @@ render_grid(df_mac, "sigma_z_init", "σz", quais_traco, "MACHO VARIANDO — Tra�
 
 ------------------------------------------------------------------------
 
-> ℹ️ As seções de **redes representativas e histogramas** abaixo referem-se ao experimento de **variação da fêmea (σp)**.
+> ⚠️ **Atenção:** todas as seções a seguir — **redes representativas e histogramas** — correspondem **exclusivamente ao experimento de variação da FÊMEA ($\sigma_p$)**. Ainda não há versões destas figuras para a variação do macho ($\sigma_z$) nem para a co-evolução.
 
-# Redes Comparativas: k × σp (uma figura por curva de preferencia) {.tabset}
+# Redes Comparativas: k × σp — variação da fêmea {.tabset}
 
 Cada figura é uma grade 3×3: linhas = σp (2.0, 1.0, 0.5, de cima para baixo), colunas = k (5, 10, 20). Cada subtítulo traz Mod, NODF, Tribos e Comunidades.
 
@@ -358,7 +368,7 @@ if (length(arquivos) == 0) {
 
 ------------------------------------------------------------------------
 
-# Painéis de Redes: 4 curvas por (σp, k) {.tabset}
+# Painéis de Redes: 4 curvas por (σp, k) — variação da fêmea {.tabset}
 
 Agora, vamos as mesmas redes mas agrupanto as 4 curvas de preferência (Aleatória, Gaussiana, Sigmoide, Disruptiva) para um par fixo (σp, k).
 
@@ -390,7 +400,7 @@ if (length(arquivos) == 0) {
 
 ------------------------------------------------------------------------
 
-# Painéis de Histogramas: Evolução em 3 Atos {.tabset}
+# Painéis de Histogramas: Evolução em 3 Atos — variação da fêmea {.tabset}
 
 Aqui cada figura mostra, para as 4 curvas de preferência, as distribuições de $z$ (machos) e $p$ (fêmeas) em três momentos: Geração 1, a geração da rede representativa, e a geração final. A rede representativa é uma réplica específica cuja Modularidade é a mais "típica" (mais próxima da média) da fase estável ($generation \geq 20$) daquele cenário ( `encontrar_representativa()` no Script 06). Aqui a linha tracejada serve de referencia, está sempre apontando ao 5 (era o antigo ótimo evolutivo) ;).
 
