@@ -241,7 +241,7 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
   for (i in seq_len(n_f)) {
     p_i <- female_p[i]; s_i <- female_s[i]
     evaluacoes_reais <- min(encounters_n, n_m)
-    encounters <- sample(seq_len(n_m), size = evaluacoes_reais, replace = TRUE)
+    encounters <- sample(seq_len(n_m), size = evaluacoes_reais, replace = FALSE)  # SEM reposição: A_max = nº de machos DISTINTOS avaliados (decisão reunião Erika/Miudo)
     matings_done <- 0L
     
     for (idx in encounters) {
