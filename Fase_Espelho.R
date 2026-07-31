@@ -39,7 +39,10 @@ suppressPackageStartupMessages({
 # ---------------------------------------------------------------------
 produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
                                       N_males_next = 200, N_females_next = 200,
-                                      fecundidade_base = 50, eps_p = 0.2) {
+                                      fecundidade_base = 50, eps_p = 0.2,
+                                      segregacao = c("fixa", "infinitesimal"),
+                                      mut_sd = 0.05) {
+  segregacao <- match.arg(segregacao)
   n_femeas <- ncol(M)
 
   # Fecundidade neutra: quem acasalou deixa F filhotes; quem não acasalou, 0.
@@ -55,8 +58,27 @@ produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
     if (length(parceiros) > 1) sample(parceiros, 1) else parceiros[1]
   }, integer(1))
 
-  # Herança de ponto médio da PREFERÊNCIA + mutação
-  p_juv <- pmax(0, (male_p_surv[dads] + female_p_gen[moms]) / 2 + rnorm(total_juv, 0, eps_p))
+  # Herança de ponto médio da PREFERÊNCIA
+  midparent <- (male_p_surv[dads] + female_p_gen[moms]) / 2
+
+  if (segregacao == "fixa") {
+    # Ruído FIXO. Cuidado: o blending corta a variância pela metade a cada
+    # geração, então V converge para o equilíbrio 2*eps_p^2 — um "ponto de
+    # retorno" imposto por nós, independente da seleção.
+    desvio <- rnorm(total_juv, 0, eps_p)
+
+  } else {
+    # MODELO INFINITESIMAL (Falconer & Mackay): a variância de segregação é
+    # proporcional à variância parental (V_A/2), então V' = V/2 + V/2 = V.
+    # A variância deixa de erodir sozinha e passa a ser determinada só pela
+    # seleção e pela deriva. O termo mutacional pequeno (mut_sd) repõe o que a
+    # deriva remove, evitando que a variância se perca a longo prazo.
+    var_pais <- var(c(male_p_surv, female_p_gen))
+    if (!is.finite(var_pais) || var_pais < 0) var_pais <- 0
+    desvio <- rnorm(total_juv, 0, sqrt(var_pais / 2)) + rnorm(total_juv, 0, mut_sd)
+  }
+
+  p_juv <- pmax(0, midparent + desvio)
 
   # Capacidade de carga: mortalidade aleatória até as vagas
   vagas <- min(N_males_next + N_females_next, total_juv)
@@ -77,7 +99,9 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
                              sigma_s = 0.2, phi = 5, gamma = 0.2, eps_p = 0.2,
                              tipo_selecao = "gaussian", encounters_n = 200,
                              selecao_natural = TRUE, k_fixo = NULL,
-                             fecundidade_base = 50) {
+                             fecundidade_base = 50,
+                             segregacao = c("fixa", "infinitesimal"), mut_sd = 0.05) {
+  segregacao <- match.arg(segregacao)
 
   # Preferência: genótipo herdável carregado pelos DOIS sexos
   male_p_gen   <- pmax(0, rnorm(N_machos, phi, sigma_p_init))   # macho carrega p sem expressar
@@ -112,7 +136,7 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
     # (4) Registro: o foco é a distribuição da PREFERÊNCIA
     pool_p <- c(male_p_gen, female_p_gen)
     out[[t]] <- data.frame(
-      generation = t, tipo_selecao = tipo_selecao,
+      generation = t, tipo_selecao = tipo_selecao, segregacao = segregacao,
       sigma_z = sigma_z, sigma_p_init = sigma_p_init,
       encounters_n = encounters_n,
       k_fixo = ifelse(is.null(k_fixo), NA_integer_, as.integer(k_fixo)),
@@ -126,7 +150,8 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
     # (5) Próxima geração: herda a preferência
     off <- produce_offspring_espelho(M, male_p_surv, female_p_gen,
                                      N_machos, N_femeas,
-                                     fecundidade_base = fecundidade_base, eps_p = eps_p)
+                                     fecundidade_base = fecundidade_base, eps_p = eps_p,
+                                     segregacao = segregacao, mut_sd = mut_sd)
     if (is.null(off)) break   # ninguém acasalou: encerra a réplica
     male_p_gen   <- off$male_p_next
     female_p_gen <- off$female_p_next
