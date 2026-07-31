@@ -40,7 +40,7 @@ suppressPackageStartupMessages({
 produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
                                       N_males_next = 200, N_females_next = 200,
                                       fecundidade_base = 50, eps_p = 0.2,
-                                      segregacao = c("fixa", "infinitesimal"),
+                                      segregacao = c("infinitesimal", "fixa"),
                                       mut_sd = 0.05) {
   segregacao <- match.arg(segregacao)
   n_femeas <- ncol(M)
@@ -100,7 +100,7 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
                              tipo_selecao = "gaussian", encounters_n = 200,
                              selecao_natural = TRUE, k_fixo = NULL,
                              fecundidade_base = 50,
-                             segregacao = c("fixa", "infinitesimal"), mut_sd = 0.05) {
+                             segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05) {
   segregacao <- match.arg(segregacao)
 
   # Preferência: genótipo herdável carregado pelos DOIS sexos
@@ -171,7 +171,7 @@ if (!exists("ESPELHO_SO_FUNCOES") || !isTRUE(ESPELHO_SO_FUNCOES)) {
   cat("Iniciando Fase Espelho (a preferência evolui)...\n")
 
   valores_sigma_z <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
-  n_replicas      <- 10   # RODADA DE TESTE. Subir p/ 100 na rodada final.
+  n_replicas      <- 30   # RODADA DE EXPLORAÇÃO (discutir com Erika e Miudo). Final: 100.
 
   cenarios <- expand.grid(
     tipo_selecao    = c("uniform", "gaussian", "sigmoid", "u-shaped"),

@@ -26,7 +26,7 @@ cat("Iniciando Fase Machos Variando...\n")
 # ### CAMBIO vs FÊMEA: aqui o eixo que varia é sigma_z_init (não sigma_p).
 # sigma_z_init varia nos mesmos níveis que sigma_p variava antes
 valores_sigma_z <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
-n_replicas      <- 10   # RODADA DE TESTE (sem regra de escape). Subir p/ 100 na rodada final.
+n_replicas      <- 30   # RODADA DE EXPLORAÇÃO (sem regra de escape). Final: 100.
 
 cenarios <- expand.grid(
   tipo_selecao  = c("uniform", "gaussian", "sigmoid", "u-shaped"),

@@ -44,7 +44,7 @@ diretorios <- configurar_diretorios("Fase5_MiudoV2")
 cat("Iniciando Fase 4: O Confronto dos 4 Titãs Evolutivos...\n")
 
 valores_sigma_p <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
-n_replicas <- 10   # RODADA DE TESTE (sem regra de escape). Subir p/ 100 na rodada final.
+n_replicas <- 30   # RODADA DE EXPLORAÇÃO (sem regra de escape). Final: 100.
 
 cenarios_fase4 <- expand.grid(
   tipo_selecao = c("uniform", "gaussian", "sigmoid", "u-shaped"),
