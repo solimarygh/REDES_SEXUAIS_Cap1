@@ -90,40 +90,26 @@ SEED_BASE <- 2026
 # =====================================================================
 # 3) LOOP DE SIMULAÇÃO (Pode pausar e retomar quando quiser)
 # =====================================================================
-for (i in 1:nrow(cenarios_fase4)) {
+N_CORES <- as.integer(Sys.getenv("N_CORES", unset = "5"))   # núcleos; mude com N_CORES=8 Rscript ...
 
-  if (!is.null(lista_fase4[[i]])) next # Resume mágico: Pula o que já está pronto
-
-  if (i %% 20 == 0 || i == 1) cat(sprintf("Rodando cenário %d de %d (%.1f%%)\n", i, nrow(cenarios_fase4), (i/nrow(cenarios_fase4))*100))
-
-  # Semente individual para reprodutibilidade desta simulação específica
-  set.seed(SEED_BASE + i)
-
-  res <- tryCatch({
-    simulate_evolution(
-      generations     = 100,
-      N_machos        = 200,
-      N_femeas        = 200,
-      tipo_selecao    = cenarios_fase4$tipo_selecao[i],
-      sigma_p         = cenarios_fase4$sigma_p[i],
-      encounters_n    = cenarios_fase4$encounters_n[i],
-      k_fixo          = cenarios_fase4$k_fixo[i],
-      selecao_natural = cenarios_fase4$selecao_natural[i],
-      return_details  = FALSE
-    )
-  }, error = function(e) {
-    cat("Erro no cenário", i, ":", conditionMessage(e), "\n")
-    return(NULL)
-  })
-  
-  if (!is.null(res)) {
-    res$replica <- cenarios_fase4$replica[i]
-    lista_fase4[[i]] <- res
-  }
-  
-  # Salva o backup no HD a cada 20 cenários
-  if (i %% 20 == 0) saveRDS(lista_fase4, arquivo_backup)
+simular_i <- function(i) {
+  res <- simulate_evolution(
+    generations     = 100,
+    N_machos        = 200,
+    N_femeas        = 200,
+    tipo_selecao    = as.character(cenarios_fase4$tipo_selecao[i]),
+    sigma_p         = cenarios_fase4$sigma_p[i],
+    encounters_n    = cenarios_fase4$encounters_n[i],
+    k_fixo          = cenarios_fase4$k_fixo[i],
+    selecao_natural = cenarios_fase4$selecao_natural[i],
+    return_details  = FALSE
+  )
+  res$replica <- cenarios_fase4$replica[i]
+  res
 }
+
+lista_fase4 <- rodar_cenarios(cenarios_fase4, lista_fase4, arquivo_backup, simular_i,
+                              n_cores = N_CORES, seed_base = SEED_BASE)
 
 # Exportação Final
 saveRDS(lista_fase4, arquivo_backup)

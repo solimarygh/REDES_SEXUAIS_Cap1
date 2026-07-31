@@ -55,49 +55,29 @@ SEED_BASE <- 2027  # semente diferente do experimento original
 # =====================================================================
 # 3) LOOP DE SIMULAÇÃO
 # =====================================================================
-for (i in 1:nrow(cenarios)) {
+N_CORES <- as.integer(Sys.getenv("N_CORES", unset = "5"))
 
-  if (!is.null(lista[[i]])) next
-
-  if (i %% 20 == 0 || i == 1)
-    cat(sprintf("Rodando cenário %d de %d (%.1f%%)\n",
-                i, nrow(cenarios), (i / nrow(cenarios)) * 100))
-
-  set.seed(SEED_BASE + i)
-
-  res <- tryCatch({
-    simulate_evolution(
-      generations     = 100,
-      N_machos        = 200,
-      N_femeas        = 200,
-      tipo_selecao    = cenarios$tipo_selecao[i],
-      ### ================================================================
-      ### MUDANÇA PRINCIPAL vs o experimento da FÊMEA (Fase4_TodasAsCurvas.R)
-      ###   FÊMEA:  sigma_p = VARIA        |  sigma_z_init = 1.0 (default)
-      ###   MACHO:  sigma_p = 1.0 (FIXO)   |  sigma_z_init = VARIA   ← invertido
-      ### O motor (simulate_evolution) é o mesmo; só troca qual sigma varia.
-      ### ================================================================
-      sigma_p         = 1.0,                       # FIXO  (era o eixo que variava na fêmea)
-      sigma_z_init    = cenarios$sigma_z_init[i],  # VARIA (era fixo/1.0 na fêmea)
-      encounters_n    = cenarios$encounters_n[i],
-      k_fixo          = cenarios$k_fixo[i],
-      selecao_natural = cenarios$selecao_natural[i],
-      return_details  = FALSE
-    )
-  }, error = function(e) {
-    cat("Erro no cenário", i, ":", conditionMessage(e), "\n")
-    return(NULL)
-  })
-
-  if (!is.null(res)) {
-    res$replica <- cenarios$replica[i]
-    lista[[i]]  <- res
-  }
-
-  if (i %% 20 == 0) saveRDS(lista, arquivo_backup)
+simular_i <- function(i) {
+  res <- simulate_evolution(
+    generations     = 100,
+    N_machos        = 200,
+    N_femeas        = 200,
+    tipo_selecao    = as.character(cenarios$tipo_selecao[i]),
+    ### MUDANÇA PRINCIPAL vs FÊMEA: sigma_p FIXO, sigma_z_init VARIA
+    sigma_p         = 1.0,
+    sigma_z_init    = cenarios$sigma_z_init[i],
+    encounters_n    = cenarios$encounters_n[i],
+    k_fixo          = cenarios$k_fixo[i],
+    selecao_natural = cenarios$selecao_natural[i],
+    return_details  = FALSE
+  )
+  res$replica <- cenarios$replica[i]
+  res
 }
 
-# Exportação Final
+lista <- rodar_cenarios(cenarios, lista, arquivo_backup, simular_i,
+                        n_cores = N_CORES, seed_base = SEED_BASE)
+
 saveRDS(lista, arquivo_backup)
 df <- bind_rows(lista[!sapply(lista, is.null)])
 saveRDS(df, arquivo_final)

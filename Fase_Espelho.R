@@ -196,37 +196,27 @@ if (!exists("ESPELHO_SO_FUNCOES") || !isTRUE(ESPELHO_SO_FUNCOES)) {
 
   SEED_BASE <- 2028   # semente própria deste experimento
 
-  for (i in 1:nrow(cenarios)) {
-    if (!is.null(lista[[i]])) next
-    if (i %% 20 == 0 || i == 1)
-      cat(sprintf("Rodando cenário %d de %d (%.1f%%)\n",
-                  i, nrow(cenarios), (i / nrow(cenarios)) * 100))
+  N_CORES <- as.integer(Sys.getenv("N_CORES", unset = "5"))
 
-    set.seed(SEED_BASE + i)
-
-    res <- tryCatch({
-      simulate_espelho(
-        generations     = 100,
-        N_machos        = 200,
-        N_femeas        = 200,
-        tipo_selecao    = as.character(cenarios$tipo_selecao[i]),
-        sigma_z         = cenarios$sigma_z[i],
-        sigma_p_init    = 1.0,
-        encounters_n    = cenarios$encounters_n[i],
-        k_fixo          = cenarios$k_fixo[i],
-        selecao_natural = cenarios$selecao_natural[i]
-      )
-    }, error = function(e) {
-      cat("Erro no cenário", i, ":", conditionMessage(e), "\n"); NULL
-    })
-
-    if (!is.null(res) && nrow(res) > 0) {
-      res$replica <- cenarios$replica[i]
-      lista[[i]]  <- res
-    }
-
-    if (i %% 20 == 0) saveRDS(lista, arquivo_backup)
+  simular_i <- function(i) {
+    res <- simulate_espelho(
+      generations     = 100,
+      N_machos        = 200,
+      N_femeas        = 200,
+      tipo_selecao    = as.character(cenarios$tipo_selecao[i]),
+      sigma_z         = cenarios$sigma_z[i],
+      sigma_p_init    = 1.0,
+      encounters_n    = cenarios$encounters_n[i],
+      k_fixo          = cenarios$k_fixo[i],
+      selecao_natural = cenarios$selecao_natural[i]
+    )
+    if (is.null(res) || nrow(res) == 0) return(NULL)
+    res$replica <- cenarios$replica[i]
+    res
   }
+
+  lista <- rodar_cenarios(cenarios, lista, arquivo_backup, simular_i,
+                          n_cores = N_CORES, seed_base = SEED_BASE)
 
   saveRDS(lista, arquivo_backup)
   df_espelho <- bind_rows(lista[!sapply(lista, is.null)])

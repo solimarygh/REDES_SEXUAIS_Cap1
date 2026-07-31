@@ -353,6 +353,74 @@ produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, 
   list(male_z_next = sobreviventes_z[1:meio], female_z_next = sobreviventes_z[(meio + 1):(meio * 2)])
 }
 
+
+# =====================================================================
+# EXECUÇÃO PARALELA DE CENÁRIOS (com backup e retomada)
+# =====================================================================
+# Roda os cenários PENDENTES em blocos, repartindo cada bloco entre vários
+# núcleos com parallel::mclapply. O backup é salvo ao fim de cada bloco, então
+# a retomada ("resume mágico") continua funcionando igual à versão serial.
+#
+# IMPORTANTE — os números não mudam: a semente é definida DENTRO de cada tarefa
+# (set.seed(seed_base + i)), exatamente como na versão em série. Portanto o
+# resultado do cenário i é idêntico ao que a execução sequencial produziria.
+# A paralelização só muda a ORDEM em que os cenários são calculados.
+#
+#   cenarios       data.frame do desenho experimental (uma linha por cenário)
+#   lista          lista de resultados (NULL onde ainda falta)
+#   arquivo_backup caminho do .rds de backup
+#   simular_i      função(i) que roda o cenário i e devolve o data.frame
+#   n_cores        núcleos a usar
+# =====================================================================
+rodar_cenarios <- function(cenarios, lista, arquivo_backup, simular_i,
+                           n_cores = 5, seed_base = 2026, tamanho_bloco = NULL) {
+
+  if (.Platform$OS.type == "windows" && n_cores > 1) {
+    warning("mclapply não paraleliza no Windows; rodando com 1 núcleo.")
+    n_cores <- 1
+  }
+  if (is.null(tamanho_bloco)) tamanho_bloco <- max(1, n_cores * 20)
+
+  pendentes <- which(vapply(lista, is.null, logical(1)))
+  if (length(pendentes) == 0) { cat("Nada pendente: todos os cenários já estão prontos.\n"); return(lista) }
+
+  cat(sprintf("Pendentes: %d de %d cenários | %d núcleos | blocos de %d\n",
+              length(pendentes), nrow(cenarios), n_cores, tamanho_bloco))
+  flush.console()
+
+  blocos <- split(pendentes, ceiling(seq_along(pendentes) / tamanho_bloco))
+  t0 <- Sys.time(); feitos <- 0L; falhas <- 0L
+
+  for (b in seq_along(blocos)) {
+    idx <- blocos[[b]]
+
+    res <- parallel::mclapply(idx, function(i) {
+      set.seed(seed_base + i)
+      tryCatch(simular_i(i), error = function(e) NULL)
+    }, mc.cores = n_cores)
+
+    for (j in seq_along(idx)) {
+      r <- res[[j]]
+      if (!is.null(r) && !inherits(r, "try-error") && is.data.frame(r) && nrow(r) > 0) {
+        lista[[idx[j]]] <- r
+      } else {
+        falhas <- falhas + 1L
+      }
+    }
+
+    saveRDS(lista, arquivo_backup)   # backup ao fim de cada bloco
+    feitos <- feitos + length(idx)
+    dt     <- as.numeric(difftime(Sys.time(), t0, units = "mins"))
+    resta  <- (length(pendentes) - feitos) * dt / feitos
+    cat(sprintf("Bloco %d/%d | %d/%d cenários | %.1f min decorridos | ~%.0f min restantes | falhas: %d\n",
+                b, length(blocos), feitos, length(pendentes), dt, resta, falhas))
+    flush.console()
+  }
+
+  if (falhas > 0) cat(sprintf("ATENÇÃO: %d cenários falharam e ficaram NULL.\n", falhas))
+  lista
+}
+
 # =====================================================================
 # PARTE E: O LOOP EVOLUTIVO (O Maestro da Simulação)
 # =====================================================================
