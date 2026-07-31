@@ -375,6 +375,7 @@ simulate_evolution <- function(
     return_details = FALSE, salvar_redes = FALSE, pasta_redes = NULL, replica_id = 1,
     selecao_natural = TRUE, k_fixo = NULL
 ) {
+  segregacao <- match.arg(segregacao)   # sem isto o vetor de 2 elementos duplicaria cada linha do output
   
   male_z_gen1   <- pmax(0, rnorm(N_machos, mean = phi, sd = sigma_z_init))
   female_p_gen1 <- pmax(0, rnorm(N_femeas, mean = phi, sd = sigma_p))
