@@ -302,7 +302,7 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
 
 produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, N_females_next = 200,
                               fecundidade_base = 50, eps_sd = 0.2,
-                              segregacao = c("fixa", "infinitesimal"), mut_sd = 0.05) {
+                              segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05) {
   segregacao <- match.arg(segregacao)
   n_femeas <- ncol(M)
   # POLIANDRIA NEUTRA: fecundidade fixa por fêmea, independente do número de parceiros.
@@ -371,7 +371,7 @@ simulate_evolution <- function(
     generations = 50, N_machos = 200, N_femeas = 200,
     sigma_z_init = 1.0, sigma_p = 1.0, sigma_s = 0.2,
     tipo_selecao = "gaussian", encounters_n = 200, phi = 5, gamma = 0.2, eps_sd = 0.2,
-    segregacao = c("fixa", "infinitesimal"), mut_sd = 0.05,
+    segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
     return_details = FALSE, salvar_redes = FALSE, pasta_redes = NULL, replica_id = 1,
     selecao_natural = TRUE, k_fixo = NULL
 ) {
