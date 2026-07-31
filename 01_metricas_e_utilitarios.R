@@ -300,7 +300,10 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
 # en el espermatóforo, aumentando la cantidad de huevos que pone la hembra.-- Aclaré mejor en el texto.
 # =====================================================================
 
-produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, N_females_next = 200, fecundidade_base = 50, eps_sd = 0.2) {
+produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, N_females_next = 200,
+                              fecundidade_base = 50, eps_sd = 0.2,
+                              segregacao = c("fixa", "infinitesimal"), mut_sd = 0.05) {
+  segregacao <- match.arg(segregacao)
   n_femeas <- ncol(M)
   # POLIANDRIA NEUTRA: fecundidade fixa por fêmea, independente do número de parceiros.
   # A poliandria continua importando para a competência espermática (paternidade
@@ -326,7 +329,21 @@ produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, 
   z_moms <- female_z_gen[moms_of_juveniles]
   
   # Genética quantitativa
-  z_todos_filhotes <- pmax(0, (z_dads + z_moms) / 2 + rnorm(total_juveniles, 0, eps_sd))
+  midparent <- (z_dads + z_moms) / 2
+  if (segregacao == "fixa") {
+    # Ruído FIXO (comportamento histórico). O blending corta a variância pela
+    # metade a cada geração, então V converge para 2*eps_sd^2 (~0.08 com 0.2),
+    # independentemente da variância inicial e da seleção.
+    desvio <- rnorm(total_juveniles, 0, eps_sd)
+  } else {
+    # MODELO INFINITESIMAL (Falconer & Mackay): variância de segregação = V_A/2,
+    # proporcional à variância parental. Assim V' = V/2 + V/2 = V: a variância
+    # não erode sozinha e passa a ser determinada pela seleção e pela deriva.
+    var_pais <- var(c(male_z_surv, female_z_gen))
+    if (!is.finite(var_pais) || var_pais < 0) var_pais <- 0
+    desvio <- rnorm(total_juveniles, 0, sqrt(var_pais / 2)) + rnorm(total_juveniles, 0, mut_sd)
+  }
+  z_todos_filhotes <- pmax(0, midparent + desvio)
   
   # Capacidade de carga
   vagas_reais  <- min(N_males_next + N_females_next, total_juveniles) 
@@ -354,6 +371,7 @@ simulate_evolution <- function(
     generations = 50, N_machos = 200, N_femeas = 200,
     sigma_z_init = 1.0, sigma_p = 1.0, sigma_s = 0.2,
     tipo_selecao = "gaussian", encounters_n = 200, phi = 5, gamma = 0.2, eps_sd = 0.2,
+    segregacao = c("fixa", "infinitesimal"), mut_sd = 0.05,
     return_details = FALSE, salvar_redes = FALSE, pasta_redes = NULL, replica_id = 1,
     selecao_natural = TRUE, k_fixo = NULL
 ) {
@@ -410,7 +428,8 @@ simulate_evolution <- function(
       female_p_final <- female_p
     }
     
-    offspring <- produce_offspring(M, male_z_surv, female_z_gen, N_machos, N_femeas, eps_sd = eps_sd)
+    offspring <- produce_offspring(M, male_z_surv, female_z_gen, N_machos, N_femeas, eps_sd = eps_sd,
+                                   segregacao = segregacao, mut_sd = mut_sd)
     male_z_gen   <- offspring$male_z_next
     female_z_gen <- offspring$female_z_next
   }
