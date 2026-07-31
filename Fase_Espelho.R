@@ -138,7 +138,9 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
 # =====================================================================
 # DESENHO EXPERIMENTAL (espelho do experimento da fêmea)
 # =====================================================================
-if (sys.nframe() == 0) {   # só roda se o script for executado direto
+# Roda o experimento por padrão (tanto com source() quanto com Rscript).
+# Se você quiser apenas as funções, defina antes:  ESPELHO_SO_FUNCOES <- TRUE
+if (!exists("ESPELHO_SO_FUNCOES") || !isTRUE(ESPELHO_SO_FUNCOES)) {
 
   diretorios <- configurar_diretorios("Fase_Espelho")
   cat("Iniciando Fase Espelho (a preferência evolui)...\n")
