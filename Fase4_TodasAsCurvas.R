@@ -136,7 +136,11 @@ cat("\nFase 4 concluída com sucesso! Dados salvos em:", arquivo_final, "\n")
 # =====================================================================
 val_gens     <- max(df_fase4$generation)
 val_reps     <- length(unique(df_fase4$replica))
-df_gen_final <- df_fase4 %>% filter(generation == val_gens) %>% drop_na()
+# drop_na() alvo: sem a regra de escape, cenários com muitas fêmeas sem acasalar podem
+# gerar NA em alguma métrica. Um drop_na() geral apagaria esses cenários inteiros (justo
+# os de seleção mais forte), enviesando a análise. Só exigimos as colunas realmente usadas.
+df_gen_final <- df_fase4 %>% filter(generation == val_gens) %>%
+  drop_na(Modularity, Nestedness, Centralization, I_s, zbar_males, varz_males)
 subtitulo_base <- sprintf("Parameters: %d Generations | N=200 | Replicates: %d", val_gens, val_reps)
 
 tema_poster_claro <- theme_light(base_size = 14) +
@@ -332,7 +336,7 @@ modelo_segmentado <- segmented(modelo_general, seg.Z = ~sigma_p, psi = 1.0)
 
 summary(modelo_segmentado)
 
-df <- readRDS("Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds")
+df <- readRDS(arquivo_final)
 
 cat("Total de linhas:", nrow(df), "\n")
 cat("Réplicas únicas:", length(unique(df$replica)), "→", paste(range(df$replica), collapse="-"), "\n")

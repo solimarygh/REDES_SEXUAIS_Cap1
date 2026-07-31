@@ -43,8 +43,8 @@ cenarios_fase4 <- expand.grid(
 # =====================================================================
 # CARREGAR DADOS DA FASE 5 (MiudoV2)
 # =====================================================================
-arquivo_final  <- "Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds"
-arquivo_backup <- "Resultados_Artigo/Fase5_MiudoV2/Dados/backup_lista_fase5_miudov2.rds"
+arquivo_final  <- "Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_fase5_semEscape.rds"  # (antigo: resultados_Fase5_MiudoV2.rds — modelo COM regra de escape)
+arquivo_backup <- "Resultados_Artigo/Fase5_MiudoV2/Dados/backup_fase5_semEscape.rds"   # (antigo: backup_lista_fase5_miudov2.rds — modelo COM regra de escape)
 
 if (file.exists(arquivo_backup)) {
   lista_backup <- readRDS(arquivo_backup)

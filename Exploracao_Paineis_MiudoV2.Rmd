@@ -47,7 +47,7 @@ ordem_k      <- c(5, 10, 20)
 
 
 
->Este documento mostra os resultados do nosso IBM que simula, geração a geração, como a escolha de parceiros afeta a estrutura da rede de acasalamentos e a evolução do traço. Comparamos três cenários: variação da preferência da fêmea ($\sigma_p$, principal), variação do traço do macho ($\sigma_z$, inverso) e — como próximo passo — a co-evolução dos dois (preferência herdável).
+>Este documento mostra os resultados do nosso IBM que simula, geração a geração, como a escolha de parceiros afeta a estrutura da rede de acasalamentos e a evolução do traço. Comparamos: variação da preferência da fêmea ($\sigma_p$, principal), variação do traço do macho ($\sigma_z$), o espelho em que a própria preferência evolui, e — como próximo passo — a co-evolução dos dois.
 
 ## Lembrando detalhes do modelo
 
@@ -63,15 +63,17 @@ ordem_k      <- c(5, 10, 20)
 -   **$A_{max}$** — quantos machos cada fêmea "enxerga"/avalia antes de escolher: 200 (todos), 40 (20%) ou 10 (5%) — simula uma restrição/custo de busca.
 
 
-## Os três experimentos deste projeto
+## Os experimentos deste projeto
 
-Nos dois primeiros experimentos, o motor (o ciclo de vida abaixo) é exatamente o mesmo — só muda o parâmetro que varia. O terceiro (co-evolução) exige uma mudança no próprio motor: a preferência deixa de ser congelada e passa a ser herdável.
+Nos dois primeiros, o motor (o ciclo de vida abaixo) é exatamente o mesmo, só muda o parâmetro que varia. O terceiro (espelho) e o quarto (co-evolução) exigem mudanças no próprio motor.
 
 **1. Variação da FÊMEA — $\sigma_p$** *(principal, completo).* Varia a variação de preferência *entre* fêmeas ($\sigma_p \in [0.2,\,2.0]$); o traço masculino começa fixo ($\sigma_z = 1.0$). Pergunta: como a heterogeneidade *nas fêmeas* molda a rede e a evolução do traço. → Parte A, e todas as seções de redes/histogramas deste documento.
 
 **2. Variação do MACHO — $\sigma_z$** *(inverso, parcial).* O que muda em relação ao anterior é apenas o eixo que varia: agora fixamos $\sigma_p = 1.0$ e variamos $\sigma_z \in [0.2,\,2.0]$ (a variação *inicial* do traço masculino). O motor é idêntico — a preferência continua *congelada* (re-sorteada a cada geração). Detalhe importante: $\sigma_z$ é só a condição inicial (o traço depois evolui sozinho), enquanto $\sigma_p$ é re-imposto a cada geração — por isso os dois lados não são perfeitamente simétricos. → Parte B.
 
-**3. Co-evolução PREFERÊNCIA–TRAÇO — *planejado*.** O que vai mudar no motor: a preferência deixa de ser congelada e passa a ser herdável (as filhas herdam a preferência dos pais, exatamente como já acontece com o traço $z$). Consequências: $\sigma_p$ e $\sigma_z$ viram ambos condições iniciais (o sistema fica simétrico), e a grandeza central da análise passa a ser a covariância genética $\text{cov}(z, p)$ — o motor do *Fisherian runaway* (Lande 1981 / Kirkpatrick 1982), e não as médias por sexo. *(Rascunho do motor em `Fase_Coevolucao.R`; notas em `NOTA_coevolucao_followup.md`.)*
+**3. ESPELHO: a preferência evolui — $\sigma_z$** *(novo).* O que muda no motor: o traço do macho passa a ser **ambiental** (re-sorteado a cada geração, não herdado, como dependência de condição) e a **preferência da fêmea passa a ser herdável** (bi-parental, os dois sexos a carregam). A escolha da fêmea deixa de ser o *motor* da seleção e vira a característica **sob seleção**; a força seletiva é a disponibilidade de machos (σz). Resposta: média e variância do pico de preferência. → Parte C. *(Motor em `Fase_Espelho.R`.)*
+
+**4. Co-evolução PREFERÊNCIA–TRAÇO — *planejado*.** O que vai mudar no motor: a preferência deixa de ser congelada e passa a ser herdável (as filhas herdam a preferência dos pais, exatamente como já acontece com o traço $z$). Consequências: $\sigma_p$ e $\sigma_z$ viram ambos condições iniciais (o sistema fica simétrico), e a grandeza central da análise passa a ser a covariância genética $\text{cov}(z, p)$ — o motor do *Fisherian runaway* (Lande 1981 / Kirkpatrick 1982), e não as médias por sexo. *(Rascunho do motor em `Fase_Coevolucao.R`; notas em `NOTA_coevolucao_followup.md`.)*
 
 ## Ciclo de vida por geração
 
@@ -158,6 +160,10 @@ df_fem <- carregar(c("Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_fase5_sem
                      "Resultados_Artigo/Fase5_MiudoV2/Dados/backup_lista_fase5_miudov2.rds"))
 
 # 🟣 MACHO (σz) — experimento inverso (parcial)
+# ESPELHO (a preferência evolui; traço do macho é ambiental)
+df_esp <- carregar(c("Resultados_Artigo/Fase_Espelho/Dados/resultados_Espelho.rds",
+                     "Resultados_Artigo/Fase_Espelho/Dados/backup_Espelho.rds"))
+
 mac_backup <- "Resultados_Artigo/Fase_MachoVariando/Dados/backup_MachoVariando_semEscape.rds"
 df_mac <- carregar(c("Resultados_Artigo/Fase_MachoVariando/Dados/resultados_MachoVariando_semEscape.rds",
                      mac_backup,
@@ -178,7 +184,9 @@ niveis_var <- function(df, var_col, alvo_low = 0.5, alvo_high = 2.0) {
 #   p1  (coluna 1): nuvem de réplicas + loess, na geração final (eixo x = variação)
 #   p23 (colunas 2-3): trajetória média ± SD ao longo das gerações (eixo x = geração)
 plot_grid <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo, cor_faixa = "#2C3E50") {
-  if (is.null(df) || !all(c(var_col, names(quais), "k_fixo") %in% names(df))) return(NULL)
+  if (is.null(df) || !all(c(var_col, "k_fixo") %in% names(df))) return(NULL)
+  quais <- quais[names(quais) %in% names(df)]   # tolera colunas ausentes (ex.: dados antigos sem prop_femeas_sem_acasalar)
+  if (length(quais) == 0) return(NULL)
 
   base <- df %>% filter(k_fixo == kk, encounters_n == amax, selecao_natural == ns)
   if (nrow(base) < 20) return(NULL)
@@ -275,7 +283,9 @@ render_grid <- function(df, var_col, var_lab, quais, rotulo, cor_faixa = "#2C3E5
 }
 
 quais_metricas <- c(Modularity = "1. Modularity", Nestedness = "2. Nestedness (NODF)",
-                    I_s = "3. Opportunity (Is)", Centralization = "4. Centralization")
+                    I_s = "3. Opportunity (Is)", Centralization = "4. Centralization",
+                    prop_femeas_sem_acasalar = "5. Fêmeas sem acasalar")
+quais_pref     <- c(pbar_femeas = "Média da preferência (p)", varp_femeas = "Variância da preferência (Var p)")
 quais_traco    <- c(zbar_males = "Média do traço (z-bar)", varz_males = "Variância do traço (Var z)")
 ```
 
@@ -296,7 +306,7 @@ if (is.null(df_fem)) {
 
 Para cada combinação de $k$ e $A_{max}$: coluna 1 = métrica vs σp na geração final (o antigo "Métricas vs σp"); colunas 2–3 = evolução ao longo das gerações em σp baixo e alto. Linhas = as 4 métricas.
 
-```{r fem-grid-metricas, results='asis', fig.width=12, fig.height=9}
+```{r fem-grid-metricas, results='asis', fig.width=12, fig.height=11}
 render_grid(df_fem, "sigma_p", "σp", quais_metricas, "FÊMEA VARIANDO — Métricas de rede")
 ```
 
@@ -326,7 +336,7 @@ if (is.null(df_mac)) {
 
 Igual à Parte A, mas variando σz (σp fica fixo em 1.0). Coluna 1 = métrica vs σz na geração final; colunas 2–3 = evolução em σz baixo e alto.
 
-```{r mac-grid-metricas, results='asis', fig.width=12, fig.height=9}
+```{r mac-grid-metricas, results='asis', fig.width=12, fig.height=11}
 render_grid(df_mac, "sigma_z_init", "σz", quais_metricas, "MACHO VARIANDO — Métricas de rede")
 ```
 
@@ -335,6 +345,35 @@ render_grid(df_mac, "sigma_z_init", "σz", quais_metricas, "MACHO VARIANDO — M
 ```{r mac-grid-traco, results='asis', fig.width=12, fig.height=5.5}
 render_grid(df_mac, "sigma_z_init", "σz", quais_traco, "MACHO VARIANDO — Traço z", cor_faixa = "#6B3A8C")
 ```
+
+
+## 🟢 Parte C — Espelho: a preferência evolui (σz varia)
+
+> Modelo espelho (decisão da reunião com Erika e Miudo). Aqui os papéis se invertem: o traço do macho é ambiental (re-sorteado a cada geração, não herdado) e a preferência da fêmea é herdável (bi-parental). A escolha da fêmea deixa de ser o motor da seleção e passa a ser a característica sob seleção. A força seletiva é ecológica: a disponibilidade de machos com traços variados (σz), assim como a disponibilidade de plantas gera seleção sobre a preferência de um herbívoro. Sem regra de escape, fêmeas que não aceitam nenhum macho ficam com 0 filhotes, e é isso que gera a variância de fitness que permite a seleção sobre a preferência.
+
+```{r esp-progress, results='asis'}
+if (is.null(df_esp)) {
+  cat("\n*Ainda não há dados do espelho. Rode `source(\"Fase_Espelho.R\")` para gerar.*\n")
+} else {
+  cat(sprintf("\n> Dados: %d réplicas · geração final %d · arquivo: `%s`\n\n",
+              length(unique(df_esp$replica)), max(df_esp$generation), attr(df_esp, "fonte")))
+}
+```
+
+### Preferência da fêmea — gradiente + evolução {.tabset}
+
+A variável resposta central: como a média e a variância do pico de preferência ($p$) respondem à disponibilidade de machos (σz) e evoluem ao longo das gerações.
+
+```{r esp-grid-pref, results='asis', fig.width=12, fig.height=5.5}
+render_grid(df_esp, "sigma_z", "σz", quais_pref, "ESPELHO — Preferência da fêmea", cor_faixa = "#1F7A4C")
+```
+
+### Métricas de rede — gradiente + evolução {.tabset}
+
+```{r esp-grid-metricas, results='asis', fig.width=12, fig.height=11}
+render_grid(df_esp, "sigma_z", "σz", quais_metricas, "ESPELHO — Métricas de rede", cor_faixa = "#1F7A4C")
+```
+
 
 ------------------------------------------------------------------------
 
