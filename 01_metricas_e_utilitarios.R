@@ -186,20 +186,36 @@ safe_opportunity_sexual_selection <- function(M) {
 # "safe_" de uma vez só, devolvendo uma linha limpa de dados.
 # =====================================================================
 calc_metrics_from_M <- function(M) {
-  n_m <- nrow(M); n_f <- ncol(M)
-  
+  # Proporção de fêmeas que NÃO acasalaram. Sem a regra de escape, esta é a
+  # medida direta da força de seleção agindo sobre a preferência feminina.
+  prop_sem_acasalar <- if (ncol(M) > 0) mean(colSums(M) == 0) else NA_real_
+
+  # As métricas de rede EXCLUEM as fêmeas sem acasalamento (colunas de zeros):
+  # elas entrariam como nós isolados e inflariam artificialmente tribos/modularidade.
+  # Machos com grau 0 são MANTIDOS — são justamente o sinal da seleção sexual (Is).
+  Mm <- M[, colSums(M) > 0, drop = FALSE]
+
+  if (ncol(Mm) == 0) {
+    return(data.frame(I_s = NA_real_, Modularity = NA_real_, Nestedness = NA_real_,
+                      Centralization = NA_real_,
+                      prop_femeas_sem_acasalar = prop_sem_acasalar))
+  }
+
+  n_m <- nrow(Mm); n_f <- ncol(Mm)
+
   # Cria o grafo bipartido para o igraph
   adj_matrix <- matrix(0L, nrow = n_m + n_f, ncol = n_m + n_f)
-  adj_matrix[1:n_m, (n_m + 1):(n_m + n_f)] <- M
-  adj_matrix[(n_m + 1):(n_m + n_f), 1:n_m] <- t(M)
+  adj_matrix[1:n_m, (n_m + 1):(n_m + n_f)] <- Mm
+  adj_matrix[(n_m + 1):(n_m + n_f), 1:n_m] <- t(Mm)
   g <- igraph::graph_from_adjacency_matrix(adj_matrix, mode = "undirected")
-  
+
   # Retorna um Data Frame com 1 linha contendo todas as métricas
   data.frame(
-    I_s = safe_opportunity_sexual_selection(M),
-    Modularity = safe_modularity(g), 
-    Nestedness = safe_nested_nodf(M), 
-    Centralization = safe_centralization(g)
+    I_s = safe_opportunity_sexual_selection(Mm),
+    Modularity = safe_modularity(g),
+    Nestedness = safe_nested_nodf(Mm),
+    Centralization = safe_centralization(g),
+    prop_femeas_sem_acasalar = prop_sem_acasalar
   )
 }
 
@@ -254,13 +270,15 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
       } else if (tipo_selecao == "u-shaped") { P_ij <- 1 - exp(-s_i * (z_j - p_i)^2) }
       
       # CORREÇÃO DO REVISOR: Só conta o acasalamento se ELES AINDA NÃO CRUZARAM ANTES!
-      if (runif(1) <= P_ij && M[idx, i] == 0L) { 
+      if (runif(1) <= P_ij && M[idx, i] == 0L) {
         M[idx, i] <- 1L
-        matings_done <- matings_done + 1L 
+        matings_done <- matings_done + 1L
       }
     }
-    # Regra de escape: se não cruzou com ninguém, cruza com o último
-    if (matings_done == 0L) M[encounters[evaluacoes_reais], i] <- 1L
+    # SEM regra de escape (decisão Erika/Miudo, 2026-07):
+    # uma fêmea que não aceita nenhum macho fica SEM acasalar (0 filhotes).
+    # Isso cria variância de fitness entre fêmeas — condição necessária para
+    # que a preferência possa estar sob seleção (modelo espelho).
   }
   return(M)
 }

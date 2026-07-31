@@ -26,7 +26,7 @@ cat("Iniciando Fase Machos Variando...\n")
 # ### CAMBIO vs FÊMEA: aqui o eixo que varia é sigma_z_init (não sigma_p).
 # sigma_z_init varia nos mesmos níveis que sigma_p variava antes
 valores_sigma_z <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
-n_replicas      <- 100
+n_replicas      <- 10   # RODADA DE TESTE (sem regra de escape). Subir p/ 100 na rodada final.
 
 cenarios <- expand.grid(
   tipo_selecao  = c("uniform", "gaussian", "sigmoid", "u-shaped"),
@@ -38,8 +38,8 @@ cenarios <- expand.grid(
 )
 # sigma_p é passado fixo em 1.0 para simulate_evolution
 
-arquivo_backup <- file.path(diretorios$dados, "backup_MachoVariando.rds")
-arquivo_final  <- file.path(diretorios$dados, "resultados_MachoVariando.rds")
+arquivo_backup <- file.path(diretorios$dados, "backup_MachoVariando_semEscape.rds")
+arquivo_final  <- file.path(diretorios$dados, "resultados_MachoVariando_semEscape.rds")
 
 if (file.exists(arquivo_backup)) {
   lista <- readRDS(arquivo_backup)

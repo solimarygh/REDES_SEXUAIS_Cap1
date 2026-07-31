@@ -44,7 +44,7 @@ diretorios <- configurar_diretorios("Fase5_MiudoV2")
 cat("Iniciando Fase 4: O Confronto dos 4 Titãs Evolutivos...\n")
 
 valores_sigma_p <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
-n_replicas <- 100  # Rodada final: 100 réplicas (retoma do backup das 30 já feitas)
+n_replicas <- 10   # RODADA DE TESTE (sem regra de escape). Subir p/ 100 na rodada final.
 
 cenarios_fase4 <- expand.grid(
   tipo_selecao = c("uniform", "gaussian", "sigmoid", "u-shaped"),
@@ -59,8 +59,8 @@ cenarios_fase4 <- expand.grid(
 # A CORREÇÃO DAS PASTAS ESTÁ AQUI:
 # Forçamos os arquivos a morarem na subpasta "Dados" da Fase 4
 # ---------------------------------------------------------------------
-arquivo_backup <- file.path(diretorios$dados, "backup_lista_fase5_miudov2.rds")
-arquivo_final  <- file.path(diretorios$dados, "resultados_Fase5_MiudoV2.rds")
+arquivo_backup <- file.path(diretorios$dados, "backup_fase5_semEscape.rds")   # nome novo: modelo mudou (sem escape), backup antigo não serve
+arquivo_final  <- file.path(diretorios$dados, "resultados_fase5_semEscape.rds")
 
 if (file.exists(arquivo_backup)) {
   lista_fase4 <- readRDS(arquivo_backup)

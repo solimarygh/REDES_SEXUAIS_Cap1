@@ -51,7 +51,7 @@ ordem_k      <- c(5, 10, 20)
 
 ## Lembrando detalhes do modelo
 
--   **População:** 200 machos e 200 fêmeas, evoluindo por 100 gerações, com 100 réplicas (repetições independentes) por cenário.
+-   **População:** 200 machos e 200 fêmeas, evoluindo por 100 gerações. O número de réplicas por cenário aparece no início de cada parte (rodadas de teste usam menos réplicas).
 -   **O traço e a preferência:** cada macho tem um traço $z$ (ex.: tamanho de um ornamento); cada fêmea tem uma preferência $p$ por um determinado valor de $z$.
 -   **Quatro curvas de preferência:**
     -   **Aleatória** — as fêmeas não discriminam entre machos (referência nula, sem seleção sexual).
@@ -98,12 +98,12 @@ Cada fêmea $i$ amostra $A_{max}$ machos aleatoriamente da população (de sobre
 | Sigmoide (direcional) | $P_{ij} = 1\,/\,\bigl(1 + \exp(-s_i\,(z_j - p_i))\bigr)$ |
 | U-shaped (disruptiva) | $P_{ij} = 1 - \exp\!\bigl(-s_i\,(z_j - p_i)^2\bigr)$ |
 
-onde $s_i \sim N(2,\, 0.2)$ é a intensidade de discriminação da fêmea $i$, quanto maior $s_i$, mais seletiva ela é (no trabalho da Cris, ela viu que não foi tao relevante, mas podemos brincar com esss valor depois). A variação entre fêmeas é pequena (CV = 10%), de modo que $s_i \approx 2$ para todas na prática; no futuro, esse parâmetro poderia ser explorado como eixo adicional do modelo. Se terminar sem nenhuma cópula, aceita o último macho avaliado (regra de escape).
+onde $s_i \sim N(2,\, 0.2)$ é a intensidade de discriminação da fêmea $i$, quanto maior $s_i$, mais seletiva ela é (no trabalho da Cris, ela viu que não foi tao relevante, mas podemos brincar com esss valor depois). A variação entre fêmeas é pequena (CV = 10%), de modo que $s_i \approx 2$ para todas na prática; no futuro, esse parâmetro poderia ser explorado como eixo adicional do modelo. Se terminar sem aceitar nenhum macho, a fêmea fica **sem acasalar** e deixa 0 filhotes (não há mais "regra de escape"). É isso que cria variância de sucesso reprodutivo entre fêmeas.
 
 O resultado de cada geração é a matriz de acasalamentos $M$ (machos × fêmeas, binária): $M_{ji} = 1$ se o macho $j$ acasalou com a fêmea $i$. Essa é a rede bipartita sobre a qual calculamos as métricas.
 
 **5. Fecundidade e herança**
-Cada fêmea que acasalou produz $F = 50$ filhotes (a poliandria não aumenta a fecundidade). A paternidade de cada filhote é distribuída aleatoriamente entre os parceiros da mãe (*fair raffle* / competição espermática neutra). O traço do filhote segue herança de ponto médio com uma peq mutação:
+Cada fêmea que acasalou produz $F = 50$ filhotes (as que não acasalaram deixam 0) (a poliandria não aumenta a fecundidade). A paternidade de cada filhote é distribuída aleatoriamente entre os parceiros da mãe (*fair raffle* / competição espermática neutra). O traço do filhote segue herança de ponto médio com uma peq mutação:
 $$z_{\text{filho}} = \frac{z_{\text{pai}} + z_{\text{mãe}}}{2} + \varepsilon, \quad \varepsilon \sim N(0,\, 0.2)$$
 O pool de juvenis é então amostrado aleatoriamente para preencher as 200 vagas de machos e as 200 vagas de fêmeas (capacidade de carga fixa).
 
@@ -115,6 +115,7 @@ O pool de juvenis é então amostrado aleatoriamente para preencher as 200 vagas
 -   **Centralização** ($\in [0,1]$; `igraph::centr_degree(g, mode = "all")`): o quanto os acasalamentos se concentram em poucos indivíduos. Valores altos = poucos indivíduos concentram a maioria das ligações.
 -   **$I_s$** (oportunidade de seleção sexual, $\geq 0$; `var(k)/mean(k)^2` em R base, onde $k$ = nº de parceiras por macho): mede a variação no sucesso reprodutivo dos machos, quanto maior, mais desigual é a distribuição de cópulas.
 -   **Tribos** (nº inteiro $\geq 1$; autovalores $\approx 0$ de `igraph::laplacian_matrix()`): número de subpopulações completamente isoladas reprodutivamente (sem nenhuma ligação entre elas).
+-   **Fêmeas sem acasalar** (proporção $\in [0,1]$): fração de fêmeas que não aceitaram nenhum macho e deixaram 0 filhotes. É o indicador direto da força de seleção agindo sobre a preferência feminina. As fêmeas sem acasalar são excluídas do cálculo das métricas de rede (entrariam como nós isolados), mas os machos com grau 0 são mantidos (são o sinal da seleção sexual).
 -   **Comunidades** (nº inteiro $\geq 1$; `igraph::cluster_louvain()`): número de subgrupos sociais detectados dentro da rede (podem estar conectados entre si, mas formam grupos mais cohesos internamente).
 
 
@@ -145,16 +146,23 @@ carregar <- function(paths) {
   hit <- paths[file.exists(paths)]
   if (length(hit) == 0) return(NULL)
   obj <- readRDS(hit[1])
-  if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
+  df  <- if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
+  attr(df, "fonte") <- basename(hit[1])   # guarda de qual arquivo veio (com/sem regra de escape)
+  df
 }
 
 # 🔵 FÊMEA (σp) — experimento principal (completo)
-df_fem <- carregar(c("Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds",
+df_fem <- carregar(c("Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_fase5_semEscape.rds",
+                     "Resultados_Artigo/Fase5_MiudoV2/Dados/backup_fase5_semEscape.rds",
+                     "Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_Fase5_MiudoV2.rds",
                      "Resultados_Artigo/Fase5_MiudoV2/Dados/backup_lista_fase5_miudov2.rds"))
 
 # 🟣 MACHO (σz) — experimento inverso (parcial)
-mac_backup <- "Resultados_Artigo/Fase_MachoVariando/Dados/backup_MachoVariando.rds"
-df_mac <- carregar(c("Resultados_Artigo/Fase_MachoVariando/Dados/resultados_MachoVariando.rds", mac_backup))
+mac_backup <- "Resultados_Artigo/Fase_MachoVariando/Dados/backup_MachoVariando_semEscape.rds"
+df_mac <- carregar(c("Resultados_Artigo/Fase_MachoVariando/Dados/resultados_MachoVariando_semEscape.rds",
+                     mac_backup,
+                     "Resultados_Artigo/Fase_MachoVariando/Dados/resultados_MachoVariando.rds",
+                     "Resultados_Artigo/Fase_MachoVariando/Dados/backup_MachoVariando.rds"))
 mac_prog <- if (file.exists(mac_backup)) {
   l <- readRDS(mac_backup); ok <- !vapply(l, is.null, logical(1)); list(done=sum(ok), tot=length(l))
 } else NULL
