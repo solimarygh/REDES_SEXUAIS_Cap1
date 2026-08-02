@@ -38,13 +38,38 @@ cenarios <- expand.grid(
 )
 # sigma_p é passado fixo em 1.0 para simulate_evolution
 
-arquivo_backup <- file.path(diretorios$dados, "backup_MachoVariando_semEscape.rds")
-arquivo_final  <- file.path(diretorios$dados, "resultados_MachoVariando_semEscape.rds")
+# ---------------------------------------------------------------------
+# REPARTO ENTRE MÁQUINAS (REP_MIN / REP_MAX)
+# Permite rodar um subconjunto de réplicas em cada máquina sem duplicar trabalho.
+# O índice GLOBAL de cada cenário é guardado ANTES de filtrar, para que a semente
+# (seed_base + idx_global) seja a mesma que numa corrida única e inteira.
+# Ex.:  REP_MIN=1 REP_MAX=12 Rscript ...   |   REP_MIN=13 REP_MAX=30 Rscript ...
+# ---------------------------------------------------------------------
+cenarios$idx_global <- seq_len(nrow(cenarios))
+REP_MIN <- as.integer(Sys.getenv("REP_MIN", unset = "1"))
+REP_MAX <- as.integer(Sys.getenv("REP_MAX", unset = as.character(n_replicas)))
+cenarios <- cenarios[cenarios$replica >= REP_MIN & cenarios$replica <= REP_MAX, ]
+sufixo_rep <- if (REP_MIN == 1 && REP_MAX == n_replicas) "" else sprintf("_rep%d-%d", REP_MIN, REP_MAX)
+cat(sprintf("Réplicas: %d a %d  (%d cenários)\n", REP_MIN, REP_MAX, nrow(cenarios)))
+
+arquivo_backup <- file.path(diretorios$dados, paste0("backup_MachoVariando_semEscape", sufixo_rep, ".rds"))
+arquivo_final  <- file.path(diretorios$dados, paste0("resultados_MachoVariando_semEscape", sufixo_rep, ".rds"))
+
+# Se este intervalo ainda não tem backup próprio, aproveita o que já foi calculado
+# numa corrida inteira: o backup completo é indexado pelo índice GLOBAL, então
+# basta extrair as posições deste intervalo. Evita recalcular o que já existe.
+arquivo_backup_full <- file.path(diretorios$dados, "backup_MachoVariando_semEscape.rds")
 
 if (file.exists(arquivo_backup)) {
   lista <- readRDS(arquivo_backup)
   cat("Backup encontrado! Retomando as simulações...\n")
   if (length(lista) != nrow(cenarios)) length(lista) <- nrow(cenarios)
+} else if (sufixo_rep != "" && file.exists(arquivo_backup_full)) {
+  full_lst <- readRDS(arquivo_backup_full)
+  lista <- full_lst[cenarios$idx_global]
+  rm(full_lst); gc()
+  cat(sprintf("Aproveitando %d cenários já prontos do backup completo.\n",
+              sum(!vapply(lista, is.null, logical(1)))))
 } else {
   lista <- vector("list", nrow(cenarios))
   cat("Nenhum backup encontrado. Iniciando do zero.\n")
@@ -76,7 +101,8 @@ simular_i <- function(i) {
 }
 
 lista <- rodar_cenarios(cenarios, lista, arquivo_backup, simular_i,
-                        n_cores = N_CORES, seed_base = SEED_BASE)
+                        n_cores = N_CORES, seed_base = SEED_BASE,
+                        idx_global = cenarios$idx_global)
 
 saveRDS(lista, arquivo_backup)
 df <- bind_rows(lista[!sapply(lista, is.null)])

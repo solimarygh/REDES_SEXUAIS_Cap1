@@ -373,7 +373,13 @@ produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, 
 #   n_cores        núcleos a usar
 # =====================================================================
 rodar_cenarios <- function(cenarios, lista, arquivo_backup, simular_i,
-                           n_cores = 5, seed_base = 2026, tamanho_bloco = NULL) {
+                           n_cores = 5, seed_base = 2026, tamanho_bloco = NULL,
+                           idx_global = NULL) {
+  # idx_global: índice ORIGINAL de cada cenário no desenho completo. Serve para que
+  # a semente seja set.seed(seed_base + idx_global[i]) mesmo quando rodamos só um
+  # subconjunto de réplicas em cada máquina — assim o cenário produz EXATAMENTE o
+  # mesmo resultado que produziria numa corrida única e inteira.
+  if (is.null(idx_global)) idx_global <- seq_len(nrow(cenarios))
 
   if (.Platform$OS.type == "windows" && n_cores > 1) {
     warning("mclapply não paraleliza no Windows; rodando com 1 núcleo.")
@@ -395,7 +401,7 @@ rodar_cenarios <- function(cenarios, lista, arquivo_backup, simular_i,
     idx <- blocos[[b]]
 
     res <- parallel::mclapply(idx, function(i) {
-      set.seed(seed_base + i)
+      set.seed(seed_base + idx_global[i])   # semente pelo índice GLOBAL
       tryCatch(simular_i(i), error = function(e) NULL)
     }, mc.cores = n_cores)
 
