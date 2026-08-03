@@ -239,6 +239,100 @@ entre elas vêm da geometria da regra e não de as fêmeas quererem coisas difer
 
 ---
 
+## O ciclo de vida, passo a passo
+
+Cada geração segue sempre a mesma sequência, nos quatro estudos. O que muda entre os estudos
+é apenas quais características são herdadas no passo 5.
+
+**1. Ponto de partida.** Todas as distribuições são centradas em phi = 5, que é ao mesmo tempo
+a média inicial do traço, a média inicial do pico de preferência e o ótimo da seleção natural.
+Os machos começam com traço sorteado de N(5, sigma_z) e as fêmeas com pico de preferência
+sorteado de N(5, sigma_p).
+
+**2. Seleção natural de viabilidade (ligada ou desligada).** Quando está ligada, cada macho
+sobrevive até a fase de acasalamento com probabilidade
+
+    V = exp(-gamma * (z - phi)^2),  com gamma = 0.2
+
+ou seja, quanto mais o traço do macho se afasta do ótimo ecológico phi = 5, menor a chance dele
+sobreviver. Quem não sobrevive é removido e não entra no pool de acasalamento. Três observações
+importantes:
+- A seleção natural age **apenas sobre os machos** e **apenas sobre o traço**, nunca sobre a
+  preferência.
+- Quando está desligada, todos os machos sobrevivem (V = 1), e assim isolamos o efeito puro da
+  escolha feminina.
+- No Estudo 3, em que o traço do macho é ambiental, a seleção natural continua funcionando como
+  filtro ecológico (muda quais machos estão disponíveis), mas não tem consequência evolutiva,
+  porque o traço não é transmitido aos filhotes.
+
+**3. Formação da rede de acasalamentos.** Cada fêmea avalia A_max machos distintos, sorteados
+sem reposição entre os sobreviventes. Para cada macho avaliado, ela aceita ou não com uma
+probabilidade dada pela curva de preferência, que depende da distância entre o traço dele e o
+pico dela, e da exigência dela (a choosiness s, sorteada de N(2, 0.2) e fixa em todos os
+estudos). Ela para quando atinge k parceiros ou quando esgota os A_max machos. Se não aceitar
+nenhum, fica sem acasalar.
+
+O resultado é uma matriz binária de quem acasalou com quem, que é a rede bipartita sobre a qual
+calculamos as métricas de topologia.
+
+**4. Fecundidade e paternidade.** Cada fêmea que acasalou produz 50 filhotes, e as que não
+acasalaram produzem zero. O número de filhotes não depende de com quantos machos ela acasalou
+(fecundidade neutra). A paternidade de cada filhote é sorteada ao acaso entre os parceiros
+daquela fêmea, o que equivale a uma competição espermática justa, sem viés para nenhum macho.
+
+**5. Herança.** É aqui que os quatro estudos diferem. Cada característica herdável do filhote é
+a média dos dois pais mais um desvio de segregação com variância igual a metade da variância
+parental, mais um termo mutacional pequeno. As características não herdáveis são simplesmente
+re-sorteadas na geração seguinte.
+
+**6. Mortalidade e capacidade de carga.** Todos os filhotes vão para um mesmo pote (cerca de
+10.000, quando quase todas as fêmeas acasalam) e desse pote são sorteados ao acaso 200 machos e
+200 fêmeas para formar a geração seguinte. Esse sorteio não tem seleção nenhuma: é mortalidade
+aleatória, e é a fonte de deriva genética do modelo. Uma característica só evolui de forma
+dirigida se alguns pais colocaram mais filhotes nesse pote do que outros.
+
+---
+
+## Parâmetros do modelo
+
+| Símbolo | O que é | Valor |
+|---|---|---|
+| N | machos e fêmeas adultos por geração | 200 de cada |
+| gerações | duração de cada réplica | 100 |
+| phi | ótimo da seleção natural e média inicial das distribuições | 5 |
+| gamma | intensidade da seleção natural de viabilidade | 0.2 (ou 0, quando desligada) |
+| sigma_p | variação do pico de preferência entre fêmeas | eixo do Estudo 2: 0.2 a 2.0 |
+| sigma_z | variação do traço entre machos | eixo do Estudo 3: 0.2 a 2.0 |
+| s | exigência da fêmea (choosiness), fixa | N(2, 0.2) |
+| A_max | machos distintos avaliados por fêmea | 200, 40 ou 10 |
+| k | parceiros por fêmea | 5, 10 ou 20 |
+| F | filhotes por fêmea que acasalou | 50 |
+| mutação | termo mutacional somado à segregação | 0.05 |
+| réplicas | repetições independentes por cenário | 30 (final: 100) |
+
+---
+
+## As métricas de topologia da rede
+
+Calculadas a cada geração sobre a rede bipartita de acasalamentos:
+
+- **Modularidade.** O quanto a rede se divide em grupos que acasalam preferencialmente entre si.
+- **Aninhamento (NODF).** O quanto os parceiros dos machos menos procurados são um subconjunto
+  dos parceiros dos machos mais procurados, ou seja, o quanto existe uma hierarquia.
+- **Centralização.** O quanto os acasalamentos se concentram em poucos indivíduos.
+- **Oportunidade de seleção sexual (Is).** A variância no número de parceiras por macho dividida
+  pelo quadrado da média. Mede o quanto o sucesso reprodutivo é desigual entre os machos.
+- **Proporção de fêmeas sem acasalar.** Variável nova nesta rodada. É descritiva nos Estudos 1 e
+  2, mas no Estudo 3 é o indicador direto da força de seleção agindo sobre a preferência.
+
+**Uma decisão de cálculo que vale registrar.** As fêmeas que não acasalaram são excluídas do
+cálculo das métricas de topologia, porque entrariam como nós isolados e inflariam artificialmente
+a modularidade e o número de subgrupos. Elas são contabilizadas separadamente, na proporção de
+fêmeas sem acasalar. Já os machos com zero acasalamentos são mantidos no cálculo, porque eles são
+justamente o sinal da seleção sexual (é a variação no sucesso deles que o Is mede).
+
+---
+
 ## Como a comparação entre estudos responde às hipóteses
 
 - **H1: a forma da curva de preferência gera assinaturas topológicas distintas.** O Estudo 1
