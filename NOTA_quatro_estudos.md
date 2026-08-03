@@ -54,7 +54,7 @@ livres para responder à seleção. Cada estudo isola uma peça diferente do sis
 
 | Estudo | Traço do macho (z) | Preferência da fêmea (p) | O que o estudo isola |
 |---|---|---|---|
-| **1. Sem evolução** | ambiental (re-sorteado) | re-sorteada | o efeito das regras de acasalamento sozinhas, sem nenhuma resposta evolutiva |
+| **1. Sem evolução** | sorteado | sorteada | o efeito das regras de acasalamento sozinhas, sem nenhuma resposta evolutiva |
 | **2. Fêmeas variando** | herdável, livre para evoluir | re-sorteada | como a heterogeneidade de preferência afeta a resposta evolutiva do traço |
 | **3. Machos variando** | ambiental (re-sorteado) | herdável, livre para evoluir | como a disponibilidade de machos afeta a resposta evolutiva da preferência |
 | **4. Co-evolução** | herdável, livre para evoluir | herdável, livre para evoluir | o feedback entre as duas (mecanismo de Fisher) |
@@ -78,25 +78,41 @@ A comparação entre os estudos é o que dá o poder inferencial:
 **Pergunta.** Que topologia de rede as regras de acasalamento produzem por si só, antes de
 qualquer resposta evolutiva?
 
-**Como funciona.** Nenhuma característica é herdada. A cada geração, tanto o traço dos machos
-quanto o pico de preferência das fêmeas são re-sorteados das mesmas distribuições. A rede de
-acasalamentos se forma, medem-se as métricas de topologia, e a geração seguinte recomeça do
-zero. Não existe feedback entre gerações.
+**Como funciona.** Nenhuma característica é herdada. O traço dos machos e o pico de preferência
+das fêmeas são sorteados, a rede de acasalamentos se forma, medem-se as métricas de topologia,
+e acabou. Não existe geração seguinte nem feedback.
 
-**Por que importa.** É a linha de base contra a qual os outros estudos são lidos. Sem ela não
-dá para separar "esta topologia vem da regra de escolha" de "esta topologia vem da evolução
-que já aconteceu nas gerações anteriores".
+**Por que basta uma única geração.** Sem herança, a geração 2 seria um sorteio independente da
+geração 1, com exatamente a mesma distribuição. Rodar 100 gerações seria apenas fazer 100
+réplicas disfarçadas. Por isso rodamos uma geração e usamos as réplicas para estimar a
+variabilidade. Isso torna este estudo cerca de cem vezes mais barato que os outros três.
 
-**Observação prática.** Como nada é herdado, cada geração é uma amostra independente das
-demais, e a dinâmica não existe. Isso significa que a **geração 1 do Estudo 2 já é este
-controle** (com sigma_z fixo em 1.0): na primeira geração ainda não houve nenhuma resposta
-evolutiva. O controle sai de graça dos dados que já temos, e vem pareado com o experimento
-(mesmas réplicas, mesmas sementes), o que é estatisticamente mais forte do que rodar um
-controle separado.
+**Por que ele precisa ser um estudo independente.** A geração 1 dos outros estudos já é um
+controle, porque na primeira geração nada evoluiu ainda. Mas cada um cobre apenas uma linha do
+espaço de parâmetros:
+- A geração 1 do Estudo 2 varre sigma_p, mas com sigma_z fixo em 1.0.
+- A geração 1 do Estudo 3 varre sigma_z, mas com sigma_p fixo em 1.0.
 
-**Estado.** Disponível dentro dos dados do Estudo 2. Só valeria a pena escrever um script
-próprio se quiséssemos cruzar sigma_p com sigma_z na ausência de evolução, o que hoje não
-está em nenhuma das hipóteses.
+As duas se cruzam exatamente no ponto sigma_p = sigma_z = 1.0, que é literalmente o mesmo
+cenário nos dois estudos. Juntas, portanto, elas formam uma cruz no espaço de parâmetros, e as
+combinações extremas ficam de fora: nunca se observa, por exemplo, fêmeas muito heterogêneas
+diante de machos muito homogêneos, ou o contrário. Como justamente essas combinações extremas
+são as mais informativas sobre o que a regra de acasalamento faz sozinha, vale a pena rodar a
+superfície inteira.
+
+**Por que não aproveitar a geração 1 do Estudo 4.** Seria possível: se o Estudo 4 cruzasse
+sigma_p com sigma_z nas condições iniciais, a sua geração 1 daria a superfície completa de
+graça. Mas isso obrigaria o Estudo 4 a ter um desenho sete vezes maior por uma razão que não é
+dele: no Estudo 4 o que interessa é a dinâmica da covariância entre preferência e traço, e não
+quanta variância havia no ponto de partida. Como este controle custa cerca de uma hora rodando
+sozinho, sai mais barato mantê-lo separado e deixar o Estudo 4 livre para ser desenhado segundo
+a sua própria pergunta.
+
+**Desenho.** Cruzamento completo de sigma_p (7 valores) por sigma_z (7 valores), somado aos
+mesmos fatores dos outros estudos (4 curvas de preferência, 3 valores de A_max, 3 valores de k,
+2 regimes de seleção natural), com 30 réplicas e uma geração cada.
+
+**Estado.** Script pronto (`Fase_Controle.R`), ainda não rodado.
 
 ---
 
