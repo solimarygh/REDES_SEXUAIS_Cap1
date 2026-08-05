@@ -1,0 +1,459 @@
+---
+title: "Resultados preliminares dos três estudos rodados"
+subtitle: "Rodada de exploração com 30 réplicas — para discussão com Erika e Paulo"
+author: "Solimary García Hernández"
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.align = "center", fig.width = 9, out.width = "100%")
+suppressPackageStartupMessages({
+  library(dplyr); library(tidyr); library(ggplot2); library(knitr)
+})
+
+cores_4  <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
+labels_4 <- c("uniform"="Aleatória","gaussian"="Gaussiana","sigmoid"="Sigmoide","u-shaped"="Disruptiva")
+
+carregar <- function(paths) {
+  hit <- paths[file.exists(paths)]
+  if (!length(hit)) return(NULL)
+  obj <- readRDS(hit[1])
+  if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
+}
+
+# Estudo 1 (controle), Estudo 2 (fêmeas variando), Estudo 3 (machos variando)
+ct <- carregar("Resultados_Artigo/Fase_Controle/Dados/resultados_Controle.rds")
+d  <- carregar("Resultados_Artigo/Fase5_MiudoV2/Dados/resultados_fase5_semEscape.rds")
+
+esp <- carregar("Resultados_Artigo/Fase_Espelho/Dados/resultados_Espelho_COMPLETO.rds")
+if (is.null(esp)) {
+  arqs <- list.files("Resultados_Artigo/Fase_Espelho/Dados",
+                     pattern = "Espelho.*rep.*\\.rds$", full.names = TRUE)
+  if (length(arqs)) esp <- distinct(bind_rows(lapply(arqs, function(f) carregar(f))))
+}
+
+ok <- function(x) !is.null(x) && nrow(x) > 0
+```
+
+Esta nota traz os resultados preliminares dos três estudos já rodados, com 30 réplicas cada.
+Ela está organizada em torno das **decisões** que precisamos tomar antes de rodar a versão
+final com 100 réplicas, e não como um inventário de tudo o que apareceu.
+
+O desenho de cada estudo está descrito na nota anterior (`NOTA_quatro_estudos.md`).
+
+```{r status}
+tibble(
+  Estudo = c("1. Controle (sem evolução)", "2. Fêmeas variando (sigma_p)",
+             "3. Machos variando (sigma_z)", "4. Co-evolução"),
+  Cenários = c(if (ok(ct)) format(nrow(ct), big.mark=".") else "-",
+               if (ok(d))  format(nrow(distinct(d[,c("tipo_selecao","sigma_p","encounters_n","k_fixo","selecao_natural","replica")])), big.mark=".") else "-",
+               if (ok(esp)) format(nrow(distinct(esp[,c("tipo_selecao","sigma_z","encounters_n","k_fixo","selecao_natural","replica")])), big.mark=".") else "-",
+               "-"),
+  Situação = c("concluído","concluído","concluído","não rodado")
+) %>% kable(caption = "Situação dos estudos nesta rodada de exploração")
+```
+
+---
+
+# Decisão 1. A hipótese H3 não se sustenta
+
+H3 diz que restringir a capacidade de amostragem (A_max) neutraliza a divergência entre os
+regimes de preferência. Testamos isso de quatro maneiras independentes e **em nenhuma delas o
+efeito apareceu**.
+
+```{r h3, fig.height=4.2}
+if (ok(d)) {
+  h3 <- d %>%
+    filter(generation == 100, selecao_natural == FALSE) %>%
+    group_by(tipo_selecao, sigma_p, encounters_n) %>%
+    summarise(zbar = mean(zbar_males, na.rm = TRUE), .groups = "drop") %>%
+    group_by(sigma_p, encounters_n) %>%
+    summarise(divergencia = sd(zbar), .groups = "drop")
+
+  ggplot(h3, aes(sigma_p, divergencia, color = factor(encounters_n))) +
+    geom_line(linewidth = 1.1) + geom_point(size = 2.4) +
+    scale_color_brewer(palette = "Set1", name = "A_max") +
+    labs(title = "Divergência evolutiva entre curvas de preferência",
+         subtitle = "Desvio-padrão do traço final entre as quatro curvas, por sigma_p e por A_max",
+         x = expression(sigma[p]), y = "divergência entre curvas (Gen 100)") +
+    theme_light(base_size = 12)
+}
+```
+
+**As três linhas de A_max estão praticamente sobrepostas**: restringir a fêmea a avaliar 10
+machos em vez de 200 não muda quase nada. Já o eixo horizontal mostra um efeito forte: a
+divergência praticamente **dobra** de sigma_p = 0.2 para sigma_p = 2.0.
+
+```{r h3tab}
+if (ok(d)) {
+  h3 %>% pivot_wider(names_from = encounters_n, values_from = divergencia,
+                     names_prefix = "A_max=") %>%
+    mutate(across(-sigma_p, ~round(.x, 3))) %>%
+    kable(caption = "Divergência entre curvas de preferência (Gen 100, sem seleção natural)")
+}
+```
+
+Os outros três testes deram o mesmo: excluindo a curva disruptiva (cuja média não é
+interpretável, ver Decisão 3), o padrão se mantém; e na topologia da rede o efeito de A_max
+também não é monotônico, tanto no Estudo 2 quanto no controle.
+
+> **O que precisamos decidir:** como reformular H3. Uma possibilidade é que a restrição de
+> amostragem altere a topologia da rede sem impedir que as diferentes geometrias de preferência
+> produzam resultados evolutivos divergentes. Mas é uma reformulação, não um ajuste de redação.
+
+---
+
+# Decisão 2. A variância de segregação: mudança de especificação
+
+Nos resultados anteriores, o desvio dos filhotes em relação à média dos pais tinha um ruído
+**fixo** (0.2). Descobrimos que isso fazia a variância genética erodir geração após geração até
+um piso artificial de 0.08, independentemente da variância inicial (que era 1.0) e
+independentemente da seleção.
+
+Trocamos por variância de segregação **proporcional à variância parental** (modelo infinitesimal
+de Falconer e Mackay), que é o que o próprio texto dos Métodos já dizia estar fazendo.
+
+```{r seg}
+tibble(
+  `Especificação` = c("Ruído fixo (antes)", "Proporcional (agora)"),
+  `var(z) na Gen 100` = c("~0.08 em todos os sigma_p", "0.06 a 3.55 conforme a curva e sigma_p"),
+  `Interpretação` = c("piso mecânico imposto pelo modelo",
+                      "determinada pela seleção e pela deriva")
+) %>% kable(caption = "O que mudou com a correção da variância de segregação")
+```
+
+> **O que precisamos decidir:** se adotamos a especificação proporcional. Ela muda todos os
+> números em relação ao que já tínhamos, então precisa estar validada **antes** da rodada final.
+
+---
+
+# Decisão 3. A curva disruptiva produz estados alternativos
+
+Sob a curva de preferência disruptiva, as populações não convergem para um valor intermediário:
+elas divergem para um dos dois extremos, e a média entre réplicas não descreve nenhuma população
+real.
+
+```{r bimodal, fig.height=5}
+if (ok(d)) {
+  dd <- d %>%
+    filter(generation == 100, encounters_n == 200, tipo_selecao == "u-shaped",
+           sigma_p %in% c(0.5, 1.0, 2.0)) %>%
+    mutate(NS = ifelse(selecao_natural, "com seleção natural", "sem seleção natural"))
+
+  ggplot(dd, aes(zbar_males, fill = NS)) +
+    geom_histogram(bins = 22, alpha = 0.65, position = "identity") +
+    geom_vline(xintercept = 5, linetype = "dashed", color = "red") +
+    facet_grid(NS ~ sigma_p, labeller = labeller(sigma_p = function(x) paste0("sigma_p = ", x))) +
+    scale_fill_manual(values = c("com seleção natural" = "#E4736B",
+                                 "sem seleção natural" = "#4FB3BF"), guide = "none") +
+    labs(title = "Curva disruptiva: distribuição do traço final entre réplicas",
+         subtitle = "Linha vermelha = phi = 5 (ótimo ecológico e ponto de partida)",
+         x = "traço médio da réplica na Gen 100", y = "nº de réplicas") +
+    theme_light(base_size = 12)
+}
+```
+
+Sem seleção natural, as réplicas se separam em dois grupos (em torno de 2 e de 9) e o vale
+central fica vazio. O teste de dip de Hartigan rejeita unimodalidade em todos os valores de
+sigma_p (D entre 0.10 e 0.20, p < 0.001), enquanto a curva gaussiana permanece unimodal
+(p entre 0.75 e 0.92) e com réplicas quase idênticas entre si.
+
+Com seleção natural aparece um limiar: a bimodalidade persiste em sigma_p ≤ 0.5 e desaparece
+a partir de sigma_p ≥ 0.8, quando todas as populações ficam presas no ótimo.
+
+```{r dip}
+if (ok(d) && requireNamespace("diptest", quietly = TRUE)) {
+  res <- do.call(rbind, lapply(c(0.2,0.5,0.8,1.0,1.2,1.5,2.0), function(s) {
+    g <- function(ns, cur) subset(d, generation==100 & encounters_n==200 &
+                                    selecao_natural==ns & tipo_selecao==cur & sigma_p==s)$zbar_males
+    data.frame(sigma_p = s,
+               `D disruptiva sem NS` = round(diptest::dip.test(g(FALSE,"u-shaped"))$statistic, 3),
+               `p disruptiva sem NS` = signif(diptest::dip.test(g(FALSE,"u-shaped"))$p.value, 2),
+               `D disruptiva com NS` = round(diptest::dip.test(g(TRUE,"u-shaped"))$statistic, 3),
+               `p disruptiva com NS` = signif(diptest::dip.test(g(TRUE,"u-shaped"))$p.value, 2),
+               check.names = FALSE)
+  }))
+  kable(res, caption = "Teste de dip de Hartigan sobre a curva disruptiva (A_max = 200)")
+}
+```
+
+> **O que precisamos decidir:** como reportar a curva disruptiva. Média e desvio não servem;
+> provavelmente é preciso apresentá-la como distribuição e tratar a bimodalidade como resultado.
+
+---
+
+# Resultado principal do Estudo 2: a heterogeneidade de preferência mantém variação genética
+
+```{r varz, fig.height=4.2}
+if (ok(d)) {
+  vz <- d %>%
+    filter(generation == 100, encounters_n == 200, selecao_natural == FALSE) %>%
+    group_by(tipo_selecao, sigma_p) %>%
+    summarise(varz = mean(varz_males, na.rm = TRUE), .groups = "drop")
+
+  ggplot(vz, aes(sigma_p, varz, color = tipo_selecao)) +
+    geom_hline(yintercept = 1, linetype = "dotted", color = "gray40") +
+    geom_line(linewidth = 1.1) + geom_point(size = 2.4) +
+    scale_color_manual(values = cores_4, labels = labels_4, name = "Curva de preferência") +
+    labs(title = "Variância genética do traço masculino na Gen 100",
+         subtitle = "Linha pontilhada = variância inicial (1.0). A_max = 200, sem seleção natural",
+         x = expression(sigma[p]), y = "var(z)") +
+    theme_light(base_size = 12)
+}
+```
+
+Com preferência gaussiana, a variância genética vai de 0.06 (quando quase todas as fêmeas
+querem o mesmo macho) até 3.55 (quando elas discordam bastante). Ou seja, a **heterogeneidade de
+preferência converte seleção estabilizadora em seleção diversificadora**. A curva aleatória
+permanece em torno de 1.0, que é o valor neutro, e serve de controle de deriva.
+
+---
+
+# Resultado principal do Estudo 3: a disponibilidade de machos molda a variação de preferência
+
+```{r varp, fig.height=4.2}
+if (ok(esp)) {
+  vp <- esp %>%
+    filter(generation == 100, encounters_n == 200, selecao_natural == FALSE) %>%
+    group_by(tipo_selecao, sigma_z) %>%
+    summarise(varp = mean(varp_femeas, na.rm = TRUE), .groups = "drop")
+
+  ggplot(vp, aes(sigma_z, varp, color = tipo_selecao)) +
+    geom_hline(yintercept = 1, linetype = "dotted", color = "gray40") +
+    geom_line(linewidth = 1.1) + geom_point(size = 2.4) +
+    scale_color_manual(values = cores_4, labels = labels_4, name = "Curva de preferência") +
+    labs(title = "Variância da preferência feminina na Gen 100",
+         subtitle = "Linha pontilhada = variância inicial (1.0). A_max = 200, sem seleção natural",
+         x = expression(sigma[z]), y = "var(p)") +
+    theme_light(base_size = 12)
+}
+```
+
+Este é o espelho do anterior, e responde diretamente à pergunta que a Erika formulou. Sob
+preferência gaussiana, a variância da preferência vai de 0.28 (machos homogêneos) a 0.93 (machos
+variados): quando há pouca variedade de machos, só as fêmeas cuja preferência coincide com eles
+conseguem acasalar, e a variação de preferência é eliminada. As demais curvas ficam em torno do
+valor neutro.
+
+## A seleção apaga a própria causa
+
+```{r dinamica, fig.height=4}
+if (ok(esp)) {
+  din <- esp %>%
+    filter(encounters_n == 200, selecao_natural == FALSE, tipo_selecao == "gaussian",
+           sigma_z == 0.2, generation <= 50) %>%
+    group_by(generation) %>%
+    summarise(`variância da preferência` = mean(varp_femeas, na.rm = TRUE),
+              `proporção sem acasalar` = mean(prop_femeas_sem_acasalar, na.rm = TRUE),
+              .groups = "drop") %>%
+    pivot_longer(-generation)
+
+  ggplot(din, aes(generation, value)) +
+    geom_line(linewidth = 1) + facet_wrap(~name, scales = "free_y") +
+    labs(title = "Dinâmica da seleção sobre a preferência (gaussiana, sigma_z = 0.2)",
+         subtitle = "As duas curvas caem juntas: ao eliminar as preferências extremas, a seleção remove a própria causa",
+         x = "geração", y = NULL) +
+    theme_light(base_size = 12)
+}
+```
+
+Na geração 1, cerca de 7% das fêmeas não conseguem acasalar. À medida que a seleção elimina as
+preferências mal posicionadas, a variância cai e as falhas de acasalamento desaparecem junto.
+Por isso, olhando só a geração 100, parece não haver seleção: ela já terminou o seu trabalho.
+É uma seleção **autolimitante**, visível apenas na dinâmica inicial.
+
+---
+
+# O que o Estudo 1 (controle) acrescenta
+
+O controle mostra a topologia que as regras de acasalamento produzem sozinhas, sem nenhuma
+resposta evolutiva.
+
+```{r controle, fig.height=4.6}
+if (ok(ct)) {
+  sup <- ct %>%
+    filter(encounters_n == 200, selecao_natural == FALSE, k_fixo == 5) %>%
+    group_by(tipo_selecao, sigma_p, sigma_z) %>%
+    summarise(Mod = mean(Modularity, na.rm = TRUE), .groups = "drop")
+
+  ggplot(sup, aes(factor(sigma_p), factor(sigma_z), fill = Mod)) +
+    geom_tile() + facet_wrap(~tipo_selecao, labeller = as_labeller(labels_4)) +
+    scale_fill_viridis_c(name = "Modularidade") +
+    labs(title = "Controle: modularidade na superfície sigma_p x sigma_z",
+         subtitle = "Uma geração, sem herança. A_max = 200, sem seleção natural, k = 5",
+         x = expression(sigma[p]), y = expression(sigma[z])) +
+    theme_light(base_size = 12)
+}
+```
+
+Dois pontos:
+
+**A assinatura topológica é estrutural, não evolutiva.** A divergência entre as curvas de
+preferência no controle (0.087 / 0.045 / 0.053 para A_max = 10 / 40 / 200) é praticamente
+idêntica à que se observa na geração 100 do Estudo 2 (0.103 / 0.047 / 0.060). Cem gerações de
+evolução do traço quase não alteram o quanto as curvas diferem entre si em topologia.
+
+**O que faz as curvas se distinguirem é a variabilidade total do sistema.** A divergência entre
+elas é bem explicada pela variabilidade combinada (R² = 0.54 usando a raiz de sigma_p² + sigma_z²,
+que é o desvio da distância entre traço e preferência) e não pela relação entre sigma_p e sigma_z
+(R² = 0.004). Se a variabilidade for baixa dos dois lados, todos os acasalamentos ocorrem entre
+indivíduos parecidos e a forma da regra de decisão não chega a se expressar.
+
+---
+
+# Resumo das decisões
+
+```{r decisoes}
+tibble(
+  Decisão = c("H3", "Variância de segregação", "Curva disruptiva", "Rodada final"),
+  Situação = c("não se sustenta como está formulada",
+               "trocada para proporcional (infinitesimal)",
+               "bimodal: média não é descritiva",
+               "100 réplicas, ~3 dias distribuídos em três máquinas"),
+  `Precisa de` = c("reformulação da hipótese",
+                   "validação da mudança",
+                   "definir como reportar",
+                   "aval para começar")
+) %>% kable()
+```
+
+O Estudo 4 (co-evolução) ainda não foi rodado. O controle sugere que o seu desenho pode ser
+reduzido: como o que importa é a variabilidade total e não a relação entre sigma_p e sigma_z,
+basta percorrer a diagonal sigma_p = sigma_z (7 combinações em vez de 49).
+
+---
+
+# Anexo. Todas as combinações de parâmetros
+
+As figuras acima mostram o cenário limpo (A_max = 200, sem seleção natural) para deixar o
+argumento claro. Aqui estão os mesmos resultados em **todas** as combinações de seleção natural,
+A_max e k, para conferir se os padrões se sustentam. Use as abas.
+
+```{r anexo-setup}
+# Painel de uma métrica ao longo do eixo do estudo, por curva de preferência
+painel <- function(df, xvar, yvar, ns, amax, k, xlab, ylab, titulo, hlinha = NULL) {
+  if (is.null(df) || !all(c(xvar, yvar, "k_fixo") %in% names(df))) return(NULL)
+  sub <- df %>%
+    filter(generation == max(generation), selecao_natural == ns,
+           encounters_n == amax, k_fixo == k) %>%
+    mutate(xx = .data[[xvar]], yy = .data[[yvar]])
+  if (nrow(sub) < 8) return(NULL)
+  med <- sub %>% group_by(tipo_selecao, xx) %>%
+    summarise(m = mean(yy, na.rm = TRUE), s = sd(yy, na.rm = TRUE), .groups = "drop")
+  p <- ggplot(med, aes(xx, m, color = tipo_selecao)) +
+    geom_ribbon(aes(ymin = m - s, ymax = m + s, fill = tipo_selecao),
+                alpha = 0.12, color = NA) +
+    geom_line(linewidth = 1) + geom_point(size = 2) +
+    scale_color_manual(values = cores_4, labels = labels_4, name = "Curva de preferência") +
+    scale_fill_manual(values = cores_4, guide = "none") +
+    labs(title = titulo, x = xlab, y = ylab,
+         subtitle = sprintf("%s | A_max = %d | k = %d",
+                            if (ns) "com seleção natural" else "sem seleção natural", amax, k)) +
+    theme_light(base_size = 12) + theme(legend.position = "bottom")
+  if (!is.null(hlinha)) p <- p + geom_hline(yintercept = hlinha, linetype = "dotted", color = "gray40")
+  p
+}
+
+render_abas <- function(df, xvar, yvar, xlab, ylab, titulo, hlinha = NULL) {
+  for (ns in c(FALSE, TRUE)) {
+    cat(sprintf("\n### %s {.tabset}\n\n", if (ns) "Com seleção natural" else "Sem seleção natural"))
+    for (amax in c(200, 40, 10)) {
+      cat(sprintf("\n#### A_max = %d {.tabset}\n\n", amax))
+      for (k in c(5, 10, 20)) {
+        cat(sprintf("\n##### k = %d\n\n", k))
+        p <- painel(df, xvar, yvar, ns, amax, k, xlab, ylab, titulo, hlinha)
+        if (is.null(p)) { cat("\n*Sem dados suficientes para esta combinação.*\n\n"); next }
+        print(p); cat("\n\n")
+      }
+    }
+  }
+}
+```
+
+## Estudo 2: variância genética do traço {.tabset}
+
+```{r anexo-varz, results='asis', fig.height=4.6}
+if (ok(d)) render_abas(d, "sigma_p", "varz_males",
+                       expression(sigma[p]), "var(z) na Gen 100",
+                       "Estudo 2 — variância genética do traço masculino", hlinha = 1)
+```
+
+## Estudo 2: média do traço {.tabset}
+
+```{r anexo-zbar, results='asis', fig.height=4.6}
+if (ok(d)) render_abas(d, "sigma_p", "zbar_males",
+                       expression(sigma[p]), "média do traço na Gen 100",
+                       "Estudo 2 — média do traço masculino", hlinha = 5)
+```
+
+## Estudo 3: variância da preferência {.tabset}
+
+```{r anexo-varp, results='asis', fig.height=4.6}
+if (ok(esp)) render_abas(esp, "sigma_z", "varp_femeas",
+                         expression(sigma[z]), "var(p) na Gen 100",
+                         "Estudo 3 — variância da preferência feminina", hlinha = 1)
+```
+
+## Estudo 3: fêmeas sem acasalar {.tabset}
+
+```{r anexo-sem, results='asis', fig.height=4.6}
+if (ok(esp)) render_abas(esp, "sigma_z", "prop_femeas_sem_acasalar",
+                         expression(sigma[z]), "proporção de fêmeas sem acasalar",
+                         "Estudo 3 — fêmeas que não conseguiram acasalar")
+```
+
+## Métricas de topologia da rede {.tabset}
+
+```{r anexo-topo, results='asis', fig.height=4.6}
+if (ok(d)) {
+  for (met in c("Modularity", "Nestedness", "I_s", "Centralization")) {
+    cat(sprintf("\n### %s {.tabset}\n\n", met))
+    for (ns in c(FALSE, TRUE)) {
+      cat(sprintf("\n#### %s {.tabset}\n\n", if (ns) "com NS" else "sem NS"))
+      for (amax in c(200, 40, 10)) {
+        cat(sprintf("\n##### A_max = %d\n\n", amax))
+        p <- painel(d, "sigma_p", met, ns, amax, 5,
+                    expression(sigma[p]), met,
+                    paste("Estudo 2 —", met))
+        if (is.null(p)) { cat("\n*Sem dados.*\n\n"); next }
+        print(p); cat("\n\n")
+      }
+    }
+  }
+}
+```
+
+## Superfície do controle, por métrica {.tabset}
+
+```{r anexo-controle, results='asis', fig.height=5}
+if (ok(ct)) {
+  for (met in c("Modularity", "Nestedness", "I_s", "Centralization")) {
+    cat(sprintf("\n### %s {.tabset}\n\n", met))
+    for (amax in c(200, 40, 10)) {
+      cat(sprintf("\n#### A_max = %d\n\n", amax))
+      s <- ct %>%
+        filter(encounters_n == amax, selecao_natural == FALSE, k_fixo == 5) %>%
+        group_by(tipo_selecao, sigma_p, sigma_z) %>%
+        summarise(v = mean(.data[[met]], na.rm = TRUE), .groups = "drop")
+      if (nrow(s) == 0) { cat("\n*Sem dados.*\n\n"); next }
+      print(
+        ggplot(s, aes(factor(sigma_p), factor(sigma_z), fill = v)) +
+          geom_tile() + facet_wrap(~tipo_selecao, labeller = as_labeller(labels_4)) +
+          scale_fill_viridis_c(name = met) +
+          labs(title = paste("Controle —", met),
+               subtitle = sprintf("A_max = %d, sem seleção natural, k = 5", amax),
+               x = expression(sigma[p]), y = expression(sigma[z])) +
+          theme_light(base_size = 11)
+      )
+      cat("\n\n")
+    }
+  }
+}
+```
