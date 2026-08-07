@@ -558,7 +558,22 @@ if (!exists("COEVO_SO_FUNCOES") || !isTRUE(COEVO_SO_FUNCOES)) {
 }
 ```
 
-**Três pontos para discutir antes de rodar.**
+**Quatro pontos para discutir antes de rodar.**
+0. O gradiente de k precisa ser repensado, e este é o ponto mais urgente dos quatro. Como está
+   detalhado na seção sobre a interação entre A_max, k e a curva de preferência, das nove
+   células do cruzamento A_max por k, as três com A_max = 10 e k igual a 10 ou 20 não são
+   tratamentos distintos: nelas o k nunca é atingido e o que sobra é sempre "ela acasala com
+   quem aceitar entre dez machos". Copiar o desenho dos Estudos 2 e 3 para o Estudo 4 seria
+   gastar cenários em células que não separam nada. Três saídas possíveis, em ordem crescente de
+   ambição: (a) manter o cruzamento como está, para conservar a comparabilidade com os Estudos 2
+   e 3, e apenas declarar a limitação; (b) substituir o k fixo por um k proporcional a A_max, de
+   modo que o gradiente de poliandria seja o mesmo em todos os níveis de custo de busca; (c)
+   deixar o k de fora do Estudo 4, aproveitando que ele já foi varrido nos Estudos 2 e 3, e usar
+   os cenários economizados para sondar fora da diagonal de sigma. A opção (a) é a mais
+   conservadora e a que menos compromete a comparação entre estudos; a (c) é a que aproveita
+   melhor o orçamento de simulação. Isso precisa ser decidido antes, porque muda o
+   `expand.grid`. E em qualquer das três, as duas colunas novas de grau realizado deveriam
+   entrar, para que a limitação passe de argumentada a medida.
 1. A diagonal é suficiente, ou queremos ao menos alguns pontos fora dela como sonda? Uma
    alternativa barata seria acrescentar os quatro cantos (0.2 x 2.0 e 2.0 x 0.2), o que custaria
    pouco e daria uma verificação direta do argumento do Estudo 1.
@@ -601,12 +616,95 @@ coisas diferentes em média:
 - k: quantos parceiros cada fêmea acasala (5, 10 ou 20). Representa o grau de poliandria.
 - Seleção natural de viabilidade sobre o traço do macho, ligada ou desligada.
 
-**Uma interação entre A_max e k que precisa ser lembrada na análise.** Como a amostragem é sem
-reposição, uma fêmea nunca pode acasalar com mais machos do que os que ela avaliou. Nos cenários
-com A_max = 10 e k = 20, o k é inalcançável: o máximo efetivo é 10, e mesmo isso só se ela
-aceitar todos os dez. Com A_max = 10 e k = 5, ela precisa aceitar metade dos machos que viu.
-Isso não é um defeito do modelo, é exatamente o custo de busca que queremos representar, mas
-significa que o efeito de k não pode ser lido isoladamente do de A_max.
+---
+
+## A interação entre A_max, k e a curva de preferência
+
+Este ponto precisa ficar explícito porque afeta a leitura de todos os estudos já rodados e,
+principalmente, a escolha de parâmetros do Estudo 4, que ainda está aberta.
+
+**O parâmetro k não é o número de parceiros, é um teto.** O número de parceiros que uma fêmea
+de fato consegue é
+
+    parceiros = min( k , número de machos que ela aceitou entre os A_max avaliados )
+
+e, como a amostragem é sem reposição, ela nunca pode acasalar com mais machos do que os que
+avaliou. Nos cenários com A_max = 10 e k = 20, portanto, o k é inalcançável por construção: o
+máximo absoluto é 10. Isso não é um defeito do modelo, é exatamente o custo de busca que
+queremos representar, mas significa que o efeito de k não pode ser lido isoladamente do de A_max.
+
+**O teto morde muito antes do que o limite aritmético sugere.** Ela não acasala com os dez que
+avaliou, acasala com os que aceitou entre esses dez. Com A_max = 10 e uma taxa média de aceite
+de 0.5, o número esperado de aceites é 5. Ou seja, mesmo o cenário k = 5 já fica no limite, e o
+cenário k = 10 exigiria que ela aceitasse todos os dez.
+
+**E a taxa de aceite depende da curva de preferência.** Aqui está a parte que mais preocupa,
+porque transforma uma interação entre dois fatores de desenho numa interação com a variável de
+interesse do paper. Tomando s = 2 e sigma_p = sigma_z = 1.0, a probabilidade média de aceite por
+macho avaliado é aproximadamente:
+
+| Curva de preferência | Fórmula | Aceite médio |
+|---|---|---|
+| Aleatória | P = 0.5 | 0.50 |
+| Sigmoide | P = 1 / (1 + exp(-s (z - p))) | 0.50 |
+| Gaussiana | P = exp(-s (z - p)^2) | 0.33 |
+| U-shaped | P = 1 - exp(-s (z - p)^2) | 0.67 |
+
+(Para a gaussiana, a diferença z - p tem variância sigma_z^2 + sigma_p^2, e a média de
+exp(-s d^2) para d normal de variância v é 1 / sqrt(1 + 2 s v). A u-shaped é o complemento.)
+
+Cruzando isso com A_max = 10, a proporção aproximada de fêmeas que chega a atingir o k é:
+
+| Curva de preferência | atinge k = 5 | atinge k = 10 | atinge k = 20 |
+|---|---|---|---|
+| Gaussiana | 21% | 0.002% | impossível |
+| Aleatória | 62% | 0.1% | impossível |
+| Sigmoide | 62% | 0.1% | impossível |
+| U-shaped | 92% | 1.7% | impossível |
+
+A conclusão prática é forte: **com A_max = 10, as células k = 10 e k = 20 não são dois
+tratamentos distintos de poliandria, são o mesmo tratamento**, que na prática é "ela acasala com
+quem aceitar entre dez machos". O gradiente de poliandria simplesmente não existe nessa faixa de
+A_max. E com A_max = 40 o problema não desapareceu de todo: na curva gaussiana, só cerca de 2%
+das fêmeas chega a k = 20, enquanto na u-shaped chegam mais de 99%.
+
+**Duas consequências para a análise.**
+
+Primeira, o k realizado difere sistematicamente entre curvas de preferência, o que é um
+confundimento direto sobre a H1. Se a gaussiana e a u-shaped produzem topologias diferentes, uma
+parte dessa diferença pode vir simplesmente de as fêmeas da u-shaped terem mais parceiros, e não
+da geometria da escolha. Densidade de arestas afeta modularidade, aninhamento e centralização.
+
+Segunda, o efeito de A_max e o de k estão parcialmente confundidos entre si, então nenhum dos
+dois pode entrar num modelo como fator aditivo sem o termo de interação, e a interpretação de
+qualquer coeficiente marginal de k é enganosa.
+
+**Uma ressalva sobre esses números.** São aproximações analíticas com s fixo em 2, ignorando o
+truncamento em zero, a variação de s entre fêmeas e o efeito da seleção natural, que estreita a
+distribuição dos machos e portanto aumenta a taxa de aceite da gaussiana. Servem para mostrar a
+ordem de grandeza do problema, não como estimativa exata.
+
+**Um problema que descobrimos ao escrever isto: não dá para verificar o k realizado nos dados
+que já temos.** A saída de cada simulação guarda `prop_femeas_sem_acasalar`, mas não guarda o
+número de parceiros por fêmea, nem a soma da matriz, nem o grau médio. O Is é calculado sobre os
+machos e não permite recuperar o grau das fêmeas. Ou seja, a interação descrita aqui está
+argumentada de forma analítica, mas não medida. Duas colunas baratas em `calc_metrics_from_M`
+resolveriam isso de vez:
+- `grau_medio_femeas`: média de `colSums(M)` entre as fêmeas que acasalaram, ou seja, o k
+  efetivamente realizado.
+- `prop_femeas_atingiu_k`: proporção de fêmeas que chegaram ao teto k.
+
+Vale acrescentá-las antes de rodar o Estudo 4, e vale rodar um punhado de réplicas dos Estudos 2
+e 3 só para medir isso e poder reportar no paper. Não é preciso refazer os estudos inteiros: o k
+realizado depende da rede daquela geração, não da história evolutiva, então uma amostra pequena
+de cenários já dá a tabela.
+
+**Uma nota relacionada sobre o rótulo de A_max = 200.** Descrevemos A_max = 200 como "100% dos
+machos", e isso só é exato quando a seleção natural está desligada. Com a seleção ligada, o
+código avalia `min(A_max, número de sobreviventes)`, e o número de sobreviventes cai com sigma_z:
+cerca de 169 machos com sigma_z = 1.0 e cerca de 124 com sigma_z = 2.0. Então A_max = 200 com
+seleção natural quer dizer "ela avalia todos os que sobraram", que é um regime qualitativamente
+diferente de A_max = 40 ou 10, e não um terceiro ponto no mesmo gradiente.
 
 **Decisões de modelo tomadas nesta rodada.**
 1. Amostragem sem reposição. A_max passa a ser literalmente o número de machos distintos
@@ -740,6 +838,12 @@ Calculadas a cada geração sobre a rede bipartita de acasalamentos:
 - **Proporção de fêmeas sem acasalar.** Variável nova nesta rodada. É descritiva nos Estudos 1 e
   2, mas no Estudo 3 é o indicador direto da força de seleção agindo sobre a preferência.
 
+**O que falta medir.** Não registramos o número de parceiros por fêmea, nem o grau médio, nem a
+soma da matriz. Sem isso não dá para saber qual foi o k realizado em cada cenário, que é
+justamente o que a seção sobre a interação entre A_max, k e a curva de preferência mostra ser
+crítico. As colunas `grau_medio_femeas` e `prop_femeas_atingiu_k` deveriam entrar em
+`calc_metrics_from_M` antes do Estudo 4.
+
 Quando a rede é pequena ou degenerada demais para uma métrica fazer sentido (por exemplo, menos
 de dois machos ou menos de duas cópulas para o NODF), a métrica devolve NA em vez de zero. Isso
 é deliberado: devolver zero introduziria um viés, fazendo parecer que a topologia foi medida e
@@ -780,6 +884,7 @@ Esta nota foi conferida contra os scripts. A tabela abaixo diz onde verificar ca
 |---|---|
 | Curvas de preferência e suas fórmulas | `01_metricas_e_utilitarios.R`, `mate_with_survivors` |
 | Amostragem sem reposição, parada em k, ausência de regra de escape | `01_metricas_e_utilitarios.R`, `mate_with_survivors` |
+| Teto de parceiros: `evaluacoes_reais <- min(encounters_n, n_m)` e `if (matings_done >= matings_per_female[i]) break` | `01_metricas_e_utilitarios.R`, `mate_with_survivors` |
 | Seleção natural, gamma, trava de 2 sobreviventes | `01_metricas_e_utilitarios.R`, `ensure_min_survivors` e os loops de cada estudo |
 | Fecundidade neutra, paternidade sorteada, segregação infinitesimal | `01_metricas_e_utilitarios.R`, `produce_offspring` |
 | Exclusão das fêmeas sem acasalar das métricas, retorno de NA | `01_metricas_e_utilitarios.R`, `calc_metrics_from_M` |
