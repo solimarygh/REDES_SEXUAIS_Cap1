@@ -39,7 +39,7 @@ suppressPackageStartupMessages({
 # ---------------------------------------------------------------------
 produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
                                       N_males_next = 200, N_females_next = 200,
-                                      fecundidade_base = 50, eps_p = 0.2,
+                                      fecundidade_base = 50, eps_sd = 0.2,
                                       segregacao = c("infinitesimal", "fixa"),
                                       mut_sd = 0.05) {
   segregacao <- match.arg(segregacao)
@@ -47,25 +47,27 @@ produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
 
   # Fecundidade neutra: quem acasalou deixa F filhotes; quem não acasalou, 0.
   acasalaram   <- colSums(M) > 0
-  num_filhotes <- ifelse(acasalaram, fecundidade_base, 0)
-  total_juv    <- sum(num_filhotes)
+  num_filhotes_por_femea <- ifelse(acasalaram, fecundidade_base, 0)
+  total_filhotes         <- sum(num_filhotes_por_femea)
 
-  if (total_juv == 0) return(NULL)   # ninguém acasalou: cenário degenerado
+  if (total_filhotes == 0) return(NULL)   # ninguém acasalou: cenário degenerado
 
-  moms <- rep(seq_len(n_femeas), times = num_filhotes)
+  moms <- rep(seq_len(n_femeas), times = num_filhotes_por_femea)
   dads <- vapply(moms, function(mom) {
     parceiros <- which(M[, mom] == 1L)
     if (length(parceiros) > 1) sample(parceiros, 1) else parceiros[1]
   }, integer(1))
 
   # Herança de ponto médio da PREFERÊNCIA
-  midparent <- (male_p_surv[dads] + female_p_gen[moms]) / 2
+  p_dads <- male_p_surv[dads]
+  p_moms <- female_p_gen[moms]
+  midparent <- (p_dads + p_moms) / 2
 
   if (segregacao == "fixa") {
     # Ruído FIXO. Cuidado: o blending corta a variância pela metade a cada
-    # geração, então V converge para o equilíbrio 2*eps_p^2 — um "ponto de
+    # geração, então V converge para o equilíbrio 2*eps_sd^2 — um "ponto de
     # retorno" imposto por nós, independente da seleção.
-    desvio <- rnorm(total_juv, 0, eps_p)
+    desvio <- rnorm(total_filhotes, 0, eps_sd)
 
   } else {
     # MODELO INFINITESIMAL (Falconer & Mackay): a variância de segregação é
@@ -75,19 +77,22 @@ produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
     # deriva remove, evitando que a variância se perca a longo prazo.
     var_pais <- var(c(male_p_surv, female_p_gen))
     if (!is.finite(var_pais) || var_pais < 0) var_pais <- 0
-    desvio <- rnorm(total_juv, 0, sqrt(var_pais / 2)) + rnorm(total_juv, 0, mut_sd)
+    desvio <- rnorm(total_filhotes, 0, sqrt(var_pais / 2)) + rnorm(total_filhotes, 0, mut_sd)
   }
 
-  p_juv <- pmax(0, midparent + desvio)
+  p_filhotes <- pmax(0, midparent + desvio)
 
-  # Capacidade de carga: mortalidade aleatória até as vagas
-  vagas <- min(N_males_next + N_females_next, total_juv)
-  idx   <- sample(seq_len(total_juv), size = vagas, replace = FALSE)
+  # Capacidade de carga: mortalidade aleatória até as vagas.
+  # Aqui o sorteio é por ÍNDICE e não por valor. Com uma única característica os
+  # dois são equivalentes; a forma por índice está aqui porque é a que o Estudo 4
+  # exige (lá z e p do mesmo filhote precisam viajar juntos).
+  vagas <- min(N_males_next + N_females_next, total_filhotes)
+  idx   <- sample(seq_len(total_filhotes), size = vagas, replace = FALSE)
   meio  <- floor(vagas / 2)
   if (meio < 1) return(NULL)
 
-  list(male_p_next   = p_juv[idx[1:meio]],
-       female_p_next = p_juv[idx[(meio + 1):(2 * meio)]])
+  list(male_p_next   = p_filhotes[idx[1:meio]],
+       female_p_next = p_filhotes[idx[(meio + 1):(2 * meio)]])
 }
 
 # ---------------------------------------------------------------------
@@ -96,7 +101,7 @@ produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
 simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
                              sigma_z = 1.0,          # dispersão dos machos (AMBIENTAL, o eixo do experimento)
                              sigma_p_init = 1.0,     # dispersão inicial da preferência (condição inicial)
-                             sigma_s = 0.2, phi = 5, gamma = 0.2, eps_p = 0.2,
+                             sigma_s = 0.2, phi = 5, gamma = 0.2, eps_sd = 0.2,
                              tipo_selecao = "gaussian", encounters_n = 200,
                              selecao_natural = TRUE, k_fixo = NULL,
                              fecundidade_base = 50,
@@ -150,7 +155,7 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
     # (5) Próxima geração: herda a preferência
     off <- produce_offspring_espelho(M, male_p_surv, female_p_gen,
                                      N_machos, N_femeas,
-                                     fecundidade_base = fecundidade_base, eps_p = eps_p,
+                                     fecundidade_base = fecundidade_base, eps_sd = eps_sd,
                                      segregacao = segregacao, mut_sd = mut_sd)
     if (is.null(off)) break   # ninguém acasalou: encerra a réplica
     male_p_gen   <- off$male_p_next

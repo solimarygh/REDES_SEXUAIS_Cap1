@@ -312,45 +312,44 @@ produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, 
   # Hembras que não acasalaram com ninguém recebem 0 filhotes.
   acasalaram <- colSums(M) > 0
   num_filhotes_por_femea <- ifelse(acasalaram, fecundidade_base, 0)
-  total_juveniles <- sum(num_filhotes_por_femea)
-  
+  total_filhotes <- sum(num_filhotes_por_femea)
+
   # Segurança: se ninguém acasalou, devolve a geração anterior
-  if(total_juveniles == 0) return(list(male_z_next=male_z_surv, female_z_next=female_z_gen))
-  
-  moms_of_juveniles <- rep(1:n_femeas, times = num_filhotes_por_femea)
-  
-  dads_of_juveniles <- sapply(moms_of_juveniles, function(mom_id) {
-    parceiros <- which(M[, mom_id] == 1L) 
+  if(total_filhotes == 0) return(list(male_z_next=male_z_surv, female_z_next=female_z_gen))
+
+  moms <- rep(1:n_femeas, times = num_filhotes_por_femea)
+
+  dads <- sapply(moms, function(mom_id) {
+    parceiros <- which(M[, mom_id] == 1L)
     if(length(parceiros) > 1) { sample(parceiros, 1) } else { parceiros[1] }
   })
-  
-  # AQUI ESTAVA O PROBLEMA! Esta linha deve ter sumido no seu script:
-  z_dads <- male_z_surv[dads_of_juveniles] 
-  z_moms <- female_z_gen[moms_of_juveniles]
-  
+
+  z_dads <- male_z_surv[dads]
+  z_moms <- female_z_gen[moms]
+
   # Genética quantitativa
   midparent <- (z_dads + z_moms) / 2
   if (segregacao == "fixa") {
     # Ruído FIXO (comportamento histórico). O blending corta a variância pela
     # metade a cada geração, então V converge para 2*eps_sd^2 (~0.08 com 0.2),
     # independentemente da variância inicial e da seleção.
-    desvio <- rnorm(total_juveniles, 0, eps_sd)
+    desvio <- rnorm(total_filhotes, 0, eps_sd)
   } else {
     # MODELO INFINITESIMAL (Falconer & Mackay): variância de segregação = V_A/2,
     # proporcional à variância parental. Assim V' = V/2 + V/2 = V: a variância
     # não erode sozinha e passa a ser determinada pela seleção e pela deriva.
     var_pais <- var(c(male_z_surv, female_z_gen))
     if (!is.finite(var_pais) || var_pais < 0) var_pais <- 0
-    desvio <- rnorm(total_juveniles, 0, sqrt(var_pais / 2)) + rnorm(total_juveniles, 0, mut_sd)
+    desvio <- rnorm(total_filhotes, 0, sqrt(var_pais / 2)) + rnorm(total_filhotes, 0, mut_sd)
   }
-  z_todos_filhotes <- pmax(0, midparent + desvio)
-  
-  # Capacidade de carga
-  vagas_reais  <- min(N_males_next + N_females_next, total_juveniles) 
-  sobreviventes_z <- sample(z_todos_filhotes, size = vagas_reais, replace = FALSE)
-  meio <- floor(vagas_reais / 2)
-  
-  list(male_z_next = sobreviventes_z[1:meio], female_z_next = sobreviventes_z[(meio + 1):(meio * 2)])
+  z_filhotes <- pmax(0, midparent + desvio)
+
+  # Capacidade de carga: mortalidade aleatória até as vagas
+  vagas <- min(N_males_next + N_females_next, total_filhotes)
+  z_sorteados <- sample(z_filhotes, size = vagas, replace = FALSE)
+  meio <- floor(vagas / 2)
+
+  list(male_z_next = z_sorteados[1:meio], female_z_next = z_sorteados[(meio + 1):(meio * 2)])
 }
 
 

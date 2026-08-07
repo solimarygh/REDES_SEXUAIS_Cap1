@@ -349,11 +349,11 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
 
   # Fecundidade neutra: quem acasalou deixa F filhotes; quem não acasalou, 0.
   acasalaram   <- colSums(M) > 0
-  num_filhotes <- ifelse(acasalaram, fecundidade_base, 0)
-  total_juv    <- sum(num_filhotes)
-  if (total_juv == 0) return(NULL)
+  num_filhotes_por_femea <- ifelse(acasalaram, fecundidade_base, 0)
+  total_filhotes         <- sum(num_filhotes_por_femea)
+  if (total_filhotes == 0) return(NULL)
 
-  moms <- rep(seq_len(n_femeas), times = num_filhotes)
+  moms <- rep(seq_len(n_femeas), times = num_filhotes_por_femea)
   dads <- vapply(moms, function(mom) {
     parceiros <- which(M[, mom] == 1L)
     if (length(parceiros) > 1) sample(parceiros, 1) else parceiros[1]
@@ -362,32 +362,34 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
   # Herança de ponto médio das DUAS características, do MESMO casal.
   # É aqui que a covariância nasce: se o acasalamento foi assortativo, os pais
   # de um mesmo filhote têm z e p correlacionados, e o filhote herda os dois.
-  mid_z <- (male_z_surv[dads]  + female_z_gen[moms]) / 2
-  mid_p <- (male_p_surv[dads]  + female_p_gen[moms]) / 2
+  z_dads <- male_z_surv[dads]; z_moms <- female_z_gen[moms]
+  p_dads <- male_p_surv[dads]; p_moms <- female_p_gen[moms]
+  midparent_z <- (z_dads + z_moms) / 2
+  midparent_p <- (p_dads + p_moms) / 2
 
   desvio_segregacao <- function(valores_pais) {
-    if (segregacao == "fixa") return(rnorm(total_juv, 0, eps_sd))
-    v <- var(valores_pais)
-    if (!is.finite(v) || v < 0) v <- 0
-    rnorm(total_juv, 0, sqrt(v / 2)) + rnorm(total_juv, 0, mut_sd)
+    if (segregacao == "fixa") return(rnorm(total_filhotes, 0, eps_sd))
+    var_pais <- var(valores_pais)
+    if (!is.finite(var_pais) || var_pais < 0) var_pais <- 0
+    rnorm(total_filhotes, 0, sqrt(var_pais / 2)) + rnorm(total_filhotes, 0, mut_sd)
   }
 
   # Os desvios de segregação de z e de p são independentes entre si: a
   # segregação embaralha cada característica separadamente, e é a herança de
   # ponto médio que carrega a associação. Isso é o comportamento correto.
-  z_juv <- pmax(0, mid_z + desvio_segregacao(c(male_z_surv, female_z_gen)))
-  p_juv <- pmax(0, mid_p + desvio_segregacao(c(male_p_surv, female_p_gen)))
+  z_filhotes <- pmax(0, midparent_z + desvio_segregacao(c(male_z_surv, female_z_gen)))
+  p_filhotes <- pmax(0, midparent_p + desvio_segregacao(c(male_p_surv, female_p_gen)))
 
   # Capacidade de carga: mortalidade aleatória, POR ÍNDICE
-  vagas <- min(N_males_next + N_females_next, total_juv)
-  idx   <- sample(seq_len(total_juv), size = vagas, replace = FALSE)
+  vagas <- min(N_males_next + N_females_next, total_filhotes)
+  idx   <- sample(seq_len(total_filhotes), size = vagas, replace = FALSE)
   meio  <- floor(vagas / 2)
   if (meio < 1) return(NULL)
   i_m <- idx[1:meio]
   i_f <- idx[(meio + 1):(2 * meio)]
 
-  list(male_z_next   = z_juv[i_m], male_p_next   = p_juv[i_m],
-       female_z_next = z_juv[i_f], female_p_next = p_juv[i_f])
+  list(male_z_next   = z_filhotes[i_m], male_p_next   = p_filhotes[i_m],
+       female_z_next = z_filhotes[i_f], female_p_next = p_filhotes[i_f])
 }
 
 # ---------------------------------------------------------------------
@@ -873,6 +875,49 @@ justamente o sinal da seleção sexual (é a variação no sucesso deles que o I
   comparação envolve escalas diferentes entre as métricas.
 - **Mecanismo de Fisher.** Só o Estudo 4 pode testar, porque é o único desenho em que a
   covariância genética entre preferência e traço pode se acumular.
+
+---
+
+## Convenção de nomes entre os estudos
+
+Os motores dos Estudos 2 e 3 fazem a mesma coisa com características diferentes, mas tinham sido
+escritos em momentos diferentes e usavam nomes distintos para os mesmos objetos. Isso dificultava
+comparar as duas funções lado a lado, que é justamente o que a gente precisa fazer para explicar
+o desenho. Os nomes foram uniformizados assim:
+
+| O que é | Nome padrão |
+|---|---|
+| Filhotes por fêmea | `num_filhotes_por_femea` |
+| Total de filhotes na geração | `total_filhotes` |
+| Índice da mãe de cada filhote | `moms` |
+| Índice do pai de cada filhote | `dads` |
+| Valor paterno e materno | `z_dads` / `z_moms`, `p_dads` / `p_moms` |
+| Média dos pais | `midparent` |
+| Desvio de segregação | `desvio` |
+| Variância parental | `var_pais` |
+| Valor dos filhotes | `z_filhotes` / `p_filhotes` |
+| Vagas da próxima geração | `vagas` |
+| Ruído fixo do modo antigo | `eps_sd` (era `eps_p` no Estudo 3) |
+
+**A regra é que a letra da característica não muda.** No Estudo 3 o que se herda é a preferência,
+então continua sendo `p_filhotes` e não `z_filhotes`: a letra diz qual característica é, e é
+justamente ela que distingue um estudo do outro. O que se uniformiza é todo o resto do nome.
+
+**Duas assimetrias que ficaram de propósito.** A primeira é `sigma_p` no Estudo 2 contra
+`sigma_p_init` no Estudo 3: os nomes são diferentes porque as coisas são diferentes, um é
+parâmetro imposto a cada geração e o outro é condição inicial, como está explicado na seção do
+Estudo 3. A segunda é o tratamento do caso degenerado: o Estudo 2 devolve a geração anterior e o
+Estudo 3 devolve NULL, o que encerra a réplica. Essa segunda continua sendo uma inconsistência de
+verdade, não uma diferença deliberada, e vale resolver antes da rodada final.
+
+**Uma diferença que deixou de existir na prática mas ainda merece atenção.** O Estudo 2 sorteia
+os sobreviventes por valor (`sample(z_filhotes, ...)`) e o Estudo 3 sorteia por índice
+(`sample(seq_len(total_filhotes), ...)`). Com uma única característica herdável os dois são
+equivalentes, porque `sample` sobre um vetor é implementado como sorteio de índices seguido de
+indexação. Mas no Estudo 4 só a forma por índice funciona, então vale padronizar tudo por índice
+para que o padrão do código já seja o correto quando as duas características entrarem. Como essa
+mudança mexe numa chamada de sorteio, convém confirmar num cenário com semente fixa que o
+resultado sai idêntico antes de adotá-la em definitivo.
 
 ---
 
