@@ -31,7 +31,7 @@ n_replicas      <- 30   # RODADA DE EXPLORAÇÃO (sem regra de escape). Final: 1
 cenarios <- expand.grid(
   tipo_selecao  = c("uniform", "gaussian", "sigmoid", "u-shaped"),
   sigma_z_init  = valores_sigma_z,      # ### σz VARIA  (na fêmea aqui ia sigma_p)
-  encounters_n  = c(200, 40, 10),       # 100%, 20%, 5% de N=200
+  encounters_n  = c(200, 40, 10),       # nº ABSOLUTO de machos distintos avaliados (ver nota sobre o pool não ser constante)
   k_fixo        = c(5L, 10L, 20L),
   selecao_natural = c(TRUE, FALSE),
   replica       = 1:n_replicas

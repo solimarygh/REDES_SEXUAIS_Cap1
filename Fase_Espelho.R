@@ -50,7 +50,11 @@ produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
   num_filhotes_por_femea <- ifelse(acasalaram, fecundidade_base, 0)
   total_filhotes         <- sum(num_filhotes_por_femea)
 
-  if (total_filhotes == 0) return(NULL)   # ninguém acasalou: cenário degenerado
+  # CASO DEGENERADO — mesma regra do Estudo 2 (ver comentário em produce_offspring):
+  # ou ninguém acasalou, ou os filhotes não bastam para preencher as vagas com N
+  # constante. Nos dois casos NULL, e quem chama encerra a réplica registrando a
+  # geração em extincao_gen.
+  if (total_filhotes < N_males_next + N_females_next) return(NULL)
 
   moms <- rep(seq_len(n_femeas), times = num_filhotes_por_femea)
   dads <- vapply(moms, function(mom) {
@@ -86,10 +90,9 @@ produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
   # Aqui o sorteio é por ÍNDICE e não por valor. Com uma única característica os
   # dois são equivalentes; a forma por índice está aqui porque é a que o Estudo 4
   # exige (lá z e p do mesmo filhote precisam viajar juntos).
-  vagas <- min(N_males_next + N_females_next, total_filhotes)
+  vagas <- N_males_next + N_females_next
   idx   <- sample(seq_len(total_filhotes), size = vagas, replace = FALSE)
   meio  <- floor(vagas / 2)
-  if (meio < 1) return(NULL)
 
   list(male_p_next   = p_filhotes[idx[1:meio]],
        female_p_next = p_filhotes[idx[(meio + 1):(2 * meio)]])
@@ -113,6 +116,7 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
   female_p_gen <- pmax(0, rnorm(N_femeas, phi, sigma_p_init))
 
   out <- vector("list", generations)
+  extincao_gen <- NA_integer_   # geração em que a réplica foi encerrada; NA = chegou ao fim
 
   for (t in seq_len(generations)) {
 
@@ -149,6 +153,11 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
       pbar_pop    = mean(pool_p),      varp_pop    = var(pool_p),     # genótipo (os dois sexos)
       pbar_femeas = mean(female_p),    varp_femeas = var(female_p),   # preferência expressa
       zbar_males  = mean(male_z_surv), varz_males  = var(male_z_surv),
+      # Tamanho do pool de machos disponíveis. Não é constante: cai com sigma_z
+      # quando a seleção natural está ligada, e isso muda a densidade da rede
+      # independentemente de qualquer efeito da escolha feminina. Aqui importa
+      # ainda mais que no Estudo 2, porque sigma_z é o eixo do experimento.
+      n_machos_surv = length(male_z_surv),
       metrics
     )
 
@@ -157,12 +166,17 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
                                      N_machos, N_femeas,
                                      fecundidade_base = fecundidade_base, eps_sd = eps_sd,
                                      segregacao = segregacao, mut_sd = mut_sd)
-    if (is.null(off)) break   # ninguém acasalou: encerra a réplica
+    # Réplica encerrada: guardamos as gerações já rodadas e registramos ONDE parou,
+    # para que a perda seja contável na análise em vez de virar uma réplica que
+    # some no filtro generation == 100.
+    if (is.null(off)) { extincao_gen <- t; break }
     male_p_gen   <- off$male_p_next
     female_p_gen <- off$female_p_next
   }
 
-  dplyr::bind_rows(out)
+  df_out <- dplyr::bind_rows(out)
+  df_out$extincao_gen <- extincao_gen
+  df_out
 }
 
 # =====================================================================

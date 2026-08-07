@@ -314,8 +314,17 @@ produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, 
   num_filhotes_por_femea <- ifelse(acasalaram, fecundidade_base, 0)
   total_filhotes <- sum(num_filhotes_por_femea)
 
-  # Segurança: se ninguém acasalou, devolve a geração anterior
-  if(total_filhotes == 0) return(list(male_z_next=male_z_surv, female_z_next=female_z_gen))
+  # CASO DEGENERADO — regra única nos três motores (Estudos 2, 3 e 4).
+  # Duas situações impedem formar a geração seguinte:
+  #   (a) ninguém acasalou, então não há filhotes;
+  #   (b) há filhotes, mas menos do que as vagas, e o desenho exige N constante.
+  # Nos dois casos devolvemos NULL: quem chama ENCERRA a réplica e registra em
+  # que geração isso aconteceu (coluna extincao_gen). A versão antiga devolvia a
+  # geração anterior, o que fabricava uma geração de pais imortais e, pior,
+  # devolvia só os SOBREVIVENTES, encolhendo a população em silêncio: dali em
+  # diante runif(N_machos) reciclava um V mais curto e male_z_gen[survive]
+  # passava a produzir NA sem nenhum aviso.
+  if (total_filhotes < N_males_next + N_females_next) return(NULL)
 
   moms <- rep(1:n_femeas, times = num_filhotes_por_femea)
 
@@ -344,12 +353,17 @@ produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, 
   }
   z_filhotes <- pmax(0, midparent + desvio)
 
-  # Capacidade de carga: mortalidade aleatória até as vagas
-  vagas <- min(N_males_next + N_females_next, total_filhotes)
-  z_sorteados <- sample(z_filhotes, size = vagas, replace = FALSE)
-  meio <- floor(vagas / 2)
+  # Capacidade de carga: mortalidade aleatória até as vagas.
+  # O sorteio é por ÍNDICE e não por valor. Com uma característica só os dois são
+  # equivalentes (sample sobre um vetor é sample.int seguido de indexação), mas o
+  # Estudo 4 exige a forma por índice, porque lá z e p do mesmo filhote precisam
+  # viajar juntos. Padronizado aqui para que os três motores tenham a mesma forma.
+  vagas <- N_males_next + N_females_next
+  idx   <- sample(seq_len(total_filhotes), size = vagas, replace = FALSE)
+  meio  <- floor(vagas / 2)
 
-  list(male_z_next = z_sorteados[1:meio], female_z_next = z_sorteados[(meio + 1):(meio * 2)])
+  list(male_z_next   = z_filhotes[idx[1:meio]],
+       female_z_next = z_filhotes[idx[(meio + 1):(2 * meio)]])
 }
 
 
@@ -458,9 +472,11 @@ simulate_evolution <- function(
   female_z_gen <- female_z_gen1
   
   out <- vector("list", generations)
-  
+  extincao_gen <- NA_integer_   # geração em que a réplica foi encerrada; NA = chegou ao fim
+  M_final <- NULL; male_z_final <- NULL; female_p_final <- NULL
+
   for (t in seq_len(generations)) {
-    
+
     # RE-MUESTREO (Congelando a Evolução da Preferência)
     # En cada generación, las preferencias femeninas son tiradas de nuevo desde cero 
     # de una distribución fija N(φ=5, σ_p). No se heredan de las madres.
@@ -472,12 +488,16 @@ simulate_evolution <- function(
     
     female_s <- pmax(0, rnorm(N_femeas, mean = 2, sd = sigma_s))
     
+    # length(male_z_gen) em vez de N_machos: são sempre iguais no desenho atual,
+    # mas escrito assim o passo nunca recicla um V mais curto se a população
+    # encolher por algum motivo (o que gerava NA silenciosos).
+    n_machos_atual <- length(male_z_gen)
     if (selecao_natural) {
       V <- exp(-gamma * (male_z_gen - phi)^2)
-      survive <- runif(N_machos) <= V
+      survive <- runif(n_machos_atual) <= V
       survive <- ensure_min_survivors(survive, V, min_surv = 2)
     } else {
-      survive <- rep(TRUE, N_machos)  # V_j = 1: todos os machos sobrevivem
+      survive <- rep(TRUE, n_machos_atual)  # V_j = 1: todos os machos sobrevivem
     }
     male_z_surv <- male_z_gen[survive]
     
@@ -494,7 +514,13 @@ simulate_evolution <- function(
       sigma_p = sigma_p, sigma_z_init = sigma_z_init, encounters_n = encounters_n,
       k_fixo = ifelse(is.null(k_fixo), NA_integer_, as.integer(k_fixo)),
       selecao_natural = selecao_natural,
-      zbar_males = mean(male_z_surv), varz_males = var(male_z_surv), metrics
+      zbar_males = mean(male_z_surv), varz_males = var(male_z_surv),
+      # Tamanho do pool de machos disponíveis. Não é constante: cai com sigma_z
+      # quando a seleção natural está ligada, e isso muda a densidade da rede
+      # independentemente de qualquer efeito da escolha feminina. Registrado para
+      # poder entrar como covariável na análise.
+      n_machos_surv = length(male_z_surv),
+      metrics
     )
     
     if (t == generations && return_details == TRUE) {
@@ -505,12 +531,18 @@ simulate_evolution <- function(
     
     offspring <- produce_offspring(M, male_z_surv, female_z_gen, N_machos, N_femeas, eps_sd = eps_sd,
                                    segregacao = segregacao, mut_sd = mut_sd)
+    # Réplica encerrada: não há filhotes suficientes para a geração seguinte.
+    # Guardamos as gerações já rodadas e registramos ONDE parou, para que a perda
+    # seja contável na análise em vez de virar uma réplica que some no filtro
+    # generation == 100.
+    if (is.null(offspring)) { extincao_gen <- t; break }
     male_z_gen   <- offspring$male_z_next
     female_z_gen <- offspring$female_z_next
   }
-  
+
   df_out <- dplyr::bind_rows(out)
-  
+  df_out$extincao_gen <- extincao_gen
+
   if (return_details) {
     return(list(
       dados_tabela = df_out,

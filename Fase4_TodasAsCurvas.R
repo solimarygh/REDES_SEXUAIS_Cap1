@@ -49,7 +49,7 @@ n_replicas <- 30   # RODADA DE EXPLORAÇÃO (sem regra de escape). Final: 100.
 cenarios_fase4 <- expand.grid(
   tipo_selecao = c("uniform", "gaussian", "sigmoid", "u-shaped"),
   sigma_p = valores_sigma_p,
-  encounters_n = c(200, 40, 10), # 100%, 20% e 5% de N=200
+  encounters_n = c(200, 40, 10), # nº ABSOLUTO de machos distintos avaliados. 200 = sem restrição de busca (o código faz min(A_max, sobreviventes)); NÃO ler como porcentagem: com seleção natural o pool tem menos de 200
   k_fixo = c(5L, 10L, 20L),      # acasalamentos fixos por fêmea (sugestão Miudo)
   selecao_natural = c(TRUE, FALSE), # com/sem seleção natural viabilidade
   replica = 1:n_replicas

@@ -351,7 +351,8 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
   acasalaram   <- colSums(M) > 0
   num_filhotes_por_femea <- ifelse(acasalaram, fecundidade_base, 0)
   total_filhotes         <- sum(num_filhotes_por_femea)
-  if (total_filhotes == 0) return(NULL)
+  # CASO DEGENERADO: mesma regra dos Estudos 2 e 3
+  if (total_filhotes < N_males_next + N_females_next) return(NULL)
 
   moms <- rep(seq_len(n_femeas), times = num_filhotes_por_femea)
   dads <- vapply(moms, function(mom) {
@@ -381,10 +382,9 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
   p_filhotes <- pmax(0, midparent_p + desvio_segregacao(c(male_p_surv, female_p_gen)))
 
   # Capacidade de carga: mortalidade aleatória, POR ÍNDICE
-  vagas <- min(N_males_next + N_females_next, total_filhotes)
+  vagas <- N_males_next + N_females_next
   idx   <- sample(seq_len(total_filhotes), size = vagas, replace = FALSE)
   meio  <- floor(vagas / 2)
-  if (meio < 1) return(NULL)
   i_m <- idx[1:meio]
   i_f <- idx[(meio + 1):(2 * meio)]
 
@@ -412,6 +412,7 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
   female_p_gen <- pmax(0, rnorm(N_femeas, phi, sigma_p_init))
 
   out <- vector("list", generations)
+  extincao_gen <- NA_integer_   # geração em que a réplica foi encerrada; NA = chegou ao fim
 
   for (t in seq_len(generations)) {
 
@@ -459,6 +460,7 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
       },
       zbar_males = mean(male_z_surv), varz_males = var(male_z_surv),
       pbar_femeas = mean(female_p),   varp_femeas = var(female_p),
+      n_machos_surv = length(male_z_surv),   # pool disponível: covariável de densidade
       metrics
     )
 
@@ -469,14 +471,16 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
                                    fecundidade_base = fecundidade_base,
                                    segregacao = segregacao,
                                    eps_sd = eps_sd, mut_sd = mut_sd)
-    if (is.null(off)) break   # ninguém acasalou: encerra a réplica
+    if (is.null(off)) { extincao_gen <- t; break }   # encerra e registra onde parou
     male_z_gen   <- off$male_z_next
     male_p_gen   <- off$male_p_next
     female_z_gen <- off$female_z_next
     female_p_gen <- off$female_p_next
   }
 
-  dplyr::bind_rows(out)
+  df_out <- dplyr::bind_rows(out)
+  df_out$extincao_gen <- extincao_gen
+  df_out
 }
 
 # =====================================================================
@@ -614,7 +618,10 @@ coisas diferentes em média:
 
 **Fatores cruzados em todos os estudos.**
 - A_max: quantos machos distintos cada fêmea consegue avaliar antes de decidir (200, 40 ou 10,
-  ou seja, 100%, 20% e 5% dos machos). Representa o custo ecológico de procurar parceiro.
+  em número absoluto). Representa o custo ecológico de procurar parceiro. O nível 200 é a
+  condição de saturação, "sem restrição de busca", e não um terceiro ponto equidistante do
+  gradiente. Ver a seção sobre o tamanho do pool de machos: os rótulos percentuais que usávamos
+  antes eram enganosos.
 - k: quantos parceiros cada fêmea acasala (5, 10 ou 20). Representa o grau de poliandria.
 - Seleção natural de viabilidade sobre o traço do macho, ligada ou desligada.
 
@@ -701,12 +708,65 @@ e 3 só para medir isso e poder reportar no paper. Não é preciso refazer os es
 realizado depende da rede daquela geração, não da história evolutiva, então uma amostra pequena
 de cenários já dá a tabela.
 
-**Uma nota relacionada sobre o rótulo de A_max = 200.** Descrevemos A_max = 200 como "100% dos
-machos", e isso só é exato quando a seleção natural está desligada. Com a seleção ligada, o
-código avalia `min(A_max, número de sobreviventes)`, e o número de sobreviventes cai com sigma_z:
-cerca de 169 machos com sigma_z = 1.0 e cerca de 124 com sigma_z = 2.0. Então A_max = 200 com
-seleção natural quer dizer "ela avalia todos os que sobraram", que é um regime qualitativamente
-diferente de A_max = 40 ou 10, e não um terceiro ponto no mesmo gradiente.
+---
+
+## O tamanho do pool de machos não é constante
+
+Esta seção nasceu de uma observação sobre o rótulo de A_max, mas o problema de fundo acabou
+sendo outro, e maior.
+
+**Primeiro, o que NÃO é um problema.** Descrevemos os níveis de A_max como "100%, 20% e 5% de
+N = 200". Os rótulos percentuais estão errados quando a seleção natural está ligada, mas o
+tratamento em si continua comparável: A_max = 40 quer dizer "ela avalia 40 machos" com a seleção
+ligada ou desligada, e A_max = 200 quer dizer "ela avalia todos os disponíveis" nos dois casos,
+porque o código faz `min(A_max, número de sobreviventes)`. A correção aqui é só de rótulo:
+descrever A_max em número absoluto de machos avaliados, e não em porcentagem. O que muda é a
+interpretação de A_max = 200, que não é um terceiro ponto equidistante num gradiente, e sim a
+condição de saturação, "sem restrição de busca". Por isso A_max deve entrar nos modelos como
+fator, nunca como covariável contínua.
+
+**Segundo, o que é um problema de verdade.** O número de machos disponíveis muda de cenário para
+cenário, porque a seleção natural de viabilidade remove uma fração que depende de sigma_z. A
+fração que sobrevive é aproximadamente `1 / sqrt(1 + 2 gamma sigma_z^2)`, ou seja, com
+gamma = 0.2:
+
+| sigma_z | 0.2 | 0.5 | 0.8 | 1.0 | 1.2 | 1.5 | 2.0 |
+|---|---|---|---|---|---|---|---|
+| Machos sobreviventes (de 200) | 198 | 191 | 178 | 169 | 159 | 145 | 124 |
+
+O pool encolhe 37% ao longo do gradiente. Como o número de fêmeas e o k continuam os mesmos, o
+número total de arestas da rede não muda, mas ele se reparte entre menos machos: com k = 5, o
+grau médio dos machos passa de cerca de 5.1 para cerca de 8.1. Isso afeta diretamente o Is, a
+centralização e o aninhamento, e não tem nada a ver com a escolha feminina.
+
+**Onde isso morde.** No Estudo 2 pouco, porque sigma_z fica fixo em 1.0 e o pool é estável. No
+Estudo 1 e no Estudo 3 morde de frente, porque ali sigma_z é justamente um eixo do experimento:
+parte de qualquer tendência das métricas ao longo de sigma_z, nos cenários com seleção natural
+ligada, é apenas o pool encolhendo. E como a comparação entre seleção natural ligada e desligada
+é um dos nossos contrastes, vale lembrar que os dois regimes diferem em duas coisas ao mesmo
+tempo: na distribuição do traço e no tamanho do pool.
+
+**O que fazer.** Três caminhos, em ordem de custo.
+
+1. Registrar e controlar. É o que foi feito agora: os três motores passam a gravar
+   `n_machos_surv` (o `Fase_Controle.R` já gravava). Com essa coluna, o tamanho do pool entra
+   como covariável nos modelos e o efeito de sigma_z pode ser lido líquido de densidade. Custo
+   praticamente zero, e não muda o modelo.
+2. Redefinir A_max como proporção do pool, `round(fracao * n_machos_surv)` em vez de um número
+   fixo. Isso tornaria o custo de busca comparável entre regimes, mas não resolve o problema
+   principal, que é a densidade da rede, e ainda quebraria a comparação com tudo o que já foi
+   rodado.
+3. Manter o pool adulto constante. Seria o mais limpo: sortear machos juvenis em excesso e deixar
+   a seleção de viabilidade agir até que sobrem exatamente 200 adultos. Biologicamente é
+   defensável, porque a seleção de viabilidade age antes do censo de adultos, e removeria o
+   confundimento na origem. Mas mudaria o modelo, obrigaria a refazer os três estudos, e faria
+   o Estudo 4 deixar de ser comparável com eles.
+
+**A recomendação é a opção 1.** O caminho 3 é mais bonito, mas o valor dos quatro estudos está
+justamente em serem comparáveis entre si, e trocar a regra agora sacrificaria isso para corrigir
+algo que se resolve com uma covariável. O que precisa acontecer é: usar `n_machos_surv` na
+análise, declarar o mecanismo nos Methods, e trocar os rótulos percentuais de A_max por números
+absolutos.
 
 **Decisões de modelo tomadas nesta rodada.**
 1. Amostragem sem reposição. A_max passa a ser literalmente o número de machos distintos
@@ -787,12 +847,28 @@ herdáveis são simplesmente re-sorteadas na geração seguinte.
 aleatória, e é a fonte de deriva genética do modelo. Uma característica só evolui de forma
 dirigida se alguns pais colocaram mais filhotes nesse pote do que outros.
 
-**Um caso extremo que o código trata.** Se numa geração absolutamente nenhuma fêmea acasalar, o
-pote fica vazio. Nos Estudos 3 e 4 a réplica é encerrada ali e as gerações já rodadas são
-mantidas. No Estudo 2 o código repete a geração anterior em vez de encerrar. Essa diferença é
-uma inconsistência menor herdada da ordem em que os scripts foram escritos, e vale uniformizar
-antes da rodada final. Na prática ela não deve estar afetando nada, porque a taxa de fêmeas sem
-acasalar nunca chegou perto de 100% em nenhum cenário.
+**O caso degenerado, e por que ele merece uma regra explícita.** Pode acontecer de o pote não
+dar para formar a geração seguinte, seja porque nenhuma fêmea acasalou, seja porque acasalaram
+tão poucas que os filhotes não chegam às 400 vagas (o que exigiria mais de 96% das fêmeas sem
+acasalar). A regra agora é a mesma nos três motores: a réplica é encerrada ali, as gerações já
+rodadas são mantidas, e a coluna `extincao_gen` guarda em que geração isso aconteceu. Quando a
+réplica chega ao fim normalmente, `extincao_gen` fica NA.
+
+Vale explicar por que não ficamos com nenhuma das duas soluções anteriores. O Estudo 2 devolvia a
+geração anterior, o que fabrica uma geração de pais imortais que não deixaram descendência mas
+continuam na população. E devolvia apenas os machos sobreviventes, não os 200: a população
+encolhia em silêncio, e a partir dali o passo de viabilidade reciclava um vetor mais curto,
+`male_z_gen[survive]` passava a devolver NA, e a réplica seguia rodando produzindo lixo sem
+nenhum aviso. O Estudo 3 encerrava a réplica, que é o correto, mas sem deixar registro: ela
+entrava no conjunto de dados apenas com menos gerações, e desaparecia depois no filtro
+`generation == 100`. Como as réplicas que falham são justamente as dos cenários mais duros, essa
+perda silenciosa seria enviesada.
+
+Com a coluna `extincao_gen`, quantas réplicas se extinguem por cenário passa a ser um resultado
+que se pode reportar: é a medida de quando as regras de acasalamento foram restritivas demais
+para a população se sustentar. Na prática esperamos que seja zero em todos os cenários já
+rodados, porque a proporção de fêmeas sem acasalar nunca chegou perto de 96%, mas isso agora fica
+verificável em vez de suposto.
 
 ---
 
@@ -903,21 +979,18 @@ o desenho. Os nomes foram uniformizados assim:
 então continua sendo `p_filhotes` e não `z_filhotes`: a letra diz qual característica é, e é
 justamente ela que distingue um estudo do outro. O que se uniformiza é todo o resto do nome.
 
-**Duas assimetrias que ficaram de propósito.** A primeira é `sigma_p` no Estudo 2 contra
-`sigma_p_init` no Estudo 3: os nomes são diferentes porque as coisas são diferentes, um é
-parâmetro imposto a cada geração e o outro é condição inicial, como está explicado na seção do
-Estudo 3. A segunda é o tratamento do caso degenerado: o Estudo 2 devolve a geração anterior e o
-Estudo 3 devolve NULL, o que encerra a réplica. Essa segunda continua sendo uma inconsistência de
-verdade, não uma diferença deliberada, e vale resolver antes da rodada final.
+**Uma assimetria que ficou de propósito.** `sigma_p` no Estudo 2 contra `sigma_p_init` no
+Estudo 3: os nomes são diferentes porque as coisas são diferentes, um é parâmetro imposto a cada
+geração e o outro é condição inicial, como está explicado na seção do Estudo 3.
 
-**Uma diferença que deixou de existir na prática mas ainda merece atenção.** O Estudo 2 sorteia
-os sobreviventes por valor (`sample(z_filhotes, ...)`) e o Estudo 3 sorteia por índice
+**O sorteio dos sobreviventes agora é por índice nos três motores.** O Estudo 2 sorteava por
+valor (`sample(z_filhotes, ...)`) e o Estudo 3 por índice
 (`sample(seq_len(total_filhotes), ...)`). Com uma única característica herdável os dois são
 equivalentes, porque `sample` sobre um vetor é implementado como sorteio de índices seguido de
-indexação. Mas no Estudo 4 só a forma por índice funciona, então vale padronizar tudo por índice
-para que o padrão do código já seja o correto quando as duas características entrarem. Como essa
-mudança mexe numa chamada de sorteio, convém confirmar num cenário com semente fixa que o
-resultado sai idêntico antes de adotá-la em definitivo.
+indexação, e portanto consome o mesmo RNG. Mas no Estudo 4 só a forma por índice funciona, então
+o Estudo 2 foi padronizado para ela: assim o padrão do código já está correto quando as duas
+características entrarem. Como a mudança mexe numa chamada de sorteio, vale confirmar num cenário
+com semente fixa que o resultado sai idêntico.
 
 ---
 
