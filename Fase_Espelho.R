@@ -41,9 +41,11 @@ produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
                                       N_males_next = 200, N_females_next = 200,
                                       fecundidade_base = 50, eps_sd = 0.2,
                                       segregacao = c("infinitesimal", "fixa"),
-                                      mut_sd = 0.05) {
+                                      mut_sd = 0.05, fator_juvenis = 3) {
   segregacao <- match.arg(segregacao)
   n_femeas <- ncol(M)
+  # Machos saem como JUVENIS; o censo adulto acontece na geração seguinte.
+  N_machos_juv <- N_males_next * fator_juvenis
 
   # Fecundidade neutra: quem acasalou deixa F filhotes; quem não acasalou, 0.
   acasalaram   <- colSums(M) > 0
@@ -54,7 +56,7 @@ produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
   # ou ninguém acasalou, ou os filhotes não bastam para preencher as vagas com N
   # constante. Nos dois casos NULL, e quem chama encerra a réplica registrando a
   # geração em extincao_gen.
-  if (total_filhotes < N_males_next + N_females_next) return(NULL)
+  if (total_filhotes < N_machos_juv + N_females_next) return(NULL)
 
   moms <- rep(seq_len(n_femeas), times = num_filhotes_por_femea)
   dads <- vapply(moms, function(mom) {
@@ -90,12 +92,11 @@ produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
   # Aqui o sorteio é por ÍNDICE e não por valor. Com uma única característica os
   # dois são equivalentes; a forma por índice está aqui porque é a que o Estudo 4
   # exige (lá z e p do mesmo filhote precisam viajar juntos).
-  vagas <- N_males_next + N_females_next
+  vagas <- N_machos_juv + N_females_next
   idx   <- sample(seq_len(total_filhotes), size = vagas, replace = FALSE)
-  meio  <- floor(vagas / 2)
 
-  list(male_p_next   = p_filhotes[idx[1:meio]],
-       female_p_next = p_filhotes[idx[(meio + 1):(2 * meio)]])
+  list(male_p_juv    = p_filhotes[idx[seq_len(N_machos_juv)]],
+       female_p_next = p_filhotes[idx[(N_machos_juv + 1):vagas]])
 }
 
 # ---------------------------------------------------------------------
@@ -108,11 +109,13 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
                              tipo_selecao = "gaussian", encounters_n = 200,
                              selecao_natural = TRUE, k_fixo = NULL,
                              fecundidade_base = 50,
-                             segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05) {
+                             segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
+                             fator_juvenis = 3) {
   segregacao <- match.arg(segregacao)
+  N_machos_juv <- N_machos * fator_juvenis
 
   # Preferência: genótipo herdável carregado pelos DOIS sexos
-  male_p_gen   <- pmax(0, rnorm(N_machos, phi, sigma_p_init))   # macho carrega p sem expressar
+  male_p_juv   <- pmax(0, rnorm(N_machos_juv, phi, sigma_p_init))  # macho carrega p sem expressar
   female_p_gen <- pmax(0, rnorm(N_femeas, phi, sigma_p_init))
 
   out <- vector("list", generations)
@@ -120,30 +123,31 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
 
   for (t in seq_len(generations)) {
 
-    # (1) Traço do macho: AMBIENTAL — re-sorteado toda geração, não herdado
-    male_z_gen <- pmax(0, rnorm(N_machos, phi, sigma_z))
+    # (1) Traço do macho: AMBIENTAL — re-sorteado toda geração, não herdado.
+    # Sorteado para todos os JUVENIS, porque é sobre eles que a viabilidade age.
+    male_z_juv <- pmax(0, rnorm(N_machos_juv, phi, sigma_z))
 
     female_p <- female_p_gen                                     # HERDADA (evolui)
     female_s <- pmax(0, rnorm(N_femeas, mean = 2, sd = sigma_s))  # choosiness fixa (não evolui)
 
-    # (2) Seleção de viabilidade: filtro ecológico sobre quem está disponível
-    if (selecao_natural) {
-      V <- exp(-gamma * (male_z_gen - phi)^2)
-      survive <- runif(N_machos) <= V
-      survive <- ensure_min_survivors(survive, V, min_surv = 2)
-    } else {
-      survive <- rep(TRUE, N_machos)
-    }
-    male_z_surv <- male_z_gen[survive]
-    male_p_surv <- male_p_gen[survive]
+    # (2) Censo de adultos constante: a viabilidade filtra os juvenis e sobram
+    # sempre N_machos adultos. O índice é o mesmo para z e p, então o p que cada
+    # macho carrega acompanha o macho certo.
+    idx_adultos <- selecionar_machos_adultos(male_z_juv, N_machos, phi, gamma, selecao_natural)
+    male_z_surv <- male_z_juv[idx_adultos]
+    male_p_surv <- male_p_juv[idx_adultos]
 
     # (3) Rede de acasalamentos (sem regra de escape)
     M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_selecao,
                              encounters_n = encounters_n, k_fixo = k_fixo)
-    metrics <- calc_metrics_from_M(M)
+    metrics <- calc_metrics_from_M(M, k_alvo = k_fixo)
 
-    # (4) Registro: o foco é a distribuição da PREFERÊNCIA
-    pool_p <- c(male_p_gen, female_p_gen)
+    # (4) Registro: o foco é a distribuição da PREFERÊNCIA.
+    # O pool genotípico é o CENSO ADULTO (200 machos + 200 fêmeas), e não o pool
+    # de juvenis, para ficar balanceado entre os sexos. Como no espelho o traço z
+    # é ambiental e independente de p, a seleção de viabilidade não enviesa p:
+    # male_p_surv é uma amostra não enviesada de male_p_juv.
+    pool_p <- c(male_p_surv, female_p_gen)
     out[[t]] <- data.frame(
       generation = t, tipo_selecao = tipo_selecao, segregacao = segregacao,
       sigma_z = sigma_z, sigma_p_init = sigma_p_init,
@@ -165,12 +169,13 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
     off <- produce_offspring_espelho(M, male_p_surv, female_p_gen,
                                      N_machos, N_femeas,
                                      fecundidade_base = fecundidade_base, eps_sd = eps_sd,
-                                     segregacao = segregacao, mut_sd = mut_sd)
+                                     segregacao = segregacao, mut_sd = mut_sd,
+                                     fator_juvenis = fator_juvenis)
     # Réplica encerrada: guardamos as gerações já rodadas e registramos ONDE parou,
     # para que a perda seja contável na análise em vez de virar uma réplica que
     # some no filtro generation == 100.
     if (is.null(off)) { extincao_gen <- t; break }
-    male_p_gen   <- off$male_p_next
+    male_p_juv   <- off$male_p_juv
     female_p_gen <- off$female_p_next
   }
 
@@ -190,7 +195,7 @@ if (!exists("ESPELHO_SO_FUNCOES") || !isTRUE(ESPELHO_SO_FUNCOES)) {
   cat("Iniciando Fase Espelho (a preferência evolui)...\n")
 
   valores_sigma_z <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
-  n_replicas      <- 30   # RODADA DE EXPLORAÇÃO (discutir com Erika e Miudo). Final: 100.
+  n_replicas      <- 20   # RODADA DE EXPLORAÇÃO antes da reunião. Final: subir depois.
 
   cenarios <- expand.grid(
     tipo_selecao    = c("uniform", "gaussian", "sigmoid", "u-shaped"),
@@ -215,13 +220,13 @@ if (!exists("ESPELHO_SO_FUNCOES") || !isTRUE(ESPELHO_SO_FUNCOES)) {
   sufixo_rep <- if (REP_MIN == 1 && REP_MAX == n_replicas) "" else sprintf("_rep%d-%d", REP_MIN, REP_MAX)
   cat(sprintf("Réplicas: %d a %d  (%d cenários)\n", REP_MIN, REP_MAX, nrow(cenarios)))
 
-  arquivo_backup <- file.path(diretorios$dados, paste0("backup_Espelho", sufixo_rep, ".rds"))
-  arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Espelho", sufixo_rep, ".rds"))
+  arquivo_backup <- file.path(diretorios$dados, paste0("backup_Espelho_censoConst", sufixo_rep, ".rds"))
+  arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Espelho_censoConst", sufixo_rep, ".rds"))
 
   # Se este intervalo ainda não tem backup próprio, aproveita o que já foi calculado
   # numa corrida inteira: o backup completo é indexado pelo índice GLOBAL, então
   # basta extrair as posições deste intervalo. Evita recalcular o que já existe.
-  arquivo_backup_full <- file.path(diretorios$dados, "backup_Espelho.rds")
+  arquivo_backup_full <- file.path(diretorios$dados, "backup_Espelho_censoConst.rds")
 
   if (file.exists(arquivo_backup)) {
     lista <- readRDS(arquivo_backup)

@@ -41,29 +41,27 @@ simulate_controle <- function(N_machos = 200, N_femeas = 200,
                               sigma_z = 1.0, sigma_p = 1.0, sigma_s = 0.2,
                               phi = 5, gamma = 0.2,
                               tipo_selecao = "gaussian", encounters_n = 200,
-                              selecao_natural = TRUE, k_fixo = NULL) {
+                              selecao_natural = TRUE, k_fixo = NULL,
+                              fator_juvenis = 3) {
 
-  # (1) Sorteio da população: nada vem de geração anterior
-  male_z   <- pmax(0, rnorm(N_machos, phi, sigma_z))
-  female_p <- pmax(0, rnorm(N_femeas, phi, sigma_p))
-  female_s <- pmax(0, rnorm(N_femeas, mean = 2, sd = sigma_s))
+  # (1) Sorteio da população: nada vem de geração anterior.
+  # Os machos são sorteados como JUVENIS, porque é sobre eles que a viabilidade age.
+  N_machos_juv <- N_machos * fator_juvenis
+  male_z_juv <- pmax(0, rnorm(N_machos_juv, phi, sigma_z))
+  female_p   <- pmax(0, rnorm(N_femeas, phi, sigma_p))
+  female_s   <- pmax(0, rnorm(N_femeas, mean = 2, sd = sigma_s))
 
-  # (2) Seleção natural de viabilidade (mesma regra dos outros estudos).
-  # Aqui ela é puramente um filtro ecológico: muda quais machos estão disponíveis,
-  # mas não tem consequência evolutiva porque não existe geração seguinte.
-  if (selecao_natural) {
-    V <- exp(-gamma * (male_z - phi)^2)
-    survive <- runif(N_machos) <= V
-    survive <- ensure_min_survivors(survive, V, min_surv = 2)
-  } else {
-    survive <- rep(TRUE, N_machos)
-  }
-  male_z_surv <- male_z[survive]
+  # (2) Censo de adultos constante (mesma regra dos outros estudos).
+  # Aqui a seleção natural é puramente um filtro ecológico: muda quais machos
+  # estão disponíveis, mas não tem consequência evolutiva porque não existe
+  # geração seguinte. E, com o censo constante, ela também não muda quantos são.
+  idx_adultos <- selecionar_machos_adultos(male_z_juv, N_machos, phi, gamma, selecao_natural)
+  male_z_surv <- male_z_juv[idx_adultos]
 
   # (3) Rede de acasalamentos (mesma função dos outros estudos, sem regra de escape)
   M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_selecao,
                            encounters_n = encounters_n, k_fixo = k_fixo)
-  metrics <- calc_metrics_from_M(M)
+  metrics <- calc_metrics_from_M(M, k_alvo = k_fixo)
 
   data.frame(
     tipo_selecao = tipo_selecao,
@@ -87,7 +85,7 @@ if (!exists("CONTROLE_SO_FUNCOES") || !isTRUE(CONTROLE_SO_FUNCOES)) {
   cat("Iniciando Estudo 1: controle nulo (sem herança, uma geração)...\n")
 
   valores_sigma <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
-  n_replicas    <- 30
+  n_replicas    <- 20   # RODADA DE EXPLORAÇÃO antes da reunião. Final: subir depois.
 
   cenarios <- expand.grid(
     tipo_selecao    = c("uniform", "gaussian", "sigmoid", "u-shaped"),
@@ -107,9 +105,9 @@ if (!exists("CONTROLE_SO_FUNCOES") || !isTRUE(CONTROLE_SO_FUNCOES)) {
   cat(sprintf("Réplicas: %d a %d  (%d cenários, 1 geração cada)\n",
               REP_MIN, REP_MAX, nrow(cenarios)))
 
-  arquivo_backup <- file.path(diretorios$dados, paste0("backup_Controle", sufixo_rep, ".rds"))
-  arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Controle", sufixo_rep, ".rds"))
-  arquivo_backup_full <- file.path(diretorios$dados, "backup_Controle.rds")
+  arquivo_backup <- file.path(diretorios$dados, paste0("backup_Controle_censoConst", sufixo_rep, ".rds"))
+  arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Controle_censoConst", sufixo_rep, ".rds"))
+  arquivo_backup_full <- file.path(diretorios$dados, "backup_Controle_censoConst.rds")
 
   if (file.exists(arquivo_backup)) {
     lista <- readRDS(arquivo_backup)

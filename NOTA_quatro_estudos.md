@@ -7,6 +7,11 @@ estudo faz, não os resultados. Os resultados preliminares vão num documento à
 Esta versão da nota foi conferida linha a linha contra o código. A última seção lista, para
 cada afirmação, o arquivo e a função onde ela pode ser verificada.
 
+O histórico das decisões que levaram a este desenho está em duas notas de reunião:
+`NOTA_reuniao_2026-07-29_variancia.md` (variância genética e segregação infinitesimal) e
+`NOTA_reuniao_2026-08-08_desenho.md` (o teto de k, o censo de adultos constante e o caso
+degenerado). Esta nota descreve o desenho; aquelas contam por que ele é assim.
+
 ---
 
 ## Vocabulário usado nesta nota
@@ -123,10 +128,12 @@ mantê-lo separado e deixar o Estudo 4 livre para ser desenhado segundo a sua pr
 
 **Desenho.** Cruzamento completo de sigma_p (7 valores: 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0) por
 sigma_z (os mesmos 7 valores), somado aos mesmos fatores dos outros estudos: 4 curvas de
-preferência, 3 valores de A_max, 3 valores de k e 2 regimes de seleção natural. Com 30 réplicas,
-isso dá 4 x 7 x 7 x 3 x 3 x 2 x 30 = 105.840 cenários, de uma geração cada.
+preferência, 3 valores de A_max, 3 valores de k e 2 regimes de seleção natural. Com 20 réplicas,
+isso dá 4 x 7 x 7 x 3 x 3 x 2 x 20 = 70.560 cenários, de uma geração cada.
 
-**Estado.** Concluído. Script `Fase_Controle.R`, semente base 2029.
+**Estado.** Uma primeira rodada com 30 réplicas foi concluída e é a base das análises citadas
+nesta nota. Vai ser refeita com o modelo atual (censo de adultos constante e poliandria
+realizada). Script `Fase_Controle.R`, semente base 2029.
 
 ---
 
@@ -156,9 +163,10 @@ quanto, depende da curva de preferência e é justamente o que o estudo mede.
 e oportunidade de seleção sexual Is), média e variância do traço dos machos sobreviventes ao
 longo das gerações, e a proporção de fêmeas que ficaram sem acasalar.
 
-**Estado.** Concluído. 15.120 cenários (4 curvas de preferência x 7 valores de sigma_p x 3
-valores de A_max x 3 valores de k x 2 regimes de seleção natural x 30 réplicas), 100 gerações
-cada, sem falhas. Script `Fase4_TodasAsCurvas.R`, semente base 2026.
+**Estado.** Uma primeira rodada foi concluída sem falhas, com 15.120 cenários e 30 réplicas.
+Vai ser refeita com o modelo atual: 10.080 cenários (4 curvas de preferência x 7 valores de
+sigma_p x 3 valores de A_max x 3 valores de k x 2 regimes de seleção natural x 20 réplicas),
+100 gerações cada. Script `Fase4_TodasAsCurvas.R`, semente base 2026.
 
 ---
 
@@ -213,10 +221,10 @@ preferência. A preferência é registrada de duas formas: no pool genotípico (
 juntos, que é a variável evolutiva propriamente dita) e apenas nas fêmeas (que é a preferência
 efetivamente expressa e que gera a rede).
 
-**Estado.** Concluído. 15.120 cenários, mesmo desenho fatorial do Estudo 2, 30 réplicas por
-cenário, 100 gerações cada. Script `Fase_Espelho.R`, semente base 2028. Os dados foram rodados
-repartidos entre duas máquinas e depois reunidos; a conferência confirmou 504 cenários com 30
-réplicas cada.
+**Estado.** Uma primeira rodada foi concluída com 15.120 cenários e 30 réplicas, repartida entre
+duas máquinas e depois reunida; a conferência confirmou 504 cenários com 30 réplicas cada. Vai
+ser refeita com o modelo atual: 10.080 cenários, mesmo desenho fatorial do Estudo 2, 20 réplicas,
+100 gerações cada. Script `Fase_Espelho.R`, semente base 2028.
 
 ---
 
@@ -290,8 +298,8 @@ com o desenho experimental.
 
 ### Proposta de desenho: a diagonal em vez da superfície
 
-Os Estudos 2 e 3 gastam 15.120 cenários cada um para varrer um eixo. Cruzar sigma_p_init com
-sigma_z_init no Estudo 4 custaria 105.840 cenários com 100 gerações cada, o que é inviável.
+Os Estudos 2 e 3 gastam 10.080 cenários cada um para varrer um eixo. Cruzar sigma_p_init com
+sigma_z_init no Estudo 4 custaria 70.560 cenários com 100 gerações cada, o que é inviável.
 A análise do Estudo 1 sugere um corte defensável.
 
 No Estudo 1, a divergência entre as curvas de preferência no espaço das métricas de topologia
@@ -305,7 +313,7 @@ foi modelada em função da posição no plano sigma_p por sigma_z. O que ficou:
 A leitura é que o que importa é quanta variabilidade existe no sistema como um todo, e não como
 ela está repartida entre os dois sexos. Se isso vale também com as duas características
 evoluindo, então percorrer a diagonal sigma_p_init = sigma_z_init já cobre o gradiente
-relevante, e o desenho volta a caber em 15.120 cenários, do mesmo tamanho dos Estudos 2 e 3.
+relevante, e o desenho volta a caber em 10.080 cenários, do mesmo tamanho dos Estudos 2 e 3.
 
 Duas ressalvas honestas sobre esse argumento. Primeira, o resultado vem de uma única geração sem
 herança, então ele diz respeito ao que a regra de acasalamento faz, e não necessariamente ao que
@@ -492,7 +500,7 @@ if (!exists("COEVO_SO_FUNCOES") || !isTRUE(COEVO_SO_FUNCOES)) {
   cat("Iniciando Estudo 4: co-evolução (traço e preferência herdáveis)...\n")
 
   valores_sigma <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
-  n_replicas    <- 30
+  n_replicas    <- 20
 
   # DIAGONAL: um único eixo sigma_init aplicado às DUAS características.
   # Justificativa no texto: no Estudo 1 a divergência entre curvas de
@@ -693,20 +701,30 @@ truncamento em zero, a variação de s entre fêmeas e o efeito da seleção nat
 distribuição dos machos e portanto aumenta a taxa de aceite da gaussiana. Servem para mostrar a
 ordem de grandeza do problema, não como estimativa exata.
 
-**Um problema que descobrimos ao escrever isto: não dá para verificar o k realizado nos dados
-que já temos.** A saída de cada simulação guarda `prop_femeas_sem_acasalar`, mas não guarda o
-número de parceiros por fêmea, nem a soma da matriz, nem o grau médio. O Is é calculado sobre os
-machos e não permite recuperar o grau das fêmeas. Ou seja, a interação descrita aqui está
-argumentada de forma analítica, mas não medida. Duas colunas baratas em `calc_metrics_from_M`
-resolveriam isso de vez:
-- `grau_medio_femeas`: média de `colSums(M)` entre as fêmeas que acasalaram, ou seja, o k
-  efetivamente realizado.
-- `prop_femeas_atingiu_k`: proporção de fêmeas que chegaram ao teto k.
+**A decisão: k é apetite, não cota.** A fêmea busca até k parceiros; quantos consegue depende da
+disponibilidade e da própria seletividade. A poliandria realizada passa a ser variável resposta,
+e não parâmetro. Três razões sustentam isso. É o que o código sempre fez, porque
+`matings_per_female` é condição de parada e não cota garantida. Converte as células degeneradas
+nas mais interessantes: A_max = 10 com k = 20 não é lixo, é poliandria frustrada, e comparada
+com A_max = 200 e k = 20 é exatamente o teste da H3. E é mais defensável biologicamente, porque
+nenhum organismo tem garantido o seu número de parceiros.
 
-Vale acrescentá-las antes de rodar o Estudo 4, e vale rodar um punhado de réplicas dos Estudos 2
-e 3 só para medir isso e poder reportar no paper. Não é preciso refazer os estudos inteiros: o k
-realizado depende da rede daquela geração, não da história evolutiva, então uma amostra pequena
-de cenários já dá a tabela.
+O reenquadramento exige medir, e por isso `calc_metrics_from_M` passou a gravar
+`grau_medio_femeas` (a poliandria realizada), `prop_femeas_atingiu_k` e `arestas`. Nenhuma delas
+podia ser recuperada dos dados antigos: o Is é calculado sobre os machos e não permite
+reconstruir o grau das fêmeas. Foi a razão mais forte para refazer os três estudos.
+
+**O desenho fatorial fica intacto, os 3 por 3 de A_max e k.** Chegou a ser proposto cortar a
+célula A_max = 10 com k = 10, por ser estatisticamente indistinguível de k = 20. A proposta foi
+retirada: agora que a poliandria realizada é medida, a convergência entre as duas células é
+justamente a evidência de que k é apetite e não cota. Manter o fatorial balanceado vale mais que
+os 11% de computação economizados.
+
+**Uma dúvida de inferência causal, para levar ao Miudo.** Se o grau realizado depende da curva de
+preferência, e o usamos como covariável para comparar curvas, estamos controlando por um mediador
+e não por um confundidor: a curva causa o grau realizado e a topologia, então controlar remove
+parte do efeito causal que queremos medir. A saída provável é reportar as duas coisas, o efeito
+total da curva e o efeito líquido de densidade, declarando que respondem a perguntas diferentes.
 
 ---
 
@@ -746,27 +764,33 @@ ligada, é apenas o pool encolhendo. E como a comparação entre seleção natur
 é um dos nossos contrastes, vale lembrar que os dois regimes diferem em duas coisas ao mesmo
 tempo: na distribuição do traço e no tamanho do pool.
 
-**O que fazer.** Três caminhos, em ordem de custo.
+**O que foi feito: censo de adultos constante.** A seleção de viabilidade passou a agir sobre
+juvenis, antes do censo de adultos. Cada geração começa com três machos juvenis por vaga, a
+viabilidade age sobre eles, e o censo adulto fica sempre em 200 machos. A seleção natural
+continua mudando quais machos estão disponíveis, que é o efeito que nos interessa, e deixa de
+mudar quantos, que era o confundimento. Biologicamente é a formulação mais comum: a mortalidade
+de viabilidade age sobre juvenis e o censo é de adultos.
 
-1. Registrar e controlar. É o que foi feito agora: os três motores passam a gravar
-   `n_machos_surv` (o `Fase_Controle.R` já gravava). Com essa coluna, o tamanho do pool entra
-   como covariável nos modelos e o efeito de sigma_z pode ser lido líquido de densidade. Custo
-   praticamente zero, e não muda o modelo.
-2. Redefinir A_max como proporção do pool, `round(fracao * n_machos_surv)` em vez de um número
-   fixo. Isso tornaria o custo de busca comparável entre regimes, mas não resolve o problema
-   principal, que é a densidade da rede, e ainda quebraria a comparação com tudo o que já foi
-   rodado.
-3. Manter o pool adulto constante. Seria o mais limpo: sortear machos juvenis em excesso e deixar
-   a seleção de viabilidade agir até que sobrem exatamente 200 adultos. Biologicamente é
-   defensável, porque a seleção de viabilidade age antes do censo de adultos, e removeria o
-   confundimento na origem. Mas mudaria o modelo, obrigaria a refazer os três estudos, e faria
-   o Estudo 4 deixar de ser comparável com eles.
+Vale registrar as duas alternativas que foram descartadas, porque o argumento pode voltar.
 
-**A recomendação é a opção 1.** O caminho 3 é mais bonito, mas o valor dos quatro estudos está
-justamente em serem comparáveis entre si, e trocar a regra agora sacrificaria isso para corrigir
-algo que se resolve com uma covariável. O que precisa acontecer é: usar `n_machos_surv` na
-análise, declarar o mecanismo nos Methods, e trocar os rótulos percentuais de A_max por números
-absolutos.
+Registrar e controlar, ou seja, gravar `n_machos_surv` e usá-lo como covariável nos modelos.
+Custo zero e sem mudar o modelo, mas deixa o confundimento na estrutura dos dados e obriga a
+confiar num ajuste estatístico para algo que dá para resolver na origem. Foi a recomendação
+inicial, feita quando ainda supúnhamos que os três estudos não seriam refeitos. A partir do
+momento em que o recorrido completo entrou em cena, ela deixou de fazer sentido. A coluna
+`n_machos_surv` continua sendo gravada, mas agora como verificação e não como correção.
+
+Redefinir A_max como proporção do pool. Tornaria o custo de busca comparável entre regimes, mas
+não resolve o problema principal, que é a densidade, e além disso deixaria A_max e o tamanho do
+pool colineares por construção.
+
+**Uma nota sobre comparabilidade entre estudos.** A objeção original ao censo constante era que
+mudar a regra faria o Estudo 4 deixar de ser comparável com os Estudos 1, 2 e 3, e a inferência
+inteira depende dessa comparação: a diferença entre o Estudo 4 e o Estudo 1 é o que a co-evolução
+acrescentou, e essa subtração não vale se os dois também diferirem na demografia. A objeção era
+correta, mas valia apenas enquanto os três primeiros estudos ficassem como estavam. Como o
+recorrido completo vai acontecer de qualquer maneira, o censo constante passa a valer para os
+quatro e a comparabilidade fica intacta.
 
 **Decisões de modelo tomadas nesta rodada.**
 1. Amostragem sem reposição. A_max passa a ser literalmente o número de machos distintos
@@ -786,7 +810,9 @@ absolutos.
    antigo continua disponível no código (`segregacao = "fixa"`) para comparação, e o modo usado
    fica registrado numa coluna da saída de cada simulação.
 
-**Réplicas.** 30 nesta rodada de exploração, 100 na rodada final.
+**Réplicas.** 20 nesta rodada de exploração, mais na rodada final. São 20 e não mais porque os
+problemas que motivaram o recorrido (o teto de k, o pool de machos, o caso degenerado) são vieses
+sistemáticos e não ruído: mais réplicas não os tocariam.
 
 ---
 
@@ -801,20 +827,28 @@ Os machos começam com traço sorteado de N(5, sigma_z) e as fêmeas com pico de
 sorteado de N(5, sigma_p). Todos os valores são truncados em zero, ou seja, nem o traço nem a
 preferência podem ser negativos.
 
-**2. Seleção natural de viabilidade (ligada ou desligada).** Quando está ligada, cada macho
-sobrevive até a fase de acasalamento com probabilidade
+**2. Seleção natural de viabilidade (ligada ou desligada), com censo de adultos constante.**
+Cada geração começa com um excedente de machos juvenis (três por vaga adulta). Quando a seleção
+está ligada, cada juvenil sobrevive até a fase de acasalamento com probabilidade
 
     V = exp(-gamma * (z - phi)^2),  com gamma = 0.2
 
-ou seja, quanto mais o traço do macho se afasta do ótimo ecológico phi = 5, menor a chance dele
-sobreviver. Quem não sobrevive é removido e não entra no pool de acasalamento. Quatro
+ou seja, quanto mais o traço se afasta do ótimo ecológico phi = 5, menor a chance de sobreviver.
+Entre os sobreviventes, sorteiam-se ao acaso os 200 que formam o censo adulto de machos. Assim o
+número de machos disponíveis para acasalar é sempre 200, com ou sem seleção natural. Cinco
 observações importantes:
 - A seleção natural age apenas sobre os machos e apenas sobre o traço, nunca sobre a
   preferência.
-- Quando está desligada, todos os machos sobrevivem (V = 1), e assim isolamos o efeito puro da
-  escolha feminina.
-- Há uma trava de segurança: se menos de 2 machos sobrevivessem, os 2 de maior viabilidade são
-  resgatados. Serve para que a rede nunca fique degenerada demais para calcular as métricas.
+- Quando está desligada, todos os juvenis são equivalentes (V = 1) e o censo é um sorteio
+  aleatório, o que isola o efeito puro da escolha feminina.
+- O censo constante é o que impede que a seleção natural mexa na densidade da rede. Na versão
+  anterior a viabilidade agia sobre os 200 adultos, o pool caía de 198 para 124 ao longo do
+  gradiente de sigma_z, e isso sozinho mexia em Is, centralização e aninhamento. Ver a seção
+  sobre o tamanho do pool de machos.
+- Há uma trava de segurança: se menos de 2 juvenis sobrevivessem, os 2 de maior viabilidade são
+  resgatados. Serve para que a rede nunca fique degenerada demais para calcular as métricas. A
+  coluna `n_machos_surv` grava o censo efetivo, então qualquer cenário em que a trava tenha
+  entrado é identificável na hora.
 - No Estudo 3, em que o traço do macho é ambiental, a seleção natural continua funcionando como
   filtro ecológico (muda quais machos estão disponíveis), mas não tem consequência evolutiva,
   porque o traço não é transmitido aos filhotes. O mesmo vale para o Estudo 1, por não haver
@@ -889,7 +923,8 @@ verificável em vez de suposto.
 | mut_sd | termo mutacional somado à segregação | 0.05 |
 | eps_sd | ruído de segregação do modo antigo | 0.2 (só usado com `segregacao = "fixa"`) |
 | min_surv | mínimo de machos resgatados da seleção natural | 2 |
-| réplicas | repetições independentes por cenário | 30 (final: 100) |
+| réplicas | repetições independentes por cenário | 20 (final: subir depois) |
+| fator_juvenis | machos juvenis sorteados por vaga adulta | 3 |
 | semente base | por estudo, para reprodutibilidade | 2026 (E2), 2028 (E3), 2029 (E1), 2030 (E4) |
 
 Todos os cenários são reprodutíveis: a semente de cada um é `semente base + índice global do
@@ -916,11 +951,16 @@ Calculadas a cada geração sobre a rede bipartita de acasalamentos:
 - **Proporção de fêmeas sem acasalar.** Variável nova nesta rodada. É descritiva nos Estudos 1 e
   2, mas no Estudo 3 é o indicador direto da força de seleção agindo sobre a preferência.
 
-**O que falta medir.** Não registramos o número de parceiros por fêmea, nem o grau médio, nem a
-soma da matriz. Sem isso não dá para saber qual foi o k realizado em cada cenário, que é
-justamente o que a seção sobre a interação entre A_max, k e a curva de preferência mostra ser
-crítico. As colunas `grau_medio_femeas` e `prop_femeas_atingiu_k` deveriam entrar em
-`calc_metrics_from_M` antes do Estudo 4.
+- **Poliandria realizada (`grau_medio_femeas`).** O grau médio das fêmeas que acasalaram, ou
+  seja, quantos parceiros elas de fato conseguiram. Sob o reenquadramento de k como apetite (ver
+  a seção sobre a interação entre A_max, k e a curva de preferência), esta é a variável de
+  poliandria do paper, e não o k nominal.
+- **Proporção que atingiu o teto (`prop_femeas_atingiu_k`).** Quantas fêmeas chegaram ao k que
+  buscavam. Mede diretamente o quanto o teto foi vinculante em cada cenário.
+- **Arestas (`arestas`).** O total de acasalamentos da rede, ou seja, a densidade.
+- **Censo adulto de machos (`n_machos_surv`).** Deve ser sempre 200 com o censo constante; fica
+  gravado como verificação.
+- **Geração de encerramento (`extincao_gen`).** NA quando a réplica chegou ao fim.
 
 Quando a rede é pequena ou degenerada demais para uma métrica fazer sentido (por exemplo, menos
 de dois machos ou menos de duas cópulas para o NODF), a métrica devolve NA em vez de zero. Isso
@@ -1007,7 +1047,7 @@ Esta nota foi conferida contra os scripts. A tabela abaixo diz onde verificar ca
 | Fecundidade neutra, paternidade sorteada, segregação infinitesimal | `01_metricas_e_utilitarios.R`, `produce_offspring` |
 | Exclusão das fêmeas sem acasalar das métricas, retorno de NA | `01_metricas_e_utilitarios.R`, `calc_metrics_from_M` |
 | Sementes, reparto entre máquinas, retomada por backup | `01_metricas_e_utilitarios.R`, `rodar_cenarios` |
-| Estudo 1: uma geração, superfície completa, 105.840 cenários | `Fase_Controle.R` |
+| Estudo 1: uma geração, superfície completa, 70.560 cenários | `Fase_Controle.R` |
 | Estudo 2: sigma_p imposto a cada geração, traço herdável | `Fase4_TodasAsCurvas.R` e `simulate_evolution` |
 | Estudo 3: traço ambiental, preferência herdável bi-parental | `Fase_Espelho.R`, `simulate_espelho` e `produce_offspring_espelho` |
 | Estudo 4: rascunho do motor, ainda sem desenho experimental | `Fase_Coevolucao.R`, e a versão atualizada nesta nota |

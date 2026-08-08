@@ -150,14 +150,18 @@ replay_capturar <- function(seed, tipo_sel, sp, am, gen_alvo,
                             k_fixo = NULL, sel_nat = TRUE,
                             N = N_POP, generations = GEN_MAX,
                             phi = 5, gamma = 0.2, sigma_z_init = 1.0,
-                            sigma_s = 0.2, eps_sd = 0.2) {
+                            sigma_s = 0.2, eps_sd = 0.2, fator_juvenis = 3) {
   set.seed(seed)
 
-  male_z_gen1   <- pmax(0, rnorm(N, mean = phi, sd = sigma_z_init))
+  # Este loop TEM que ser idêntico ao de simulate_evolution(), senão o replay não
+  # reproduz a réplica. Acompanhou a mudança para censo de adultos constante.
+  N_machos_juv  <- N * fator_juvenis
+
+  male_z_gen1   <- pmax(0, rnorm(N_machos_juv, mean = phi, sd = sigma_z_init))
   female_p_gen1 <- pmax(0, rnorm(N, mean = phi, sd = sp))
   female_z_gen1 <- pmax(0, rnorm(N, mean = phi, sd = sigma_z_init))
 
-  male_z_gen   <- male_z_gen1
+  male_z_juv   <- male_z_gen1
   female_z_gen <- female_z_gen1
 
   captura_alvo    <- NULL
@@ -171,21 +175,15 @@ replay_capturar <- function(seed, tipo_sel, sp, am, gen_alvo,
     }
     female_s <- pmax(0, rnorm(N, mean = 2, sd = sigma_s))
 
-    # Bloco de viabilidade: idêntico ao de simulate_evolution()
-    if (sel_nat) {
-      V <- exp(-gamma * (male_z_gen - phi)^2)
-      survive <- runif(N) <= V
-      survive <- ensure_min_survivors(survive, V, min_surv = 2)
-    } else {
-      survive <- rep(TRUE, N)   # V_j = 1: sem consumo de RNG
-    }
-    male_z_surv <- male_z_gen[survive]
+    # Censo de adultos constante: idêntico ao de simulate_evolution()
+    idx_adultos <- selecionar_machos_adultos(male_z_juv, N, phi, gamma, sel_nat)
+    male_z_surv <- male_z_juv[idx_adultos]
 
     M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_sel,
                               encounters_n = am, k_fixo = k_fixo)
 
     # OBRIGATÓRIO: calc_metrics consome RNs (cluster_louvain usa RNG)
-    metrics <- calc_metrics_from_M(M)
+    metrics <- calc_metrics_from_M(M, k_alvo = k_fixo)
 
     if (t == gen_alvo) {
       captura_alvo <- list(
@@ -204,8 +202,10 @@ replay_capturar <- function(seed, tipo_sel, sp, am, gen_alvo,
       Gen_final_dados <- list(Z_Machos = male_z_surv, P_Femeas = female_p)
     }
 
-    offspring    <- produce_offspring(M, male_z_surv, female_z_gen, N, N, eps_sd = eps_sd)
-    male_z_gen   <- offspring$male_z_next
+    offspring    <- produce_offspring(M, male_z_surv, female_z_gen, N, N, eps_sd = eps_sd,
+                                      fator_juvenis = fator_juvenis)
+    if (is.null(offspring)) break   # réplica encerrada (ver produce_offspring)
+    male_z_juv   <- offspring$male_z_juv
     female_z_gen <- offspring$female_z_next
   }
 

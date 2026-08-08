@@ -44,7 +44,7 @@ diretorios <- configurar_diretorios("Fase5_MiudoV2")
 cat("Iniciando Fase 4: O Confronto dos 4 Titãs Evolutivos...\n")
 
 valores_sigma_p <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
-n_replicas <- 30   # RODADA DE EXPLORAÇÃO (sem regra de escape). Final: 100.
+n_replicas <- 20   # RODADA DE EXPLORAÇÃO antes da reunião. Final: subir depois.
 
 cenarios_fase4 <- expand.grid(
   tipo_selecao = c("uniform", "gaussian", "sigmoid", "u-shaped"),
@@ -73,13 +73,13 @@ cenarios_fase4 <- cenarios_fase4[cenarios_fase4$replica >= REP_MIN & cenarios_fa
 sufixo_rep <- if (REP_MIN == 1 && REP_MAX == n_replicas) "" else sprintf("_rep%d-%d", REP_MIN, REP_MAX)
 cat(sprintf("Réplicas: %d a %d  (%d cenários)\n", REP_MIN, REP_MAX, nrow(cenarios_fase4)))
 
-arquivo_backup <- file.path(diretorios$dados, paste0("backup_fase5_semEscape", sufixo_rep, ".rds"))   # nome novo: modelo mudou (sem escape), backup antigo não serve
-arquivo_final  <- file.path(diretorios$dados, paste0("resultados_fase5_semEscape", sufixo_rep, ".rds"))
+arquivo_backup <- file.path(diretorios$dados, paste0("backup_Femeas_censoConst", sufixo_rep, ".rds"))   # nome novo a cada mudança de modelo: censo adulto constante + poliandria realizada. Backups antigos NÃO servem.
+arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Femeas_censoConst", sufixo_rep, ".rds"))
 
 # Se este intervalo ainda não tem backup próprio, aproveita o que já foi calculado
 # numa corrida inteira: o backup completo é indexado pelo índice GLOBAL, então
 # basta extrair as posições deste intervalo. Evita recalcular o que já existe.
-arquivo_backup_full <- file.path(diretorios$dados, "backup_fase5_semEscape.rds")
+arquivo_backup_full <- file.path(diretorios$dados, "backup_Femeas_censoConst.rds")
 
 if (file.exists(arquivo_backup)) {
   lista_fase4 <- readRDS(arquivo_backup)

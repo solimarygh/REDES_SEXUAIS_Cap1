@@ -169,5 +169,12 @@ testar_coevolucao <- function(n_rep = 5, gens = 100) {
   invisible(df)
 }
 
-# Roda a validação ao dar source (leve: 4 curvas x 5 réplicas x 100 gerações)
-testar_coevolucao()
+# ATENÇÃO: este arquivo é o RASCUNHO do Estudo 4, anterior às decisões do modelo
+# atual. Falta nele: segregação infinitesimal, censo de adultos constante,
+# extincao_gen, poliandria realizada e o desenho experimental. A versão
+# atualizada está escrita em NOTA_quatro_estudos.md, seção do Estudo 4.
+# Por isso a validação NÃO roda mais sozinha: para rodá-la de propósito, faça
+#   COEVO_SO_FUNCOES <- FALSE; source("Fase_Coevolucao.R")
+if (exists("COEVO_SO_FUNCOES") && isFALSE(COEVO_SO_FUNCOES)) {
+  testar_coevolucao()
+}
