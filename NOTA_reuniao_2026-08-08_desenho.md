@@ -238,7 +238,43 @@ poliandria realizada nunca passa do teto k. Convém rodá-lo antes de lançar.
 
 ---
 
-## 7. Pontos para discutir
+## 7. Para a rodada final (depois da reunião)
+
+Coisas que decidimos deixar para depois, para não atrasar os resultados da reunião. Nenhuma
+delas muda o modelo; são de infraestrutura e de rastreabilidade.
+
+**Guardar a rede da última geração de cada cenário.** Hoje as redes não são guardadas: elas se
+recuperam re-simulando o cenário com a sua semente. Isso funciona, custa uns 3 segundos por
+cenário, e guardar todas seria inviável (o Estudo 2 tem um milhão de redes, cerca de 16 GB). Mas
+guardar só a última geração são 10.080 redes por estudo, uns 160 MB, o que é perfeitamente
+manejável. Vale a pena por dois motivos que não são a velocidade: uma rede guardada não depende
+da plataforma, e não depende da versão do código. As duas dependências são reais. A primeira
+apareceu ao comparar o teste de fumaça entre o Mac e o thylacosmilus, onde um valor divergiu na
+segunda casa decimal, provavelmente por diferença de 1 ULP em `exp()` virando uma comparação de
+aceite que estava no limite. A segunda é mais séria: o motor mudou várias vezes só nesta semana,
+e "regenerável a partir da semente" só vale rodando exatamente o código que gerou os dados.
+
+**Trocar o replay do script 06 por uma captura no motor.** O `06_Rede_Representativa_e_3Atos.R`
+mantém uma cópia paralela do laço de `simulate_evolution` para reproduzir a rede representativa,
+e essa cópia precisa consumir os números aleatórios na mesma ordem que o motor. Ela ficou
+desalinhada com a mudança do censo constante e teve que ser corrigida à mão. Com o Estudo 3
+seriam duas cópias para manter em dia, e com o Estudo 4, três. A alternativa é um argumento
+opcional `captura_gen` nos motores, que devolve a matriz M daquela geração. Não consome nenhum
+número aleatório, então não altera resultado nenhum, serve para os três estudos e não pode
+desalinhar. De brinde permite verificar a captura: recalcular a modularidade da matriz e comparar
+com a linha guardada.
+
+**Atualizar o script 06.** Ele ainda aponta para `backup_fase5_semEscape.rds`, que é o nome
+antigo, e tem `N_REPLICAS <- 100`.
+
+**Etiquetar o commit da rodada final** (`git tag`), para que daqui a seis meses se saiba com que
+versão do código cada conjunto de dados foi gerado. Sem isso, a semente sozinha não basta.
+
+**Subir o número de réplicas.** Ver a seção 6 sobre por que 20 bastam para esta rodada.
+
+---
+
+## 8. Pontos para discutir
 
 1. O reenquadramento de k como apetite, com a poliandria realizada como variável resposta. É a
    decisão que mais muda o que o paper pode afirmar sobre poliandria.
