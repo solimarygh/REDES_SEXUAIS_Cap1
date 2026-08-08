@@ -32,8 +32,8 @@ source("01_metricas_e_utilitarios.R")
 suppressPackageStartupMessages({
   library(dplyr)
   library(tidyr)
-  library(ggplot2)
-  library(segmented)
+  # ggplot2 e segmented são carregados só na seção de gráficos, lá embaixo.
+  # Assim o script roda em máquina sem eles: a simulação não depende de gráfico.
 })
 
 diretorios <- configurar_diretorios("Fase5_MiudoV2")
@@ -141,6 +141,18 @@ cat("\nFase 4 concluída com sucesso! Dados salvos em:", arquivo_final, "\n")
 # =====================================================================
 # 4) PREPARAÇÃO DOS GRÁFICOS (Geração Final)
 # =====================================================================
+# Os dados JÁ FORAM SALVOS acima. Daqui para baixo é só gráfico, então numa
+# máquina sem ggplot2/segmented o script encerra aqui, com sucesso, em vez de
+# falhar. Basta rodar esta parte depois, na máquina onde as análises são feitas.
+if (!requireNamespace("ggplot2", quietly = TRUE) ||
+    !requireNamespace("segmented", quietly = TRUE)) {
+  cat("ggplot2 e/ou segmented não instalados: pulando a seção de gráficos.\n")
+  cat("Os dados da simulação já estão salvos em", arquivo_final, "\n")
+  quit(save = "no", status = 0)
+}
+library(ggplot2)
+library(segmented)
+
 val_gens     <- max(df_fase4$generation)
 val_reps     <- length(unique(df_fase4$replica))
 # drop_na() alvo: sem a regra de escape, cenários com muitas fêmeas sem acasalar podem
