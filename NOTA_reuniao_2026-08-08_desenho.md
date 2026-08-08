@@ -84,13 +84,37 @@ k = 20, o teto é inalcançável por construção.
 E morde bem antes do limite aritmético, porque ela não acasala com os dez que avaliou, e sim com
 os que aceitou entre esses dez. A taxa de aceite depende da curva de preferência: com s = 2 e
 sigma_p = sigma_z = 1, é de cerca de 0.33 na gaussiana, 0.50 na aleatória e na sigmoide, e 0.67
-na U-shaped. Cruzando com A_max, a proporção aproximada de fêmeas que atinge o k nominal é:
+na U-shaped.
 
-| A_max | k = 5 | k = 10 | k = 20 |
-|---|---|---|---|
-| 200 | ~100% todas as curvas | ~100% todas | ~100% todas |
-| 40 | ~100% todas | 90% gaussiana, ~100% resto | 2% gaussiana, 56% aleatória, 99% U-shaped |
-| 10 | 21% gaussiana, 62% aleatória, 92% U-shaped | ~0% todas | impossível |
+Tabela medida (`00_teste_motores.R`, uma réplica por célula, sem seleção natural). Em cada
+célula, a poliandria realizada e, entre parênteses, a proporção de fêmeas que atingiu o k nominal:
+
+| A_max | curva | k = 5 | k = 10 | k = 20 |
+|---|---|---|---|---|
+| 200 | gaussiana | 4.98 (100%) | 9.91 (98%) | 19.68 (95%) |
+| 200 | aleatória | 5.00 (100%) | 10.00 (100%) | 20.00 (100%) |
+| 200 | U-shaped | 5.00 (100%) | 10.00 (100%) | 20.00 (100%) |
+| 40 | gaussiana | 4.83 (93%) | 9.15 (79%) | 13.08 (10%) |
+| 40 | aleatória | 5.00 (100%) | 10.00 (100%) | 18.91 (62%) |
+| 40 | U-shaped | 5.00 (100%) | 10.00 (100%) | 19.90 (94%) |
+| 10 | gaussiana | 3.32 (26%) | 3.56 (0%) | 3.51 (0%) |
+| 10 | aleatória | 4.45 (66%) | 5.15 (0%) | 5.10 (0%) |
+| 10 | U-shaped | 4.78 (84%) | 6.55 (4%) | 6.89 (0%) |
+
+Três leituras. **Com A_max = 200 está tudo limpo:** todas as curvas atingem o k e o realizado bate
+com o nominal, então é a condição em que a H1 pode ser testada sem contaminação de densidade.
+**Com A_max = 10, k = 10 e k = 20 são o mesmo tratamento:** 3.56 contra 3.51 na gaussiana, 5.15
+contra 5.10 na aleatória, 6.55 contra 6.89 na U-shaped. O teto não é vinculante em nenhuma das
+duas, o que confirma a leitura de k como apetite. **E o confundimento entre curvas é grande:** com
+A_max = 10 e o mesmo k nominal, a poliandria realizada vai de 3.5 na gaussiana a 6.9 na U-shaped,
+um fator de dois.
+
+Uma nota metodológica sobre estes números. As estimativas analíticas que eu tinha feito antes
+(21%, 2%, 92%, 99% nas células críticas) erraram de forma sistemática, sempre para baixo na
+gaussiana e para cima na U-shaped. A razão é que o cálculo binomial trata todas as fêmeas como
+iguais, mas o pico p varia entre elas: uma fêmea com p perto de 5, onde estão quase todos os
+machos, aceita muito mais que a média, e uma com p extremo aceita muito menos. Isso gera
+sobredispersão, e as caudas é justamente onde o teto é ou não atingido. Valem os números medidos.
 
 Duas consequências. A primeira é que o k realizado difere sistematicamente entre curvas de
 preferência, o que é um confundimento direto sobre a H1: se a gaussiana e a U-shaped produzem
