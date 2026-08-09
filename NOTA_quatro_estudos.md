@@ -47,12 +47,13 @@ eram os pais. Ela nunca pode responder à seleção, por construção.
 específica (pensando mais específicamente no trait z dos machos): o valor que o indivíduo expressa depende da condição em que ele se desenvolveu
 (alimento, ambiente), não do que ele herdou. Por isso não passa para os filhotes.
 
-**Parâmetro imposto e condição inicial.** Na hora de comparar os estudos, uma distinção que importa para comparar os
-estudos é que um parâmetro imposto é re-aplicado a cada geração e portanto continua valendo do
-começo ao fim da réplica. Já, uma condição inicial vale só na geração 1, e daí em diante a
-distribuição fica por conta da seleção e da deriva. No Estudo 2 (femeas variando), os 7 níveis de sigma_p são impostos, e sigma_z_init é a condição inicial (fija en 1.0); no
-Estudo 3 (o espelho, machos variando), os 7 níveis de sigma_p são impostos, e sigma_p_init é apenas condição inicial (fija en 1.0). 
-Nesse aspecto os dois estudos são simétricos. A assimetria real está noutro ponto: a seleção natural de viabilidade age sobre z nos dois estudos, mas no Estudo 2 ela age diretamente sobre a característica que evolui, competindo com a seleção sexual, enquanto no Estudo 3 ela age sobre uma característica ambiental e não tem consequência evolutiva nenhuma. A preferência, que é o que evolui ali, não recebe seleção natural.
+**Parâmetro imposto e condição inicial.** Uma distinção que importa na hora de comparar os
+estudos. Um parâmetro imposto é re-aplicado a cada geração e portanto continua valendo do começo
+ao fim da réplica. Já uma condição inicial vale só na geração 1, e daí em diante a distribuição
+fica por conta da seleção e da deriva. Em Fêmeas variando, os 7 níveis de sigma_p são impostos e
+sigma_z_init é apenas condição inicial (fixa em 1.0). Em Machos variando, o espelho, os 7 níveis
+de sigma_z são impostos e sigma_p_init é apenas condição inicial (fixa em 1.0).
+Nesse aspecto os dois estudos são simétricos. A assimetria real está noutro ponto: a seleção natural de viabilidade age sobre z nos dois estudos, mas em Fêmeas variando ela age diretamente sobre a característica que evolui, competindo com a seleção sexual, enquanto em Machos variando ela age sobre uma característica ambiental e não tem consequência evolutiva nenhuma. A preferência, que é o que evolui ali, não recebe seleção natural.
 ---
 
 ## A lógica: por que quatro estudos
@@ -61,12 +62,16 @@ Todos os estudos compartilham o mesmo ciclo de vida e as mesmas quatro curvas de
 O que muda entre eles é quais características são herdadas, ou seja, quais delas estão
 livres para responder à seleção. Cada estudo isola uma peça diferente do sistema:
 
-| Estudo | Traço do macho (z) | Preferência da fêmea (p) | O que o estudo isola |
-|---|---|---|---|
-| 1. Sem evolução | sorteado | sorteada | o efeito das regras de acasalamento sozinhas, sem nenhuma resposta evolutiva |
-| 2. Fêmeas variando | herdável, livre para evoluir | re-sorteada | como a heterogeneidade de preferência afeta a resposta evolutiva do traço |
-| 3. Machos variando |  re-sorteado (ambiental) | herdável, livre para evoluir | como a disponibilidade de machos afeta a resposta evolutiva da preferência |
-| 4. Co-evolução | herdável, livre para evoluir | herdável, livre para evoluir | o feedback entre as duas (mecanismo de Fisher) |
+| Estudo | O que varia | Traço do macho (z) | Preferência da fêmea (p) | O que o estudo isola |
+|---|---|---|---|---|
+| **Controle** | sigma_p e sigma_z | sorteado | sorteada | o efeito das regras de acasalamento sozinhas, sem nenhuma resposta evolutiva |
+| **Fêmeas variando** | sigma_p | herdável, livre para evoluir | re-sorteada | como a heterogeneidade de preferência afeta a resposta evolutiva do traço |
+| **Machos variando** | sigma_z | re-sorteado (ambiental) | herdável, livre para evoluir | como a disponibilidade de machos afeta a resposta evolutiva da preferência |
+| **Co-evolução** | os dois, só como condição inicial | herdável, livre para evoluir | herdável, livre para evoluir | o feedback entre as duas (mecanismo de Fisher) |
+
+Repare na última coluna da esquerda: nos três primeiros estudos o que varia é um parâmetro
+imposto, que vale do começo ao fim. Em Co-evolução isso é impossível, e a razão está explicada
+na seção daquele estudo.
 
 Vale insistir num ponto: "livre para evoluir" descreve o desenho, não o resultado. Em vários
 cenários a característica herdável pode simplesmente não mudar. O exemplo mais claro é a curva
@@ -75,13 +80,15 @@ sendo herdável, mas como nenhuma seleção sexual age sobre ele, ele apenas der
 se traduz em mudança evolutiva e quando não.
 
 A comparação entre os estudos nos ajuda a entender o sistema melhor: 
-- A diferença entre o Estudo 2 e o Estudo 1 mostra o que a resposta evolutiva do traço acrescenta.
-- A diferença entre o Estudo 3 e o Estudo 1 mostra o que a resposta evolutiva da preferência acrescenta.
-- O Estudo 4 mostra o que emerge quando as duas evoluem juntas, que não é a soma dos anteriores.
+- A diferença entre Fêmeas variando e o Controle mostra o que a resposta evolutiva do traço acrescenta.
+- A diferença entre Machos variando e o Controle mostra o que a resposta evolutiva da preferência acrescenta.
+- O Co-evolução mostra o que emerge quando as duas evoluem juntas, que não é a soma dos anteriores.
 
 ---
 
-## Estudo 1. Sem evolução (controle nulo)
+## Controle
+
+*Variam sigma_p e sigma_z. Nada é herdado.*
 
 **Pergunta.** Que topologia de rede as regras de acasalamento produzem por si só, antes de
 qualquer resposta evolutiva?
@@ -102,8 +109,8 @@ variabilidade. Isso torna cada cenário cerca de cem vezes mais barato que nos o
 **Por que ele precisa ser um estudo independente.** A geração 1 dos outros estudos já é um
 controle, porque na primeira geração nada evoluiu ainda. Mas cada um cobre apenas uma linha do
 espaço de parâmetros:
-- A geração 1 do Estudo 2 varre sigma_p, mas com sigma_z fixo em 1.0.
-- A geração 1 do Estudo 3 varre sigma_z, mas com sigma_p fixo em 1.0.
+- A geração 1 de Fêmeas variando varre sigma_p, mas com sigma_z fixo em 1.0.
+- A geração 1 de Machos variando varre sigma_z, mas com sigma_p fixo em 1.0.
 
 As duas se cruzam exatamente no ponto sigma_p = sigma_z = 1.0, que é literalmente o mesmo
 cenário nos dois estudos. Juntas, portanto, elas formam uma cruz no espaço de parâmetros, e as
@@ -112,12 +119,12 @@ diante de machos muito homogêneos, ou o contrário. Como justamente essas combi
 são as mais informativas sobre o que a regra de acasalamento faz sozinha, vale a pena rodar a
 superfície inteira.
 
-**Por que não aproveitar a geração 1 do Estudo 4.** Seria possível: se o Estudo 4 cruzasse
+**Por que não aproveitar a geração 1 de Co-evolução.** Seria possível: se Co-evolução cruzasse
 sigma_p com sigma_z nas condições iniciais, a sua geração 1 daria a superfície completa de
-graça. Mas isso obrigaria o Estudo 4 a ter um desenho sete vezes maior por uma razão que não é
-dele: no Estudo 4 o que interessa é a dinâmica da covariância entre preferência e traço, e não
+graça. Mas isso obrigaria Co-evolução a ter um desenho sete vezes maior por uma razão que não é
+dele: em Co-evolução o que interessa é a dinâmica da covariância entre preferência e traço, e não
 quanta variância havia no ponto de partida. Como este controle é barato, sai mais em conta
-mantê-lo separado e deixar o Estudo 4 livre para ser desenhado segundo a sua própria pergunta.
+mantê-lo separado e deixar Co-evolução livre para ser desenhado segundo a sua própria pergunta.
 
 **Desenho.** Cruzamento completo de sigma_p (7 valores: 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0) por
 sigma_z (os mesmos 7 valores), somado aos mesmos fatores dos outros estudos: 4 curvas de
@@ -125,13 +132,15 @@ preferência, 3 valores de A_max, 3 valores de k e 2 regimes de seleção natura
 isso dá 4 x 7 x 7 x 3 x 3 x 2 x 20 = 70.560 cenários, de uma geração cada.
 
 **Estado.** Concluído com o modelo atual (censo de adultos constante e poliandria realizada):
-70.560 cenários, 20 réplicas, sem falhas. As análises do plano do Estudo 4 citadas mais adiante
+70.560 cenários, 20 réplicas, sem falhas. As análises do plano de Co-evolução citadas mais adiante
 vêm de uma rodada anterior, com 30 réplicas e o modelo antigo, e devem ser refeitas sobre estes
 dados. Script `Fase_Controle.R`, semente base 2029.
 
 ---
 
-## Estudo 2. Fêmeas variando: sigma_p varia, o traço do macho é herdável
+## Fêmeas variando
+
+*Varia sigma_p. Evolui o traço do macho.*
 
 **Pergunta.** Como a variação do pico de preferência entre as fêmeas (sigma_p) afeta a
 topologia da rede de acasalamentos e a resposta evolutiva do traço masculino?
@@ -165,12 +174,14 @@ base 2026.
 
 ---
 
-## Estudo 3. Machos variando: sigma_z varia, a preferência da fêmea é herdável
+## Machos variando
+
+*Varia sigma_z. Evolui a preferência da fêmea.*
 
 **Pergunta.** Como a disponibilidade de machos com traços variados (sigma_z) afeta a resposta
 evolutiva da preferência feminina?
 
-**Como funciona.** É o espelho do Estudo 2: os papéis se invertem.
+**Como funciona.** É o espelho de Fêmeas variando: os papéis se invertem.
 - O eixo do experimento é sigma_z, que varia de 0.2 (machos quase todos parecidos) a 2.0
   (machos muito variados).
 - O traço do macho passa a ser ambiental: é re-sorteado a cada geração de N(5, sigma_z) e não é
@@ -178,7 +189,7 @@ evolutiva da preferência feminina?
   traço por causa do ambiente em que se desenvolveu, e não por causa dos genes que vai transmitir.
 - O pico de preferência da fêmea passa a ser herdável e bi-parental, portanto livre para
   evoluir: os dois sexos carregam p (o macho carrega sem expressar, do mesmo modo que no
-  Estudo 2 a fêmea carrega o traço sem expressar) e o filhote recebe a média dos pais mais a
+  Fêmeas variando a fêmea carrega o traço sem expressar) e o filhote recebe a média dos pais mais a
   variância de segregação.
 
 **Aqui o papel da escolha da fêmea se inverte: ela deixa de ser a causa da seleção e passa a
@@ -197,9 +208,9 @@ sem acasalar e deixa zero filhotes. A fecundidade continua neutra (quem acasalou
 mesmo número de filhotes, independentemente de com quantos machos acasalou), como tínhamos
 combinado.
 
-**Uma assimetria estrutural que vale declarar no paper.** No Estudo 2, sigma_p é um parâmetro
+**Uma assimetria estrutural que vale declarar no paper.** NFêmeas variando, sigma_p é um parâmetro
 imposto: a distribuição de preferências é re-sorteada com aquela largura a cada uma das 100
-gerações, então o tratamento continua valendo até o fim. No Estudo 3, sigma_z também é imposto
+gerações, então o tratamento continua valendo até o fim. NMachos variando, sigma_z também é imposto
 a cada geração (o traço é re-sorteado), mas sigma_p_init é apenas condição inicial, fixada em
 1.0 em todos os cenários: da geração 2 em diante a largura da distribuição de preferências é o
 que a seleção e a deriva fizerem dela. Os dois estudos são espelhos no que diz respeito ao eixo
@@ -216,12 +227,14 @@ preferência. A preferência é registrada de duas formas: no pool genotípico (
 juntos, que é a variável evolutiva propriamente dita) e apenas nas fêmeas (que é a preferência
 efetivamente expressa e que gera a rede).
 
-**Estado.** Concluído com o modelo atual: 10.080 cenários, mesmo desenho fatorial do Estudo 2,
+**Estado.** Concluído com o modelo atual: 10.080 cenários, mesmo desenho fatorial de Fêmeas variando,
 20 réplicas, 100 gerações cada. Script `Fase_Espelho.R`, semente base 2028.
 
 ---
 
-## Estudo 4. Co-evolução entre preferência e traço (proposta)
+## Co-evolução (proposta)
+
+*Evoluem os dois. Os dois sigmas são apenas condição inicial.*
 
 **Pergunta.** O que acontece quando as duas características são herdáveis ao mesmo tempo?
 
@@ -237,6 +250,35 @@ herdam juntos os genes da preferência e os genes do traço. Uma vez que essa as
 seleção que age sobre o traço arrasta a preferência junto, mesmo sem nenhuma seleção agindo
 diretamente sobre a preferência. Esse é o mecanismo do Fisherian runaway (Lande 1981;
 Kirkpatrick 1982).
+
+**Uma previsão sobre a variância inicial.** No Controle, em Fêmeas variando e em Machos variando,
+sigma é um parâmetro imposto e por isso vale do começo ao fim. Em Co-evolução isso é impossível:
+como as duas características são herdáveis, impor a variância significaria re-sortear os valores a
+cada geração, e re-sortear é exatamente o que impede a herança. Os dois sigmas só podem ser
+condição inicial.
+
+Isso não os torna irrelevantes, muda a pergunta que eles fazem. A resposta à seleção é
+proporcional à variância genética disponível: com pouca variância de partida o sistema responde
+devagar, com muita responde rápido. E como o mecanismo de Fisher é um ciclo de retroalimentação,
+a velocidade inicial pode decidir se ele chega a se acender. Se a covariância cresce devagar
+demais, a seleção natural puxa o traço de volta para phi antes que o ciclo se estabeleça, e a
+seleção também vai erodindo a própria variância que alimentaria a resposta.
+
+**A previsão, então, é de limiar e não de dose.** Esperamos uma variância inicial abaixo da qual
+o runaway não acontece e acima da qual acontece, e não uma resposta que cresça suavemente com
+sigma_init. O limiar deve depender da curva de preferência, sendo mais baixo na sigmoide, que é a
+única direcional, e deve subir quando a seleção natural está ligada, porque ela é a força que
+compete com o ciclo.
+
+Uma ressalva teórica. No modelo analítico de Lande, se o runaway ocorre é uma condição sobre os
+parâmetros, e não sobre a variância inicial: esta determina só a direção ao longo da linha de
+equilíbrios. O limiar que esperamos aqui é um efeito de população finita, em que a variância
+erode sob seleção e a deriva atua, então ele é uma previsão sobre a simulação e não sobre a
+teoria. Vale declarar isso ao reportar.
+
+**Consequência para o desenho.** Procurar um limiar não exige um gradiente fino. Três níveis bem
+separados de variância inicial (baixa, média, alta) bastam para localizá-lo, e os cenários
+economizados podem ir para o eixo que a análise do Controle mostrou ser o que manda.
 
 **Como as quatro curvas de preferência devem se comportar, e por quê.** Esta é a previsão que
 o estudo testa:
@@ -256,7 +298,7 @@ o estudo testa:
 características que precisam viajar juntas, os filhotes têm que ser amostrados por índice, e não
 por valor. Se o traço e a preferência forem embaralhados separadamente, a covariância entre eles
 é destruída e o runaway desaparece por causa de um erro de programação, e não por causa da
-biologia. É o tipo de erro que não gera mensagem de erro nenhuma. Nos Estudos 2 e 3 esse
+biologia. É o tipo de erro que não gera mensagem de erro nenhuma. Nos Fêmeas variando e Machos variando esse
 problema não existia, porque só havia uma característica herdável em cada um.
 
 ### O que já existe e o que falta
@@ -270,7 +312,7 @@ curvas de preferência e 5 réplicas, que roda automaticamente ao dar source.
 
 O que ficou desatualizado em relação ao que combinamos depois:
 1. A segregação é de ruído fixo (`eps_sd`, `eps_p`), sem a opção infinitesimal. É a mesma coisa
-   que corrigimos nos Estudos 2 e 3: com ruído fixo a variância genética cai até o piso 2 vezes
+   que corrigimos nos Fêmeas variando e Machos variando: com ruído fixo a variância genética cai até o piso 2 vezes
    eps^2 e a resposta evolutiva fica artificialmente comprimida. Num estudo cuja grandeza central
    é a covariância, isso é especialmente grave, porque a covariância é limitada pelas variâncias.
 2. Não há coluna `segregacao` na saída, que foi o que adotamos nos outros estudos para saber
@@ -291,11 +333,11 @@ com o desenho experimental.
 
 ### Proposta de desenho: a diagonal em vez da superfície
 
-Os Estudos 2 e 3 gastam 10.080 cenários cada um para varrer um eixo. Cruzar sigma_p_init com
-sigma_z_init no Estudo 4 custaria 70.560 cenários com 100 gerações cada, o que é inviável.
-A análise do Estudo 1 sugere um corte defensável.
+Os Fêmeas variando e Machos variando gastam 10.080 cenários cada um para varrer um eixo. Cruzar sigma_p_init com
+sigma_z_init em Co-evolução custaria 70.560 cenários com 100 gerações cada, o que é inviável.
+A análise do Controle sugere um corte defensável.
 
-No Estudo 1, a divergência entre as curvas de preferência no espaço das métricas de topologia
+No Controle, a divergência entre as curvas de preferência no espaço das métricas de topologia
 foi modelada em função da posição no plano sigma_p por sigma_z. O que ficou:
 - A variabilidade total, medida pela norma sqrt(sigma_p^2 + sigma_z^2), explica R^2 = 0.539.
 - O máximo entre as duas, max(sigma_p, sigma_z), explica R^2 = 0.556, e é estatisticamente
@@ -306,11 +348,11 @@ foi modelada em função da posição no plano sigma_p por sigma_z. O que ficou:
 A leitura é que o que importa é quanta variabilidade existe no sistema como um todo, e não como
 ela está repartida entre os dois sexos. Se isso vale também com as duas características
 evoluindo, então percorrer a diagonal sigma_p_init = sigma_z_init já cobre o gradiente
-relevante, e o desenho volta a caber em 10.080 cenários, do mesmo tamanho dos Estudos 2 e 3.
+relevante, e o desenho volta a caber em 10.080 cenários, do mesmo tamanho dos Fêmeas variando e Machos variando.
 
 Duas ressalvas honestas sobre esse argumento. Primeira, o resultado vem de uma única geração sem
 herança, então ele diz respeito ao que a regra de acasalamento faz, e não necessariamente ao que
-a dinâmica de 100 gerações faz. Segunda, no Estudo 4 as duas larguras são condições iniciais, e
+a dinâmica de 100 gerações faz. Segunda, em Co-evolução as duas larguras são condições iniciais, e
 não parâmetros impostos, então elas deixam de valer a partir da geração 2 de qualquer maneira.
 Por isso a proposta é começar pela diagonal e, se os resultados mostrarem que a repartição entre
 os sexos importa depois de tudo, rodar as combinações fora da diagonal em seguida. O motor não
@@ -352,7 +394,7 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
   acasalaram   <- colSums(M) > 0
   num_filhotes_por_femea <- ifelse(acasalaram, fecundidade_base, 0)
   total_filhotes         <- sum(num_filhotes_por_femea)
-  # CASO DEGENERADO: mesma regra dos Estudos 2 e 3
+  # CASO DEGENERADO: mesma regra dos Fêmeas variando e Machos variando
   if (total_filhotes < 2 * (N_males_next + N_females_next)) return(NULL)
 
   moms <- rep(seq_len(n_femeas), times = num_filhotes_por_femea)
@@ -426,7 +468,7 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
     female_s <- pmax(0, rnorm(N_femeas, mean = 2, sd = sigma_s)) # choosiness fixa
 
     # (1) Censo de adultos constante. A viabilidade age sobre os machos JUVENIS
-    # e sobram sempre N_machos adultos. No Estudo 4 ela volta a ter consequência
+    # e sobram sempre N_machos adultos. NCo-evolução ela volta a ter consequência
     # evolutiva (o traço é herdado) e é a única força que age DIRETAMENTE contra
     # a exageração do traço. selecionar_machos_adultos devolve ÍNDICES, então o
     # par (z, p) do mesmo macho viaja junto.
@@ -448,7 +490,7 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
     # genotípico: é ela que mede o quanto preferência e traço estão associados,
     # e portanto o quanto a seleção sobre um arrasta o outro.
     # Pool genotípico = CENSO ADULTO (N_machos + N_femeas), balanceado entre os
-    # sexos. Atenção: aqui, ao contrário do Estudo 3, a seleção de viabilidade
+    # sexos. Atenção: aqui, ao contrário de Machos variando, a seleção de viabilidade
     # NÃO é neutra em relação a p, porque z e p estão correlacionados. Usar o
     # censo adulto é o correto: é a população que de fato se reproduz.
     pool_z <- c(male_z_surv, female_z_gen)
@@ -500,13 +542,13 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
 if (!exists("COEVO_SO_FUNCOES") || !isTRUE(COEVO_SO_FUNCOES)) {
 
   diretorios <- configurar_diretorios("Fase_Coevolucao")
-  cat("Iniciando Estudo 4: co-evolução (traço e preferência herdáveis)...\n")
+  cat("Iniciande Co-evolução: co-evolução (traço e preferência herdáveis)...\n")
 
   valores_sigma <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
   n_replicas    <- 20
 
   # DIAGONAL: um único eixo sigma_init aplicado às DUAS características.
-  # Justificativa no texto: no Estudo 1 a divergência entre curvas de
+  # Justificativa no texto: no Controle a divergência entre curvas de
   # preferência depende da variabilidade TOTAL e não da repartição entre sexos.
   cenarios <- expand.grid(
     tipo_selecao    = c("uniform", "gaussian", "sigmoid", "u-shaped"),
@@ -570,7 +612,7 @@ if (!exists("COEVO_SO_FUNCOES") || !isTRUE(COEVO_SO_FUNCOES)) {
   saveRDS(lista, arquivo_backup)
   df_coevo <- bind_rows(lista[!sapply(lista, is.null)])
   saveRDS(df_coevo, arquivo_final)
-  cat("\nEstudo 4 (co-evolução) concluído! Dados salvos em:", arquivo_final, "\n")
+  cat("\nCo-evolução (co-evolução) concluído! Dados salvos em:", arquivo_final, "\n")
   cat(sprintf("Total de linhas: %d\n", nrow(df_coevo)))
 }
 ```
@@ -580,12 +622,12 @@ if (!exists("COEVO_SO_FUNCOES") || !isTRUE(COEVO_SO_FUNCOES)) {
    detalhado na seção sobre a interação entre A_max, k e a curva de preferência, das nove
    células do cruzamento A_max por k, as três com A_max = 10 e k igual a 10 ou 20 não são
    tratamentos distintos: nelas o k nunca é atingido e o que sobra é sempre "ela acasala com
-   quem aceitar entre dez machos". Copiar o desenho dos Estudos 2 e 3 para o Estudo 4 seria
+   quem aceitar entre dez machos". Copiar o desenho dos Fêmeas variando e Machos variando para Co-evolução seria
    gastar cenários em células que não separam nada. Três saídas possíveis, em ordem crescente de
    ambição: (a) manter o cruzamento como está, para conservar a comparabilidade com os Estudos 2
    e 3, e apenas declarar a limitação; (b) substituir o k fixo por um k proporcional a A_max, de
    modo que o gradiente de poliandria seja o mesmo em todos os níveis de custo de busca; (c)
-   deixar o k de fora do Estudo 4, aproveitando que ele já foi varrido nos Estudos 2 e 3, e usar
+   deixar o k de fora de Co-evolução, aproveitando que ele já foi varrido nos Fêmeas variando e Machos variando, e usar
    os cenários economizados para sondar fora da diagonal de sigma. A opção (a) é a mais
    conservadora e a que menos compromete a comparação entre estudos; a (c) é a que aproveita
    melhor o orçamento de simulação. Isso precisa ser decidido antes, porque muda o
@@ -593,13 +635,13 @@ if (!exists("COEVO_SO_FUNCOES") || !isTRUE(COEVO_SO_FUNCOES)) {
    entrar, para que a limitação passe de argumentada a medida.
 1. A diagonal é suficiente, ou queremos ao menos alguns pontos fora dela como sonda? Uma
    alternativa barata seria acrescentar os quatro cantos (0.2 x 2.0 e 2.0 x 0.2), o que custaria
-   pouco e daria uma verificação direta do argumento do Estudo 1.
+   pouco e daria uma verificação direta do argumento do Controle.
 2. A `cov_casais` é uma variável nova, que mede a covariância entre traço e preferência dentro
    dos casais que efetivamente acasalaram. Ela é o passo anterior na cadeia causal (acasalamento
    assortativo primeiro, covariância genética depois), e permite separar os dois. Vale a pena
    registrar as duas ou é redundante?
 3. Se o runaway aparecer com a curva sigmoide e sem seleção natural, o traço pode crescer sem
-   limite e a réplica vira uma explosão numérica. Nos Estudos 2 e 3 isso não acontecia porque só
+   limite e a réplica vira uma explosão numérica. Nos Fêmeas variando e Machos variando isso não acontecia porque só
    uma característica evoluía. Talvez valha registrar um indicador de fuga (por exemplo, a
    geração em que a média do traço passa de algum múltiplo de phi) em vez de deixar a réplica
    correr até a geração 100 sem aviso.
@@ -612,7 +654,7 @@ acima ainda pendentes. Nada rodado, aguardando a discussão dos três pontos de 
 ## O que é comum aos quatro estudos
 
 **População.** 200 machos e 200 fêmeas, gerações discretas e não sobrepostas, tamanho
-populacional constante. Cem gerações por réplica nos Estudos 2, 3 e 4; uma geração no Estudo 1.
+populacional constante. Cem gerações por réplica nos Fêmeas variando, Machos variando e Co-evolução; uma geração no Controle.
 
 **As quatro curvas de preferência.** P_ij é a probabilidade de a fêmea i aceitar o macho j,
 onde s é a exigência dela, p é o pico dela e z é o traço dele. Todas partem do mesmo pico médio,
@@ -641,7 +683,7 @@ coisas diferentes em média:
 ## A interação entre A_max, k e a curva de preferência
 
 Este ponto precisa ficar explícito porque afeta a leitura de todos os estudos já rodados e,
-principalmente, a escolha de parâmetros do Estudo 4, que ainda está aberta.
+principalmente, a escolha de parâmetros de Co-evolução, que ainda está aberta.
 
 **O parâmetro k não é o número de parceiros, é um teto.** O número de parceiros que uma fêmea
 de fato consegue é
@@ -783,8 +825,8 @@ número total de arestas da rede não muda, mas ele se reparte entre menos macho
 grau médio dos machos passa de cerca de 5.1 para cerca de 8.1. Isso afeta diretamente o Is, a
 centralização e o aninhamento, e não tem nada a ver com a escolha feminina.
 
-**Onde isso morde.** No Estudo 2 pouco, porque sigma_z fica fixo em 1.0 e o pool é estável. No
-Estudo 1 e no Estudo 3 morde de frente, porque ali sigma_z é justamente um eixo do experimento:
+**Onde isso morde.** NFêmeas variando pouco, porque sigma_z fica fixo em 1.0 e o pool é estável. No
+Controle e em Machos variando morde de frente, porque ali sigma_z é justamente um eixo do experimento:
 parte de qualquer tendência das métricas ao longo de sigma_z, nos cenários com seleção natural
 ligada, é apenas o pool encolhendo. E como a comparação entre seleção natural ligada e desligada
 é um dos nossos contrastes, vale lembrar que os dois regimes diferem em duas coisas ao mesmo
@@ -811,8 +853,8 @@ não resolve o problema principal, que é a densidade, e além disso deixaria A_
 pool colineares por construção.
 
 **Uma nota sobre comparabilidade entre estudos.** A objeção original ao censo constante era que
-mudar a regra faria o Estudo 4 deixar de ser comparável com os Estudos 1, 2 e 3, e a inferência
-inteira depende dessa comparação: a diferença entre o Estudo 4 e o Estudo 1 é o que a co-evolução
+mudar a regra faria Co-evolução deixar de ser comparável com os Controle, Fêmeas variando e Machos variando, e a inferência
+inteira depende dessa comparação: a diferença entre Co-evolução e o Controle é o que a co-evolução
 acrescentou, e essa subtração não vale se os dois também diferirem na demografia. A objeção era
 correta, mas valia apenas enquanto os três primeiros estudos ficassem como estavam. Como o
 recorrido completo vai acontecer de qualquer maneira, o censo constante passa a valer para os
@@ -825,7 +867,7 @@ quatro e a comparabilidade fica intacta.
 2. Sem regra de escape. Antes, uma fêmea que não aceitasse ninguém acasalava com o último
    macho avaliado, de modo que todas acasalavam. Agora ela fica sem acasalar e deixa zero
    filhotes. Sem essa mudança não existiria variância de sucesso reprodutivo entre fêmeas, e o
-   Estudo 3 seria impossível.
+   Machos variando seria impossível.
 3. Fecundidade neutra. A poliandria não aumenta o número de filhotes; ela só distribui a
    paternidade entre os parceiros.
 4. Variância de segregação proporcional (modelo infinitesimal de Falconer e Mackay). O
@@ -879,9 +921,9 @@ Quatro observações:
   resgatados, para que a rede nunca fique degenerada demais para calcular as métricas. A coluna
   `n_machos_surv` grava o censo efetivo, então qualquer cenário em que a trava tenha entrado é
   identificável na hora.
-- No Estudo 3, em que o traço do macho é ambiental, a seleção natural continua funcionando como
+- NMachos variando, em que o traço do macho é ambiental, a seleção natural continua funcionando como
   filtro ecológico (muda quais machos estão disponíveis), mas não tem consequência evolutiva,
-  porque o traço não é transmitido aos filhotes. O mesmo vale para o Estudo 1, por não haver
+  porque o traço não é transmitido aos filhotes. O mesmo vale para o Controle, por não haver
   geração seguinte.
 
 **3. Formação da rede de acasalamentos.** Cada fêmea avalia A_max machos distintos, sorteados
@@ -922,12 +964,12 @@ tão poucas que os filhotes não bastam para formar a população adulta (o que 
 rodadas são mantidas, e a coluna `extincao_gen` guarda em que geração isso aconteceu. Quando a
 réplica chega ao fim normalmente, `extincao_gen` fica NA.
 
-Vale explicar por que não ficamos com nenhuma das duas soluções anteriores. O Estudo 2 devolvia a
+Vale explicar por que não ficamos com nenhuma das duas soluções anteriores. Fêmeas variando devolvia a
 geração anterior, o que fabrica uma geração de pais imortais que não deixaram descendência mas
 continuam na população. E devolvia apenas os machos sobreviventes, não os 200: a população
 encolhia em silêncio, e a partir dali o passo de viabilidade reciclava um vetor mais curto,
 `male_z_gen[survive]` passava a devolver NA, e a réplica seguia rodando produzindo lixo sem
-nenhum aviso. O Estudo 3 encerrava a réplica, que é o correto, mas sem deixar registro: ela
+nenhum aviso. Machos variando encerrava a réplica, que é o correto, mas sem deixar registro: ela
 entrava no conjunto de dados apenas com menos gerações, e desaparecia depois no filtro
 `generation == 100`. Como as réplicas que falham são justamente as dos cenários mais duros, essa
 perda silenciosa seria enviesada.
@@ -945,11 +987,11 @@ verificável em vez de suposto.
 | Símbolo | O que é | Valor |
 |---|---|---|
 | N | machos e fêmeas adultos por geração | 200 de cada |
-| gerações | duração de cada réplica | 100 (1 no Estudo 1) |
+| gerações | duração de cada réplica | 100 (1 no Controle) |
 | phi | ótimo da seleção natural e média inicial das distribuições | 5 |
 | gamma | intensidade da seleção natural de viabilidade | 0.2 (ou seleção desligada) |
-| sigma_p | variação do pico de preferência entre fêmeas | eixo do Estudo 2: 0.2 a 2.0 |
-| sigma_z | variação do traço entre machos | eixo do Estudo 3: 0.2 a 2.0 |
+| sigma_p | variação do pico de preferência entre fêmeas | eixo de Fêmeas variando: 0.2 a 2.0 |
+| sigma_z | variação do traço entre machos | eixo de Machos variando: 0.2 a 2.0 |
 | s | exigência da fêmea (choosiness), fixa, nunca herdada | N(2, 0.2) |
 | A_max | machos distintos avaliados por fêmea | 200, 40 ou 10 |
 | k | parceiros por fêmea | 5, 10 ou 20 |
@@ -992,7 +1034,7 @@ Calculadas a cada geração sobre a rede bipartita de acasalamentos:
 - **Oportunidade de seleção sexual (Is).** A variância no número de parceiras por macho dividida
   pelo quadrado da média. Mede o quanto o sucesso reprodutivo é desigual entre os machos.
 - **Proporção de fêmeas sem acasalar.** Variável nova nesta rodada. É descritiva nos Estudos 1 e
-  2, mas no Estudo 3 é o indicador direto da força de seleção agindo sobre a preferência.
+  2, mas em Machos variando é o indicador direto da força de seleção agindo sobre a preferência.
 
 - **Poliandria realizada (`grau_medio_femeas`).** O grau médio das fêmeas que acasalaram, ou
   seja, quantos parceiros elas de fato conseguiram. Atenção ao denominador: esta média exclui as
@@ -1023,26 +1065,26 @@ justamente o sinal da seleção sexual (é a variação no sucesso deles que o I
 
 ## Como a comparação entre estudos responde às hipóteses
 
-- **H1: a forma da curva de preferência gera assinaturas topológicas distintas.** O Estudo 1
+- **H1: a forma da curva de preferência gera assinaturas topológicas distintas.** O Controle
   testa isso sem o confundimento da evolução, ou seja, mostra a topologia que a regra de escolha
-  produz sozinha. O Estudo 2 mostra se essa assinatura persiste depois de 100 gerações de
+  produz sozinha. Fêmeas variando mostra se essa assinatura persiste depois de 100 gerações de
   resposta evolutiva do traço.
-- **H2: a topologia da rede prediz a trajetória evolutiva.** O Estudo 2 testa isso para o traço
-  do macho, e o Estudo 3 testa o análogo para a preferência da fêmea.
+- **H2: a topologia da rede prediz a trajetória evolutiva.** Fêmeas variando testa isso para o traço
+  do macho, e Machos variando testa o análogo para a preferência da fêmea.
 - **H3: a restrição de amostragem apaga as assinaturas topológicas.** O gradiente de A_max está
   presente nos quatro estudos, então dá para verificar se o efeito do custo de busca é o
   mesmo quando quem responde à seleção é o traço e quando é a preferência. Vale registrar que no
-  Estudo 1 esse efeito não saiu na direção esperada: a divergência entre curvas de preferência
+  Controle esse efeito não saiu na direção esperada: a divergência entre curvas de preferência
   foi maior, e não menor, com A_max = 10. Isso precisa ser olhado com cuidado, porque a
   comparação envolve escalas diferentes entre as métricas.
-- **Mecanismo de Fisher.** Só o Estudo 4 pode testar, porque é o único desenho em que a
+- **Mecanismo de Fisher.** Só Co-evolução pode testar, porque é o único desenho em que a
   covariância genética entre preferência e traço pode se acumular.
 
 ---
 
 ## Convenção de nomes entre os estudos
 
-Os motores dos Estudos 2 e 3 fazem a mesma coisa com características diferentes, mas tinham sido
+Os motores dos Fêmeas variando e Machos variando fazem a mesma coisa com características diferentes, mas tinham sido
 escritos em momentos diferentes e usavam nomes distintos para os mesmos objetos. Isso dificultava
 comparar as duas funções lado a lado, que é justamente o que a gente precisa fazer para explicar
 o desenho. Os nomes foram uniformizados assim:
@@ -1059,22 +1101,22 @@ o desenho. Os nomes foram uniformizados assim:
 | Variância parental | `var_pais` |
 | Valor dos filhotes | `z_filhotes` / `p_filhotes` |
 | Vagas da próxima geração | `vagas` |
-| Ruído fixo do modo antigo | `eps_sd` (era `eps_p` no Estudo 3) |
+| Ruído fixo do modo antigo | `eps_sd` (era `eps_p` em Machos variando) |
 
-**A regra é que a letra da característica não muda.** No Estudo 3 o que se herda é a preferência,
+**A regra é que a letra da característica não muda.** NMachos variando o que se herda é a preferência,
 então continua sendo `p_filhotes` e não `z_filhotes`: a letra diz qual característica é, e é
 justamente ela que distingue um estudo do outro. O que se uniformiza é todo o resto do nome.
 
-**Uma assimetria que ficou de propósito.** `sigma_p` no Estudo 2 contra `sigma_p_init` no
-Estudo 3: os nomes são diferentes porque as coisas são diferentes, um é parâmetro imposto a cada
-geração e o outro é condição inicial, como está explicado na seção do Estudo 3.
+**Uma assimetria que ficou de propósito.** `sigma_p` em Fêmeas variando contra `sigma_p_init` no
+Machos variando: os nomes são diferentes porque as coisas são diferentes, um é parâmetro imposto a cada
+geração e o outro é condição inicial, como está explicado na seção de Machos variando.
 
-**O sorteio dos sobreviventes agora é por índice nos três motores.** O Estudo 2 sorteava por
-valor (`sample(z_filhotes, ...)`) e o Estudo 3 por índice
+**O sorteio dos sobreviventes agora é por índice nos três motores.** Fêmeas variando sorteava por
+valor (`sample(z_filhotes, ...)`) e Machos variando por índice
 (`sample(seq_len(total_filhotes), ...)`). Com uma única característica herdável os dois são
 equivalentes, porque `sample` sobre um vetor é implementado como sorteio de índices seguido de
-indexação, e portanto consome o mesmo RNG. Mas no Estudo 4 só a forma por índice funciona, então
-o Estudo 2 foi padronizado para ela: assim o padrão do código já está correto quando as duas
+indexação, e portanto consome o mesmo RNG. Mas em Co-evolução só a forma por índice funciona, então
+o motor de Fêmeas variando foi padronizado para ela: assim o padrão do código já está correto quando as duas
 características entrarem. Como a mudança mexe numa chamada de sorteio, vale confirmar num cenário
 com semente fixa que o resultado sai idêntico.
 
@@ -1089,12 +1131,12 @@ Esta nota foi conferida contra os scripts. A tabela abaixo diz onde verificar ca
 | Curvas de preferência e suas fórmulas | `01_metricas_e_utilitarios.R`, `mate_with_survivors` |
 | Amostragem sem reposição, parada em k, ausência de regra de escape | `01_metricas_e_utilitarios.R`, `mate_with_survivors` |
 | Teto de parceiros: `evaluacoes_reais <- min(encounters_n, n_m)` e `if (matings_done >= matings_per_female[i]) break` | `01_metricas_e_utilitarios.R`, `mate_with_survivors` |
-| Seleção natural, gamma, trava de 2 sobreviventes | `01_metricas_e_utilitarios.R`, `ensure_min_survivors` e os loops de cada estudo |
+| Seleção natural, gamma, censo adulto constante, trava de 2 sobreviventes | `01_metricas_e_utilitarios.R`, `selecionar_machos_adultos` |
 | Fecundidade neutra, paternidade sorteada, segregação infinitesimal | `01_metricas_e_utilitarios.R`, `produce_offspring` |
 | Exclusão das fêmeas sem acasalar das métricas, retorno de NA | `01_metricas_e_utilitarios.R`, `calc_metrics_from_M` |
 | Sementes, reparto entre máquinas, retomada por backup | `01_metricas_e_utilitarios.R`, `rodar_cenarios` |
-| Estudo 1: uma geração, superfície completa, 70.560 cenários | `Fase_Controle.R` |
-| Estudo 2: sigma_p imposto a cada geração, traço herdável | `Fase4_TodasAsCurvas.R` e `simulate_evolution` |
-| Estudo 3: traço ambiental, preferência herdável bi-parental | `Fase_Espelho.R`, `simulate_espelho` e `produce_offspring_espelho` |
-| Estudo 4: rascunho do motor, ainda sem desenho experimental | `Fase_Coevolucao.R`, e a versão atualizada nesta nota |
+| Controle: uma geração, superfície completa, 70.560 cenários | `Fase_Controle.R` |
+| Fêmeas variando: sigma_p imposto a cada geração, traço herdável | `Fase4_TodasAsCurvas.R` e `simulate_evolution` |
+| Machos variando: traço ambiental, preferência herdável bi-parental | `Fase_Espelho.R`, `simulate_espelho` e `produce_offspring_espelho` |
+| Co-evolução: rascunho do motor, ainda sem desenho experimental | `Fase_Coevolucao.R`, e a versão atualizada nesta nota |
 | Primeira versão descartada do experimento inverso | `Fase_MachoVariando.R`, mantido só como registro |
