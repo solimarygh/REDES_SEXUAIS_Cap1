@@ -1,16 +1,13 @@
 # Os quatro estudos complementares
 
-Nota de trabalho para discussão com Erika e Paulo (Miudo). Aqui está descrito o que cada
+Olá Erika y Paulo. Aqui está descrito o que cada
 estudo faz, não os resultados. Os resultados preliminares vão num documento à parte
 (`Resultados_Preliminares.Rmd`).
 
 Esta versão da nota foi conferida linha a linha contra o código. A última seção lista, para
 cada afirmação, o arquivo e a função onde ela pode ser verificada.
 
-O histórico das decisões que levaram a este desenho está em duas notas de reunião:
-`NOTA_reuniao_2026-07-29_variancia.md` (variância genética e segregação infinitesimal) e
-`NOTA_reuniao_2026-08-08_desenho.md` (o teto de k, o censo de adultos constante e o caso
-degenerado). Esta nota descreve o desenho; aquelas contam por que ele é assim.
+O histórico das decisões que levaram a este desenho está em duas notas de reunião aparte. Esta nota descreve o desenho; aquelas contam por que ele é assim.
 
 ---
 
@@ -39,26 +36,23 @@ de machos existe disponível para as fêmeas escolherem.
 
 **Característica herdável.** Uma característica que os filhotes recebem dos pais. Ser
 herdável é uma condição necessária para que ela possa responder à seleção, mas não garante
-que ela vá mudar: se não houver seleção agindo sobre ela, ela apenas deriva ao acaso. Nesta
-nota, quando dizemos que uma característica é herdável, estamos dizendo que ela está livre
-para evoluir, e não que ela necessariamente evoluiu. Se evoluiu ou não, e em que direção,
+que ela vá mudar. Se evoluiu ou não, e em que direção,
 é um resultado a ser observado.
 
 **Característica re-sorteada (congelada).** Uma característica que não é herdada: a cada
 geração seus valores são sorteados de novo da mesma distribuição, independentemente de quem
 eram os pais. Ela nunca pode responder à seleção, por construção.
 
-**Característica ambiental.** Mesma coisa que re-sorteada, mas com uma leitura biológica
-específica: o valor que o indivíduo expressa depende da condição em que ele se desenvolveu
+**Característica  re-sorteada (ambiental).** Mesma coisa que re-sorteada, mas com uma leitura biológica
+específica (pensando mais específicamente no trait z dos machos): o valor que o indivíduo expressa depende da condição em que ele se desenvolveu
 (alimento, ambiente), não do que ele herdou. Por isso não passa para os filhotes.
 
-**Parâmetro imposto e condição inicial.** Uma distinção que importa para comparar os
-estudos. Um parâmetro imposto é re-aplicado a cada geração e portanto continua valendo do
-começo ao fim da réplica. Uma condição inicial vale só na geração 1, e daí em diante a
-distribuição fica por conta da seleção e da deriva. No Estudo 2, sigma_p é imposto; no
-Estudo 3, sigma_z é imposto e sigma_p_init é apenas condição inicial. Voltamos a este ponto
-adiante, porque ele é a única assimetria estrutural entre os dois estudos.
-
+**Parâmetro imposto e condição inicial.** Na hora de comparar os estudos, uma distinção que importa para comparar os
+estudos é que um parâmetro imposto é re-aplicado a cada geração e portanto continua valendo do
+começo ao fim da réplica. Já, uma condição inicial vale só na geração 1, e daí em diante a
+distribuição fica por conta da seleção e da deriva. No Estudo 2 (femeas variando), os 7 níveis de sigma_p são impostos, e sigma_z_init é a condição inicial (fija en 1.0); no
+Estudo 3 (o espelho, machos variando), os 7 níveis de sigma_p são impostos, e sigma_p_init é apenas condição inicial (fija en 1.0). 
+Nesse aspecto os dois estudos são simétricos. A assimetria real está noutro ponto: a seleção natural de viabilidade age sobre z nos dois estudos, mas no Estudo 2 ela age diretamente sobre a característica que evolui, competindo com a seleção sexual, enquanto no Estudo 3 ela age sobre uma característica ambiental e não tem consequência evolutiva nenhuma. A preferência, que é o que evolui ali, não recebe seleção natural.
 ---
 
 ## A lógica: por que quatro estudos
@@ -71,17 +65,16 @@ livres para responder à seleção. Cada estudo isola uma peça diferente do sis
 |---|---|---|---|
 | 1. Sem evolução | sorteado | sorteada | o efeito das regras de acasalamento sozinhas, sem nenhuma resposta evolutiva |
 | 2. Fêmeas variando | herdável, livre para evoluir | re-sorteada | como a heterogeneidade de preferência afeta a resposta evolutiva do traço |
-| 3. Machos variando | ambiental (re-sorteado) | herdável, livre para evoluir | como a disponibilidade de machos afeta a resposta evolutiva da preferência |
+| 3. Machos variando |  re-sorteado (ambiental) | herdável, livre para evoluir | como a disponibilidade de machos afeta a resposta evolutiva da preferência |
 | 4. Co-evolução | herdável, livre para evoluir | herdável, livre para evoluir | o feedback entre as duas (mecanismo de Fisher) |
 
 Vale insistir num ponto: "livre para evoluir" descreve o desenho, não o resultado. Em vários
 cenários a característica herdável pode simplesmente não mudar. O exemplo mais claro é a curva
 de preferência aleatória, em que as fêmeas não discriminam entre machos: ali o traço continua
-sendo herdável, mas como nenhuma seleção sexual age sobre ele, ele apenas deriva ao acaso. Ou
-seja, a comparação entre curvas de preferência é justamente o que revela quando a herdabilidade
+sendo herdável, mas como nenhuma seleção sexual age sobre ele, ele apenas deriva ao acaso. A comparação entre curvas de preferência é justamente o que revela quando a herdabilidade
 se traduz em mudança evolutiva e quando não.
 
-A comparação entre os estudos é o que dá o poder inferencial:
+A comparação entre os estudos nos ajuda a entender o sistema melhor: 
 - A diferença entre o Estudo 2 e o Estudo 1 mostra o que a resposta evolutiva do traço acrescenta.
 - A diferença entre o Estudo 3 e o Estudo 1 mostra o que a resposta evolutiva da preferência acrescenta.
 - O Estudo 4 mostra o que emerge quando as duas evoluem juntas, que não é a soma dos anteriores.
