@@ -156,13 +156,14 @@ replay_capturar <- function(seed, tipo_sel, sp, am, gen_alvo,
   # Este loop TEM que ser idêntico ao de simulate_evolution(), senão o replay não
   # reproduz a réplica. Acompanhou a mudança para censo de adultos constante.
   N_machos_juv  <- N * fator_juvenis
+  N_femeas_juv  <- N * fator_juvenis
 
   male_z_gen1   <- pmax(0, rnorm(N_machos_juv, mean = phi, sd = sigma_z_init))
   female_p_gen1 <- pmax(0, rnorm(N, mean = phi, sd = sp))
-  female_z_gen1 <- pmax(0, rnorm(N, mean = phi, sd = sigma_z_init))
+  female_z_gen1 <- pmax(0, rnorm(N_femeas_juv, mean = phi, sd = sigma_z_init))
 
   male_z_juv   <- male_z_gen1
-  female_z_gen <- female_z_gen1
+  female_z_juv <- female_z_gen1
 
   captura_alvo    <- NULL
   Gen_final_dados <- NULL
@@ -176,8 +177,9 @@ replay_capturar <- function(seed, tipo_sel, sp, am, gen_alvo,
     female_s <- pmax(0, rnorm(N, mean = 2, sd = sigma_s))
 
     # Censo de adultos constante: idêntico ao de simulate_evolution()
-    idx_adultos <- selecionar_machos_adultos(male_z_juv, N, phi, gamma, sel_nat)
-    male_z_surv <- male_z_juv[idx_adultos]
+    idx_adultos  <- selecionar_machos_adultos(male_z_juv, N, phi, gamma, sel_nat)
+    male_z_surv  <- male_z_juv[idx_adultos]
+    female_z_gen <- female_z_juv[sample.int(length(female_z_juv), N)]
 
     M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_sel,
                               encounters_n = am, k_fixo = k_fixo)
@@ -206,7 +208,7 @@ replay_capturar <- function(seed, tipo_sel, sp, am, gen_alvo,
                                       fator_juvenis = fator_juvenis)
     if (is.null(offspring)) break   # réplica encerrada (ver produce_offspring)
     male_z_juv   <- offspring$male_z_juv
-    female_z_gen <- offspring$female_z_next
+    female_z_juv <- offspring$female_z_juv
   }
 
   list(
