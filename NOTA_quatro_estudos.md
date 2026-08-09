@@ -229,7 +229,7 @@ Quatro observações:
   resgatados, para que a rede nunca fique degenerada demais para calcular as métricas. A coluna
   `n_machos_surv` grava o censo efetivo, então qualquer cenário em que a trava tenha entrado é
   identificável na hora.
-- NMachos variando, em que o traço do macho é ambiental, a seleção natural continua funcionando como
+- Em Machos variando, em que o traço do macho é ambiental, a seleção natural continua funcionando como
   filtro ecológico (muda quais machos estão disponíveis), mas não tem consequência evolutiva,
   porque o traço não é transmitido aos filhotes. O mesmo vale para o Controle, por não haver
   geração seguinte.
@@ -415,9 +415,9 @@ sem acasalar e deixa zero filhotes. A fecundidade continua neutra (quem acasalou
 mesmo número de filhotes, independentemente de com quantos machos acasalou), como tínhamos
 combinado.
 
-**Uma assimetria estrutural que vale declarar no paper.** NFêmeas variando, sigma_p é um parâmetro
+**Uma assimetria estrutural que vale declarar no paper.** Em Fêmeas variando, sigma_p é um parâmetro
 imposto: a distribuição de preferências é re-sorteada com aquela largura a cada uma das 100
-gerações, então o tratamento continua valendo até o fim. NMachos variando, sigma_z também é imposto
+gerações, então o tratamento continua valendo até o fim. em Machos variando, sigma_z também é imposto
 a cada geração (o traço é re-sorteado), mas sigma_p_init é apenas condição inicial, fixada em
 1.0 em todos os cenários: da geração 2 em diante a largura da distribuição de preferências é o
 que a seleção e a deriva fizerem dela. Os dois estudos são espelhos no que diz respeito ao eixo
@@ -1271,7 +1271,7 @@ o desenho. Os nomes foram uniformizados assim:
 | Vagas da próxima geração | `vagas` |
 | Ruído fixo do modo antigo | `eps_sd` (era `eps_p` em Machos variando) |
 
-**A regra é que a letra da característica não muda.** NMachos variando o que se herda é a preferência,
+**A regra é que a letra da característica não muda.** Em Machos variando o que se herda é a preferência,
 então continua sendo `p_filhotes` e não `z_filhotes`: a letra diz qual característica é, e é
 justamente ela que distingue um estudo do outro. O que se uniformiza é todo o resto do nome.
 
