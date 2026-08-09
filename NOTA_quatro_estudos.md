@@ -298,7 +298,7 @@ o estudo testa:
 características que precisam viajar juntas, os filhotes têm que ser amostrados por índice, e não
 por valor. Se o traço e a preferência forem embaralhados separadamente, a covariância entre eles
 é destruída e o runaway desaparece por causa de um erro de programação, e não por causa da
-biologia. É o tipo de erro que não gera mensagem de erro nenhuma. Nos Fêmeas variando e Machos variando esse
+biologia. É o tipo de erro que não gera mensagem de erro nenhuma. Em Fêmeas variando e em Machos variando esse
 problema não existia, porque só havia uma característica herdável em cada um.
 
 ### O que já existe e o que falta
@@ -312,7 +312,7 @@ curvas de preferência e 5 réplicas, que roda automaticamente ao dar source.
 
 O que ficou desatualizado em relação ao que combinamos depois:
 1. A segregação é de ruído fixo (`eps_sd`, `eps_p`), sem a opção infinitesimal. É a mesma coisa
-   que corrigimos nos Fêmeas variando e Machos variando: com ruído fixo a variância genética cai até o piso 2 vezes
+   que corrigimos em Fêmeas variando e em Machos variando: com ruído fixo a variância genética cai até o piso 2 vezes
    eps^2 e a resposta evolutiva fica artificialmente comprimida. Num estudo cuja grandeza central
    é a covariância, isso é especialmente grave, porque a covariância é limitada pelas variâncias.
 2. Não há coluna `segregacao` na saída, que foi o que adotamos nos outros estudos para saber
@@ -331,32 +331,76 @@ O que ficou desatualizado em relação ao que combinamos depois:
 A proposta abaixo é a versão atualizada desse arquivo, já com as quatro decisões do modelo e
 com o desenho experimental.
 
-### Proposta de desenho: a diagonal em vez da superfície
+### Proposta de desenho: medir a assimetria em vez de impô-la
 
-Os Fêmeas variando e Machos variando gastam 10.080 cenários cada um para varrer um eixo. Cruzar sigma_p_init com
-sigma_z_init em Co-evolução custaria 70.560 cenários com 100 gerações cada, o que é inviável.
-A análise do Controle sugere um corte defensável.
+Cruzar sigma_p_init com sigma_z_init em Co-evolução custaria 70.560 cenários com 100 gerações
+cada, o que é inviável. Fêmeas variando e Machos variando gastam 10.080 cada um para varrer um
+eixo só. É preciso um corte, e a análise do Controle diz qual.
 
-No Controle, a divergência entre as curvas de preferência no espaço das métricas de topologia
-foi modelada em função da posição no plano sigma_p por sigma_z. O que ficou:
-- A variabilidade total, medida pela norma sqrt(sigma_p^2 + sigma_z^2), explica R^2 = 0.539.
-- O máximo entre as duas, max(sigma_p, sigma_z), explica R^2 = 0.556, e é estatisticamente
-  equivalente à norma (diferença de AIC de 1.8).
-- O descasamento entre as duas, medido por |log(sigma_p / sigma_z)|, explica R^2 = 0.004
-  (p = 0.67), ou seja, praticamente nada.
+**O que o Controle mostrou** (`10_Analise_Diagonal.R`, sobre os 70.560 cenários da superfície
+completa). A divergência entre as quatro curvas de preferência, medida como a distância média ao
+centroide delas no espaço das quatro métricas padronizadas, foi modelada em função da posição no
+plano. O regime de busca domina: A_max, k e seleção natural sozinhos explicam R^2 = 0.679. Sobre
+essa base, o que cada termo de dispersão acrescenta é:
 
-A leitura é que o que importa é quanta variabilidade existe no sistema como um todo, e não como
-ela está repartida entre os dois sexos. Se isso vale também com as duas características
-evoluindo, então percorrer a diagonal sigma_p_init = sigma_z_init já cobre o gradiente
-relevante, e o desenho volta a caber em 10.080 cenários, do mesmo tamanho dos Fêmeas variando e Machos variando.
+| Termo | R^2 parcial (dentro do regime de busca) | R^2 (agregado nas 49 células) |
+|---|---|---|
+| Assimetria, `log(sigma_z / sigma_p)` | **0.428** | **0.639** |
+| Descasamento, `abs(log(sigma_p / sigma_z))` | 0.103 | 0.154 |
+| Máximo, `max(sigma_p, sigma_z)` | 0.049 | 0.074 |
+| Variabilidade total, `sqrt(sigma_p^2 + sigma_z^2)` | 0.020 | 0.030 |
 
-Duas ressalvas honestas sobre esse argumento. Primeira, o resultado vem de uma única geração sem
-herança, então ele diz respeito ao que a regra de acasalamento faz, e não necessariamente ao que
-a dinâmica de 100 gerações faz. Segunda, em Co-evolução as duas larguras são condições iniciais, e
-não parâmetros impostos, então elas deixam de valer a partir da geração 2 de qualquer maneira.
-Por isso a proposta é começar pela diagonal e, se os resultados mostrarem que a repartição entre
-os sexos importa depois de tudo, rodar as combinações fora da diagonal em seguida. O motor não
-muda, só o `expand.grid`.
+**O que importa não é quanta variabilidade existe, é de que lado ela está.** A divergência é
+máxima quando as fêmeas são homogêneas e os machos variados: das 37 células cuja divergência
+ultrapassa o máximo alcançado pela diagonal, todas têm sigma_p baixo e sigma_z alto, e nenhuma o
+contrário. A leitura biológica é direta. Quando todas as fêmeas querem a mesma coisa, a geometria
+da curva se traduz sem ruído em quem acasala com quem; quando as fêmeas discordam entre si, a
+variação individual delas borra a assinatura. E é preciso haver machos variados para que exista
+algo a discriminar.
+
+Vale registrar que uma versão anterior desta nota afirmava o contrário, que a variabilidade total
+explicava R^2 = 0.539 e o descasamento R^2 = 0.004, e usava isso para justificar um desenho
+diagonal. Esse cálculo não incluía A_max nem k, que dominam o fenômeno, e media o descasamento em
+valor absoluto, o que mistura duas situações biologicamente opostas. Com a especificação
+corrigida a ordem se inverte. A proposta diagonal foi retirada.
+
+**Um resultado colateral que vale para o paper.** O espalhamento da poliandria realizada entre as
+curvas acrescenta R^2 parcial de 0.0097, e somado à assimetria acrescenta 0.0003, com AIC pior. A
+divergência entre curvas de preferência não é, portanto, um artefato de densidade de rede. A
+ressalva é que o modelo base já contém A_max e k, que são os maiores determinantes do grau
+realizado, então o que este teste mostra é que a densidade residual não explica nada. Não é uma
+análise de mediação completa.
+
+**Mas nada disso pode ser imposto em Co-evolução.** Como as duas características são herdáveis,
+os dois sigmas são apenas condição inicial (ver a previsão sobre a variância inicial, acima). A
+assimetria da geração 50 não é a que fixamos na geração 1.
+
+Isso não anula o resultado do Controle, muda o seu papel. Ele é um fato sobre a regra de
+acasalamento, não sobre o desenho: dada uma população com estas dispersões, as curvas divergem
+isto. Vale em qualquer geração de qualquer estudo, porque as quatro usam a mesma
+`mate_with_survivors`. O que deixa de valer é usá-lo para desenhar a grade de sigma_init.
+
+**A proposta, então, é medir em vez de impor.** A assimetria realizada é calculável a cada
+geração a partir do que já gravamos:
+
+    assimetria_realizada(t) = 0.5 * log( varz_pop(t) / varp_pop(t) )
+
+Ela entra na análise como covariável geração a geração, e a pergunta passa a ser se a relação que
+o Controle encontrou se mantém quando as duas características evoluem. Manter-se ou não é
+resultado.
+
+Para a condição inicial bastam três níveis bem separados de variância (baixa, média, alta),
+porque o que se procura ali é o limiar de ignição descrito acima, e não uma curva de resposta.
+Com 3 níveis, o desenho fica em 4 curvas x 3 níveis x 3 A_max x 3 k x 2 regimes x 20 réplicas =
+4.320 cenários, menos da metade dos outros dois estudos.
+
+**E daqui sai uma previsão que liga as duas coisas.** Em Co-evolução o traço está sob seleção de
+viabilidade e sob seleção sexual, enquanto a preferência não recebe seleção direta nenhuma. Se
+sigma_z erodir mais depressa que sigma_p, a assimetria realizada deriva para valores negativos, e
+o Controle diz que essa é a região de divergência baixa. A previsão é que a assinatura topológica
+das curvas de preferência se desvaneça ao longo das gerações, a menos que o runaway se acenda e
+reponha variância no traço. A persistência da assinatura seria, ela mesma, um indicador de que o
+ciclo de Fisher está ativo.
 
 ### Código proposto
 
@@ -394,7 +438,7 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
   acasalaram   <- colSums(M) > 0
   num_filhotes_por_femea <- ifelse(acasalaram, fecundidade_base, 0)
   total_filhotes         <- sum(num_filhotes_por_femea)
-  # CASO DEGENERADO: mesma regra dos Fêmeas variando e Machos variando
+  # CASO DEGENERADO: mesma regra dos outros estudos
   if (total_filhotes < 2 * (N_males_next + N_females_next)) return(NULL)
 
   moms <- rep(seq_len(n_femeas), times = num_filhotes_por_femea)
@@ -537,19 +581,21 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
 }
 
 # =====================================================================
-# DESENHO EXPERIMENTAL: a DIAGONAL sigma_p_init = sigma_z_init
+# DESENHO EXPERIMENTAL: três níveis de variância inicial
 # =====================================================================
 if (!exists("COEVO_SO_FUNCOES") || !isTRUE(COEVO_SO_FUNCOES)) {
 
   diretorios <- configurar_diretorios("Fase_Coevolucao")
-  cat("Iniciande Co-evolução: co-evolução (traço e preferência herdáveis)...\n")
+  cat("Iniciando Co-evolução (traço e preferência herdáveis)...\n")
 
-  valores_sigma <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
+  # Três níveis bem separados, aplicados às DUAS características. Não é um
+  # gradiente fino de propósito: aqui sigma é só condição inicial e o que se
+  # procura é o LIMIAR de ignição do ciclo de Fisher, não uma curva de resposta.
+  # A assimetria não é imposta, é MEDIDA a cada geração a partir de varz_pop e
+  # varp_pop (ver o texto). Justificativa completa na seção do desenho.
+  valores_sigma <- c(0.5, 1.0, 2.0)
   n_replicas    <- 20
 
-  # DIAGONAL: um único eixo sigma_init aplicado às DUAS características.
-  # Justificativa no texto: no Controle a divergência entre curvas de
-  # preferência depende da variabilidade TOTAL e não da repartição entre sexos.
   cenarios <- expand.grid(
     tipo_selecao    = c("uniform", "gaussian", "sigmoid", "u-shaped"),
     sigma_init      = valores_sigma,
@@ -618,43 +664,43 @@ if (!exists("COEVO_SO_FUNCOES") || !isTRUE(COEVO_SO_FUNCOES)) {
 ```
 
 **Quatro pontos para discutir antes de rodar.**
-0. O gradiente de k precisa ser repensado, e este é o ponto mais urgente dos quatro. Como está
-   detalhado na seção sobre a interação entre A_max, k e a curva de preferência, das nove
-   células do cruzamento A_max por k, as três com A_max = 10 e k igual a 10 ou 20 não são
-   tratamentos distintos: nelas o k nunca é atingido e o que sobra é sempre "ela acasala com
-   quem aceitar entre dez machos". Copiar o desenho dos Fêmeas variando e Machos variando para Co-evolução seria
-   gastar cenários em células que não separam nada. Três saídas possíveis, em ordem crescente de
-   ambição: (a) manter o cruzamento como está, para conservar a comparabilidade com os Estudos 2
-   e 3, e apenas declarar a limitação; (b) substituir o k fixo por um k proporcional a A_max, de
-   modo que o gradiente de poliandria seja o mesmo em todos os níveis de custo de busca; (c)
-   deixar o k de fora de Co-evolução, aproveitando que ele já foi varrido nos Fêmeas variando e Machos variando, e usar
-   os cenários economizados para sondar fora da diagonal de sigma. A opção (a) é a mais
-   conservadora e a que menos compromete a comparação entre estudos; a (c) é a que aproveita
-   melhor o orçamento de simulação. Isso precisa ser decidido antes, porque muda o
-   `expand.grid`. E em qualquer das três, as duas colunas novas de grau realizado deveriam
-   entrar, para que a limitação passe de argumentada a medida.
-1. A diagonal é suficiente, ou queremos ao menos alguns pontos fora dela como sonda? Uma
-   alternativa barata seria acrescentar os quatro cantos (0.2 x 2.0 e 2.0 x 0.2), o que custaria
-   pouco e daria uma verificação direta do argumento do Controle.
-2. A `cov_casais` é uma variável nova, que mede a covariância entre traço e preferência dentro
-   dos casais que efetivamente acasalaram. Ela é o passo anterior na cadeia causal (acasalamento
-   assortativo primeiro, covariância genética depois), e permite separar os dois. Vale a pena
-   registrar as duas ou é redundante?
-3. Se o runaway aparecer com a curva sigmoide e sem seleção natural, o traço pode crescer sem
-   limite e a réplica vira uma explosão numérica. Nos Fêmeas variando e Machos variando isso não acontecia porque só
-   uma característica evoluía. Talvez valha registrar um indicador de fuga (por exemplo, a
-   geração em que a média do traço passa de algum múltiplo de phi) em vez de deixar a réplica
-   correr até a geração 100 sem aviso.
 
-**Estado.** Motor rascunhado em `Fase_Coevolucao.R`, com os seis pontos de atualização listados
-acima ainda pendentes. Nada rodado, aguardando a discussão dos três pontos de desenho.
+**1. O gradiente de k**, que é o mais urgente. Como está detalhado na seção sobre a interação
+entre A_max, k e a curva de preferência, das nove células do cruzamento A_max por k, as com
+A_max = 10 e k igual a 10 ou 20 não são tratamentos distintos: nelas o k nunca é atingido e o que
+sobra é sempre "ela acasala com quem aceitar entre dez machos". Copiar o desenho de Fêmeas
+variando e Machos variando gastaria cenários em células que não separam nada. Três saídas, em
+ordem crescente de ambição: (a) manter o cruzamento como está, para conservar a comparabilidade
+com os outros estudos, e apenas declarar a limitação; (b) substituir o k fixo por um k
+proporcional a A_max, de modo que o gradiente de poliandria seja o mesmo em todos os níveis de
+custo de busca; (c) deixar o k de fora de Co-evolução, já que ele foi varrido nos outros dois, e
+usar os cenários economizados para outra coisa. A opção (a) é a mais conservadora; a (c) é a que
+aproveita melhor o orçamento.
+
+**2. Os três níveis de variância inicial bastam?** A previsão é de limiar e não de dose, o que
+justifica três níveis bem separados. Mas se o limiar cair entre dois deles, saberemos que existe
+e não onde está. Vale acrescentar um quarto nível, ou é melhor localizá-lo depois, com uma
+varredura fina só na curva de preferência onde ele aparecer?
+
+**3. A `cov_casais`**, que mede a covariância entre traço e preferência dentro dos casais que
+efetivamente acasalaram. É o passo anterior na cadeia causal, acasalamento assortativo primeiro e
+covariância genética depois, e permite separar os dois. Vale registrar as duas ou é redundante?
+
+**4. A explosão numérica.** Se o runaway aparecer com a curva sigmoide e sem seleção natural, o
+traço pode crescer sem limite. Em Fêmeas variando e Machos variando isso não acontecia porque só
+uma característica evoluía. Talvez valha registrar um indicador de fuga, por exemplo a geração em
+que a média do traço passa de algum múltiplo de phi, em vez de deixar a réplica correr até a
+geração 100 sem aviso.
+
+**Estado.** Motor rascunhado em `Fase_Coevolucao.R`, com os pontos de atualização listados acima
+ainda pendentes. Nada rodado, aguardando a discussão dos quatro pontos de desenho.
 
 ---
 
 ## O que é comum aos quatro estudos
 
 **População.** 200 machos e 200 fêmeas, gerações discretas e não sobrepostas, tamanho
-populacional constante. Cem gerações por réplica nos Fêmeas variando, Machos variando e Co-evolução; uma geração no Controle.
+populacional constante. Cem gerações por réplica em Fêmeas variando, Machos variando e Co-evolução; uma geração no Controle.
 
 **As quatro curvas de preferência.** P_ij é a probabilidade de a fêmea i aceitar o macho j,
 onde s é a exigência dela, p é o pico dela e z é o traço dele. Todas partem do mesmo pico médio,
@@ -1084,7 +1130,7 @@ justamente o sinal da seleção sexual (é a variação no sucesso deles que o I
 
 ## Convenção de nomes entre os estudos
 
-Os motores dos Fêmeas variando e Machos variando fazem a mesma coisa com características diferentes, mas tinham sido
+Os motores de Fêmeas variando e de Machos variando fazem a mesma coisa com características diferentes, mas tinham sido
 escritos em momentos diferentes e usavam nomes distintos para os mesmos objetos. Isso dificultava
 comparar as duas funções lado a lado, que é justamente o que a gente precisa fazer para explicar
 o desenho. Os nomes foram uniformizados assim:
