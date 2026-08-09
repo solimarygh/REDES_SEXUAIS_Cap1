@@ -192,33 +192,83 @@ cat("a reparticao entre os sexos age por outra via, e nao so pela densidade.\n")
 # ---------------------------------------------------------------------
 # 5. Gráficos
 # ---------------------------------------------------------------------
+
+# (1) O MAPA. A superfície sigma_p x sigma_z, um painel por nível de A_max,
+# porque a busca é o fator dominante e convém ver se o padrão se repete nos três.
+# A linha tracejada é a diagonal. Se o gradiente de cor correr PERPENDICULAR a
+# ela, a diagonal atravessa uma faixa de divergência quase constante, ou seja,
+# não varia justamente o que importa.
 mapa <- divergencia %>%
-  group_by(sigma_p, sigma_z) %>%
-  summarise(div = mean(div), .groups = "drop")
+  group_by(sigma_p, sigma_z, encounters_n) %>%
+  summarise(div = mean(div), .groups = "drop") %>%
+  mutate(painel = factor(paste("A_max =", encounters_n),
+                         levels = paste("A_max =", c(200, 40, 10))))
 
 g1 <- ggplot(mapa, aes(sigma_z, sigma_p, fill = div)) +
   geom_tile() +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", linewidth = 0.8, color = "white") +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed",
+              linewidth = 0.9, color = "white") +
+  facet_wrap(~painel) +
   scale_fill_viridis_c(option = "magma") +
   labs(title = "Divergência entre curvas de preferência na superfície sigma_p x sigma_z",
-       subtitle = "A linha tracejada é a diagonal proposta para o Estudo 4",
-       x = expression(sigma[z]), y = expression(sigma[p]), fill = "Divergência") +
-  theme_light(base_size = 13)
+       subtitle = "Tracejado: a diagonal proposta. O canto quente é fêmeas homogêneas com machos variados",
+       x = expression(sigma[z]~"(variação entre machos)"),
+       y = expression(sigma[p]~"(variação entre fêmeas)"),
+       fill = "Divergência") +
+  theme_light(base_size = 12) +
+  theme(panel.spacing = unit(1, "lines"))
 
-g2 <- ggplot(divergencia, aes(norma, div)) +
-  geom_point(aes(color = na_diagonal), alpha = 0.35, size = 1.4) +
-  geom_smooth(method = "lm", se = FALSE, color = "black", linewidth = 0.7) +
-  scale_color_manual(values = c(`FALSE` = "gray65", `TRUE` = "#C0392B"),
+# (2) O CONTRASTE. A mesma divergência contra os dois candidatos, lado a lado.
+# Os pontos vermelhos são as células da diagonal. No painel da assimetria eles
+# ficam TODOS empilhados em zero: a diagonal é um único ponto do eixo que manda.
+comp <- divergencia %>%
+  select(div, na_diagonal, norma, assimetria) %>%
+  tidyr::pivot_longer(c(norma, assimetria), names_to = "preditor", values_to = "x") %>%
+  mutate(preditor = factor(preditor, levels = c("norma", "assimetria"),
+                           labels = c("Variabilidade total  sqrt(sp^2 + sz^2)",
+                                      "Assimetria  log(sz / sp)")))
+
+g2 <- ggplot(comp, aes(x, div)) +
+  geom_point(aes(color = na_diagonal), alpha = 0.35, size = 1.3) +
+  geom_smooth(method = "lm", se = FALSE, color = "black", linewidth = 0.8) +
+  facet_wrap(~preditor, scales = "free_x") +
+  scale_color_manual(values = c(`FALSE` = "gray70", `TRUE` = "#C0392B"),
                      labels = c("fora da diagonal", "na diagonal"), name = NULL) +
-  labs(title = "Divergência contra variabilidade total",
-       subtitle = "Se os pontos vermelhos percorrem a mesma faixa vertical que os cinzas, a diagonal basta",
-       x = expression(sqrt(sigma[p]^2 + sigma[z]^2)), y = "Divergência entre curvas") +
-  theme_light(base_size = 13) + theme(legend.position = "bottom")
+  labs(title = "De que depende a divergência entre curvas de preferência",
+       subtitle = "Na esquerda quase não há inclinação. Na direita, os pontos da diagonal colapsam todos em x = 0",
+       x = NULL, y = "Divergência entre curvas") +
+  theme_light(base_size = 12) +
+  theme(legend.position = "bottom", panel.spacing = unit(1, "lines"))
 
-ggsave("Resultados_Artigo/Fase_Controle/Graficos/Diagonal_mapa.png", g1,
-       width = 7.5, height = 6, dpi = 150, bg = "white")
-ggsave("Resultados_Artigo/Fase_Controle/Graficos/Diagonal_norma.png", g2,
-       width = 7.5, height = 5.5, dpi = 150, bg = "white")
+# (3) O PERFIL. Divergência média ao longo do eixo da assimetria, com a faixa
+# entre quartis. É a leitura mais direta: mostra quanto se perde ao ficar só no
+# zero, e de que lado está o sinal.
+perfil <- divergencia %>%
+  group_by(assimetria) %>%
+  summarise(mediana = median(div), q25 = quantile(div, .25),
+            q75 = quantile(div, .75), .groups = "drop")
+
+g3 <- ggplot(perfil, aes(assimetria, mediana)) +
+  geom_ribbon(aes(ymin = q25, ymax = q75), fill = "#C0392B", alpha = 0.18) +
+  geom_line(color = "#C0392B", linewidth = 1) +
+  geom_point(color = "#C0392B", size = 2) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray40") +
+  annotate("text", x = 0, y = max(perfil$q75), label = "  a diagonal está toda aqui",
+           hjust = 0, size = 3.5, color = "gray30") +
+  labs(title = "Perfil da divergência ao longo do eixo da assimetria",
+       subtitle = "Negativo: fêmeas mais variadas que machos.  Positivo: machos mais variados que fêmeas",
+       x = expression(log(sigma[z]/sigma[p])), y = "Divergência (mediana e quartis)") +
+  theme_light(base_size = 12)
+
+ggsave("Resultados_Artigo/Fase_Controle/Graficos/Diagonal_1_mapa.png", g1,
+       width = 11, height = 4.2, dpi = 150, bg = "white")
+ggsave("Resultados_Artigo/Fase_Controle/Graficos/Diagonal_2_contraste.png", g2,
+       width = 10, height = 5, dpi = 150, bg = "white")
+ggsave("Resultados_Artigo/Fase_Controle/Graficos/Diagonal_3_perfil.png", g3,
+       width = 8, height = 5, dpi = 150, bg = "white")
 
 saveRDS(divergencia, "Resultados_Artigo/Fase_Controle/Dados/divergencia_por_celula.rds")
-cat("\nGráficos e tabela de divergência salvos em Resultados_Artigo/Fase_Controle/\n")
+cat("\nTres graficos salvos em Resultados_Artigo/Fase_Controle/Graficos/:\n")
+cat("  Diagonal_1_mapa.png       a superficie, um painel por A_max\n")
+cat("  Diagonal_2_contraste.png  norma contra assimetria, lado a lado\n")
+cat("  Diagonal_3_perfil.png     o perfil ao longo do eixo da assimetria\n")
