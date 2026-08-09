@@ -395,10 +395,34 @@ Co-evolução é uma situação de tipo controle, onde a assimetria inicial afet
 que se forma, e a pergunta em aberto é se esse efeito se propaga ou se dissolve. Só o cruzamento
 permite perguntá-lo; a diagonal fixaria a assimetria inicial em zero e a pergunta desapareceria.
 
-As nove combinações dão cinco valores distintos de assimetria inicial e cinco de variabilidade
-total, o que basta para separar as duas. O desenho fica em 4 curvas x 9 combinações x 3 A_max x
-3 k x 2 regimes x 20 réplicas = 12.960 cenários, cerca de um quinto a mais que Fêmeas variando e
-Machos variando, e menos de um quinto da superfície completa.
+As nove combinações, ordenadas pela assimetria:
+
+| sigma_p | sigma_z | Assimetria log(sigma_z/sigma_p) | Norma sqrt(sigma_p^2+sigma_z^2) | |
+|---|---|---|---|---|
+| 2.0 | 0.5 | -1.39 | 2.06 | fêmeas muito variadas, machos homogêneos |
+| 1.0 | 0.5 | -0.69 | 1.12 | |
+| 2.0 | 1.0 | -0.69 | 2.24 | |
+| 0.5 | 0.5 | 0.00 | 0.71 | a diagonal, pouca variação |
+| 1.0 | 1.0 | 0.00 | 1.41 | a diagonal, média |
+| 2.0 | 2.0 | 0.00 | 2.83 | a diagonal, muita |
+| 0.5 | 1.0 | +0.69 | 1.12 | |
+| 1.0 | 2.0 | +0.69 | 2.24 | |
+| 0.5 | 2.0 | +1.39 | 2.06 | fêmeas homogêneas, machos variados |
+
+São cinco valores de assimetria e seis de variabilidade total. As três linhas do meio são a
+diagonal que havíamos proposto: percorre a norma de 0.71 a 2.83 e deixa a assimetria presa em
+zero, exatamente ao contrário do que interessa. A última linha é o canto onde o Controle
+encontrou a divergência máxima, e o desenho diagonal a deixaria de fora por completo.
+
+**A assimetria com sinal e a norma ficam exatamente descorrelacionadas neste desenho** (r = 0),
+porque cada assimetria positiva tem o seu espelho negativo com a mesma norma e as contribuições
+se cancelam. Os dois efeitos podem então ser estimados separadamente, sem colinearidade, que era
+o risco de qualquer redução. Um limite honesto: as assimetrias extremas (mais e menos 1.39) só
+aparecem com norma 2.06, e não há como evitar isso com três níveis.
+
+O desenho fica em 4 curvas x 9 combinações x 3 A_max x 3 k x 2 regimes x 20 réplicas = 12.960
+cenários, cerca de um quinto a mais que Fêmeas variando e Machos variando, e menos de um quinto
+da superfície completa.
 
 **E daqui sai uma previsão que liga as duas coisas.** Em Co-evolução o traço está sob seleção de
 viabilidade e sob seleção sexual, enquanto a preferência não recebe seleção direta nenhuma. Se
