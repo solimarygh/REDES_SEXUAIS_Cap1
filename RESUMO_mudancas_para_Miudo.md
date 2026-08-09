@@ -194,6 +194,21 @@ A variância deixa então de erodir sozinha e passa a ser determinada só pela s
 deriva. O modo antigo continua no código para comparação, e o modo usado fica gravado numa coluna
 da saída de cada simulação.
 
+**O que a mudança comprou não foi mais variância, foi que o equilíbrio passasse a depender da
+seleção.** Com ruído fixo, `V* = 2 eps^2` dava o mesmo em todos os cenários: a mesma curva de
+preferência, o mesmo sigma_p, com ou sem seleção natural, sempre 0.08. A pergunta da H2 tinha a
+resposta escrita de antemão, e a resposta era "não" por construção. Aumentar eps não resolveria
+nada: mudaria o número e manteria o artefato, porque o piso continuaria sendo idêntico em todo
+lado. Com o infinitesimal, cada curva de preferência, cada sigma e cada regime de seleção natural
+chegam a um equilíbrio diferente, e é isso que torna a H2 respondível.
+
+**Sobre o valor da mutação.** Com `mut_sd = 0.05`, a entrada mutacional por geração é 0.0025. Com
+uma variância do traço da ordem de 1, isso dá uma heredabilidade mutacional em torno de
+2.5 x 10^-3, que está na faixa empiricamente reportada para caracteres quantitativos, entre 10^-3
+e 10^-2. Não é um número escolhido ao acaso. A ressalva é que a heredabilidade mutacional se
+define sobre a variância ambiental, e aqui o traço não tem componente ambiental separada, então a
+comparação é aproximada.
+
 **Uma limitação da nossa implementação, e a terceira pergunta para você.** O resultado
 `Var(D) = V_A/2` não vale sempre. Ele supõe acasalamento aleatório, equilíbrio de ligamento e
 pais não aparentados. Três situações o quebram, e as três estão presentes aqui.
