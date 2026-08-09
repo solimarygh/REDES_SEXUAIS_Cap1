@@ -358,11 +358,10 @@ da curva se traduz sem ruído em quem acasala com quem; quando as fêmeas discor
 variação individual delas borra a assinatura. E é preciso haver machos variados para que exista
 algo a discriminar.
 
-Vale registrar que uma versão anterior desta nota afirmava o contrário, que a variabilidade total
-explicava R^2 = 0.539 e o descasamento R^2 = 0.004, e usava isso para justificar um desenho
-diagonal. Esse cálculo não incluía A_max nem k, que dominam o fenômeno, e media o descasamento em
-valor absoluto, o que mistura duas situações biologicamente opostas. Com a especificação
-corrigida a ordem se inverte. A proposta diagonal foi retirada.
+Repare na diferença entre as duas primeiras linhas da tabela. As duas medem a repartição entre os
+sexos, mas o descasamento em valor absoluto trata como equivalentes duas situações biologicamente
+opostas, fêmeas homogêneas com machos variados e o contrário, e por isso subestima as duas. É
+preciso medir com sinal.
 
 **Um resultado colateral que vale para o paper.** O espalhamento da poliandria realizada entre as
 curvas acrescenta R^2 parcial de 0.0097, e somado à assimetria acrescenta 0.0003, com AIC pior. A
