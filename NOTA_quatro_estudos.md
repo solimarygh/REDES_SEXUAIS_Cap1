@@ -857,28 +857,32 @@ Os machos começam com traço sorteado de N(5, sigma_z) e as fêmeas com pico de
 sorteado de N(5, sigma_p). Todos os valores são truncados em zero, ou seja, nem o traço nem a
 preferência podem ser negativos.
 
-**2. Seleção natural de viabilidade (ligada ou desligada), com censo de adultos constante.**
-Cada geração começa com um excedente de machos juvenis (três por vaga adulta). Quando a seleção
-está ligada, cada juvenil sobrevive até a fase de acasalamento com probabilidade
+**2. Seleção natural de viabilidade (ligada ou desligada), e o censo de adultos.** A seleção de
+viabilidade age sobre os JUVENIS, antes do censo de adultos. Quando ela está ligada, cada juvenil
+macho sobrevive com probabilidade
 
     V = exp(-gamma * (z - phi)^2),  com gamma = 0.2
 
 ou seja, quanto mais o traço se afasta do ótimo ecológico phi = 5, menor a chance de sobreviver.
-Entre os sobreviventes, sorteiam-se ao acaso os 200 que formam o censo adulto de machos. Assim o
-número de machos disponíveis para acasalar é sempre 200, com ou sem seleção natural. Cinco
-observações importantes:
+Entre os juvenis que sobrevivem, sorteiam-se ao acaso os 200 que formam o censo adulto de machos.
+As fêmeas não passam por viabilidade: sorteiam-se 200 ao acaso.
+
+**A ordem importa.** Como a seleção age antes do censo, o número de machos disponíveis para
+acasalar é sempre 200, com ou sem seleção natural e para qualquer valor de sigma_z. A seleção
+muda QUAIS machos estão disponíveis, que é o efeito que nos interessa, e não QUANTOS, que seria
+um confundimento de densidade. Ver a seção sobre o tamanho do pool de machos: na versão anterior
+a viabilidade agia depois do censo, o pool caía de 198 para 124 ao longo do gradiente de sigma_z,
+e isso sozinho mexia em Is, centralização e aninhamento.
+
+Quatro observações:
 - A seleção natural age apenas sobre os machos e apenas sobre o traço, nunca sobre a
   preferência.
 - Quando está desligada, todos os juvenis são equivalentes (V = 1) e o censo é um sorteio
   aleatório, o que isola o efeito puro da escolha feminina.
-- O censo constante é o que impede que a seleção natural mexa na densidade da rede. Na versão
-  anterior a viabilidade agia sobre os 200 adultos, o pool caía de 198 para 124 ao longo do
-  gradiente de sigma_z, e isso sozinho mexia em Is, centralização e aninhamento. Ver a seção
-  sobre o tamanho do pool de machos.
 - Há uma trava de segurança: se menos de 2 juvenis sobrevivessem, os 2 de maior viabilidade são
-  resgatados. Serve para que a rede nunca fique degenerada demais para calcular as métricas. A
-  coluna `n_machos_surv` grava o censo efetivo, então qualquer cenário em que a trava tenha
-  entrado é identificável na hora.
+  resgatados, para que a rede nunca fique degenerada demais para calcular as métricas. A coluna
+  `n_machos_surv` grava o censo efetivo, então qualquer cenário em que a trava tenha entrado é
+  identificável na hora.
 - No Estudo 3, em que o traço do macho é ambiental, a seleção natural continua funcionando como
   filtro ecológico (muda quais machos estão disponíveis), mas não tem consequência evolutiva,
   porque o traço não é transmitido aos filhotes. O mesmo vale para o Estudo 1, por não haver
@@ -906,15 +910,13 @@ parental, mais um termo mutacional pequeno (desvio padrão 0.05). As caracterís
 herdáveis são simplesmente re-sorteadas na geração seguinte.
 
 **6. Mortalidade e capacidade de carga.** Todos os filhotes vão para um mesmo pote (cerca de
-10.000, quando quase todas as fêmeas acasalam) e desse pote são sorteados ao acaso 600 machos
-juvenis e 200 fêmeas. Esse sorteio não tem seleção nenhuma: é mortalidade aleatória, e é a fonte
-de deriva genética do modelo. Uma característica só evolui de forma dirigida se alguns pais
-colocaram mais filhotes nesse pote do que outros.
+10.000, quando quase todas as fêmeas acasalam). Eles são os juvenis da geração seguinte, e é
+sobre eles que o passo 2 volta a agir: a viabilidade filtra, e o censo fixa a população adulta em
+200 machos e 200 fêmeas.
 
-São 600 machos juvenis e não 200 porque a seleção de viabilidade age sobre eles no passo 2 da
-geração seguinte, e o censo adulto precisa fechar em 200 mesmo no cenário de sobrevivência mais
-baixa do gradiente (cerca de 62% com sigma_z = 2.0, o que deixa uns 372 sobreviventes). As fêmeas
-não passam por viabilidade neste modelo, então bastam 200.
+A passagem do pote ao censo não tem seleção nenhuma além da viabilidade: é mortalidade
+aleatória, e é a fonte de deriva genética do modelo. Uma característica só evolui de forma
+dirigida se alguns pais colocaram mais filhotes nesse pote do que outros.
 
 **O caso degenerado, e por que ele merece uma regra explícita.** Pode acontecer de o pote não
 dar para formar a geração seguinte, seja porque nenhuma fêmea acasalou, seja porque acasalaram
@@ -938,6 +940,16 @@ que se pode reportar: é a medida de quando as regras de acasalamento foram rest
 para a população se sustentar. Na prática esperamos que seja zero em todos os cenários já
 rodados, porque a proporção de fêmeas sem acasalar nunca chegou perto de 84%, mas isso agora fica
 verificável em vez de suposto.
+
+**Uma nota de implementação.** O código não aplica a viabilidade ao pote inteiro de filhotes:
+ele sorteia do pote um excedente de machos juvenis (três por vaga adulta, ou seja, 600), aplica a
+viabilidade a esses e censa 200 sobreviventes. Como o sorteio do pote é uniforme, as duas formas
+dão a mesma distribuição de traços entre os adultos, e a razão de ser do excedente é apenas
+garantir que sobrem 200 mesmo no cenário de sobrevivência mais baixa do gradiente (cerca de 62%
+com sigma_z = 2.0, o que deixa uns 372). Fica registrado aqui porque a descrição acima é a do
+desenho, e o código será unificado com ela na rodada final. A coluna `n_machos_surv` grava o
+censo efetivo de cada geração, então a afirmação de que ele foi sempre 200 é verificável e não
+suposta.
 
 ---
 
