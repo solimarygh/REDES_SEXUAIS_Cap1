@@ -204,6 +204,30 @@ não explica nada. Não é uma análise de mediação completa.
 
 ---
 
+## O que já rodou
+
+Tudo isto já está implementado e rodado, com o modelo novo, 20 réplicas por cenário. São 20 e não
+100 porque os problemas dos pontos 1, 2 e 3 são vieses sistemáticos e não ruído: mais réplicas
+não os tocariam. Subimos depois, quando o desenho estiver fechado.
+
+| Estudo | Cenários | Gerações | Estado |
+|---|---|---|---|
+| Controle | 70.560 | 1 | pronto |
+| Fêmeas variando | 10.080 | 100 | pronto |
+| Machos variando (o espelho) | 10.080 | 100 | pronto |
+| Co-evolução | 12.960 | 100 | desenhado, ainda não rodou |
+
+O espelho é o modelo que combinamos na reunião de julho, com o traço do macho ambiental e a
+preferência da fêmea herdável. Está implementado e rodado.
+
+Sem nenhuma falha e sem nenhum cenário encerrado antes das 100 gerações, o que verificamos com
+uma coluna nova que grava exatamente isso.
+
+A Co-evolução é a única que falta, e é sobre o desenho dela que as duas perguntas abaixo pesam
+mais.
+
+---
+
 ## Duas perguntas para você
 
 **1. O problema do mediador.** Se o grau realizado depende da curva de preferência, e o usamos
