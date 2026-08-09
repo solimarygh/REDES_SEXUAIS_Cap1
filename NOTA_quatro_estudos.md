@@ -158,9 +158,144 @@ A comparação entre os estudos nos ajuda a entender o sistema melhor:
 
 ---
 
+## O que é comum aos quatro estudos
+
+Antes de descrever cada estudo, o que todos compartilham. Os quatro usam exatamente o mesmo
+ciclo de vida, as mesmas quatro curvas de preferência e os mesmos fatores cruzados, e é por isso
+que as diferenças entre eles podem ser atribuídas ao que de fato muda: quais características são
+herdadas. Cada seção de estudo mais adiante descreve só o que aquele estudo altera.
+
+**População.** 200 machos e 200 fêmeas, gerações discretas e não sobrepostas, tamanho
+populacional constante. Cem gerações por réplica em Fêmeas variando, Machos variando e Co-evolução; uma geração no Controle.
+
+**As quatro curvas de preferência.** P_ij é a probabilidade de a fêmea i aceitar o macho j,
+onde s é a exigência dela, p é o pico dela e z é o traço dele. Todas partem do mesmo pico médio,
+de modo que as diferenças entre elas vêm da geometria da regra e não de as fêmeas quererem
+coisas diferentes em média:
+- Aleatória (nula): P = 0.5, constante. A fêmea aceita qualquer macho com a mesma probabilidade.
+  Serve de controle: aqui não existe seleção sexual, então qualquer mudança no traço é deriva.
+- Gaussiana (estabilizadora): P = exp(-s (z - p)^2). A fêmea aceita machos cujo traço está
+  próximo do seu pico, e rejeita tanto os muito maiores quanto os muito menores.
+- Sigmoide (direcional): P = 1 / (1 + exp(-s (z - p))). A fêmea aceita machos cujo traço supera
+  o seu pico, e quanto mais o supera, mais provável é o aceite.
+- U-shaped (disruptiva): P = 1 - exp(-s (z - p)^2). A fêmea evita machos parecidos com o seu
+  pico e aceita os que estão distantes dele, para mais ou para menos.
+
+**Fatores cruzados em todos os estudos.**
+- A_max: quantos machos distintos cada fêmea consegue avaliar antes de decidir (200, 40 ou 10,
+  em número absoluto). Representa o custo ecológico de procurar parceiro. O nível 200 é a
+  condição de saturação, "sem restrição de busca", e não um terceiro ponto equidistante do
+  gradiente. Ver a seção sobre o tamanho do pool de machos: os rótulos percentuais que usávamos
+  antes eram enganosos.
+- k: quantos parceiros cada fêmea acasala (5, 10 ou 20). Representa o grau de poliandria.
+- Seleção natural de viabilidade sobre o traço do macho, ligada ou desligada.
+
+---
+
+## O ciclo de vida, passo a passo
+
+Cada geração segue sempre a mesma sequência, nos quatro estudos. O que muda entre os estudos
+é apenas quais características são herdadas no passo 5.
+
+**1. Ponto de partida.** Todas as distribuições são centradas em phi = 5, que é ao mesmo tempo
+a média inicial do traço, a média inicial do pico de preferência e o ótimo da seleção natural.
+Os machos começam com traço sorteado de N(5, sigma_z) e as fêmeas com pico de preferência
+sorteado de N(5, sigma_p). Todos os valores são truncados em zero, ou seja, nem o traço nem a
+preferência podem ser negativos.
+
+**2. Seleção natural de viabilidade (ligada ou desligada), e o censo de adultos.** A seleção de
+viabilidade age sobre os JUVENIS, antes do censo de adultos. Quando ela está ligada, cada um dos
+cerca de 5.000 juvenis machos sobrevive com probabilidade
+
+    V = exp(-gamma * (z - phi)^2),  com gamma = 0.2
+
+ou seja, quanto mais o traço se afasta do ótimo ecológico phi = 5, menor a chance de sobreviver.
+Entre os juvenis que sobrevivem, sorteiam-se ao acaso os 200 que formam o censo adulto de machos.
+As fêmeas não passam por viabilidade: sorteiam-se 200 ao acaso.
+
+**A ordem importa.** Como a seleção age antes do censo, o número de machos disponíveis para
+acasalar é sempre 200, com ou sem seleção natural e para qualquer valor de sigma_z. A seleção
+muda QUAIS machos estão disponíveis, que é o efeito que nos interessa, e não QUANTOS, que seria
+um confundimento de densidade. Ver a seção sobre o tamanho do pool de machos: na versão anterior
+a viabilidade agia depois do censo, o pool caía de 198 para 124 ao longo do gradiente de sigma_z,
+e isso sozinho mexia em Is, centralização e aninhamento.
+
+Quatro observações:
+- A seleção natural age apenas sobre os machos e apenas sobre o traço, nunca sobre a
+  preferência.
+- Quando está desligada, todos os juvenis são equivalentes (V = 1) e o censo é um sorteio
+  aleatório, o que isola o efeito puro da escolha feminina.
+- Há uma trava de segurança: se menos de 2 juvenis sobrevivessem, os 2 de maior viabilidade são
+  resgatados, para que a rede nunca fique degenerada demais para calcular as métricas. A coluna
+  `n_machos_surv` grava o censo efetivo, então qualquer cenário em que a trava tenha entrado é
+  identificável na hora.
+- NMachos variando, em que o traço do macho é ambiental, a seleção natural continua funcionando como
+  filtro ecológico (muda quais machos estão disponíveis), mas não tem consequência evolutiva,
+  porque o traço não é transmitido aos filhotes. O mesmo vale para o Controle, por não haver
+  geração seguinte.
+
+**3. Formação da rede de acasalamentos.** Cada fêmea avalia A_max machos distintos, sorteados
+sem reposição entre os sobreviventes (ou todos eles, se houver menos sobreviventes do que
+A_max). Para cada macho avaliado, ela aceita ou não com uma probabilidade dada pela curva de
+preferência, que depende da distância entre o traço dele e o pico dela, e da exigência dela (a
+choosiness s, sorteada de N(2, 0.2) a cada geração e nunca herdada, em todos os estudos). Ela
+para quando atinge k parceiros ou quando esgota os A_max machos. Se não aceitar nenhum, fica sem
+acasalar. A matriz é binária, então um mesmo par nunca conta duas vezes.
+
+O resultado é uma matriz de quem acasalou com quem, que é a rede bipartita sobre a qual
+calculamos as métricas de topologia.
+
+**4. Fecundidade e paternidade.** Cada fêmea que acasalou produz 50 filhotes, e as que não
+acasalaram produzem zero. O número de filhotes não depende de com quantos machos ela acasalou
+(fecundidade neutra). A paternidade de cada filhote é sorteada ao acaso entre os parceiros
+daquela fêmea, o que equivale a uma competição espermática justa, sem viés para nenhum macho.
+
+**5. Herança.** É aqui que os quatro estudos diferem. Cada característica herdável do filhote é
+a média dos dois pais mais um desvio de segregação com variância igual a metade da variância
+parental, mais um termo mutacional pequeno (desvio padrão 0.05). As características não
+herdáveis são simplesmente re-sorteadas na geração seguinte.
+
+**6. Os juvenis da geração seguinte.** Todos os filhotes (cerca de 10.000, quando quase todas as
+fêmeas acasalam) recebem sexo ao acaso, metade machos e metade fêmeas. São eles os juvenis da
+geração seguinte, e é sobre eles que o passo 2 volta a agir. Não há nenhum corte aqui: a
+capacidade de carga é imposta uma vez só, no censo de adultos do passo 2.
+
+O modelo tem portanto duas mortalidades, e a diferença entre elas é o ponto todo. A viabilidade é
+seletiva e age só sobre os machos. O censo é sorteio puro, sem seleção nenhuma, e é a fonte de
+deriva genética do modelo. Uma característica só evolui de forma dirigida se alguns pais
+colocaram mais filhotes no pote do que outros.
+
+**O caso degenerado, e por que ele merece uma regra explícita.** Pode acontecer de o pote não
+dar para formar a geração seguinte, seja porque nenhuma fêmea acasalou, seja porque acasalaram
+tão poucas que os filhotes não bastam para formar a população adulta (o que exigiria que menos de
+16 das 200 fêmeas acasalassem, ou seja, mais de 92% sem acasalar). A regra agora é a mesma nos três motores: a réplica é encerrada ali, as gerações já
+rodadas são mantidas, e a coluna `extincao_gen` guarda em que geração isso aconteceu. Quando a
+réplica chega ao fim normalmente, `extincao_gen` fica NA.
+
+Vale explicar por que não ficamos com nenhuma das duas soluções anteriores. Fêmeas variando devolvia a
+geração anterior, o que fabrica uma geração de pais imortais que não deixaram descendência mas
+continuam na população. E devolvia apenas os machos sobreviventes, não os 200: a população
+encolhia em silêncio, e a partir dali o passo de viabilidade reciclava um vetor mais curto,
+`male_z_gen[survive]` passava a devolver NA, e a réplica seguia rodando produzindo lixo sem
+nenhum aviso. Machos variando encerrava a réplica, que é o correto, mas sem deixar registro: ela
+entrava no conjunto de dados apenas com menos gerações, e desaparecia depois no filtro
+`generation == 100`. Como as réplicas que falham são justamente as dos cenários mais duros, essa
+perda silenciosa seria enviesada.
+
+Com a coluna `extincao_gen`, quantas réplicas se extinguem por cenário passa a ser um resultado
+que se pode reportar: é a medida de quando as regras de acasalamento foram restritivas demais
+para a população se sustentar. Na prática esperamos que seja zero em todos os cenários já
+rodados, porque a proporção de fêmeas sem acasalar nunca chegou perto de 92%, mas isso agora fica
+verificável em vez de suposto.
+
+---
+
 ## Controle
 
 *Variam sigma_p e sigma_z. Nada é herdado.*
+
+Daqui em diante, um estudo por seção. Tudo o que não estiver dito é o que ficou descrito acima,
+no ciclo de vida e nos fatores comuns.
 
 **Pergunta.** Que topologia de rede as regras de acasalamento produzem por si só, antes de
 qualquer resposta evolutiva?
@@ -802,35 +937,6 @@ ainda pendentes. Nada rodado, aguardando a discussão dos quatro pontos de desen
 
 ---
 
-## O que é comum aos quatro estudos
-
-**População.** 200 machos e 200 fêmeas, gerações discretas e não sobrepostas, tamanho
-populacional constante. Cem gerações por réplica em Fêmeas variando, Machos variando e Co-evolução; uma geração no Controle.
-
-**As quatro curvas de preferência.** P_ij é a probabilidade de a fêmea i aceitar o macho j,
-onde s é a exigência dela, p é o pico dela e z é o traço dele. Todas partem do mesmo pico médio,
-de modo que as diferenças entre elas vêm da geometria da regra e não de as fêmeas quererem
-coisas diferentes em média:
-- Aleatória (nula): P = 0.5, constante. A fêmea aceita qualquer macho com a mesma probabilidade.
-  Serve de controle: aqui não existe seleção sexual, então qualquer mudança no traço é deriva.
-- Gaussiana (estabilizadora): P = exp(-s (z - p)^2). A fêmea aceita machos cujo traço está
-  próximo do seu pico, e rejeita tanto os muito maiores quanto os muito menores.
-- Sigmoide (direcional): P = 1 / (1 + exp(-s (z - p))). A fêmea aceita machos cujo traço supera
-  o seu pico, e quanto mais o supera, mais provável é o aceite.
-- U-shaped (disruptiva): P = 1 - exp(-s (z - p)^2). A fêmea evita machos parecidos com o seu
-  pico e aceita os que estão distantes dele, para mais ou para menos.
-
-**Fatores cruzados em todos os estudos.**
-- A_max: quantos machos distintos cada fêmea consegue avaliar antes de decidir (200, 40 ou 10,
-  em número absoluto). Representa o custo ecológico de procurar parceiro. O nível 200 é a
-  condição de saturação, "sem restrição de busca", e não um terceiro ponto equidistante do
-  gradiente. Ver a seção sobre o tamanho do pool de machos: os rótulos percentuais que usávamos
-  antes eram enganosos.
-- k: quantos parceiros cada fêmea acasala (5, 10 ou 20). Representa o grau de poliandria.
-- Seleção natural de viabilidade sobre o traço do macho, ligada ou desligada.
-
----
-
 ## A interação entre A_max, k e a curva de preferência
 
 Este ponto precisa ficar explícito porque afeta a leitura de todos os estudos já rodados e,
@@ -1032,104 +1138,6 @@ quatro e a comparabilidade fica intacta.
 **Réplicas.** 20 nesta rodada de exploração, mais na rodada final. São 20 e não mais porque os
 problemas que motivaram o recorrido (o teto de k, o pool de machos, o caso degenerado) são vieses
 sistemáticos e não ruído: mais réplicas não os tocariam.
-
----
-
-## O ciclo de vida, passo a passo
-
-Cada geração segue sempre a mesma sequência, nos quatro estudos. O que muda entre os estudos
-é apenas quais características são herdadas no passo 5.
-
-**1. Ponto de partida.** Todas as distribuições são centradas em phi = 5, que é ao mesmo tempo
-a média inicial do traço, a média inicial do pico de preferência e o ótimo da seleção natural.
-Os machos começam com traço sorteado de N(5, sigma_z) e as fêmeas com pico de preferência
-sorteado de N(5, sigma_p). Todos os valores são truncados em zero, ou seja, nem o traço nem a
-preferência podem ser negativos.
-
-**2. Seleção natural de viabilidade (ligada ou desligada), e o censo de adultos.** A seleção de
-viabilidade age sobre os JUVENIS, antes do censo de adultos. Quando ela está ligada, cada um dos
-cerca de 5.000 juvenis machos sobrevive com probabilidade
-
-    V = exp(-gamma * (z - phi)^2),  com gamma = 0.2
-
-ou seja, quanto mais o traço se afasta do ótimo ecológico phi = 5, menor a chance de sobreviver.
-Entre os juvenis que sobrevivem, sorteiam-se ao acaso os 200 que formam o censo adulto de machos.
-As fêmeas não passam por viabilidade: sorteiam-se 200 ao acaso.
-
-**A ordem importa.** Como a seleção age antes do censo, o número de machos disponíveis para
-acasalar é sempre 200, com ou sem seleção natural e para qualquer valor de sigma_z. A seleção
-muda QUAIS machos estão disponíveis, que é o efeito que nos interessa, e não QUANTOS, que seria
-um confundimento de densidade. Ver a seção sobre o tamanho do pool de machos: na versão anterior
-a viabilidade agia depois do censo, o pool caía de 198 para 124 ao longo do gradiente de sigma_z,
-e isso sozinho mexia em Is, centralização e aninhamento.
-
-Quatro observações:
-- A seleção natural age apenas sobre os machos e apenas sobre o traço, nunca sobre a
-  preferência.
-- Quando está desligada, todos os juvenis são equivalentes (V = 1) e o censo é um sorteio
-  aleatório, o que isola o efeito puro da escolha feminina.
-- Há uma trava de segurança: se menos de 2 juvenis sobrevivessem, os 2 de maior viabilidade são
-  resgatados, para que a rede nunca fique degenerada demais para calcular as métricas. A coluna
-  `n_machos_surv` grava o censo efetivo, então qualquer cenário em que a trava tenha entrado é
-  identificável na hora.
-- NMachos variando, em que o traço do macho é ambiental, a seleção natural continua funcionando como
-  filtro ecológico (muda quais machos estão disponíveis), mas não tem consequência evolutiva,
-  porque o traço não é transmitido aos filhotes. O mesmo vale para o Controle, por não haver
-  geração seguinte.
-
-**3. Formação da rede de acasalamentos.** Cada fêmea avalia A_max machos distintos, sorteados
-sem reposição entre os sobreviventes (ou todos eles, se houver menos sobreviventes do que
-A_max). Para cada macho avaliado, ela aceita ou não com uma probabilidade dada pela curva de
-preferência, que depende da distância entre o traço dele e o pico dela, e da exigência dela (a
-choosiness s, sorteada de N(2, 0.2) a cada geração e nunca herdada, em todos os estudos). Ela
-para quando atinge k parceiros ou quando esgota os A_max machos. Se não aceitar nenhum, fica sem
-acasalar. A matriz é binária, então um mesmo par nunca conta duas vezes.
-
-O resultado é uma matriz de quem acasalou com quem, que é a rede bipartita sobre a qual
-calculamos as métricas de topologia.
-
-**4. Fecundidade e paternidade.** Cada fêmea que acasalou produz 50 filhotes, e as que não
-acasalaram produzem zero. O número de filhotes não depende de com quantos machos ela acasalou
-(fecundidade neutra). A paternidade de cada filhote é sorteada ao acaso entre os parceiros
-daquela fêmea, o que equivale a uma competição espermática justa, sem viés para nenhum macho.
-
-**5. Herança.** É aqui que os quatro estudos diferem. Cada característica herdável do filhote é
-a média dos dois pais mais um desvio de segregação com variância igual a metade da variância
-parental, mais um termo mutacional pequeno (desvio padrão 0.05). As características não
-herdáveis são simplesmente re-sorteadas na geração seguinte.
-
-**6. Os juvenis da geração seguinte.** Todos os filhotes (cerca de 10.000, quando quase todas as
-fêmeas acasalam) recebem sexo ao acaso, metade machos e metade fêmeas. São eles os juvenis da
-geração seguinte, e é sobre eles que o passo 2 volta a agir. Não há nenhum corte aqui: a
-capacidade de carga é imposta uma vez só, no censo de adultos do passo 2.
-
-O modelo tem portanto duas mortalidades, e a diferença entre elas é o ponto todo. A viabilidade é
-seletiva e age só sobre os machos. O censo é sorteio puro, sem seleção nenhuma, e é a fonte de
-deriva genética do modelo. Uma característica só evolui de forma dirigida se alguns pais
-colocaram mais filhotes no pote do que outros.
-
-**O caso degenerado, e por que ele merece uma regra explícita.** Pode acontecer de o pote não
-dar para formar a geração seguinte, seja porque nenhuma fêmea acasalou, seja porque acasalaram
-tão poucas que os filhotes não bastam para formar a população adulta (o que exigiria que menos de
-16 das 200 fêmeas acasalassem, ou seja, mais de 92% sem acasalar). A regra agora é a mesma nos três motores: a réplica é encerrada ali, as gerações já
-rodadas são mantidas, e a coluna `extincao_gen` guarda em que geração isso aconteceu. Quando a
-réplica chega ao fim normalmente, `extincao_gen` fica NA.
-
-Vale explicar por que não ficamos com nenhuma das duas soluções anteriores. Fêmeas variando devolvia a
-geração anterior, o que fabrica uma geração de pais imortais que não deixaram descendência mas
-continuam na população. E devolvia apenas os machos sobreviventes, não os 200: a população
-encolhia em silêncio, e a partir dali o passo de viabilidade reciclava um vetor mais curto,
-`male_z_gen[survive]` passava a devolver NA, e a réplica seguia rodando produzindo lixo sem
-nenhum aviso. Machos variando encerrava a réplica, que é o correto, mas sem deixar registro: ela
-entrava no conjunto de dados apenas com menos gerações, e desaparecia depois no filtro
-`generation == 100`. Como as réplicas que falham são justamente as dos cenários mais duros, essa
-perda silenciosa seria enviesada.
-
-Com a coluna `extincao_gen`, quantas réplicas se extinguem por cenário passa a ser um resultado
-que se pode reportar: é a medida de quando as regras de acasalamento foram restritivas demais
-para a população se sustentar. Na prática esperamos que seja zero em todos os cenários já
-rodados, porque a proporção de fêmeas sem acasalar nunca chegou perto de 92%, mas isso agora fica
-verificável em vez de suposto.
 
 ---
 
