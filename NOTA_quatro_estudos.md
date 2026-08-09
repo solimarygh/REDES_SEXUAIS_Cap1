@@ -1068,10 +1068,11 @@ interpretação de A_max = 200, que não é um terceiro ponto equidistante num g
 condição de saturação, "sem restrição de busca". Por isso A_max deve entrar nos modelos como
 fator, nunca como covariável contínua.
 
-**Segundo, o que é um problema de verdade.** O número de machos disponíveis muda de cenário para
-cenário, porque a seleção natural de viabilidade remove uma fração que depende de sigma_z. A
-fração que sobrevive é aproximadamente `1 / sqrt(1 + 2 gamma sigma_z^2)`, ou seja, com
-gamma = 0.2:
+**Segundo, o que é um problema de verdade, e ele só existia com a seleção natural LIGADA.** Com
+ela desligada, o código fazia `survive <- rep(TRUE, N_machos)` e os 200 machos passavam todos, de
+modo que o pool era constante. Com ela ligada, o número de machos disponíveis muda de cenário
+para cenário, porque a viabilidade remove uma fração que depende de sigma_z. A fração que
+sobrevive é aproximadamente `1 / sqrt(1 + 2 gamma sigma_z^2)`, ou seja, com gamma = 0.2:
 
 | sigma_z | 0.2 | 0.5 | 0.8 | 1.0 | 1.2 | 1.5 | 2.0 |
 |---|---|---|---|---|---|---|---|
@@ -1082,12 +1083,20 @@ número total de arestas da rede não muda, mas ele se reparte entre menos macho
 grau médio dos machos passa de cerca de 5.1 para cerca de 8.1. Isso afeta diretamente o Is, a
 centralização e o aninhamento, e não tem nada a ver com a escolha feminina.
 
-**Onde isso morde.** NFêmeas variando pouco, porque sigma_z fica fixo em 1.0 e o pool é estável. No
-Controle e em Machos variando morde de frente, porque ali sigma_z é justamente um eixo do experimento:
-parte de qualquer tendência das métricas ao longo de sigma_z, nos cenários com seleção natural
-ligada, é apenas o pool encolhendo. E como a comparação entre seleção natural ligada e desligada
-é um dos nossos contrastes, vale lembrar que os dois regimes diferem em duas coisas ao mesmo
-tempo: na distribuição do traço e no tamanho do pool.
+**Onde isso morde.** Em Fêmeas variando pouco, porque sigma_z fica fixo em 1.0 e o pool é
+estável. No Controle e em Machos variando morde de frente, porque ali sigma_z é o eixo do
+experimento: parte de qualquer tendência das métricas ao longo dele, nos cenários com seleção
+natural ligada, era só o pool encolhendo.
+
+**E o pior é que o confundimento estava alinhado com o contraste que interessa.** Como o pool só
+encolhia com a seleção natural ligada, comparar os dois regimes não comparava apenas "há seleção"
+contra "não há": comparava também "há menos machos" contra "há 200". Um artefato de densidade
+teria se apresentado como um efeito da seleção natural, que é o pior lugar possível para ele
+estar.
+
+O lado prático disso é bom: para a metade do desenho sem seleção natural, o censo constante é uma
+mudança cosmética. O código antigo entregava 200 machos e o novo entrega 200 machos, com a mesma
+distribuição.
 
 **O que foi feito: censo de adultos constante.** A seleção de viabilidade passou a agir sobre
 juvenis, antes do censo de adultos. Cada geração começa com três machos juvenis por vaga, a

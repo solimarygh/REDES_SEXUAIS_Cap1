@@ -58,8 +58,10 @@ contaminação.
 **Como era.** A seleção natural de viabilidade agia sobre os 200 machos adultos. Quem não
 sobrevivia saía, e os que sobravam acasalavam.
 
-**O problema.** A fração que sobrevive é `1 / sqrt(1 + 2 gamma sigma_z^2)`, então o número de
-machos disponíveis caía com sigma_z:
+**O problema, e ele só existia com a seleção natural LIGADA.** Com ela desligada o código fazia
+`survive <- rep(TRUE, N_machos)` e os 200 machos passavam todos, então o pool era constante. Com
+ela ligada, a fração que sobrevive é `1 / sqrt(1 + 2 gamma sigma_z^2)`, e o número de machos
+disponíveis caía com sigma_z:
 
 | sigma_z | 0.2 | 0.5 | 0.8 | 1.0 | 1.2 | 1.5 | 2.0 |
 |---|---|---|---|---|---|---|---|
@@ -72,9 +74,17 @@ a escolha feminina.
 
 **Onde mordia.** No estudo em que sigma_p varia, pouco, porque ali sigma_z fica fixo. Mas no
 controle e no estudo do espelho mordia de frente, porque neles sigma_z é justamente o eixo do
-experimento: qualquer tendência das métricas ao longo desse eixo estaria contaminada. E o
-contraste entre com e sem seleção natural diferia em duas coisas ao mesmo tempo, na distribuição
-do traço e no tamanho do pool.
+experimento: qualquer tendência das métricas ao longo desse eixo, nos cenários com seleção
+natural, estaria contaminada.
+
+**E o pior é que o confundimento estava alinhado com o contraste que interessa.** Como o pool só
+encolhia com a seleção natural ligada, comparar os dois regimes não comparava apenas "há seleção"
+contra "não há": comparava também "há menos machos" contra "há 200". Um artefato de densidade
+teria se apresentado como um efeito da seleção natural.
+
+Isso tem um lado prático bom: para a metade do desenho sem seleção natural, o censo constante é
+uma mudança cosmética. O código antigo entregava 200 machos e o novo entrega 200 machos, com a
+mesma distribuição.
 
 **O que fizemos.** A viabilidade passou a agir sobre os JUVENIS, antes do censo de adultos. Cada
 geração, todos os filhotes recebem sexo ao acaso, a viabilidade age sobre os machos juvenis, e o
