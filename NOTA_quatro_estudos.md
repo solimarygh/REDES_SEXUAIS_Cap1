@@ -34,6 +34,23 @@ elas discordam bastante entre si.
 **sigma_z.** O quanto o traço varia entre os machos da população, ou seja, quanta variedade
 de machos existe disponível para as fêmeas escolherem.
 
+**Variabilidade total, ou a norma.** Quanta variação existe no sistema como um todo, somando os
+dois sexos: `sqrt(sigma_p^2 + sigma_z^2)`. É alta quando os dois sexos são heterogêneos e baixa
+quando os dois são homogêneos. Não diz nada sobre qual dos dois contribui mais.
+
+**Assimetria.** De que lado está a variação: `log(sigma_z / sigma_p)`. Vale zero quando os dois
+sexos variam o mesmo, é positiva quando os machos variam mais que as fêmeas e negativa no caso
+contrário. O logaritmo está ali porque a comparação é de razão e não de diferença: os machos
+variarem o dobro das fêmeas e as fêmeas variarem o dobro dos machos são situações igualmente
+assimétricas em sentidos opostos, e o logaritmo as coloca à mesma distância de zero (mais e menos
+0.69). Sem ele, a razão 2 ficaria a 1 de distância e a razão 0.5 ficaria a apenas 0.5.
+
+As duas juntas são apenas outra forma de escrever o par (sigma_p, sigma_z), como trocar
+coordenadas cartesianas por polares: a mesma informação, reorganizada para separar duas perguntas
+que se confundiam. Quanta variação existe é uma coisa; de que lado está é outra. A análise do
+Controle mostrou que a segunda pergunta é a que importa, e é por isso que estes dois termos
+aparecem aqui em vez de sigma_p e sigma_z crus.
+
 **Característica herdável.** Uma característica que os filhotes recebem dos pais. Ser
 herdável é uma condição necessária para que ela possa responder à seleção, mas não garante
 que ela vá mudar. Se evoluiu ou não, e em que direção,
@@ -395,7 +412,8 @@ Co-evolução é uma situação de tipo controle, onde a assimetria inicial afet
 que se forma, e a pergunta em aberto é se esse efeito se propaga ou se dissolve. Só o cruzamento
 permite perguntá-lo; a diagonal fixaria a assimetria inicial em zero e a pergunta desapareceria.
 
-As nove combinações, ordenadas pela assimetria:
+As nove combinações, ordenadas pela assimetria. As duas colunas da direita são as grandezas
+definidas no vocabulário: a norma diz quanta variação há, a assimetria diz de que lado está.
 
 | sigma_p | sigma_z | Assimetria log(sigma_z/sigma_p) | Norma sqrt(sigma_p^2+sigma_z^2) | |
 |---|---|---|---|---|
