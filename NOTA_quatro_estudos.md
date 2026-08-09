@@ -351,18 +351,16 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
                                     N_males_next = 200, N_females_next = 200,
                                     fecundidade_base = 50,
                                     segregacao = c("infinitesimal", "fixa"),
-                                    eps_sd = 0.2, mut_sd = 0.05, fator_juvenis = 3) {
+                                    eps_sd = 0.2, mut_sd = 0.05) {
   segregacao <- match.arg(segregacao)
   n_femeas <- ncol(M)
-  N_machos_juv <- N_males_next   * fator_juvenis
-  N_femeas_juv <- N_females_next * fator_juvenis
 
   # Fecundidade neutra: quem acasalou deixa F filhotes; quem não acasalou, 0.
   acasalaram   <- colSums(M) > 0
   num_filhotes_por_femea <- ifelse(acasalaram, fecundidade_base, 0)
   total_filhotes         <- sum(num_filhotes_por_femea)
   # CASO DEGENERADO: mesma regra dos Estudos 2 e 3
-  if (total_filhotes < N_machos_juv + N_femeas_juv) return(NULL)
+  if (total_filhotes < 2 * (N_males_next + N_females_next)) return(NULL)
 
   moms <- rep(seq_len(n_femeas), times = num_filhotes_por_femea)
   dads <- vapply(moms, function(mom) {
@@ -391,14 +389,14 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
   z_filhotes <- pmax(0, midparent_z + desvio_segregacao(c(male_z_surv, female_z_gen)))
   p_filhotes <- pmax(0, midparent_p + desvio_segregacao(c(male_p_surv, female_p_gen)))
 
-  # Capacidade de carga: mortalidade aleatória, POR ÍNDICE. É AQUI que a
+  # TODOS os filhotes são juvenis; o sexo é atribuído ao acaso, 1:1. É AQUI que a
   # covariância sobrevive: um único sorteio de índices, e os dois vetores
   # indexados pelo MESMO idx, para que z e p de um mesmo filhote fiquem juntos.
-  # Os machos saem como JUVENIS; o censo adulto acontece na geração seguinte.
-  vagas <- N_machos_juv + N_femeas_juv
-  idx   <- sample(seq_len(total_filhotes), size = vagas, replace = FALSE)
-  i_m <- idx[seq_len(N_machos_juv)]
-  i_f <- idx[(N_machos_juv + 1):vagas]
+  # A capacidade de carga é imposta só no censo adulto da geração seguinte.
+  idx  <- sample.int(total_filhotes)
+  meio <- total_filhotes %/% 2
+  i_m <- idx[seq_len(meio)]
+  i_f <- idx[(meio + 1):(2 * meio)]
 
   list(male_z_juv   = z_filhotes[i_m], male_p_juv   = p_filhotes[i_m],
        female_z_juv = z_filhotes[i_f], female_p_juv = p_filhotes[i_f])
@@ -413,19 +411,18 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
                                 tipo_selecao = "gaussian", encounters_n = 200,
                                 selecao_natural = TRUE, k_fixo = NULL,
                                 fecundidade_base = 50, eps_sd = 0.2,
-                                segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
-                                fator_juvenis = 3) {
+                                segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05) {
   segregacao <- match.arg(segregacao)
-  N_machos_juv <- N_machos * fator_juvenis
-  N_femeas_juv <- N_femeas * fator_juvenis
+  # O pool de juvenis não é parâmetro livre: é o que a fecundidade produz.
+  N_juvenis <- N_femeas * fecundidade_base %/% 2
 
   # Os DOIS sexos carregam as DUAS características. A expressão é que é dimórfica:
   # só o macho mostra z, só a fêmea usa p. Os machos entram como JUVENIS: a
   # viabilidade age sobre eles e o censo adulto fica sempre em N_machos.
-  male_z_juv   <- pmax(0, rnorm(N_machos_juv, phi, sigma_z_init))
-  male_p_juv   <- pmax(0, rnorm(N_machos_juv, phi, sigma_p_init))  # carregada, não expressa
-  female_z_juv <- pmax(0, rnorm(N_femeas_juv, phi, sigma_z_init))  # carregada, não expressa
-  female_p_juv <- pmax(0, rnorm(N_femeas_juv, phi, sigma_p_init))
+  male_z_juv   <- pmax(0, rnorm(N_juvenis, phi, sigma_z_init))
+  male_p_juv   <- pmax(0, rnorm(N_juvenis, phi, sigma_p_init))  # carregada, não expressa
+  female_z_juv <- pmax(0, rnorm(N_juvenis, phi, sigma_z_init))  # carregada, não expressa
+  female_p_juv <- pmax(0, rnorm(N_juvenis, phi, sigma_p_init))
 
   out <- vector("list", generations)
   extincao_gen <- NA_integer_   # geração em que a réplica foi encerrada; NA = chegou ao fim
@@ -491,8 +488,7 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
                                    N_machos, N_femeas,
                                    fecundidade_base = fecundidade_base,
                                    segregacao = segregacao,
-                                   eps_sd = eps_sd, mut_sd = mut_sd,
-                                   fator_juvenis = fator_juvenis)
+                                   eps_sd = eps_sd, mut_sd = mut_sd)
     if (is.null(off)) { extincao_gen <- t; break }   # encerra e registra onde parou
     male_z_juv   <- off$male_z_juv
     male_p_juv   <- off$male_p_juv
@@ -865,8 +861,8 @@ sorteado de N(5, sigma_p). Todos os valores são truncados em zero, ou seja, nem
 preferência podem ser negativos.
 
 **2. Seleção natural de viabilidade (ligada ou desligada), e o censo de adultos.** A seleção de
-viabilidade age sobre os JUVENIS, antes do censo de adultos. Quando ela está ligada, cada juvenil
-macho sobrevive com probabilidade
+viabilidade age sobre os JUVENIS, antes do censo de adultos. Quando ela está ligada, cada um dos
+cerca de 5.000 juvenis machos sobrevive com probabilidade
 
     V = exp(-gamma * (z - phi)^2),  com gamma = 0.2
 
@@ -916,24 +912,20 @@ a média dos dois pais mais um desvio de segregação com variância igual a met
 parental, mais um termo mutacional pequeno (desvio padrão 0.05). As características não
 herdáveis são simplesmente re-sorteadas na geração seguinte.
 
-**6. Mortalidade e capacidade de carga.** Todos os filhotes vão para um mesmo pote (cerca de
-10.000, quando quase todas as fêmeas acasalam). Desse pote, uma mortalidade aleatória deixa
-passar 600 juvenis de cada sexo, que são os juvenis da geração seguinte. É sobre eles que o passo
-2 volta a agir.
+**6. Os juvenis da geração seguinte.** Todos os filhotes (cerca de 10.000, quando quase todas as
+fêmeas acasalam) recebem sexo ao acaso, metade machos e metade fêmeas. São eles os juvenis da
+geração seguinte, e é sobre eles que o passo 2 volta a agir. Não há nenhum corte aqui: a
+capacidade de carga é imposta uma vez só, no censo de adultos do passo 2.
 
-Existem portanto dois episódios de mortalidade, e a diferença entre eles é o ponto todo. Este
-aqui não tem seleção nenhuma: é sorteio puro, e é a fonte de deriva genética do modelo. O do
-passo 2 é seletivo, e age só sobre os machos. Uma característica só evolui de forma dirigida se
-alguns pais colocaram mais filhotes no pote do que outros.
-
-O excedente de juvenis existe para que o censo adulto possa fechar em 200 mesmo quando a
-viabilidade é mais dura: com sigma_z = 2.0 sobrevive cerca de 62% dos juvenis machos, o que deixa
-uns 372 para preencher as 200 vagas.
+O modelo tem portanto duas mortalidades, e a diferença entre elas é o ponto todo. A viabilidade é
+seletiva e age só sobre os machos. O censo é sorteio puro, sem seleção nenhuma, e é a fonte de
+deriva genética do modelo. Uma característica só evolui de forma dirigida se alguns pais
+colocaram mais filhotes no pote do que outros.
 
 **O caso degenerado, e por que ele merece uma regra explícita.** Pode acontecer de o pote não
 dar para formar a geração seguinte, seja porque nenhuma fêmea acasalou, seja porque acasalaram
-tão poucas que os filhotes não chegam às 1.200 vagas de juvenil (o que exigiria mais de 76% das
-fêmeas sem acasalar). A regra agora é a mesma nos três motores: a réplica é encerrada ali, as gerações já
+tão poucas que os filhotes não bastam para formar a população adulta (o que exigiria que menos de
+16 das 200 fêmeas acasalassem, ou seja, mais de 92% sem acasalar). A regra agora é a mesma nos três motores: a réplica é encerrada ali, as gerações já
 rodadas são mantidas, e a coluna `extincao_gen` guarda em que geração isso aconteceu. Quando a
 réplica chega ao fim normalmente, `extincao_gen` fica NA.
 
@@ -950,7 +942,7 @@ perda silenciosa seria enviesada.
 Com a coluna `extincao_gen`, quantas réplicas se extinguem por cenário passa a ser um resultado
 que se pode reportar: é a medida de quando as regras de acasalamento foram restritivas demais
 para a população se sustentar. Na prática esperamos que seja zero em todos os cenários já
-rodados, porque a proporção de fêmeas sem acasalar nunca chegou perto de 76%, mas isso agora fica
+rodados, porque a proporção de fêmeas sem acasalar nunca chegou perto de 92%, mas isso agora fica
 verificável em vez de suposto.
 
 ---
@@ -973,7 +965,6 @@ verificável em vez de suposto.
 | eps_sd | ruído de segregação do modo antigo | 0.2 (só usado com `segregacao = "fixa"`) |
 | min_surv | mínimo de machos resgatados da seleção natural | 2 |
 | réplicas | repetições independentes por cenário | 20 (final: subir depois) |
-| fator_juvenis | juvenis por vaga adulta, em cada sexo | 3 |
 | semente base | por estudo, para reprodutibilidade | 2026 (E2), 2028 (E3), 2029 (E1), 2030 (E4) |
 
 Todos os cenários são reprodutíveis: a semente de cada um é `semente base + índice global do

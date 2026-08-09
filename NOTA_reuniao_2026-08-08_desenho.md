@@ -211,6 +211,18 @@ a coluna `extincao_gen` guarda em que geração parou (NA quando chegou ao fim).
 se extinguem por cenário passa a ser um resultado reportável. Esperamos que seja zero em tudo,
 mas agora fica verificável em vez de suposto.
 
+**Uma simplificação do ciclo de vida, decidida depois.** Numa primeira versão o código sorteava
+do pote de filhotes um excedente de machos juvenis e aplicava a viabilidade só a esses. Funcionava
+e dava a mesma distribuição de traços entre os adultos, porque o sorteio do pote era uniforme, mas
+obrigava a explicar de onde saía o tamanho do excedente. Agora a viabilidade age sobre todos os
+juvenis machos, o sexo é atribuído ao acaso 1:1, e o único corte é o censo. O ciclo fica com duas
+mortalidades e nenhum número arbitrário: a viabilidade, que é seletiva e age só sobre os machos, e
+o censo, que é sorteio puro e é a fonte de deriva do modelo.
+
+Isso significa que o código atual já não é o que gerou os resultados desta rodada. A diferença é
+estatisticamente irrelevante (as duas formas amostram da mesma distribuição), mas para não haver
+dúvida, o commit que gerou estes dados está etiquetado como `rodada-preliminar-2026-08-08`.
+
 ---
 
 ## 6. O que vai rodar agora
@@ -263,17 +275,6 @@ opcional `captura_gen` nos motores, que devolve a matriz M daquela geração. N�
 número aleatório, então não altera resultado nenhum, serve para os três estudos e não pode
 desalinhar. De brinde permite verificar a captura: recalcular a modularidade da matriz e comparar
 com a linha guardada.
-
-**Aplicar a viabilidade ao pote inteiro de filhotes, em vez de a um excedente sorteado.** Hoje o
-código sorteia do pote 600 machos juvenis (três por vaga adulta), aplica a viabilidade a esses e
-censa 200 sobreviventes. Como o sorteio do pote é uniforme, isso dá a mesma distribuição de
-traços entre os adultos que aplicar a viabilidade a todos os filhotes e depois censar 200: não há
-seleção escondida no sorteio, e não é uma correção de viés. Mas o excedente de três por vaga é
-conveniência de programação, não biologia, e implica uma razão sexual primária de 3:1 que nenhum
-organismo tem. A formulação natural, e a que está escrita na seção do ciclo de vida, é "a
-viabilidade age sobre os juvenis e depois censamos 200 adultos de cada sexo". Custa calcular V
-para uns 10.000 indivíduos em vez de 600, o que é desprezível ao lado do laço de acasalamento, e
-deixa o modelo mais fácil de descrever nos Métodos.
 
 **Atualizar o script 06.** Ele ainda aponta para `backup_fase5_semEscape.rds`, que é o nome
 antigo, e tem `N_REPLICAS <- 100`.

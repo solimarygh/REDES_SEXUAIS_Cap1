@@ -42,12 +42,14 @@ simulate_controle <- function(N_machos = 200, N_femeas = 200,
                               phi = 5, gamma = 0.2,
                               tipo_selecao = "gaussian", encounters_n = 200,
                               selecao_natural = TRUE, k_fixo = NULL,
-                              fator_juvenis = 3) {
+                              fecundidade_base = 50) {
 
   # (1) Sorteio da população: nada vem de geração anterior.
-  # Os machos são sorteados como JUVENIS, porque é sobre eles que a viabilidade age.
-  N_machos_juv <- N_machos * fator_juvenis
-  male_z_juv <- pmax(0, rnorm(N_machos_juv, phi, sigma_z))
+  # Os machos são sorteados como JUVENIS, porque é sobre eles que a viabilidade
+  # age. O tamanho do pool é o mesmo dos outros estudos, ou seja, o que a
+  # fecundidade produziria, para que o censo adulto seja comparável entre eles.
+  N_juvenis  <- N_femeas * fecundidade_base %/% 2
+  male_z_juv <- pmax(0, rnorm(N_juvenis, phi, sigma_z))
   female_p   <- pmax(0, rnorm(N_femeas, phi, sigma_p))
   female_s   <- pmax(0, rnorm(N_femeas, mean = 2, sd = sigma_s))
 

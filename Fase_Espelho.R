@@ -41,13 +41,9 @@ produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
                                       N_males_next = 200, N_females_next = 200,
                                       fecundidade_base = 50, eps_sd = 0.2,
                                       segregacao = c("infinitesimal", "fixa"),
-                                      mut_sd = 0.05, fator_juvenis = 3) {
+                                      mut_sd = 0.05) {
   segregacao <- match.arg(segregacao)
   n_femeas <- ncol(M)
-  # Os dois sexos saem como JUVENIS, em número igual; o censo acontece na geração
-  # seguinte (viabilidade nos machos, sorteio aleatório nas fêmeas).
-  N_machos_juv <- N_males_next   * fator_juvenis
-  N_femeas_juv <- N_females_next * fator_juvenis
 
   # Fecundidade neutra: quem acasalou deixa F filhotes; quem não acasalou, 0.
   acasalaram   <- colSums(M) > 0
@@ -58,7 +54,7 @@ produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
   # ou ninguém acasalou, ou os filhotes não bastam para preencher as vagas com N
   # constante. Nos dois casos NULL, e quem chama encerra a réplica registrando a
   # geração em extincao_gen.
-  if (total_filhotes < N_machos_juv + N_femeas_juv) return(NULL)
+  if (total_filhotes < 2 * (N_males_next + N_females_next)) return(NULL)
 
   moms <- rep(seq_len(n_femeas), times = num_filhotes_por_femea)
   dads <- vapply(moms, function(mom) {
@@ -94,11 +90,11 @@ produce_offspring_espelho <- function(M, male_p_surv, female_p_gen,
   # Aqui o sorteio é por ÍNDICE e não por valor. Com uma única característica os
   # dois são equivalentes; a forma por índice está aqui porque é a que o Estudo 4
   # exige (lá z e p do mesmo filhote precisam viajar juntos).
-  vagas <- N_machos_juv + N_femeas_juv
-  idx   <- sample(seq_len(total_filhotes), size = vagas, replace = FALSE)
+  idx  <- sample.int(total_filhotes)
+  meio <- total_filhotes %/% 2
 
-  list(male_p_juv   = p_filhotes[idx[seq_len(N_machos_juv)]],
-       female_p_juv = p_filhotes[idx[(N_machos_juv + 1):vagas]])
+  list(male_p_juv   = p_filhotes[idx[seq_len(meio)]],
+       female_p_juv = p_filhotes[idx[(meio + 1):(2 * meio)]])
 }
 
 # ---------------------------------------------------------------------
@@ -111,15 +107,14 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
                              tipo_selecao = "gaussian", encounters_n = 200,
                              selecao_natural = TRUE, k_fixo = NULL,
                              fecundidade_base = 50,
-                             segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
-                             fator_juvenis = 3) {
+                             segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05) {
   segregacao <- match.arg(segregacao)
-  N_machos_juv <- N_machos * fator_juvenis
-  N_femeas_juv <- N_femeas * fator_juvenis
+  # O pool de juvenis não é parâmetro livre: é o que a fecundidade produz.
+  N_juvenis <- N_femeas * fecundidade_base %/% 2
 
   # Preferência: genótipo herdável carregado pelos DOIS sexos
-  male_p_juv   <- pmax(0, rnorm(N_machos_juv, phi, sigma_p_init))  # macho carrega p sem expressar
-  female_p_juv <- pmax(0, rnorm(N_femeas_juv, phi, sigma_p_init))
+  male_p_juv   <- pmax(0, rnorm(N_juvenis, phi, sigma_p_init))  # macho carrega p sem expressar
+  female_p_juv <- pmax(0, rnorm(N_juvenis, phi, sigma_p_init))
 
   out <- vector("list", generations)
   extincao_gen <- NA_integer_   # geração em que a réplica foi encerrada; NA = chegou ao fim
@@ -128,7 +123,7 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
 
     # (1) Traço do macho: AMBIENTAL — re-sorteado toda geração, não herdado.
     # Sorteado para todos os JUVENIS, porque é sobre eles que a viabilidade age.
-    male_z_juv <- pmax(0, rnorm(N_machos_juv, phi, sigma_z))
+    male_z_juv <- pmax(0, rnorm(length(male_p_juv), phi, sigma_z))
 
     # (2) Censo de adultos: a viabilidade filtra os juvenis machos e sobram sempre
     # N_machos adultos. O índice é o mesmo para z e p, então o p que cada macho
@@ -174,8 +169,7 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
     off <- produce_offspring_espelho(M, male_p_surv, female_p_gen,
                                      N_machos, N_femeas,
                                      fecundidade_base = fecundidade_base, eps_sd = eps_sd,
-                                     segregacao = segregacao, mut_sd = mut_sd,
-                                     fator_juvenis = fator_juvenis)
+                                     segregacao = segregacao, mut_sd = mut_sd)
     # Réplica encerrada: guardamos as gerações já rodadas e registramos ONDE parou,
     # para que a perda seja contável na análise em vez de virar uma réplica que
     # some no filtro generation == 100.

@@ -150,17 +150,16 @@ replay_capturar <- function(seed, tipo_sel, sp, am, gen_alvo,
                             k_fixo = NULL, sel_nat = TRUE,
                             N = N_POP, generations = GEN_MAX,
                             phi = 5, gamma = 0.2, sigma_z_init = 1.0,
-                            sigma_s = 0.2, eps_sd = 0.2, fator_juvenis = 3) {
+                            sigma_s = 0.2, eps_sd = 0.2, fecundidade_base = 50) {
   set.seed(seed)
 
   # Este loop TEM que ser idêntico ao de simulate_evolution(), senão o replay não
   # reproduz a réplica. Acompanhou a mudança para censo de adultos constante.
-  N_machos_juv  <- N * fator_juvenis
-  N_femeas_juv  <- N * fator_juvenis
+  N_juvenis     <- N * fecundidade_base %/% 2
 
-  male_z_gen1   <- pmax(0, rnorm(N_machos_juv, mean = phi, sd = sigma_z_init))
+  male_z_gen1   <- pmax(0, rnorm(N_juvenis, mean = phi, sd = sigma_z_init))
   female_p_gen1 <- pmax(0, rnorm(N, mean = phi, sd = sp))
-  female_z_gen1 <- pmax(0, rnorm(N_femeas_juv, mean = phi, sd = sigma_z_init))
+  female_z_gen1 <- pmax(0, rnorm(N_juvenis, mean = phi, sd = sigma_z_init))
 
   male_z_juv   <- male_z_gen1
   female_z_juv <- female_z_gen1
@@ -204,8 +203,8 @@ replay_capturar <- function(seed, tipo_sel, sp, am, gen_alvo,
       Gen_final_dados <- list(Z_Machos = male_z_surv, P_Femeas = female_p)
     }
 
-    offspring    <- produce_offspring(M, male_z_surv, female_z_gen, N, N, eps_sd = eps_sd,
-                                      fator_juvenis = fator_juvenis)
+    offspring    <- produce_offspring(M, male_z_surv, female_z_gen, N, N,
+                                      fecundidade_base = fecundidade_base, eps_sd = eps_sd)
     if (is.null(offspring)) break   # réplica encerrada (ver produce_offspring)
     male_z_juv   <- offspring$male_z_juv
     female_z_juv <- offspring$female_z_juv

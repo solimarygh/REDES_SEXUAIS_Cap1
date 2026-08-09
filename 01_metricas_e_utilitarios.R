@@ -370,16 +370,8 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
 
 produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, N_females_next = 200,
                               fecundidade_base = 50, eps_sd = 0.2,
-                              segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
-                              fator_juvenis = 3) {
+                              segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05) {
   segregacao <- match.arg(segregacao)
-  # fator_juvenis: quantos JUVENIS por vaga adulta, igual nos dois sexos (razão
-  # sexual primária 1:1). A viabilidade agirá sobre os juvenis machos e o censo
-  # adulto ficará em N_males_next. Com 3, mesmo no pior caso do gradiente
-  # (sobrevivência ~0.62 com sigma_z = 2.0) sobram ~372 juvenis machos para
-  # preencher 200 vagas, com folga confortável.
-  N_machos_juv <- N_males_next   * fator_juvenis
-  N_femeas_juv <- N_females_next * fator_juvenis
   n_femeas <- ncol(M)
   # POLIANDRIA NEUTRA: fecundidade fixa por fêmea, independente do número de parceiros.
   # A poliandria continua importando para a competência espermática (paternidade
@@ -400,7 +392,11 @@ produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, 
   # devolvia só os SOBREVIVENTES, encolhendo a população em silêncio: dali em
   # diante runif(N_machos) reciclava um V mais curto e male_z_gen[survive]
   # passava a produzir NA sem nenhum aviso.
-  if (total_filhotes < N_machos_juv + N_femeas_juv) return(NULL)
+  # O mínimo é o necessário para que, depois do sexo 1:1 e da viabilidade, ainda
+  # sobrem N adultos de cada sexo no pior caso do gradiente (sobrevivência ~0.62
+  # com sigma_z = 2.0): 800 filhotes dão 400 juvenis de cada sexo, e 400 * 0.62 =
+  # 248 machos sobreviventes para as 200 vagas.
+  if (total_filhotes < 2 * (N_males_next + N_females_next)) return(NULL)
 
   moms <- rep(1:n_femeas, times = num_filhotes_por_femea)
 
@@ -434,15 +430,17 @@ produce_offspring <- function(M, male_z_surv, female_z_gen, N_males_next = 200, 
   # equivalentes (sample sobre um vetor é sample.int seguido de indexação), mas o
   # Estudo 4 exige a forma por índice, porque lá z e p do mesmo filhote precisam
   # viajar juntos. Padronizado aqui para que os três motores tenham a mesma forma.
-  # Os dois sexos saem como JUVENIS, em número igual. A viabilidade age sobre os
-  # juvenis machos e o censo dos 200 adultos de cada sexo acontece no início da
-  # geração seguinte. As fêmeas não passam por viabilidade neste modelo, então o
-  # censo delas é um sorteio aleatório entre as juvenis.
-  vagas <- N_machos_juv + N_femeas_juv
-  idx   <- sample(seq_len(total_filhotes), size = vagas, replace = FALSE)
+  # TODOS os filhotes são juvenis: o sexo é atribuído ao acaso, 1:1. Não há
+  # capacidade de carga aqui. Ela é imposta no início da geração seguinte, no
+  # censo dos N adultos de cada sexo, depois da viabilidade.
+  # O sorteio é por ÍNDICE e não por valor. Com uma característica só os dois são
+  # equivalentes, mas o Estudo 4 exige a forma por índice, porque lá z e p do
+  # mesmo filhote precisam viajar juntos. Padronizado nos três motores.
+  idx  <- sample.int(total_filhotes)
+  meio <- total_filhotes %/% 2
 
-  list(male_z_juv   = z_filhotes[idx[seq_len(N_machos_juv)]],
-       female_z_juv = z_filhotes[idx[(N_machos_juv + 1):vagas]])
+  list(male_z_juv   = z_filhotes[idx[seq_len(meio)]],
+       female_z_juv = z_filhotes[idx[(meio + 1):(2 * meio)]])
 }
 
 
@@ -537,7 +535,7 @@ simulate_evolution <- function(
     generations = 50, N_machos = 200, N_femeas = 200,
     sigma_z_init = 1.0, sigma_p = 1.0, sigma_s = 0.2,
     tipo_selecao = "gaussian", encounters_n = 200, phi = 5, gamma = 0.2, eps_sd = 0.2,
-    segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05, fator_juvenis = 3,
+    segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05, fecundidade_base = 50,
     return_details = FALSE, salvar_redes = FALSE, pasta_redes = NULL, replica_id = 1,
     selecao_natural = TRUE, k_fixo = NULL
 ) {
@@ -546,12 +544,13 @@ simulate_evolution <- function(
   # Os dois sexos entram na geração como JUVENIS, em número igual (razão sexual
   # primária 1:1). A viabilidade age sobre os juvenis machos e o censo fixa a
   # população adulta em N_machos e N_femeas (ver selecionar_machos_adultos).
-  N_machos_juv  <- N_machos * fator_juvenis
-  N_femeas_juv  <- N_femeas * fator_juvenis
+  # O tamanho do pool de juvenis não é um parâmetro livre: é o que a fecundidade
+  # produz, N_femeas * F filhotes repartidos entre os dois sexos.
+  N_juvenis     <- N_femeas * fecundidade_base %/% 2
 
-  male_z_gen1   <- pmax(0, rnorm(N_machos_juv, mean = phi, sd = sigma_z_init))
+  male_z_gen1   <- pmax(0, rnorm(N_juvenis, mean = phi, sd = sigma_z_init))
   female_p_gen1 <- pmax(0, rnorm(N_femeas, mean = phi, sd = sigma_p))
-  female_z_gen1 <- pmax(0, rnorm(N_femeas_juv, mean = phi, sd = sigma_z_init))
+  female_z_gen1 <- pmax(0, rnorm(N_juvenis, mean = phi, sd = sigma_z_init))
 
   male_z_juv   <- male_z_gen1
   female_z_juv <- female_z_gen1
@@ -608,9 +607,9 @@ simulate_evolution <- function(
       female_p_final <- female_p
     }
     
-    offspring <- produce_offspring(M, male_z_surv, female_z_gen, N_machos, N_femeas, eps_sd = eps_sd,
-                                   segregacao = segregacao, mut_sd = mut_sd,
-                                   fator_juvenis = fator_juvenis)
+    offspring <- produce_offspring(M, male_z_surv, female_z_gen, N_machos, N_femeas,
+                                   fecundidade_base = fecundidade_base, eps_sd = eps_sd,
+                                   segregacao = segregacao, mut_sd = mut_sd)
     # Réplica encerrada: não há filhotes suficientes para a geração seguinte.
     # Guardamos as gerações já rodadas e registramos ONDE parou, para que a perda
     # seja contável na análise em vez de virar uma réplica que some no filtro
