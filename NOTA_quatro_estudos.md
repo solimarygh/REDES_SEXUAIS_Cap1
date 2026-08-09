@@ -1152,11 +1152,40 @@ quatro e a comparabilidade fica intacta.
    paternidade entre os parceiros.
 4. Variância de segregação proporcional (modelo infinitesimal de Falconer e Mackay). O
    desvio dos filhotes em relação à média dos pais tem variância igual a metade da variância
-   parental, em vez de um ruído fixo. Com ruído fixo, a variância genética erodia geração após
-   geração até um piso artificial baixo (2 vezes eps^2, cerca de 0.08 com eps = 0.2), e isso
-   comprimia artificialmente a resposta evolutiva de qualquer característica herdável. O modo
-   antigo continua disponível no código (`segregacao = "fixa"`) para comparação, e o modo usado
-   fica registrado numa coluna da saída de cada simulação.
+   parental, em vez de um ruído fixo. A conta está logo abaixo. O modo antigo continua disponível
+   no código (`segregacao = "fixa"`) para comparação, e o modo usado fica registrado numa coluna
+   da saída de cada simulação.
+
+**A conta da segregação, passo a passo.** Cada filhote recebe
+
+    z_filhote = (z_pai + z_mae)/2 + D
+
+O primeiro termo é a média dos dois pais. Se os pais forem tomados ao acaso na população, cada um
+com variância V, então `Var((z_pai + z_mae)/2) = (V + V)/4 = V/2`: a média de dois números varia
+menos que um número sozinho. É por isso que a herança de ponto médio, sozinha, corta a variância
+pela metade a cada geração.
+
+O segundo termo, D, é o desvio de segregação: o quanto cada filhote se afasta da média dos pais,
+por ter calhado de receber uma metade dos genes de cada um e não a outra. É ele que faz irmãos
+diferirem entre si, e toda a diferença entre os dois modos está em quanto vale a sua variância.
+
+Com ruído fixo, `Var(D) = eps^2`, um número que nós escolhemos e que não depende de nada. Então
+`V' = V/2 + eps^2`, e repetindo isso geração após geração V converge para o ponto fixo
+`V* = V*/2 + eps^2`, ou seja `V* = 2 eps^2`. Com eps = 0.2 dá 0.08, que é exatamente o valor em
+que a variância travava.
+
+No modelo infinitesimal, `Var(D) = V/2`, proporcional à variância que existe entre os pais. Então
+`V' = V/2 + V/2 = V`: a metade que o blending tira é exatamente a metade que a segregação repõe.
+
+**Por que o infinitesimal é o certo.** Com ruído fixo, uma população em que todos os pais fossem
+idênticos ainda produziria filhotes variados, do nada. Isso é impossível: se não há variação
+entre os pais, não pode haver variação entre irmãos. O infinitesimal respeita isso, porque faz a
+variação entre irmãos ser proporcional à que existe na população. É o resultado clássico de
+Falconer e Mackay: um pai transmite metade dos seus genes ao acaso, e a variância entre os
+gametas que ele pode produzir é V_A/2.
+
+No código isso é `rnorm(n, 0, sqrt(var_pais / 2))`, mais um termo mutacional pequeno
+(`mut_sd = 0.05`) que repõe o que a deriva remove ao longo de muitas gerações.
 
 **Réplicas.** 20 nesta rodada de exploração, mais na rodada final. São 20 e não mais porque os
 problemas que motivaram o recorrido (o teto de k, o pool de machos, o caso degenerado) são vieses

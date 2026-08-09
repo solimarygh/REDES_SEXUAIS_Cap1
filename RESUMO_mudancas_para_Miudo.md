@@ -148,11 +148,51 @@ geração 100, a variância do traço era 0.08 para qualquer valor de sigma_p.
 manutenção de variância genética estava medindo desvios de poucos pontos percentuais em torno de
 um valor que nós tínhamos fixado.
 
-**O que fizemos.** Adotamos o modelo infinitesimal: o desvio de segregação é proporcional à
-variância parental (V_A/2) em vez de um ruído de tamanho fixo. Assim `V' = V/2 + V/2 = V`. A
-variância deixa de erodir sozinha e passa a ser determinada só pela seleção e pela deriva, com um
-termo mutacional pequeno repondo o que a deriva remove. O modo antigo continua no código para
-comparação, e o modo usado fica gravado numa coluna da saída.
+**O que fizemos.** Adotamos o modelo infinitesimal: o desvio de segregação passou a ser
+proporcional à variância parental, em vez de um ruído de tamanho fixo.
+
+**A conta, passo a passo.** Cada filhote recebe
+
+    z_filhote = (z_pai + z_mae)/2 + D
+
+O primeiro termo é a média dos dois pais. Se os pais forem tomados ao acaso na população, cada um
+com variância V, então
+
+    Var( (z_pai + z_mae)/2 ) = (V + V)/4 = V/2
+
+ou seja, a média de dois números varia menos que um número sozinho. É por isso que o blending,
+sozinho, corta a variância pela metade a cada geração.
+
+O segundo termo, D, é o desvio de segregação: o quanto cada filhote se afasta da média dos pais,
+porque calhou de receber uma metade dos genes de cada um e não a outra. É ele que faz irmãos
+diferirem entre si. E toda a diferença entre os dois modelos está em quanto vale a sua variância.
+
+**Com ruído fixo,** Var(D) = eps^2, um número que nós escolhemos e que não depende de nada:
+
+    V' = V/2 + eps^2
+
+Repetindo isso geração após geração, V converge para o ponto fixo onde V* = V*/2 + eps^2, ou seja
+V* = 2 eps^2. Com eps = 0.2 dá 0.08, que é exatamente o que víamos.
+
+**No modelo infinitesimal,** Var(D) = V/2, proporcional à variância que existe entre os pais:
+
+    V' = V/2 + V/2 = V
+
+A metade que o blending tira é exatamente a metade que a segregação repõe.
+
+**A intuição de por que o infinitesimal é o certo.** Com ruído fixo, uma população em que todos os
+pais fossem idênticos ainda produziria filhotes variados, do nada. Isso é impossível: se não há
+variação entre os pais, não pode haver variação entre irmãos. O infinitesimal respeita isso,
+porque faz a variação entre irmãos ser proporcional à que existe na população. É o resultado
+clássico de Falconer e Mackay: um pai transmite metade dos seus genes ao acaso, e a variância
+entre os gametas que ele pode produzir é V_A/2.
+
+No código isso é `desvio <- rnorm(n, 0, sqrt(var_pais / 2))`, mais um termo mutacional pequeno
+(`mut_sd = 0.05`) que repõe o que a deriva remove ao longo de muitas gerações.
+
+A variância deixa então de erodir sozinha e passa a ser determinada só pela seleção e pela
+deriva. O modo antigo continua no código para comparação, e o modo usado fica gravado numa coluna
+da saída de cada simulação.
 
 ---
 
