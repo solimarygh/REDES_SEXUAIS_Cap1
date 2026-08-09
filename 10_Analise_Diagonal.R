@@ -63,7 +63,11 @@ divergencia <- por_curva %>%
   mutate(
     norma     = sqrt(sigma_p^2 + sigma_z^2),   # variabilidade TOTAL
     maximo    = pmax(sigma_p, sigma_z),
-    descasado = abs(log(sigma_p / sigma_z)),   # REPARTIÇÃO entre os sexos
+    descasado = abs(log(sigma_p / sigma_z)),   # REPARTIÇÃO, simétrica
+    # A versão COM SINAL. Positiva quando os machos são mais variados que as
+    # fêmeas. Faz diferença: se o efeito for assimétrico, a versão em valor
+    # absoluto mistura duas situações biologicamente opostas e subestima tudo.
+    assimetria  = log(sigma_z / sigma_p),
     na_diagonal = abs(sigma_p - sigma_z) < 1e-9
   )
 
@@ -92,10 +96,12 @@ parcial <- function(extra) {
 }
 
 dentro <- rbind(
-  norma     = parcial("norma"),
-  maximo    = parcial("maximo"),
-  descasado = parcial("descasado"),
-  ambos     = parcial("norma + descasado")
+  norma      = parcial("norma"),
+  maximo     = parcial("maximo"),
+  descasado  = parcial("descasado"),
+  assimetria = parcial("assimetria"),
+  ambos      = parcial("norma + descasado"),
+  ambos_sin  = parcial("norma + assimetria")
 )
 
 cat(sprintf("=== (a) DENTRO de cada condicao de busca (A_max x k x selecao natural) ===\n"))
@@ -111,14 +117,17 @@ print(round(as.data.frame(dentro), 4))
 agg <- divergencia %>%
   group_by(sigma_p, sigma_z) %>%
   summarise(div = mean(div, na.rm = TRUE), .groups = "drop") %>%
-  mutate(norma     = sqrt(sigma_p^2 + sigma_z^2),
-         maximo    = pmax(sigma_p, sigma_z),
-         descasado = abs(log(sigma_p / sigma_z)))
+  mutate(norma      = sqrt(sigma_p^2 + sigma_z^2),
+         maximo     = pmax(sigma_p, sigma_z),
+         descasado  = abs(log(sigma_p / sigma_z)),
+         assimetria = log(sigma_z / sigma_p))
 
-mods_agg <- list(norma     = lm(div ~ norma,     data = agg),
-                 maximo    = lm(div ~ maximo,    data = agg),
-                 descasado = lm(div ~ descasado, data = agg),
-                 ambos     = lm(div ~ norma + descasado, data = agg))
+mods_agg <- list(norma      = lm(div ~ norma,      data = agg),
+                 maximo     = lm(div ~ maximo,     data = agg),
+                 descasado  = lm(div ~ descasado,  data = agg),
+                 assimetria = lm(div ~ assimetria, data = agg),
+                 ambos      = lm(div ~ norma + descasado,  data = agg),
+                 ambos_sin  = lm(div ~ norma + assimetria, data = agg))
 
 comp_agg <- tibble(modelo = names(mods_agg),
                    R2  = sapply(mods_agg, function(m) summary(m)$r.squared),
@@ -166,16 +175,19 @@ if (nrow(nao_cobertas) > 0) print(as.data.frame(head(nao_cobertas, 12)), row.nam
 # Pergunta nova, que só se pode fazer agora que gravamos grau_medio_femeas.
 # Se a divergência entre curvas for explicada pelo espalhamento do grau, então
 # o que separa as curvas é densidade de rede, e não geometria da escolha.
-mod_grau  <- lm(div ~ spread_grau, data = divergencia)
-mod_ambos <- lm(div ~ norma + spread_grau, data = divergencia)
-
-cat("\n=== A divergência é apenas diferença de poliandria realizada? ===\n")
-cat(sprintf("div ~ spread_grau            : R2 = %.3f\n", summary(mod_grau)$r.squared))
-cat(sprintf("div ~ norma + spread_grau    : R2 = %.3f\n", summary(mod_ambos)$r.squared))
-cat(sprintf("div ~ norma (sozinho)        : R2 = %.3f\n", summary(mods$norma)$r.squared))
-cat("\nSe spread_grau sozinho já explica quase tudo, a comparação entre curvas está\n")
-cat("confundida com densidade e precisa ser feita em A_max = 200, onde a tabela do\n")
-cat("teste mostra que todas as curvas atingem o k e a densidade fica equiparada.\n")
+# Aqui também sobre o modelo base, senão o efeito de A_max e k contamina tudo.
+med <- rbind(
+  spread_grau            = parcial("spread_grau"),
+  assimetria             = parcial("assimetria"),
+  `assimetria+spread`    = parcial("assimetria + spread_grau")
+)
+cat("\n=== A divergencia e apenas diferenca de poliandria realizada? ===\n")
+print(round(as.data.frame(med), 4))
+cat("\nSe 'spread_grau' sozinho ja explica quase tudo, a comparacao entre curvas\n")
+cat("esta confundida com densidade, e a H1 precisa ser lida em A_max = 200, onde\n")
+cat("a tabela do teste mostra que todas as curvas atingem o k.\n")
+cat("Se 'assimetria' mantem o seu efeito depois de incluir 'spread_grau', entao\n")
+cat("a reparticao entre os sexos age por outra via, e nao so pela densidade.\n")
 
 # ---------------------------------------------------------------------
 # 5. Gráficos
