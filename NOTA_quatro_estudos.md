@@ -1078,10 +1078,24 @@ sobrevive é aproximadamente `1 / sqrt(1 + 2 gamma sigma_z^2)`, ou seja, com gam
 |---|---|---|---|---|---|---|---|
 | Machos sobreviventes (de 200) | 198 | 191 | 178 | 169 | 159 | 145 | 124 |
 
-O pool encolhe 37% ao longo do gradiente. Como o número de fêmeas e o k continuam os mesmos, o
-número total de arestas da rede não muda, mas ele se reparte entre menos machos: com k = 5, o
-grau médio dos machos passa de cerca de 5.1 para cerca de 8.1. Isso afeta diretamente o Is, a
-centralização e o aninhamento, e não tem nada a ver com a escolha feminina.
+O pool encolhe 37% ao longo do gradiente, e isso muda as DIMENSÕES da matriz sobre a qual as
+métricas são calculadas. Modularidade, aninhamento e centralização dependem do tamanho da matriz,
+e não apenas da sua densidade, então qualquer tendência ao longo de sigma_z já estaria
+contaminada só por isso, sem nenhuma relação com a escolha feminina.
+
+**Cuidado com o argumento de densidade, que é mais fraco do que parece.** Seria tentador dizer
+que o mesmo número de arestas se reparte entre menos machos e que o grau médio dos machos sobe.
+Não se sustenta, por duas razões. O número de fêmeas na rede também não é constante, porque as
+que não acasalam são excluídas do cálculo das métricas. E o número de arestas cai com sigma_z,
+porque a taxa de aceite diminui quando os machos estão mais dispersos: mesmo depois da
+viabilidade estreitar a distribuição, o desvio padrão dos sobreviventes ainda sobe de cerca de
+0.20 para cerca de 1.24 ao longo do gradiente. Numerador e denominador caem os dois, e sem medir
+não dá para afirmar qual ganha.
+
+**Uma distinção que vale registrar.** As fêmeas que somem da rede somem por um resultado
+biológico que queremos medir, o de não terem acasalado, e ele fica gravado à parte em
+`prop_femeas_sem_acasalar`. Os machos que sumiam sumiam por um artefato de onde tínhamos colocado
+o passo da viabilidade, e em quantidade que dependia justamente do eixo do experimento.
 
 **Onde isso morde.** Em Fêmeas variando pouco, porque sigma_z fica fixo em 1.0 e o pool é
 estável. No Controle e em Machos variando morde de frente, porque ali sigma_z é o eixo do

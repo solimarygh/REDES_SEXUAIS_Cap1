@@ -67,10 +67,22 @@ disponíveis caía com sigma_z:
 |---|---|---|---|---|---|---|---|
 | Machos disponíveis (de 200) | 198 | 191 | 178 | 169 | 159 | 145 | 124 |
 
-O pool encolhia 37% ao longo do gradiente. Como o número de fêmeas e o k não mudavam, o mesmo
-número de arestas se repartia entre menos machos, e o grau médio dos machos subia de cerca de 5.1
-para cerca de 8.1. Isso mexe sozinho em Is, centralização e aninhamento, sem nenhuma relação com
-a escolha feminina.
+O pool encolhia 37% ao longo do gradiente, e isso muda as DIMENSÕES da matriz sobre a qual as
+métricas são calculadas. Modularidade, aninhamento e centralização dependem do tamanho da matriz,
+não só da sua densidade, então uma tendência ao longo de sigma_z já estaria contaminada só por
+isso.
+
+**Uma correção sobre o efeito na densidade.** Numa versão anterior deste resumo eu escrevia que o
+mesmo número de arestas se repartia entre menos machos, e que o grau médio dos machos subia de
+5.1 para 8.1. Isso não se sustenta: o número de fêmeas na rede também não é constante, porque as
+que não acasalam são excluídas do cálculo, e o número de arestas cai com sigma_z, já que a taxa
+de aceite diminui quando os machos são mais dispersos. Numerador e denominador caem os dois, e
+sem medir não dá para dizer qual ganha. O que fica é o argumento das dimensões, que basta.
+
+**E há uma distinção que vale registrar.** As fêmeas que somem da rede somem por um resultado
+biológico que queremos medir: elas não acasalaram, e isso está gravado à parte. Os machos que
+sumiam sumiam por um artefato de onde nós tínhamos colocado o passo da viabilidade, em quantidade
+que dependia justamente do eixo do experimento.
 
 **Onde mordia.** No estudo em que sigma_p varia, pouco, porque ali sigma_z fica fixo. Mas no
 controle e no estudo do espelho mordia de frente, porque neles sigma_z é justamente o eixo do
