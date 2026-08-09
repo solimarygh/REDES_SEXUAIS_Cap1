@@ -194,6 +194,44 @@ A variância deixa então de erodir sozinha e passa a ser determinada só pela s
 deriva. O modo antigo continua no código para comparação, e o modo usado fica gravado numa coluna
 da saída de cada simulação.
 
+**Uma limitação da nossa implementação, e a terceira pergunta para você.** O resultado
+`Var(D) = V_A/2` não vale sempre. Ele supõe acasalamento aleatório, equilíbrio de ligamento e
+pais não aparentados. Três situações o quebram, e as três estão presentes aqui.
+
+O acasalamento assortativo gera desequilíbrio de ligamento positivo, e aí a variância total da
+população passa a ser maior que a variância génica. A segregação se calcula sobre a génica, não
+sobre a total. O nosso modelo tem acasalamento assortativo por construção: é o motor do mecanismo
+de Fisher.
+
+A seleção gera desequilíbrio negativo (efeito Bulmer), e aí a variância total cai abaixo da
+génica.
+
+E em população finita a variância de segregação decai com o parentesco acumulado, como
+`(1 - F) V_A/2`.
+
+O nosso código usa `var(c(male_z_surv, female_z_gen))`, ou seja, a variância TOTAL realizada do
+pool parental, e ainda por cima com os machos já pós-seleção. Ele mistura a componente génica com
+a de desequilíbrio em vez de separá-las, que é justamente o que o modelo infinitesimal estrito
+faz.
+
+**Por que isso preocupa aqui em particular.** Os dois desvios vão em sentidos opostos e se
+compensam em parte: o assortativo nos faz superestimar a segregação, a seleção nos faz
+subestimá-la. Mas eles NÃO se compensam igual nas quatro curvas de preferência, porque cada uma
+gera uma quantidade diferente de acasalamento assortativo: a gaussiana gera muito, a aleatória
+nenhum. Ou seja, a nossa aproximação erra de forma diferente conforme a curva, e isso poderia
+produzir diferenças aparentes de manutenção de variância entre curvas que fossem de implementação
+e não biológicas. Bem em cima da H2.
+
+É verificável: dá para implementar a versão estrita, que acompanha a variância génica à parte, e
+comparar num subconjunto de cenários. A pergunta é se vale a pena, ou se a magnitude do
+desequilíbrio nestas condições é pequena o bastante para a aproximação se sustentar na revisão.
+
+Referências que eu procuraria para fundamentar isso: Barton, Etheridge e Véber (2017), "The
+infinitesimal model: definition, derivation, and implications", que deriva com rigor quando a
+segregação vale V_A/2; Bulmer (1971) sobre o efeito da seleção na variabilidade; Crow e
+Felsenstein (1968) sobre acasalamento assortativo; e o capítulo de semelhança entre parentes de
+Falconer e Mackay.
+
 ---
 
 ## 5. O desenho virou quatro estudos, com um controle novo
@@ -280,16 +318,21 @@ mais.
 
 ---
 
-## Duas perguntas para você
+## Três perguntas para você
 
-**1. O problema do mediador.** Se o grau realizado depende da curva de preferência, e o usamos
+**1. A implementação do infinitesimal**, descrita no ponto 4: usamos a variância total realizada
+do pool parental como base da segregação, em vez de acompanhar a variância génica à parte. Vale a
+pena implementar a versão estrita e comparar, ou a magnitude do desequilíbrio aqui é pequena o
+bastante?
+
+**2. O problema do mediador.** Se o grau realizado depende da curva de preferência, e o usamos
 como covariável para comparar curvas, estamos controlando por um mediador e não por um
 confundidor: a curva causa o grau realizado E a topologia, então controlar remove parte do efeito
 causal que queremos medir. Minha intuição é reportar as duas coisas, o efeito total da curva e o
 efeito líquido de densidade, declarando que respondem a perguntas diferentes. Mas é inferência
 causal em redes e prefiro ouvir você antes.
 
-**2. Louvain contra modularidade bipartida.** Continuamos usando `cluster_louvain` do igraph
+**3. Louvain contra modularidade bipartida.** Continuamos usando `cluster_louvain` do igraph
 sobre a projeção não dirigida, e não o `computeModules` do pacote `bipartite`. A razão é de
 custo: Louvain leva centésimos de segundo por rede e o computeModules chega a dez segundos, o que
 com dezenas de milhares de redes seria inviável. Isso se sustenta na revisão, ou vale pagar o

@@ -1187,6 +1187,25 @@ gametas que ele pode produzir é V_A/2.
 No código isso é `rnorm(n, 0, sqrt(var_pais / 2))`, mais um termo mutacional pequeno
 (`mut_sd = 0.05`) que repõe o que a deriva remove ao longo de muitas gerações.
 
+**Uma limitação da nossa implementação, que vale declarar.** O resultado `Var(D) = V_A/2` não
+vale sempre: ele supõe acasalamento aleatório, equilíbrio de ligamento e pais não aparentados.
+Três situações o quebram, e as três estão presentes aqui. O acasalamento assortativo gera
+desequilíbrio de ligamento positivo, e a variância total da população passa a ser maior que a
+génica, sendo a génica a que governa a segregação. A seleção gera desequilíbrio negativo (efeito
+Bulmer) e empurra na direção contrária. E em população finita a segregação decai com o parentesco
+acumulado, como `(1 - F) V_A/2`.
+
+O nosso `var_pais <- var(c(male_z_surv, female_z_gen))` usa a variância TOTAL realizada do pool
+parental, com os machos já pós-seleção, misturando as duas componentes em vez de separá-las. O
+modelo infinitesimal estrito acompanha a variância génica à parte.
+
+Os dois desvios vão em sentidos opostos e se compensam em parte, mas não se compensam igual nas
+quatro curvas de preferência, porque cada uma gera uma quantidade diferente de acasalamento
+assortativo: a gaussiana gera muito, a aleatória nenhum. Isso poderia produzir diferenças
+aparentes de manutenção de variância entre curvas que fossem de implementação e não biológicas,
+bem em cima da H2. É verificável implementando a versão estrita num subconjunto de cenários e
+comparando, e está na lista de perguntas para o Miudo.
+
 **Réplicas.** 20 nesta rodada de exploração, mais na rodada final. São 20 e não mais porque os
 problemas que motivaram o recorrido (o teto de k, o pool de machos, o caso degenerado) são vieses
 sistemáticos e não ruído: mais réplicas não os tocariam.
