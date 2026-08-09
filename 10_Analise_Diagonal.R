@@ -170,6 +170,41 @@ cat(sprintf("\nCelulas acima do maximo da diagonal: %d. Onde estao:\n", sum(nao_
 if (nrow(nao_cobertas) > 0) print(as.data.frame(head(nao_cobertas, 12)), row.names = FALSE)
 
 # ---------------------------------------------------------------------
+# 3b. CONFRONTO DIRETO COM AS PREVISÕES DO PAPER (H1 e H3a)
+# ---------------------------------------------------------------------
+# H1 diz que as assinaturas topológicas "intensify with increasing preference
+# heterogeneity (sigma_p)". A linha sigma_z = 1.0 do Controle é exatamente o eixo
+# de Fêmeas variando, então dá para testar isso direto.
+h1 <- divergencia %>%
+  filter(abs(sigma_z - 1.0) < 1e-9) %>%
+  group_by(sigma_p) %>%
+  summarise(div_media = mean(div), n = n(), .groups = "drop")
+
+cat("\n=== H1: a divergencia cresce com sigma_p? (linha sigma_z = 1.0) ===\n")
+print(as.data.frame(h1), row.names = FALSE, digits = 3)
+tend_h1 <- coef(lm(div ~ sigma_p, data = filter(divergencia, abs(sigma_z - 1.0) < 1e-9)))[2]
+cat(sprintf("Inclinacao: %+.3f por unidade de sigma_p.\n", tend_h1))
+cat(if (tend_h1 > 0) "Sinal POSITIVO: compativel com H1.\n" else
+    "Sinal NEGATIVO: CONTRARIO ao previsto por H1.\n")
+
+# H3a diz que a divergência é MÁXIMA em A_max = 200 e cai quando a busca é
+# restringida. Aqui a comparação é direta.
+h3 <- divergencia %>%
+  group_by(encounters_n) %>%
+  summarise(div_media = mean(div), div_mediana = median(div), n = n(), .groups = "drop") %>%
+  arrange(desc(encounters_n))
+
+cat("\n=== H3a: a divergencia e maxima em A_max = 200? ===\n")
+print(as.data.frame(h3), row.names = FALSE, digits = 3)
+maior <- h3$encounters_n[which.max(h3$div_media)]
+cat(sprintf("Divergencia media maxima em A_max = %d.\n", maior))
+cat(if (maior == 200) "Compativel com H3a.\n" else
+    "CONTRARIO a H3a, que preve o maximo em A_max = 200.\n")
+cat("\nRessalva para os dois: a divergencia e calculada sobre metricas padronizadas\n")
+cat("no conjunto todo, entao ela mede separacao relativa entre curvas e nao\n")
+cat("magnitude absoluta das metricas.\n")
+
+# ---------------------------------------------------------------------
 # 4. O mediador: a divergência é só diferença de poliandria realizada?
 # ---------------------------------------------------------------------
 # Pergunta nova, que só se pode fazer agora que gravamos grau_medio_femeas.
