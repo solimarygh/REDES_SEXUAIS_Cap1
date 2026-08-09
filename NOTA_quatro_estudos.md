@@ -131,9 +131,10 @@ sigma_z (os mesmos 7 valores), somado aos mesmos fatores dos outros estudos: 4 c
 preferência, 3 valores de A_max, 3 valores de k e 2 regimes de seleção natural. Com 20 réplicas,
 isso dá 4 x 7 x 7 x 3 x 3 x 2 x 20 = 70.560 cenários, de uma geração cada.
 
-**Estado.** Uma primeira rodada com 30 réplicas foi concluída e é a base das análises citadas
-nesta nota. Vai ser refeita com o modelo atual (censo de adultos constante e poliandria
-realizada). Script `Fase_Controle.R`, semente base 2029.
+**Estado.** Concluído com o modelo atual (censo de adultos constante e poliandria realizada):
+70.560 cenários, 20 réplicas, sem falhas. As análises do plano do Estudo 4 citadas mais adiante
+vêm de uma rodada anterior, com 30 réplicas e o modelo antigo, e devem ser refeitas sobre estes
+dados. Script `Fase_Controle.R`, semente base 2029.
 
 ---
 
@@ -163,10 +164,11 @@ quanto, depende da curva de preferência e é justamente o que o estudo mede.
 e oportunidade de seleção sexual Is), média e variância do traço dos machos sobreviventes ao
 longo das gerações, e a proporção de fêmeas que ficaram sem acasalar.
 
-**Estado.** Uma primeira rodada foi concluída sem falhas, com 15.120 cenários e 30 réplicas.
-Vai ser refeita com o modelo atual: 10.080 cenários (4 curvas de preferência x 7 valores de
-sigma_p x 3 valores de A_max x 3 valores de k x 2 regimes de seleção natural x 20 réplicas),
-100 gerações cada. Script `Fase4_TodasAsCurvas.R`, semente base 2026.
+**Estado.** Rodando com o modelo atual: 10.080 cenários (4 curvas de preferência x 7 valores de
+sigma_p x 3 valores de A_max x 3 valores de k x 2 regimes de seleção natural x 20 réplicas), 100
+gerações cada, repartido entre duas máquinas Linux. As réplicas 1 a 8 já terminaram, sem falhas e
+sem nenhum cenário encerrado antes das 100 gerações. Script `Fase4_TodasAsCurvas.R`, semente
+base 2026.
 
 ---
 
@@ -221,10 +223,8 @@ preferência. A preferência é registrada de duas formas: no pool genotípico (
 juntos, que é a variável evolutiva propriamente dita) e apenas nas fêmeas (que é a preferência
 efetivamente expressa e que gera a rede).
 
-**Estado.** Uma primeira rodada foi concluída com 15.120 cenários e 30 réplicas, repartida entre
-duas máquinas e depois reunida; a conferência confirmou 504 cenários com 30 réplicas cada. Vai
-ser refeita com o modelo atual: 10.080 cenários, mesmo desenho fatorial do Estudo 2, 20 réplicas,
-100 gerações cada. Script `Fase_Espelho.R`, semente base 2028.
+**Estado.** Concluído com o modelo atual: 10.080 cenários, mesmo desenho fatorial do Estudo 2,
+20 réplicas, 100 gerações cada. Script `Fase_Espelho.R`, semente base 2028.
 
 ---
 
@@ -351,16 +351,17 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
                                     N_males_next = 200, N_females_next = 200,
                                     fecundidade_base = 50,
                                     segregacao = c("infinitesimal", "fixa"),
-                                    eps_sd = 0.2, mut_sd = 0.05) {
+                                    eps_sd = 0.2, mut_sd = 0.05, fator_juvenis = 3) {
   segregacao <- match.arg(segregacao)
   n_femeas <- ncol(M)
+  N_machos_juv <- N_males_next * fator_juvenis
 
   # Fecundidade neutra: quem acasalou deixa F filhotes; quem não acasalou, 0.
   acasalaram   <- colSums(M) > 0
   num_filhotes_por_femea <- ifelse(acasalaram, fecundidade_base, 0)
   total_filhotes         <- sum(num_filhotes_por_femea)
   # CASO DEGENERADO: mesma regra dos Estudos 2 e 3
-  if (total_filhotes < N_males_next + N_females_next) return(NULL)
+  if (total_filhotes < N_machos_juv + N_females_next) return(NULL)
 
   moms <- rep(seq_len(n_femeas), times = num_filhotes_por_femea)
   dads <- vapply(moms, function(mom) {
@@ -389,14 +390,16 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
   z_filhotes <- pmax(0, midparent_z + desvio_segregacao(c(male_z_surv, female_z_gen)))
   p_filhotes <- pmax(0, midparent_p + desvio_segregacao(c(male_p_surv, female_p_gen)))
 
-  # Capacidade de carga: mortalidade aleatória, POR ÍNDICE
-  vagas <- N_males_next + N_females_next
+  # Capacidade de carga: mortalidade aleatória, POR ÍNDICE. É AQUI que a
+  # covariância sobrevive: um único sorteio de índices, e os dois vetores
+  # indexados pelo MESMO idx, para que z e p de um mesmo filhote fiquem juntos.
+  # Os machos saem como JUVENIS; o censo adulto acontece na geração seguinte.
+  vagas <- N_machos_juv + N_females_next
   idx   <- sample(seq_len(total_filhotes), size = vagas, replace = FALSE)
-  meio  <- floor(vagas / 2)
-  i_m <- idx[1:meio]
-  i_f <- idx[(meio + 1):(2 * meio)]
+  i_m <- idx[seq_len(N_machos_juv)]
+  i_f <- idx[(N_machos_juv + 1):vagas]
 
-  list(male_z_next   = z_filhotes[i_m], male_p_next   = p_filhotes[i_m],
+  list(male_z_juv    = z_filhotes[i_m], male_p_juv    = p_filhotes[i_m],
        female_z_next = z_filhotes[i_f], female_p_next = p_filhotes[i_f])
 }
 
@@ -409,14 +412,17 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
                                 tipo_selecao = "gaussian", encounters_n = 200,
                                 selecao_natural = TRUE, k_fixo = NULL,
                                 fecundidade_base = 50, eps_sd = 0.2,
-                                segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05) {
+                                segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
+                                fator_juvenis = 3) {
   segregacao <- match.arg(segregacao)
+  N_machos_juv <- N_machos * fator_juvenis
 
   # Os DOIS sexos carregam as DUAS características. A expressão é que é dimórfica:
-  # só o macho mostra z, só a fêmea usa p.
-  male_z_gen   <- pmax(0, rnorm(N_machos, phi, sigma_z_init))
-  male_p_gen   <- pmax(0, rnorm(N_machos, phi, sigma_p_init))   # carregada, não expressa
-  female_z_gen <- pmax(0, rnorm(N_femeas, phi, sigma_z_init))   # carregada, não expressa
+  # só o macho mostra z, só a fêmea usa p. Os machos entram como JUVENIS: a
+  # viabilidade age sobre eles e o censo adulto fica sempre em N_machos.
+  male_z_juv   <- pmax(0, rnorm(N_machos_juv, phi, sigma_z_init))
+  male_p_juv   <- pmax(0, rnorm(N_machos_juv, phi, sigma_p_init))  # carregada, não expressa
+  female_z_gen <- pmax(0, rnorm(N_femeas, phi, sigma_z_init))      # carregada, não expressa
   female_p_gen <- pmax(0, rnorm(N_femeas, phi, sigma_p_init))
 
   out <- vector("list", generations)
@@ -427,29 +433,29 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
     female_p <- female_p_gen                                     # HERDADA (evolui)
     female_s <- pmax(0, rnorm(N_femeas, mean = 2, sd = sigma_s)) # choosiness fixa
 
-    # (1) Seleção natural de viabilidade sobre o traço do macho.
-    # No Estudo 4 ela volta a ter consequência evolutiva (o traço é herdado) e
-    # é a única força que age DIRETAMENTE contra a exageração do traço.
-    if (selecao_natural) {
-      V <- exp(-gamma * (male_z_gen - phi)^2)
-      survive <- runif(N_machos) <= V
-      survive <- ensure_min_survivors(survive, V, min_surv = 2)
-    } else {
-      survive <- rep(TRUE, N_machos)
-    }
-    male_z_surv <- male_z_gen[survive]
-    male_p_surv <- male_p_gen[survive]   # o índice é o mesmo: z e p do mesmo macho
+    # (1) Censo de adultos constante. A viabilidade age sobre os machos JUVENIS
+    # e sobram sempre N_machos adultos. No Estudo 4 ela volta a ter consequência
+    # evolutiva (o traço é herdado) e é a única força que age DIRETAMENTE contra
+    # a exageração do traço. selecionar_machos_adultos devolve ÍNDICES, então o
+    # par (z, p) do mesmo macho viaja junto.
+    idx_adultos <- selecionar_machos_adultos(male_z_juv, N_machos, phi, gamma, selecao_natural)
+    male_z_surv <- male_z_juv[idx_adultos]
+    male_p_surv <- male_p_juv[idx_adultos]
 
     # (2) Rede de acasalamentos (sem regra de escape)
     M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_selecao,
                              encounters_n = encounters_n, k_fixo = k_fixo)
-    metrics <- calc_metrics_from_M(M)
+    metrics <- calc_metrics_from_M(M, k_alvo = k_fixo)
 
     # (3) Registro. A GRANDEZA CENTRAL deste estudo é cov(z, p) no pool
     # genotípico: é ela que mede o quanto preferência e traço estão associados,
     # e portanto o quanto a seleção sobre um arrasta o outro.
-    pool_z <- c(male_z_gen, female_z_gen)
-    pool_p <- c(male_p_gen, female_p_gen)
+    # Pool genotípico = CENSO ADULTO (N_machos + N_femeas), balanceado entre os
+    # sexos. Atenção: aqui, ao contrário do Estudo 3, a seleção de viabilidade
+    # NÃO é neutra em relação a p, porque z e p estão correlacionados. Usar o
+    # censo adulto é o correto: é a população que de fato se reproduz.
+    pool_z <- c(male_z_surv, female_z_gen)
+    pool_p <- c(male_p_surv, female_p_gen)
     out[[t]] <- data.frame(
       generation = t, tipo_selecao = tipo_selecao, segregacao = segregacao,
       sigma_z_init = sigma_z_init, sigma_p_init = sigma_p_init,
@@ -478,10 +484,11 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
                                    N_machos, N_femeas,
                                    fecundidade_base = fecundidade_base,
                                    segregacao = segregacao,
-                                   eps_sd = eps_sd, mut_sd = mut_sd)
+                                   eps_sd = eps_sd, mut_sd = mut_sd,
+                                   fator_juvenis = fator_juvenis)
     if (is.null(off)) { extincao_gen <- t; break }   # encerra e registra onde parou
-    male_z_gen   <- off$male_z_next
-    male_p_gen   <- off$male_p_next
+    male_z_juv   <- off$male_z_juv
+    male_p_juv   <- off$male_p_juv
     female_z_gen <- off$female_z_next
     female_p_gen <- off$female_p_next
   }
@@ -670,20 +677,43 @@ macho avaliado é aproximadamente:
 (Para a gaussiana, a diferença z - p tem variância sigma_z^2 + sigma_p^2, e a média de
 exp(-s d^2) para d normal de variância v é 1 / sqrt(1 + 2 s v). A u-shaped é o complemento.)
 
-Cruzando isso com A_max = 10, a proporção aproximada de fêmeas que chega a atingir o k é:
+Os números medidos (`00_teste_motores.R`, uma réplica por célula, sem seleção natural). Em cada
+célula, a poliandria realizada e, entre parênteses, a proporção que atingiu o k nominal:
 
-| Curva de preferência | atinge k = 5 | atinge k = 10 | atinge k = 20 |
-|---|---|---|---|
-| Gaussiana | 21% | 0.002% | impossível |
-| Aleatória | 62% | 0.1% | impossível |
-| Sigmoide | 62% | 0.1% | impossível |
-| U-shaped | 92% | 1.7% | impossível |
+| A_max | curva | k = 5 | k = 10 | k = 20 |
+|---|---|---|---|---|
+| 200 | gaussiana | 4.98 (100%) | 9.91 (98%) | 19.68 (95%) |
+| 200 | aleatória | 5.00 (100%) | 10.00 (100%) | 20.00 (100%) |
+| 200 | U-shaped | 5.00 (100%) | 10.00 (100%) | 20.00 (100%) |
+| 40 | gaussiana | 4.83 (93%) | 9.15 (79%) | 13.08 (10%) |
+| 40 | aleatória | 5.00 (100%) | 10.00 (100%) | 18.91 (62%) |
+| 40 | U-shaped | 5.00 (100%) | 10.00 (100%) | 19.90 (94%) |
+| 10 | gaussiana | 3.32 (26%) | 3.56 (0%) | 3.51 (0%) |
+| 10 | aleatória | 4.45 (66%) | 5.15 (0%) | 5.10 (0%) |
+| 10 | U-shaped | 4.78 (84%) | 6.55 (4%) | 6.89 (0%) |
+
+**Os números seguem uma regra simples:** a poliandria realizada é aproximadamente
+`min(k, A_max x taxa de aceite)`. Confira na faixa de A_max = 10, onde o teto nunca ata:
+10 x 0.33 = 3.3 contra 3.56 medido na gaussiana, 10 x 0.50 = 5.0 contra 5.15 na aleatória,
+10 x 0.67 = 6.7 contra 6.55 na U-shaped. É uma validação do motor: ele se comporta como a teoria
+prevê.
 
 A conclusão prática é forte: **com A_max = 10, as células k = 10 e k = 20 não são dois
 tratamentos distintos de poliandria, são o mesmo tratamento**, que na prática é "ela acasala com
 quem aceitar entre dez machos". O gradiente de poliandria simplesmente não existe nessa faixa de
-A_max. E com A_max = 40 o problema não desapareceu de todo: na curva gaussiana, só cerca de 2%
-das fêmeas chega a k = 20, enquanto na u-shaped chegam mais de 99%.
+A_max. E com A_max = 40 o problema não desapareceu de todo: na curva gaussiana, só 10% das fêmeas
+chega a k = 20, enquanto na U-shaped chegam 94%.
+
+**Em compensação, com A_max = 200 está tudo limpo.** Todas as curvas atingem o k, e o grau
+realizado é idêntico entre elas (5.00, 10.00, 20.00), ou seja, a densidade da rede está
+equiparada. Isso dá um caminho analítico direto, descrito na seção sobre as hipóteses.
+
+Uma nota metodológica. As estimativas analíticas que fizemos antes destes números (21%, 2%, 92%,
+99% nas células críticas) erraram de forma sistemática, sempre para baixo na gaussiana e para
+cima na U-shaped. O cálculo binomial trata todas as fêmeas como iguais, mas o pico p varia entre
+elas: uma fêmea com p perto de 5, onde estão quase todos os machos, aceita muito mais que a
+média, e uma com p extremo aceita muito menos. Isso gera sobredispersão, e as caudas é justamente
+onde o teto é ou não atingido. Valem os números medidos.
 
 **Duas consequências para a análise.**
 
@@ -876,14 +906,19 @@ parental, mais um termo mutacional pequeno (desvio padrão 0.05). As caracterís
 herdáveis são simplesmente re-sorteadas na geração seguinte.
 
 **6. Mortalidade e capacidade de carga.** Todos os filhotes vão para um mesmo pote (cerca de
-10.000, quando quase todas as fêmeas acasalam) e desse pote são sorteados ao acaso 200 machos e
-200 fêmeas para formar a geração seguinte. Esse sorteio não tem seleção nenhuma: é mortalidade
-aleatória, e é a fonte de deriva genética do modelo. Uma característica só evolui de forma
-dirigida se alguns pais colocaram mais filhotes nesse pote do que outros.
+10.000, quando quase todas as fêmeas acasalam) e desse pote são sorteados ao acaso 600 machos
+juvenis e 200 fêmeas. Esse sorteio não tem seleção nenhuma: é mortalidade aleatória, e é a fonte
+de deriva genética do modelo. Uma característica só evolui de forma dirigida se alguns pais
+colocaram mais filhotes nesse pote do que outros.
+
+São 600 machos juvenis e não 200 porque a seleção de viabilidade age sobre eles no passo 2 da
+geração seguinte, e o censo adulto precisa fechar em 200 mesmo no cenário de sobrevivência mais
+baixa do gradiente (cerca de 62% com sigma_z = 2.0, o que deixa uns 372 sobreviventes). As fêmeas
+não passam por viabilidade neste modelo, então bastam 200.
 
 **O caso degenerado, e por que ele merece uma regra explícita.** Pode acontecer de o pote não
 dar para formar a geração seguinte, seja porque nenhuma fêmea acasalou, seja porque acasalaram
-tão poucas que os filhotes não chegam às 400 vagas (o que exigiria mais de 96% das fêmeas sem
+tão poucas que os filhotes não chegam às 800 vagas (o que exigiria mais de 84% das fêmeas sem
 acasalar). A regra agora é a mesma nos três motores: a réplica é encerrada ali, as gerações já
 rodadas são mantidas, e a coluna `extincao_gen` guarda em que geração isso aconteceu. Quando a
 réplica chega ao fim normalmente, `extincao_gen` fica NA.
@@ -901,7 +936,7 @@ perda silenciosa seria enviesada.
 Com a coluna `extincao_gen`, quantas réplicas se extinguem por cenário passa a ser um resultado
 que se pode reportar: é a medida de quando as regras de acasalamento foram restritivas demais
 para a população se sustentar. Na prática esperamos que seja zero em todos os cenários já
-rodados, porque a proporção de fêmeas sem acasalar nunca chegou perto de 96%, mas isso agora fica
+rodados, porque a proporção de fêmeas sem acasalar nunca chegou perto de 84%, mas isso agora fica
 verificável em vez de suposto.
 
 ---
@@ -931,6 +966,16 @@ Todos os cenários são reprodutíveis: a semente de cada um é `semente base + 
 cenário`, definida dentro da tarefa. Isso vale mesmo quando as réplicas são repartidas entre
 máquinas diferentes, porque o índice usado é o do desenho completo e não o da fatia.
 
+**Duas ressalvas sobre reprodutibilidade, que valem para os Métodos.** A primeira é de
+plataforma: ao rodar o mesmo teste com a mesma semente no Mac e no servidor Linux, um valor
+divergiu na segunda casa decimal (5.10 contra 5.09), enquanto as outras 24 comparações saíram
+idênticas. A explicação provável é uma diferença de um bit na implementação de `exp()`, virando
+uma comparação de aceite que estava no limite. Não é erro nem viés, cada réplica continua sendo
+um sorteio válido do modelo, mas significa que a reprodução exata exige a mesma plataforma, e que
+re-simular um cenário para extrair a rede deve ser feito na máquina que o gerou. A segunda é de
+versão: a semente só reproduz os dados junto com o código que os gerou, e o motor mudou várias
+vezes. Por isso vale etiquetar o commit de cada rodada.
+
 ---
 
 ## As métricas de topologia da rede
@@ -952,7 +997,10 @@ Calculadas a cada geração sobre a rede bipartita de acasalamentos:
   2, mas no Estudo 3 é o indicador direto da força de seleção agindo sobre a preferência.
 
 - **Poliandria realizada (`grau_medio_femeas`).** O grau médio das fêmeas que acasalaram, ou
-  seja, quantos parceiros elas de fato conseguiram. Sob o reenquadramento de k como apetite (ver
+  seja, quantos parceiros elas de fato conseguiram. Atenção ao denominador: esta média exclui as
+  fêmeas que não acasalaram, enquanto `prop_femeas_atingiu_k` é calculada sobre TODAS. Os dois
+  denominadores são diferentes de propósito, e como `prop_femeas_sem_acasalar` também é gravada,
+  qualquer das duas pode ser recalculada na base que se preferir. Sob o reenquadramento de k como apetite (ver
   a seção sobre a interação entre A_max, k e a curva de preferência), esta é a variável de
   poliandria do paper, e não o k nominal.
 - **Proporção que atingiu o teto (`prop_femeas_atingiu_k`).** Quantas fêmeas chegaram ao k que
