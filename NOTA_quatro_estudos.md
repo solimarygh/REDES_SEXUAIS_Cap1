@@ -388,10 +388,17 @@ Ela entra na análise como covariável geração a geração, e a pergunta passa
 o Controle encontrou se mantém quando as duas características evoluem. Manter-se ou não é
 resultado.
 
-Para a condição inicial bastam três níveis bem separados de variância (baixa, média, alta),
-porque o que se procura ali é o limiar de ignição descrito acima, e não uma curva de resposta.
-Com 3 níveis, o desenho fica em 4 curvas x 3 níveis x 3 A_max x 3 k x 2 regimes x 20 réplicas =
-4.320 cenários, menos da metade dos outros dois estudos.
+Para a condição inicial bastam três níveis bem separados de variância (0.5, 1.0 e 2.0), porque o
+que se procura ali é o limiar de ignição descrito acima, e não uma curva de resposta. Mas os três
+níveis vão CRUZADOS entre os dois sexos, e não ao longo da diagonal. A razão é que a geração 1 de
+Co-evolução é uma situação de tipo controle, onde a assimetria inicial afeta de verdade a rede
+que se forma, e a pergunta em aberto é se esse efeito se propaga ou se dissolve. Só o cruzamento
+permite perguntá-lo; a diagonal fixaria a assimetria inicial em zero e a pergunta desapareceria.
+
+As nove combinações dão cinco valores distintos de assimetria inicial e cinco de variabilidade
+total, o que basta para separar as duas. O desenho fica em 4 curvas x 9 combinações x 3 A_max x
+3 k x 2 regimes x 20 réplicas = 12.960 cenários, cerca de um quinto a mais que Fêmeas variando e
+Machos variando, e menos de um quinto da superfície completa.
 
 **E daqui sai uma previsão que liga as duas coisas.** Em Co-evolução o traço está sob seleção de
 viabilidade e sob seleção sexual, enquanto a preferência não recebe seleção direta nenhuma. Se
@@ -587,17 +594,19 @@ if (!exists("COEVO_SO_FUNCOES") || !isTRUE(COEVO_SO_FUNCOES)) {
   diretorios <- configurar_diretorios("Fase_Coevolucao")
   cat("Iniciando Co-evolução (traço e preferência herdáveis)...\n")
 
-  # Três níveis bem separados, aplicados às DUAS características. Não é um
-  # gradiente fino de propósito: aqui sigma é só condição inicial e o que se
-  # procura é o LIMIAR de ignição do ciclo de Fisher, não uma curva de resposta.
-  # A assimetria não é imposta, é MEDIDA a cada geração a partir de varz_pop e
-  # varp_pop (ver o texto). Justificativa completa na seção do desenho.
+  # Três níveis bem separados, CRUZADOS entre os dois sexos. Não é um gradiente
+  # fino de propósito: aqui sigma é só condição inicial e o que se procura é o
+  # LIMIAR de ignição do ciclo de Fisher, não uma curva de resposta.
+  # O cruzamento (e não a diagonal) é o que permite perguntar se PARTIR
+  # assimétrico muda a trajetória. A assimetria das gerações seguintes não é
+  # imposta, é MEDIDA a partir de varz_pop e varp_pop (ver o texto).
   valores_sigma <- c(0.5, 1.0, 2.0)
   n_replicas    <- 20
 
   cenarios <- expand.grid(
     tipo_selecao    = c("uniform", "gaussian", "sigmoid", "u-shaped"),
-    sigma_init      = valores_sigma,
+    sigma_p_init    = valores_sigma,
+    sigma_z_init    = valores_sigma,
     encounters_n    = c(200, 40, 10),
     k_fixo          = c(5L, 10L, 20L),
     selecao_natural = c(TRUE, FALSE),
@@ -639,8 +648,8 @@ if (!exists("COEVO_SO_FUNCOES") || !isTRUE(COEVO_SO_FUNCOES)) {
       N_machos        = 200,
       N_femeas        = 200,
       tipo_selecao    = as.character(cenarios$tipo_selecao[i]),
-      sigma_z_init    = cenarios$sigma_init[i],   # a DIAGONAL: os dois recebem
-      sigma_p_init    = cenarios$sigma_init[i],   # o mesmo valor
+      sigma_p_init    = cenarios$sigma_p_init[i],
+      sigma_z_init    = cenarios$sigma_z_init[i],
       encounters_n    = cenarios$encounters_n[i],
       k_fixo          = cenarios$k_fixo[i],
       selecao_natural = cenarios$selecao_natural[i]
