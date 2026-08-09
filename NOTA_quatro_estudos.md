@@ -71,6 +71,61 @@ fica por conta da seleção e da deriva. Em Fêmeas variando, os 7 níveis de si
 sigma_z_init é apenas condição inicial (fixa em 1.0). Em Machos variando, o espelho, os 7 níveis
 de sigma_z são impostos e sigma_p_init é apenas condição inicial (fixa em 1.0).
 Nesse aspecto os dois estudos são simétricos. A assimetria real está noutro ponto: a seleção natural de viabilidade age sobre z nos dois estudos, mas em Fêmeas variando ela age diretamente sobre a característica que evolui, competindo com a seleção sexual, enquanto em Machos variando ela age sobre uma característica ambiental e não tem consequência evolutiva nenhuma. A preferência, que é o que evolui ali, não recebe seleção natural.
+
+### Vocabulário do desenho
+
+**Cenário e réplica.** Um cenário é uma combinação concreta de valores dos fatores do desenho:
+uma curva de preferência, um sigma, um A_max, um k e um regime de seleção natural. Uma réplica é
+uma repetição independente do mesmo cenário, com outra semente aleatória. Quando dizemos "70.560
+cenários", as réplicas já estão contadas dentro.
+
+**Célula.** Usado só nas análises, e não é sinônimo de cenário: uma célula é uma combinação de
+tudo MENOS a curva de preferência. Serve para comparar as quatro curvas entre si mantendo o resto
+igual, que é a única forma de isolar o efeito da curva.
+
+**A_max.** Quantos machos distintos cada fêmea consegue avaliar antes de decidir com quem
+acasalar. Representa o custo ecológico de procurar parceiro: quanto menor, mais cara é a busca.
+Assume os valores 200, 40 e 10.
+
+**k, e a poliandria realizada.** k é o número máximo de parceiros que a fêmea busca (5, 10 ou
+20). Ela para quando o atinge ou quando esgota os A_max machos que avaliou, o que vier primeiro,
+então k é um teto e não uma cota. A poliandria realizada é quantos parceiros ela de fato
+conseguiu, e é uma variável resposta e não um parâmetro. A seção sobre a interação entre A_max, k
+e a curva de preferência mostra o quanto as duas coisas podem diferir.
+
+### Vocabulário das respostas
+
+**As quatro métricas de topologia.** Calculadas sobre a rede bipartita de acasalamentos.
+Modularidade é o quanto a rede se divide em grupos que acasalam preferencialmente entre si.
+Aninhamento (NODF) é o quanto os parceiros dos machos menos procurados são um subconjunto dos
+parceiros dos mais procurados, ou seja, o quanto existe hierarquia. Centralização é o quanto os
+acasalamentos se concentram em poucos indivíduos. Oportunidade de seleção sexual (Is) é a
+desigualdade no número de parceiras entre os machos. A seção sobre as métricas dá as definições
+completas.
+
+**Divergência entre curvas de preferência.** Uma grandeza construída por nós para a análise, e o
+resultado principal do Controle. Dentro de uma célula, calcula-se a média de cada uma das quatro
+métricas para cada curva, e a divergência é o quanto essas quatro posições se afastam do centro
+comum delas. Vale zero se as quatro curvas produzem a mesma topologia, e cresce quanto mais elas
+se separam. As métricas são padronizadas antes, para que a de maior escala não domine o cálculo.
+
+### Vocabulário do modelo
+
+**Regra de escape.** Uma regra da versão antiga do modelo, já removida. Se a fêmea avaliava os
+machos e não aceitava nenhum, ela acabava acasalando à força com o último avaliado, de modo que
+nenhuma fêmea ficava sem acasalar. Como a fecundidade é neutra, isso fazia com que todas as
+fêmeas tivessem exatamente o mesmo sucesso reprodutivo, e sem variância de sucesso não pode haver
+seleção sobre a preferência. Agora quem não aceita ninguém fica sem acasalar.
+
+**Variância de segregação.** O quanto um filhote se desvia da média dos seus dois pais. Vem de
+qual metade dos genes de cada pai ele calhou de receber. No modelo infinitesimal, que é o que
+usamos, esse desvio é proporcional à variância que existe entre os pais, e não um ruído de
+tamanho fixo escolhido por nós.
+
+**R^2 parcial.** Nas análises, o quanto um termo explica do que ainda sobrava depois de já
+descontar outros. Aparece porque o regime de busca (A_max, k e seleção natural) domina o
+fenômeno, e um R^2 comum, sem descontá-lo, esmagaria todos os outros efeitos e os faria parecer
+nulos.
 ---
 
 ## A lógica: por que quatro estudos
