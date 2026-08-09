@@ -750,7 +750,7 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
     female_s <- pmax(0, rnorm(N_femeas, mean = 2, sd = sigma_s)) # choosiness fixa
 
     # (1) Censo de adultos constante. A viabilidade age sobre os machos JUVENIS
-    # e sobram sempre N_machos adultos. NCo-evolução ela volta a ter consequência
+    # e sobram sempre N_machos adultos. Em Co-evolução ela volta a ter consequência
     # evolutiva (o traço é herdado) e é a única força que age DIRETAMENTE contra
     # a exageração do traço. selecionar_machos_adultos devolve ÍNDICES, então o
     # par (z, p) do mesmo macho viaja junto.
