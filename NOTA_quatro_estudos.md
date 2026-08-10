@@ -674,7 +674,7 @@ com os outros estudos, e apenas declarar a limitação; (b) substituir o k fixo 
 proporcional a A_max, de modo que o gradiente de poliandria seja o mesmo em todos os níveis de
 custo de busca; (c) deixar o k de fora de Co-evolução, já que ele foi varrido nos outros dois, e
 usar os cenários economizados para outra coisa. A opção (a) é a mais conservadora; a (c) é a que
-aproveita melhor o orçamento.
+aproveita melhor o tempo.
 
 **2. Os três níveis de variância inicial bastam?** A previsão é de limiar e não de dose, o que
 justifica três níveis bem separados. Mas se o limiar cair entre dois deles, saberemos que existe
