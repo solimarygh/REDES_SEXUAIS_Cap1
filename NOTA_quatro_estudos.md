@@ -1308,22 +1308,83 @@ justamente o sinal da seleção sexual (é a variação no sucesso deles que o I
 
 ---
 
-## Como a comparação entre estudos responde às hipóteses
+## As hipóteses, e qual estudo testa cada uma
 
-- **H1: a forma da curva de preferência gera assinaturas topológicas distintas.** O Controle
-  testa isso sem o confundimento da evolução, ou seja, mostra a topologia que a regra de escolha
-  produz sozinha. Fêmeas variando mostra se essa assinatura persiste depois de 100 gerações de
-  resposta evolutiva do traço.
-- **H2: a topologia da rede prediz a trajetória evolutiva.** Fêmeas variando testa isso para o traço
-  do macho, e Machos variando testa o análogo para a preferência da fêmea.
-- **H3: a restrição de amostragem apaga as assinaturas topológicas.** O gradiente de A_max está
-  presente nos quatro estudos, então dá para verificar se o efeito do custo de busca é o
-  mesmo quando quem responde à seleção é o traço e quando é a preferência. Vale registrar que no
-  Controle esse efeito não saiu na direção esperada: a divergência entre curvas de preferência
-  foi maior, e não menor, com A_max = 10. Isso precisa ser olhado com cuidado, porque a
-  comparação envolve escalas diferentes entre as métricas.
-- **Mecanismo de Fisher.** Só Co-evolução pode testar, porque é o único desenho em que a
-  covariância genética entre preferência e traço pode se acumular.
+Esta formulação substitui a que está em `Paper_JEB_Cl.Rmd` e nos Métodos, que foi escrita antes
+de termos o controle e que precisa ser atualizada. A mudança principal é que nenhuma hipótese se
+compromete mais com uma direção que os dados possam desmentir: as direções passam a ser
+resultados.
+
+### H1. Os determinantes da estrutura da rede
+
+**A estrutura da rede de acasalamento é determinada por fatores que atuam em três níveis, e a
+questão é qual deles domina e como interagem.**
+
+| Nível | O que é | Fatores |
+|---|---|---|
+| A regra | como a fêmea escolhe | as quatro curvas de preferência |
+| O material | quanta variação existe para escolher | sigma_p, sigma_z, ou os dois |
+| A ecologia | quanto se pode buscar e quem está disponível | A_max, k, seleção natural |
+
+Quem testa: o **Controle**, que é o único desenho que cruza os três níveis por inteiro.
+
+É uma hipótese exploratória, mas não é uma lista: ela é falsificável porque qualquer um dos três
+níveis poderia dominar, e cada resposta conta uma história diferente. Se a regra dominar, a
+escolha feminina desenha a rede. Se a ecologia dominar, o custo de buscar importa mais do que o
+que as fêmeas querem.
+
+**Onde entra a variação no pico das preferências femininas**, que é a pergunta que originou o
+capítulo. Ela é o nível do material, junto com sigma_z. A literatura quase sempre atribui uma
+única função de preferência a toda a população, e por isso não pode nem formular a pergunta de o
+que acontece quando as fêmeas discordam entre si. Deixar sigma_p variar é o que permite fazê-la,
+e cruzar sigma_p com sigma_z é o que permite responder se a heterogeneidade feminina tem
+significado absoluto ou apenas relativo à variabilidade dos machos.
+
+### H2. A topologia não é epifenômeno
+
+**A topologia da rede prediz a trajetória evolutiva da característica que estiver livre para
+evoluir.**
+
+- **H2a**, com Fêmeas variando: prediz a trajetória do traço do macho.
+- **H2b**, com Machos variando: prediz a trajetória da preferência da fêmea.
+
+O espelho deixa de ser uma curiosidade e passa a ser **replicação interna**. Se a relação for da
+rede e não da característica em particular, ela tem que aparecer nos dois lados. Aparecer só num
+deles também é resultado, e dos interessantes.
+
+Este é o par de hipóteses que carrega o peso de teste direcional do paper, já que H1 é
+exploratória.
+
+### H3. A ecologia modula a cadeia inteira
+
+**Restringir a capacidade de amostragem (A_max) erode a assinatura topológica e, com ela, as suas
+consequências evolutivas.**
+
+Não tem estudo próprio: A_max está cruzado nos quatro, então H3 atravessa H1, H2 e H4. É a
+hipótese que liga a ecologia à evolução.
+
+### H4. Com as duas livres, a topologia governa o ciclo de Fisher
+
+**Quando o traço e a preferência são ambos herdáveis, a topologia da rede determina se a
+covariância genética entre eles chega a se acumular.**
+
+Quem testa: **Co-evolução**, que é o único desenho em que essa covariância pode existir. A
+previsão de limiar descrita na seção daquele estudo entra aqui.
+
+### Uma nota sobre o que o Controle pode e não pode fazer
+
+O Controle caracteriza o que a regra de acasalamento faz sozinha, na superfície inteira. Fêmeas
+variando e Machos variando mostram o que sobra disso depois de 100 gerações, cada um ao longo de
+uma linha.
+
+Não é "derivar aqui e testar independentemente ali". A geração 1 de Fêmeas variando é exatamente
+a linha sigma_z = 1.0 do Controle, e a de Machos variando é a coluna sigma_p = 1.0, por
+construção do desenho. O que os estudos evolutivos acrescentam não é uma amostra independente, é
+a resposta a uma pergunta diferente: se a assinatura persiste quando a característica responde à
+seleção.
+
+O que é exclusivo do Controle são as células fora dessas duas linhas, e é justamente onde a
+divergência entre curvas é máxima.
 
 ---
 
