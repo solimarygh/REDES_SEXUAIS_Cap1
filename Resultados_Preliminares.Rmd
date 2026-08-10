@@ -105,6 +105,33 @@ Quem testa: o **Controle**, o único desenho que cruza os três níveis.
 
 ## O nível ecológico domina
 
+**Como a divergência entre curvas é medida.** Cada célula do desenho, ou seja, cada combinação de
+sigma_p, sigma_z, A_max, k e regime de seleção natural, contém as quatro curvas de preferência
+rodadas nas mesmas condições. Para cada curva calculamos a média de cada uma das quatro métricas
+de topologia sobre as 20 réplicas.
+
+As quatro métricas são padronizadas antes (subtraindo a média e dividindo pelo desvio, sobre o
+conjunto todo), porque estão em escalas diferentes: sem isso, a de maior variância dominaria a
+conta e o resultado seria um artefato de unidades.
+
+Cada curva vira então um ponto num espaço de quatro dimensões. **A divergência daquela célula é a
+distância média dos quatro pontos ao centro comum deles.** Vale zero se as quatro curvas produzem
+exatamente a mesma topologia, e cresce quanto mais elas se separam umas das outras. São 882
+células no total.
+
+**De onde saem os três números da tabela.** O primeiro é o R² comum de um modelo linear que prevê
+a divergência a partir de A_max, k e seleção natural, com todas as interações entre eles. Ele diz
+quanto da variação na divergência o regime de busca explica sozinho.
+
+Os outros dois são **R² parciais**: quanto cada termo de dispersão explica **do que ainda sobrava**
+depois de descontar o primeiro modelo, pela conta `(R² com o termo − R² do base) / (1 − R² do
+base)`.
+
+Usamos o R² parcial e não o comum porque o regime de busca domina o fenômeno. Num R² comum, sem
+descontá-lo, todos os outros efeitos apareceriam esmagados perto de zero e a comparação entre eles
+não diria nada. Por isso os três números **não são comparáveis entre si de forma direta**: o
+primeiro é sobre o total, os outros dois são sobre o resíduo.
+
 ```{r h1-niveis}
 if (ok(ct)) {
   METRICAS <- c("Modularity", "Nestedness", "Centralization", "I_s")
@@ -130,17 +157,20 @@ if (ok(ct)) {
     (summary(m)$r.squared - r2b) / (1 - r2b)
   }
   tibble(
-    Nível = c("Ecologia (A_max, k, seleção natural)",
-              "Material: assimetria log(sigma_z/sigma_p)",
-              "Material: variabilidade total"),
-    `R² (ou R² parcial)` = c(round(r2b, 3), round(parc("assimetria"), 3), round(parc("norma"), 3))
-  ) %>% kable(caption = "Quanto cada nível explica da divergência entre as quatro curvas de preferência")
+    Nível = c("Ecologia: A_max, k e seleção natural",
+              "Material: assimetria, log(sigma_z/sigma_p)",
+              "Material: variabilidade total, sqrt(sigma_p²+sigma_z²)"),
+    `Tipo de R²` = c("total (modelo base)", "parcial, sobre o resíduo do base",
+                     "parcial, sobre o resíduo do base"),
+    `Valor` = c(round(r2b, 3), round(parc("assimetria"), 3), round(parc("norma"), 3))
+  ) %>% kable(caption = "Quanto cada nível explica da divergência entre as quatro curvas de preferência. As duas últimas linhas são comparáveis entre si, mas não com a primeira.")
 }
 ```
 
-A divergência entre curvas é a distância média ao centroide das quatro, no espaço das quatro
-métricas padronizadas. O nível ecológico sozinho explica a maior parte dela; os termos de
-dispersão acrescentam bem menos.
+**Leitura.** O regime de busca explica mais de dois terços da divergência entre curvas. Dentro do
+que sobra, a assimetria entre os sexos explica vinte vezes mais que a variabilidade total. Ou
+seja: o que mais determina se as quatro curvas produzem redes distinguíveis é quanto a fêmea
+consegue procurar; e, depois disso, de que lado está a variação, não quanta há.
 
 ## Dentro do material, o que importa é de que lado está a variação
 
@@ -241,6 +271,11 @@ preferência gaussiana, a variância genética cresce à medida que as fêmeas d
 A curva aleatória fica em torno do valor neutro e serve de controle de deriva.
 
 As duas predições que o paper faz sobre o traço do macho vão em sentidos opostos nos dados.
+
+Cada linha da tabela é um modelo linear ajustado sobre todas as réplicas na geração 100, com a
+curva de preferência, sigma_p e A_max como covariáveis. O coeficiente mostrado é o da métrica de
+rede, ou seja, o efeito dela **dentro** de cada combinação das covariáveis. O sinal é o que
+importa: a predição do paper é que os dois sejam positivos.
 
 ```{r h2a-regressao}
 if (ok(d)) {
