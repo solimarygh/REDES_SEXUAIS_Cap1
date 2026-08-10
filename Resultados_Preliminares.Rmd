@@ -54,9 +54,9 @@ São 20 réplicas e não 100 porque os problemas que motivaram esta rodada são 
 não ruído: mais réplicas não os tocariam.
 
 ```{r status}
-n_cen <- function(x, eixo) {
+n_cen <- function(x, eixos) {
   if (!ok(x)) return("-")
-  cols <- intersect(c("tipo_selecao", eixo, "encounters_n", "k_fixo", "selecao_natural", "replica"),
+  cols <- intersect(c("tipo_selecao", eixos, "encounters_n", "k_fixo", "selecao_natural", "replica"),
                     names(x))
   format(nrow(distinct(x[, cols])), big.mark = ".")
 }
@@ -64,7 +64,7 @@ tibble(
   Estudo = c("Controle", "Fêmeas variando", "Machos variando", "Co-evolução"),
   `O que evolui` = c("nada", "o traço do macho", "a preferência da fêmea", "os dois"),
   `Testa` = c("H1", "H2a", "H2b", "H4"),
-  Cenários = c(n_cen(ct, "sigma_p"), n_cen(d, "sigma_p"), n_cen(esp, "sigma_z"), "-"),
+  Cenários = c(n_cen(ct, c("sigma_p", "sigma_z")), n_cen(d, "sigma_p"), n_cen(esp, "sigma_z"), "-"),
   Situação = c(if (ok(ct)) "concluído" else "pendente",
                if (ok(d))  "concluído" else "pendente",
                if (ok(esp)) "concluído" else "pendente",
@@ -240,6 +240,8 @@ A heterogeneidade de preferência converte seleção estabilizadora em seleção
 preferência gaussiana, a variância genética cresce à medida que as fêmeas discordam mais entre si.
 A curva aleatória fica em torno do valor neutro e serve de controle de deriva.
 
+As duas predições que o paper faz sobre o traço do macho vão em sentidos opostos nos dados.
+
 ```{r h2a-regressao}
 if (ok(d)) {
   g100 <- d %>% filter(generation == 100) %>%
@@ -257,6 +259,18 @@ if (ok(d)) {
   }
 }
 ```
+
+**A segunda predição se confirma e a primeira se inverte.** A modularidade prediz a variância
+genética com sinal positivo e forte, que é exatamente o "resgate de diversidade" previsto. Já o
+aninhamento aparece associado a médias de traço MENORES, e não maiores, com o sinal contrário ao
+previsto e estatisticamente bem definido.
+
+Uma explicação candidata, que precisa ser checada e não afirmada: o aninhamento é alto quando há
+hierarquia forte, e a hierarquia é forte quando poucos machos são aceitáveis, o que acontece
+quando as fêmeas concordam entre si. Mas fêmeas que concordam em torno de phi não empurram o
+traço para lugar nenhum, então ele fica onde está. A exageração precisaria de fêmeas que
+discordem, e essas produzem redes menos hierárquicas. Se for isso, aninhamento e exageração são
+consequências alternativas do mesmo eixo, e não causa e efeito.
 
 ## H2b. A preferência da fêmea (Machos variando)
 
@@ -332,9 +346,10 @@ if (ok(ct) && ok(d)) {
 }
 ```
 
-Se os dois valores forem próximos, cem gerações de evolução do traço quase não alteram o quanto as
-curvas diferem entre si em topologia, e a assinatura é uma consequência direta da regra de
-acasalamento e não da resposta evolutiva.
+Os dois valores são praticamente iguais nos três níveis de A_max. **Cem gerações de evolução do
+traço quase não alteram o quanto as curvas diferem entre si em topologia.** A assinatura é uma
+consequência direta da regra de acasalamento, e não da resposta evolutiva, o que justifica o
+Controle ter um papel próprio no paper e não ser apenas uma linha de base.
 
 ---
 
@@ -361,8 +376,8 @@ if (ok(d)) {
 }
 ```
 
-Se as três linhas de A_max ficarem sobrepostas, restringir a fêmea a avaliar 10 machos em vez de
-200 não muda o resultado evolutivo, e H3 precisa ser reformulada e não apenas ajustada na redação.
+No resultado evolutivo, as três linhas de A_max ficam muito próximas: restringir a fêmea a
+avaliar 10 machos em vez de 200 quase não muda para onde o traço vai parar.
 
 ```{r h3-topo}
 if (ok(ct)) {
@@ -375,8 +390,13 @@ if (ok(ct)) {
 }
 ```
 
-A predição original diz que a divergência é máxima em A_max = 200 e cai quando a busca é
-restringida. Vale conferir a direção antes de escrever qualquer coisa a respeito.
+**Mas na topologia H3 se confirma.** A divergência entre curvas cai de forma monotônica ao
+restringir a busca, e é máxima em A_max = 200, exatamente como a predição original diz.
+
+As duas coisas juntas dão a leitura mais interessante desta rodada: **restringir a busca apaga a
+assinatura topológica sem apagar a consequência evolutiva.** A cadeia se rompe no meio. Se isso se
+sustentar, é um resultado que reformula H3 em vez de confirmá-la ou refutá-la: a topologia responde
+ao custo de busca, mas a trajetória do traço parece chegar ao mesmo lugar por outro caminho.
 
 ---
 
