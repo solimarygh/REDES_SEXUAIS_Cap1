@@ -709,7 +709,18 @@ plot_plano <- function(metrica, kk, amax, ns) {
   if (nrow(dd) == 0) return(NULL)
 
   n_fora <- sum(dd$fora, na.rm = TRUE)
-  desv   <- max(dd$desvio_media, na.rm = TRUE)
+
+  # O afastamento da média POR CURVA, e não um máximo só para a figura toda.
+  # Um número global não serve: basta uma curva fugir para o aviso contaminar
+  # os quatro painéis, quando na verdade três deles podem estar comparáveis.
+  # O Controle fica de fora da conta porque nele as médias são 5 por
+  # construção; quem pode ter se deslocado são as gerações dos estudos.
+  desv_txt <- dd %>%
+    filter(!grepl("^Controle", painel)) %>%
+    group_by(tipo_selecao) %>%
+    summarise(dv = max(desvio_media, na.rm = TRUE), .groups = "drop") %>%
+    mutate(txt = sprintf("%s %.2f", labels_4[as.character(tipo_selecao)], dv)) %>%
+    pull(txt) %>% paste(collapse = "  ·  ")
 
   # Níveis explícitos nos dois eixos: sem isso o ggplot desenharia só as
   # colunas e linhas que têm dado, e a grade do Controle deixaria de servir
@@ -730,10 +741,11 @@ plot_plano <- function(metrica, kk, amax, ns) {
          y = "σp — variação da preferência entre fêmeas",
          caption = sprintf(paste("Mesma escala de cor nas cinco linhas: a comparação entre elas é direta.",
                                  "Células vazias são combinações que aquele estudo não visita.",
-                                 "\nAfastamento máximo da média em relação a phi = 5 (do traço no Controle e em",
-                                 "Fêmeas variando, da preferência em Machos variando): %.2f.",
+                                 "\nAfastamento máximo da média em relação a phi = 5, por curva: %s.",
+                                 "\nAcima de ~1 a comparação com o Controle deixa de ser direta, porque lá os dois",
+                                 "sexos estão sempre centrados em 5 e aqui não.",
                                  "\nCélulas cuja dispersão medida passou de 2.0 e foi encostada no teto da grade: %d."),
-                           desv, n_fora)) +
+                           desv_txt, n_fora)) +
     tema_painel() +
     theme(panel.grid = element_blank(),
           strip.text.y = element_text(color = "white", face = "bold", size = 8, angle = 0),

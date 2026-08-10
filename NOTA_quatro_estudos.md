@@ -1238,6 +1238,50 @@ com semente fixa que o resultado sai idêntico.
 
 ---
 
+## O que olhar primeiro quando a rodada nova terminar
+
+Esta seção é um bilhete para nós mesmos. A rodada anterior, ainda com a regra sequencial,
+deixou uma observação que vale conferir assim que a rodada best-of-n estiver pronta. Nada
+aqui é resultado: é uma coisa vista de relance numa figura, com dados que já foram
+substituídos, e está escrita só para não se perder.
+
+**A diagonal em Fêmeas variando.** Na seção do plano compartilhado (a que põe os três
+estudos sobre a grade do Controle), o painel da curva gaussiana na geração 100 mostrava as
+células acomodadas sobre uma diagonal quase perfeita: cada cenário partia de sigma_z = 1.0 e
+terminava com a dispersão do traço aproximadamente igual ao sigma_p que lhe tinha sido
+imposto. Nas outras curvas não era assim. Na sigmoide a dispersão colapsava para perto de
+0.5 em quase todos os cenários, na aleatória ficava em torno de 1.0 com deriva pequena, e na
+disruptiva ficava espalhada sem padrão claro.
+
+Se isso se confirmar, tem mecanismo plausível: com preferência estabilizadora cada fêmea
+acasala com machos próximos do seu próprio pico, então o conjunto de machos que se reproduz
+fica repartido segundo a distribuição dos picos, e os filhotes herdam essa repartição. Com a
+segregação infinitesimal a variância não está presa a piso nenhum e pode se acomodar onde o
+acasalamento assortativo a levar. É justamente o tipo de coisa que o ruído fixo escondia.
+
+E havia um segundo pedaço: a cor daquelas células era aproximadamente a cor das mesmas
+células no Controle. Se também se confirmar, a leitura é que a evolução não produziu uma
+topologia nova, apenas moveu o sistema para outro ponto da mesma superfície. Para a H2 e a
+H3 isso seria uma afirmação forte.
+
+**Três coisas para conferir antes de acreditar.**
+
+Primeiro, se o padrão sobrevive à mudança de regra. Com best-of-n a fêmea passa a avaliar os
+A_max machos e a ficar com os melhores entre os aceitáveis, o que muda a intensidade da
+seleção sexual e pode muito bem mover a diagonal, ou desfazê-la.
+
+Segundo, o afastamento da média. Naquela figura ele chegava a 4.63, quase certamente na
+sigmoide, onde a média do traço vai para perto de 10 enquanto as preferências continuam
+sendo re-sorteadas em torno de 5. Onde isso acontece, a célula não é comparável com o
+Controle, porque lá os dois sexos estão sempre centrados em phi. A figura agora reporta esse
+afastamento por curva justamente para separar os painéis em que a comparação vale.
+
+Terceiro, se a diagonal é mesmo diagonal ou um efeito do arredondamento. A dispersão medida
+é encaixada nos sete níveis da grade para a figura sair legível, e convém confirmar o padrão
+com os valores contínuos antes de escrever qualquer coisa.
+
+---
+
 ## Correspondência com o código
 
 Esta nota foi conferida contra os scripts. A tabela abaixo diz onde verificar cada bloco.
