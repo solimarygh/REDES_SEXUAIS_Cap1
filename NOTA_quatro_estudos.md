@@ -106,7 +106,28 @@ completas.
 resultado principal do Controle. Dentro de uma célula, calcula-se a média de cada uma das quatro
 métricas para cada curva, e a divergência é o quanto essas quatro posições se afastam do centro
 comum delas. Vale zero se as quatro curvas produzem a mesma topologia, e cresce quanto mais elas
-se separam. As métricas são padronizadas antes, para que a de maior escala não domine o cálculo.
+se separam.
+
+**A padronização, que é o passo delicado.** Antes de qualquer conta, cada métrica é convertida em
+z-score: subtrai-se a média e divide-se pelo desvio padrão, de modo que ela passe a ser lida como
+"a quantos desvios padrão do valor típico este cenário está". Depois disso as quatro métricas
+estão na mesma unidade e podem ser somadas dentro de uma distância.
+
+Sem esse passo a conta seria dominada por uma métrica só. As quatro vivem em escalas muito
+diferentes: a modularidade e a centralização ficam entre 0 e 1, o Is é um número positivo sem
+teto, e o NODF é definido de 0 a 100, ainda que nos nossos cenários ande numa faixa de poucos
+pontos. Como a distância euclidiana soma quadrados, a métrica de maior amplitude entra elevada ao
+quadrado e as outras viram arredondamento. A divergência mediria o aninhamento e mais nada, e
+isso seria um artefato de unidades e não um resultado.
+
+**E a padronização é feita uma vez só, sobre a tabela inteira**, com uma média e um desvio por
+métrica calculados sobre todos os 70.560 cenários. Isso importa mais do que parece. Se
+padronizássemos dentro de cada célula, cada uma seria reescalada pela sua própria dispersão, e
+uma célula onde as curvas mal se distinguem sairia com o mesmo valor de uma onde elas se separam
+muito, porque em ambas as diferenças teriam sido esticadas até preencher a mesma escala. A
+comparação entre células, que é justamente a pergunta ("em que ponto do plano as curvas divergem
+mais?"), desapareceria. Padronizando uma vez só, a operação é uma troca de unidades e nada mais:
+muda o número, preserva quem é maior que quem.
 
 ### Vocabulário do modelo
 

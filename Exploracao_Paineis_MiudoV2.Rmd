@@ -360,6 +360,14 @@ cada métrica para cada curva, e a divergência é o quanto essas quatro posiç�
 centro comum delas, no espaço das quatro métricas padronizadas. Vale zero se as quatro curvas
 produzem exatamente a mesma rede, e cresce quanto mais elas se separam.
 
+Padronizar aqui quer dizer converter cada métrica em z-score, subtraindo a média e dividindo pelo
+desvio padrão, para que as quatro fiquem na mesma unidade antes de entrarem numa distância. Sem
+isso a conta seria dominada pelo aninhamento, que é definido de 0 a 100 enquanto a modularidade e
+a centralização ficam entre 0 e 1, e a divergência mediria uma métrica só. A padronização é feita
+uma vez sobre a tabela inteira, e não dentro de cada célula: se fosse por célula, cada uma seria
+esticada pela sua própria dispersão e todas sairiam parecidas, que é exatamente o contrário do
+que este mapa quer mostrar.
+
 ```{r ct-divergencia, fig.width=11, fig.height=7.5}
 if (!ok(ct)) {
   cat("*Sem dados do Controle.*")
