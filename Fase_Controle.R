@@ -43,7 +43,7 @@ simulate_controle <- function(N_machos = 200, N_femeas = 200,
                               tipo_selecao = "gaussian", encounters_n = 200,
                               selecao_natural = TRUE, k_fixo = NULL,
                               fecundidade_base = 50,
-                              regra = c("best_of_n", "best_of_n_estrito", "sequencial")) {
+                              regra = c("best_of_n", "sequencial")) {
   regra <- match.arg(regra)
 
   # (1) Sorteio da população: nada vem de geração anterior.

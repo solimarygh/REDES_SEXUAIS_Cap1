@@ -348,20 +348,17 @@ selecionar_machos_adultos <- function(z_juv, N_adultos, phi = 5, gamma = 0.2,
 #   sem acasalar, que é a variância de fitness de que o estudo dos machos
 #   depende.
 #
-# "best_of_n_estrito" — a versão sem filtro: ela avalia os A_max e fica
-#   direto com os k de maior P_ij. É a leitura literal de "os k mais bem
-#   ajustados", e dá a interpretação limpa de seleção por truncamento, com
-#   k/A_max como proporção selecionada.
+#   O filtro do primeiro passo não é um detalhe de implementação. Uma
+#   versão sem ele, em que a fêmea ficasse direto com os k machos mais bem
+#   ajustados, quebraria duas coisas: a exigência s viraria um parâmetro
+#   inerte, porque o ranking só depende da ORDEM que a curva induz e
+#   exp(-s d^2) é monótona em d para qualquer s > 0; e toda fêmea
+#   conseguiria exatamente k parceiros, de modo que NENHUMA ficaria sem
+#   acasalar. Sem variância de sucesso reprodutivo entre fêmeas não há
+#   seleção sobre a preferência, e o estudo dos machos variando deixaria de
+#   funcionar. Foi por isso que essa variante foi descartada.
 #
-#   ATENÇÃO ao usá-la. Como o ranking só depende da ORDEM que a curva
-#   induz, e exp(-s d^2) é monótona em d para qualquer s > 0, a exigência s
-#   vira um parâmetro inerte. E toda fêmea consegue exatamente k parceiros,
-#   então NENHUMA fica sem acasalar: sem variância de sucesso reprodutivo
-#   entre fêmeas, não há seleção sobre a preferência e o estudo dos machos
-#   variando deixa de funcionar. Fica disponível para comparação, não para
-#   rodar o desenho inteiro.
-#
-# Nas três regras o ranking por P_ij faz a coisa certa em cada curva:
+# Nas duas regras o ranking por P_ij faz a coisa certa em cada curva:
 # gaussiana ordena do mais parecido ao mais diferente, u-shaped o inverso,
 # sigmoide do maior z ao menor, e a aleatória empata tudo — e como a ordem
 # de avaliação já é um sorteio, o empate se resolve ao acaso, que é
@@ -370,7 +367,7 @@ selecionar_machos_adultos <- function(z_juv, N_adultos, phi = 5, gamma = 0.2,
 mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
                                 min_cop = 1, max_cop = 5, encounters_n = 200,
                                 k_fixo = NULL,
-                                regra = c("best_of_n", "best_of_n_estrito", "sequencial")) {
+                                regra = c("best_of_n", "sequencial")) {
   regra <- match.arg(regra)
   n_m <- length(male_z_surv); n_f <- length(female_p)
   matings_per_female <- if (!is.null(k_fixo)) rep(as.integer(k_fixo), n_f) else sample(min_cop:max_cop, n_f, replace = TRUE)
@@ -403,15 +400,11 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
         }
         aceitos
 
-      } else if (regra == "best_of_n") {
+      } else {                                       # best_of_n
         aceitos <- which(runif(n_aval) <= P)         # avalia TODOS, sem parar
         if (length(aceitos) > k_i)                    # e só então compara
           aceitos <- aceitos[order(P[aceitos], decreasing = TRUE)][seq_len(k_i)]
         avaliados[aceitos]
-
-      } else {                                       # best_of_n_estrito
-        if (n_aval <= k_i) avaliados
-        else avaliados[order(P, decreasing = TRUE)[seq_len(k_i)]]
       }
 
     if (length(escolhidos)) M[escolhidos, i] <- 1L
@@ -421,7 +414,6 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
   # aceita nenhum macho fica SEM acasalar e deixa 0 filhotes. Isso cria
   # variância de fitness entre fêmeas, que é condição necessária para a
   # preferência poder estar sob seleção no estudo dos machos variando.
-  # Em "best_of_n_estrito" isso deixa de valer, como avisado acima.
   M
 }
 
@@ -612,7 +604,7 @@ simulate_evolution <- function(
     segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05, fecundidade_base = 50,
     return_details = FALSE, salvar_redes = FALSE, pasta_redes = NULL, replica_id = 1,
     selecao_natural = TRUE, k_fixo = NULL,
-    regra = c("best_of_n", "best_of_n_estrito", "sequencial")
+    regra = c("best_of_n", "sequencial")
 ) {
   regra <- match.arg(regra)
   segregacao <- match.arg(segregacao)   # sem isto o vetor de 2 elementos duplicaria cada linha do output

@@ -97,7 +97,7 @@ if (FALSE) {
                                   selecao_natural = TRUE, k_fixo = NULL,
                                   fecundidade_base = 50, eps_sd = 0.2,
                                   segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
-                                  regra = c("best_of_n", "best_of_n_estrito", "sequencial")) {
+                                  regra = c("best_of_n", "sequencial")) {
     segregacao <- match.arg(segregacao)
     regra      <- match.arg(regra)
     # O pool de juvenis não é parâmetro livre: é o que a fecundidade produz.

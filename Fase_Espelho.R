@@ -108,7 +108,7 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
                              selecao_natural = TRUE, k_fixo = NULL,
                              fecundidade_base = 50,
                              segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
-                             regra = c("best_of_n", "best_of_n_estrito", "sequencial")) {
+                             regra = c("best_of_n", "sequencial")) {
   segregacao <- match.arg(segregacao)
   regra      <- match.arg(regra)
   # O pool de juvenis não é parâmetro livre: é o que a fecundidade produz.

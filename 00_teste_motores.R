@@ -167,36 +167,30 @@ for (cv in c("uniform", "gaussian", "u-shaped")) {
 }
 cat("  Ou seja: no sequencial, A_max = 200 e A_max = 40 eram quase o mesmo cenário.\n")
 
-# (c) O EFEITO DAS TRÊS REGRAS sobre a rede, no mesmo cenário e mesma semente.
-cat("\n  As três regras no mesmo cenário (gaussiana, A_max = 40, sem NS):\n")
-cat(sprintf("    %-20s %-10s %-10s %-14s\n", "regra", "grau", "atingiu k", "sem acasalar"))
-for (rg in c("sequencial", "best_of_n", "best_of_n_estrito")) {
+# (c) O EFEITO DAS DUAS REGRAS sobre a rede, no mesmo cenário e mesma semente.
+cat("\n  As duas regras no mesmo cenário (gaussiana, A_max = 40, sem NS, k = 10):\n")
+cat(sprintf("    %-14s %-10s %-12s %-14s\n", "regra", "grau", "atingiu k", "sem acasalar"))
+for (rg in c("sequencial", "best_of_n")) {
   set.seed(7)
   r <- simulate_controle(tipo_selecao = "gaussian", encounters_n = 40, k_fixo = 10,
                          selecao_natural = FALSE, regra = rg)
-  cat(sprintf("    %-20s %-10.2f %-10.0f%% %-13.0f%%\n", rg, r$grau_medio_femeas,
+  cat(sprintf("    %-14s %-10.2f %-11.0f%% %-13.0f%%\n", rg, r$grau_medio_femeas,
               100 * r$prop_femeas_atingiu_k, 100 * r$prop_femeas_sem_acasalar))
 }
-cat("\n  Leitura: em 'best_of_n_estrito' NENHUMA fêmea fica sem acasalar, porque\n")
-cat("  todas conseguem exatamente k. Sem variância de sucesso reprodutivo entre\n")
-cat("  fêmeas não há seleção sobre a preferência, e o Estudo 3 deixa de funcionar.\n")
-cat("  É por isso que o default é 'best_of_n', que mantém o filtro de aceite.\n")
 
-# (d) A exigência s importa? Deve importar nas duas primeiras e NÃO na estrita,
-# porque ali só a ordem conta, e ela não muda com s.
-cat("\n  A exigência s ainda faz diferença? (gaussiana, A_max = 40, k = 10)\n")
-for (rg in c("best_of_n", "best_of_n_estrito")) {
-  graus <- sapply(c(0.5, 2, 8), function(ss) {
-    set.seed(11)
-    zz <- pmax(0, rnorm(200, 5, 1)); pp <- pmax(0, rnorm(200, 5, 1))
-    Mx <- mate_with_survivors(zz, pp, rep(ss, 200), "gaussian",
-                              encounters_n = 40, k_fixo = 10, regra = rg)
-    mean(colSums(Mx)[colSums(Mx) > 0])
-  })
-  cat(sprintf("    %-20s s=0.5: %.2f   s=2: %.2f   s=8: %.2f\n", rg,
-              graus[1], graus[2], graus[3]))
-}
-cat("  Em 'best_of_n_estrito' os três valores devem ser iguais: s vira inerte.\n")
+# (d) Sob best-of-n a fêmea que não aceita ninguém CONTINUA ficando sem
+# acasalar, que é a variância de fitness de que o Estudo 3 depende. Este teste
+# falha se alguma mudança futura na regra apagar essas fêmeas sem querer.
+set.seed(13)
+r_dificil <- simulate_controle(tipo_selecao = "gaussian", sigma_p = 2.0, sigma_z = 2.0,
+                               encounters_n = 10, k_fixo = 5, selecao_natural = FALSE,
+                               regra = "best_of_n")
+ok_sem <- r_dificil$prop_femeas_sem_acasalar > 0
+cat(sprintf("\n  [%s] best_of_n ainda deixa fêmeas sem acasalar (%.0f%% no cenário difícil)\n",
+            if (ok_sem) "OK" else "FALHOU", 100 * r_dificil$prop_femeas_sem_acasalar))
+if (!ok_sem) falhas <- falhas + 1L
+cat("  Sem essa variância de sucesso não há seleção sobre a preferência, e o\n")
+cat("  Estudo 3 deixa de funcionar. É por isso que o filtro de aceite ficou.\n")
 
 # ---------------------------------------------------------------------
 cat(sprintf("\n=====================================================\n"))

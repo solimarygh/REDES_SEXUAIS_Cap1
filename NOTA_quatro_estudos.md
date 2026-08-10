@@ -284,17 +284,14 @@ então escolhe. É a suposição típica de leks e agregações, em que ela cons
 decidir. A_max passa a ser literalmente o número de machos avaliados, e k continua sendo um teto,
 agora aplicado sobre o conjunto dos que ela achou aceitáveis.
 
-O filtro de aceitação foi mantido de propósito, e não é um detalhe. A alternativa mais simples
-seria ela ficar direto com os k machos mais bem ajustados, sem filtro, e essa versão existe no
-código como `regra = "best_of_n_estrito"`. Ela dá uma leitura elegante, de seleção por
-truncamento, com k/A_max como proporção selecionada: o diferencial de seleção padronizado é 2.34
-com k = 5 contra 1.76 com k = 20, sobre A_max = 200. Mas tem duas consequências que a
-inviabilizam como default. A exigência s vira um parâmetro inerte, porque o ranking só depende da
-ordem que a curva induz e `exp(-s d^2)` é monótona em d para qualquer s positivo. E, pior, toda
-fêmea consegue exatamente k parceiros, então nenhuma fica sem acasalar: sem variância de sucesso
-reprodutivo entre fêmeas não há seleção sobre a preferência, e Machos variando deixa de
-funcionar. É o mesmo problema que a regra de escape tinha, por outro caminho. Fica disponível
-para comparação num subconjunto de cenários, não para rodar o desenho inteiro.
+O filtro de aceitação foi mantido de propósito, e não é um detalhe de implementação. Chegou a
+ser considerada uma versão sem ele, em que a fêmea ficaria direto com os k machos mais bem
+ajustados, e foi descartada por duas razões. A exigência s viraria um parâmetro inerte, porque o
+ranking só depende da ordem que a curva induz e `exp(-s d^2)` é monótona em d para qualquer s
+positivo. E toda fêmea conseguiria exatamente k parceiros, de modo que nenhuma ficaria sem
+acasalar: sem variância de sucesso reprodutivo entre fêmeas não há seleção sobre a preferência, e
+Machos variando deixaria de funcionar. É o mesmo problema que a regra de escape tinha, chegando
+por outro caminho.
 
 A regra usada fica gravada numa coluna `regra` na saída dos três estudos, como já fazíamos com
 `segregacao`.
