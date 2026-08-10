@@ -180,7 +180,38 @@ h1 <- divergencia %>%
   group_by(sigma_p) %>%
   summarise(div_media = mean(div), n = n(), .groups = "drop")
 
-cat("\n=== H1: a divergencia cresce com sigma_p? (linha sigma_z = 1.0) ===\n")
+# ATENÇÃO: há DUAS leituras de H1 e elas não são a mesma coisa.
+# (i) "os padrões se intensificam com sigma_p": é sobre a FORÇA do padrão de cada
+#     curva por si, medida em cada métrica.
+# (ii) "as curvas geram padrões DISTINTOS": é sobre a separação ENTRE curvas, que
+#     é o que a nossa divergência mede.
+# Uma pode valer sem a outra. As duas estão testadas abaixo, nesta ordem.
+
+cat("\n=== H1 (i): cada metrica se intensifica com sigma_p? (linha sigma_z = 1.0) ===\n")
+cat("Inclinacao de cada metrica contra sigma_p, por curva de preferencia.\n")
+cat("H1 preve inclinacoes de modulo crescente, cada curva no seu sentido previsto:\n")
+cat("gaussiana e u-shaped para modularidade, sigmoide para aninhamento e centralizacao.\n\n")
+
+linha_h1 <- df %>% filter(abs(sigma_z - 1.0) < 1e-9)
+incl <- expand.grid(metrica = METRICAS,
+                    curva = sort(unique(as.character(linha_h1$tipo_selecao))),
+                    stringsAsFactors = FALSE)
+incl$inclinacao <- NA_real_; incl$p <- NA_real_
+for (i in seq_len(nrow(incl))) {
+  d <- linha_h1[linha_h1$tipo_selecao == incl$curva[i], ]
+  f <- stats::as.formula(paste(incl$metrica[i], "~ sigma_p"))
+  m <- tryCatch(lm(f, data = d), error = function(e) NULL)
+  if (!is.null(m) && nrow(summary(m)$coefficients) >= 2) {
+    incl$inclinacao[i] <- summary(m)$coefficients[2, 1]
+    incl$p[i]          <- summary(m)$coefficients[2, 4]
+  }
+}
+incl$inclinacao <- round(incl$inclinacao, 4)
+incl$p <- signif(incl$p, 2)
+print(tidyr::pivot_wider(incl, names_from = curva, values_from = c(inclinacao, p)),
+      n = 40, width = Inf)
+
+cat("\n=== H1 (ii): a divergencia ENTRE curvas cresce com sigma_p? (mesma linha) ===\n")
 print(as.data.frame(h1), row.names = FALSE, digits = 3)
 tend_h1 <- coef(lm(div ~ sigma_p, data = filter(divergencia, abs(sigma_z - 1.0) < 1e-9)))[2]
 cat(sprintf("Inclinacao: %+.3f por unidade de sigma_p.\n", tend_h1))
