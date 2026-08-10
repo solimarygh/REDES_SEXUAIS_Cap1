@@ -53,6 +53,11 @@ conversa está em `RESUMO_mudancas_para_Miudo.md`.
 São 20 réplicas e não 100 porque os problemas que motivaram esta rodada são vieses sistemáticos e
 não ruído: mais réplicas não os tocariam.
 
+**Cada figura e cada tabela diz, no subtítulo ou na legenda, exatamente que combinação de
+parâmetros está mostrando.** Onde diz "todos os k", os três valores (5, 10 e 20) estão sendo
+promediados juntos, e como k tem efeito grande, vale conferir no anexo se o padrão se mantém em
+cada um deles separadamente.
+
 ```{r status}
 n_cen <- function(x, eixos) {
   if (!ok(x)) return("-")
@@ -184,7 +189,7 @@ if (ok(ct)) {
     geom_tile() + facet_wrap(~tipo_selecao, labeller = as_labeller(labels_4)) +
     scale_fill_viridis_c(name = "Modularidade") +
     labs(title = "Controle: modularidade na superfície sigma_p x sigma_z",
-         subtitle = "Uma geração, sem herança. A_max = 200, sem seleção natural, k = 5",
+         subtitle = "Controle: 1 geração | A_max = 200 | k = 5 | sem seleção natural | média de 20 réplicas",
          x = expression(sigma[z]~"(variação entre machos)"),
          y = expression(sigma[p]~"(variação entre fêmeas)")) +
     theme_light(base_size = 12)
@@ -198,10 +203,12 @@ if (ok(ct)) {
               q75 = quantile(div, .75), .groups = "drop")
   ggplot(perfil, aes(assimetria, mediana)) +
     geom_ribbon(aes(ymin = q25, ymax = q75), fill = "#C0392B", alpha = 0.18) +
-    geom_line(color = "#C0392B", linewidth = 1) + geom_point(color = "#C0392B", size = 2) +
+    geom_smooth(method = "loess", formula = y ~ x, se = FALSE, span = 1,
+                color = "#C0392B", linewidth = 1) +
+    geom_point(color = "#C0392B", size = 2) +
     geom_vline(xintercept = 0, linetype = "dashed", color = "gray40") +
     labs(title = "Divergência entre curvas ao longo do eixo da assimetria",
-         subtitle = "Negativo: fêmeas mais variadas que machos.  Positivo: machos mais variados que fêmeas",
+         subtitle = "Todas as 882 células: todos os A_max, todos os k, os dois regimes de seleção natural\nNegativo: fêmeas mais variadas que machos.  Positivo: machos mais variados que fêmeas",
          x = expression(log(sigma[z]/sigma[p])), y = "divergência (mediana e quartis)") +
     theme_light(base_size = 12)
 }
@@ -230,7 +237,7 @@ if (tem(ct, "grau_medio_femeas")) {
     mutate(grau = round(grau, 2), tipo_selecao = labels_4[tipo_selecao]) %>%
     pivot_wider(names_from = tipo_selecao, values_from = grau) %>%
     arrange(desc(encounters_n), k_fixo) %>%
-    kable(caption = "Poliandria realizada (parceiros por fêmea que acasalou), sem seleção natural")
+    kable(caption = "Poliandria realizada (parceiros por fêmea que acasalou). Controle, sem seleção natural, promediando os 7 valores de sigma_p e os 7 de sigma_z.")
 }
 ```
 
@@ -257,10 +264,10 @@ if (ok(d)) {
     summarise(varz = mean(varz_males, na.rm = TRUE), .groups = "drop")
   ggplot(vz, aes(sigma_p, varz, color = tipo_selecao)) +
     geom_hline(yintercept = 1, linetype = "dotted", color = "gray40") +
-    geom_line(linewidth = 1.1) + geom_point(size = 2.4) +
+    geom_smooth(method = "loess", formula = y ~ x, se = FALSE, span = 1, linewidth = 1.1) + geom_point(size = 2.4) +
     scale_color_manual(values = cores_4, labels = labels_4, name = "Curva de preferência") +
     labs(title = "Variância genética do traço masculino na Gen 100",
-         subtitle = "Linha pontilhada = variância inicial (1.0). A_max = 200, sem seleção natural",
+         subtitle = "Gen 100 | A_max = 200 | todos os k (5, 10 e 20) juntos | sem seleção natural\nLinha pontilhada = variância inicial (1.0)",
          x = expression(sigma[p]), y = "var(z)") +
     theme_light(base_size = 12)
 }
@@ -290,7 +297,7 @@ if (ok(d)) {
       Coeficiente = c(round(coef(m_a)["Nestedness"], 4), round(coef(m_b)["Modularity"], 4)),
       p = c(signif(summary(m_a)$coefficients["Nestedness", 4], 2),
             signif(summary(m_b)$coefficients["Modularity", 4], 2))
-    ) %>% kable(caption = "Regressões na Gen 100, controlando por curva, sigma_p e A_max")
+    ) %>% kable(caption = "Regressões sobre TODAS as réplicas na Gen 100 (todos os A_max, k e regimes de seleção natural), controlando por curva de preferência, sigma_p e A_max")
   }
 }
 ```
@@ -317,10 +324,10 @@ if (ok(esp)) {
     summarise(varp = mean(varp_femeas, na.rm = TRUE), .groups = "drop")
   ggplot(vp, aes(sigma_z, varp, color = tipo_selecao)) +
     geom_hline(yintercept = 1, linetype = "dotted", color = "gray40") +
-    geom_line(linewidth = 1.1) + geom_point(size = 2.4) +
+    geom_smooth(method = "loess", formula = y ~ x, se = FALSE, span = 1, linewidth = 1.1) + geom_point(size = 2.4) +
     scale_color_manual(values = cores_4, labels = labels_4, name = "Curva de preferência") +
     labs(title = "Variância da preferência feminina na Gen 100",
-         subtitle = "Linha pontilhada = variância inicial (1.0). A_max = 200, sem seleção natural",
+         subtitle = "Gen 100 | A_max = 200 | todos os k (5, 10 e 20) juntos | sem seleção natural\nLinha pontilhada = variância inicial (1.0)",
          x = expression(sigma[z]), y = "var(p)") +
     theme_light(base_size = 12)
 }
@@ -344,8 +351,8 @@ if (ok(esp)) {
     pivot_longer(-generation)
   ggplot(din, aes(generation, value)) +
     geom_line(linewidth = 1) + facet_wrap(~name, scales = "free_y") +
-    labs(title = "Dinâmica da seleção sobre a preferência (gaussiana, sigma_z = 0.2)",
-         subtitle = "As duas curvas caem juntas: ao eliminar as preferências extremas, a seleção remove a própria causa",
+    labs(title = "Dinâmica da seleção sobre a preferência",
+         subtitle = "Curva gaussiana | sigma_z = 0.2 | A_max = 200 | todos os k juntos | sem seleção natural | gerações 1 a 50\nAs duas curvas caem juntas: ao eliminar as preferências extremas, a seleção remove a própria causa",
          x = "geração", y = NULL) +
     theme_light(base_size = 12)
 }
@@ -377,7 +384,7 @@ if (ok(ct) && ok(d)) {
     summarise(`Fêmeas variando (Gen 100)` = round(mean(div), 3), .groups = "drop")
   left_join(div_ct, div_d, by = "encounters_n") %>%
     rename(A_max = encounters_n) %>%
-    kable(caption = "Divergência entre curvas: sem evolução contra 100 gerações de evolução")
+    kable(caption = "Divergência entre curvas, promediada sobre todos os k, os dois regimes de seleção natural e todos os sigma. Controle na geração única, Fêmeas variando na geração 100.")
 }
 ```
 
@@ -402,10 +409,10 @@ if (ok(d)) {
     group_by(sigma_p, encounters_n) %>%
     summarise(divergencia = sd(zbar), .groups = "drop")
   ggplot(h3, aes(sigma_p, divergencia, color = factor(encounters_n))) +
-    geom_line(linewidth = 1.1) + geom_point(size = 2.4) +
+    geom_smooth(method = "loess", formula = y ~ x, se = FALSE, span = 1, linewidth = 1.1) + geom_point(size = 2.4) +
     scale_color_brewer(palette = "Set1", name = "A_max") +
     labs(title = "Divergência evolutiva entre curvas de preferência",
-         subtitle = "Desvio-padrão do traço final entre as quatro curvas, por sigma_p e por A_max",
+         subtitle = "Gen 100 | sem seleção natural | todos os k juntos\nDesvio-padrão da média do traço entre as quatro curvas",
          x = expression(sigma[p]), y = "divergência entre curvas (Gen 100)") +
     theme_light(base_size = 12)
 }
@@ -421,7 +428,7 @@ if (ok(ct)) {
               `mediana` = round(median(div), 3), .groups = "drop") %>%
     arrange(desc(encounters_n)) %>%
     rename(A_max = encounters_n) %>%
-    kable(caption = "H3 na topologia (Controle): a divergência é máxima em A_max = 200?")
+    kable(caption = "H3 na topologia (Controle), promediando todos os sigma_p, sigma_z, k e os dois regimes de seleção natural")
 }
 ```
 
@@ -466,7 +473,7 @@ if (ok(d)) {
     scale_fill_manual(values = c("com seleção natural" = "#E4736B",
                                  "sem seleção natural" = "#4FB3BF"), guide = "none") +
     labs(title = "Curva disruptiva: distribuição do traço final entre réplicas",
-         subtitle = "Linha vermelha = phi = 5 (ótimo ecológico e ponto de partida)",
+         subtitle = "Gen 100 | A_max = 200 | todos os k juntos | três valores de sigma_p\nLinha vermelha = phi = 5 (ótimo ecológico e ponto de partida)",
          x = "traço médio da réplica na Gen 100", y = "nº de réplicas") +
     theme_light(base_size = 12)
 }
@@ -486,7 +493,7 @@ if (ok(d) && requireNamespace("diptest", quietly = TRUE)) {
                `p com NS` = signif(diptest::dip.test(g(TRUE))$p.value, 2),
                check.names = FALSE)
   }))
-  if (!is.null(res)) kable(res, caption = "Teste de dip de Hartigan sobre a curva disruptiva (A_max = 200)")
+  if (!is.null(res)) kable(res, caption = "Teste de dip de Hartigan sobre a curva disruptiva. Gen 100, A_max = 200, todos os k juntos, 20 réplicas por célula.")
 }
 ```
 
@@ -525,7 +532,8 @@ painel <- function(df, xvar, yvar, ns, amax, k, xlab, ylab, titulo, hlinha = NUL
   p <- ggplot(med, aes(xx, m, color = tipo_selecao)) +
     geom_ribbon(aes(ymin = m - s, ymax = m + s, fill = tipo_selecao),
                 alpha = 0.12, color = NA) +
-    geom_line(linewidth = 1) + geom_point(size = 2) +
+    geom_smooth(method = "loess", formula = y ~ x, se = FALSE, span = 1, linewidth = 1) +
+    geom_point(size = 2) +
     scale_color_manual(values = cores_4, labels = labels_4, name = "Curva de preferência") +
     scale_fill_manual(values = cores_4, guide = "none") +
     labs(title = titulo, x = xlab, y = ylab,
