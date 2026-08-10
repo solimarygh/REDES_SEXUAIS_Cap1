@@ -22,11 +22,18 @@ source("08_Poster2_comum.R")
 # seleção e passa a ser o ALVO dela. A força seletiva é ecológica, a
 # disponibilidade de machos com traços variados (sigma_z).
 #
-# A preferência é registrada de duas formas. pbar_pop é o pool genotípico,
-# os dois sexos juntos, que é a variável evolutiva propriamente dita, já
-# que o macho também carrega p sem expressar. pbar_femeas é a preferência
-# efetivamente expressa, a que gera a rede. As figuras usam o pool; para
-# ver a expressa, troque col_media e col_var abaixo.
+# A preferência é registrada de duas formas. pbar_femeas é a preferência
+# expressa, medida nas fêmeas adultas, e pbar_pop é o pool genotípico, os
+# dois sexos juntos, que é a variável evolutiva em sentido estrito, já que
+# o macho carrega p sem expressar.
+#
+# As figuras usam a expressa, por duas razões. É o espelho exato do estudo
+# das fêmeas, onde a figura equivalente é zbar_males: em cada estudo, a
+# característica medida no sexo que a expressa. E é a mesma escolha do
+# Resultados_Preliminares.Rmd e do Exploracao_Paineis_MiudoV2.Rmd, então os
+# três documentos mostram a mesma linha. Nesta rodada as duas versões andam
+# praticamente coladas; para ver o pool, troque col_media e col_var por
+# pbar_pop e varp_pop abaixo.
 MODELO_MACHOS <- list(
   nome    = "Machos variando",
   prefixo = "Machos",
@@ -44,8 +51,8 @@ MODELO_MACHOS <- list(
   faixa_evo  = "FEMALE PREFERENCE EVOLUTION",
   cor_evo    = "#1F7A4C",
   titulo_evo = "Preference Peak Mean",
-  col_media  = "pbar_pop",
-  col_var    = "varp_pop",
+  col_media  = "pbar_femeas",
+  col_var    = "varp_femeas",
   lab_media  = "bold(paste('Preference Peak Mean (', bar(p), ')'))",
   lab_var    = "Preference Variance (Var p)",
   y_media    = expression(bold(paste("Preference Peak Mean (", bar(p), ")"))),

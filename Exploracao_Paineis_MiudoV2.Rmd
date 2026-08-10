@@ -70,10 +70,13 @@ quais_poliandria <- c(grau_medio_femeas        = "1. Poliandria realizada",
                       prop_femeas_sem_acasalar = "4. Fêmeas sem acasalar")
 quais_traco     <- c(zbar_males = "Média do traço (z)",
                      varz_males = "Variância do traço (Var z)")
-quais_pref      <- c(pbar_pop    = "Média de p (pool genotípico)",
-                     varp_pop    = "Variância de p (pool genotípico)",
-                     pbar_femeas = "Média de p (fêmeas, expressa)",
-                     varp_femeas = "Variância de p (fêmeas, expressa)")
+# Duas linhas só, para o painel ficar simétrico ao do traço no estudo das
+# fêmeas. Usamos a preferência das fêmeas adultas, que é o espelho exato de
+# zbar_males lá: em cada estudo, a característica medida no sexo que a
+# expressa. O pool genotípico (pbar_pop, varp_pop) continua gravado e anda
+# praticamente colado nestas duas.
+quais_pref      <- c(pbar_femeas = "Média da preferência (p)",
+                     varp_femeas = "Variância da preferência (Var p)")
 
 tema_painel <- function(cor_faixa = "#2C3E50") {
   theme_light(base_size = 11) +
@@ -521,12 +524,17 @@ render_tabs(function(kk, amax, ns)
 
 ## 3.2 A preferência da fêmea (p) {.tabset}
 
-A variável evolutiva deste estudo, registrada de duas formas. O **pool genotípico** junta os dois
-sexos e é a variável evolutiva propriamente dita, já que o macho também carrega p sem expressar.
-As **fêmeas** são a preferência efetivamente expressa, a que gera a rede. As duas devem andar
-juntas; se descolarem, é porque a seleção de viabilidade sobre os machos está mexendo no pool.
+A variável evolutiva deste estudo, medida nas fêmeas adultas. É o espelho exato do painel 2.2:
+lá o traço no sexo que o expressa, aqui a preferência no sexo que a usa, então as duas figuras
+se leem lado a lado.
 
-```{r mac-pref, results='asis', fig.width=13, fig.height=9}
+O motor também grava a preferência no pool genotípico, `pbar_pop` e `varp_pop`, que junta os dois
+sexos e é a variável evolutiva em sentido estrito, já que o macho carrega p sem expressar. As
+duas versões andam praticamente coladas nesta rodada, e por isso ficou só uma aqui; se em alguma
+rodada elas descolarem, é sinal de que a seleção de viabilidade sobre os machos está mexendo no
+pool, e aí vale trazer a outra de volta.
+
+```{r mac-pref, results='asis', fig.width=13, fig.height=5.5}
 if (!ok(esp)) cat("\n*Sem dados.*\n") else
 render_tabs(function(kk, amax, ns)
   plot_evolucao(esp, "sigma_z", "σz", kk, amax, ns, quais_pref,
