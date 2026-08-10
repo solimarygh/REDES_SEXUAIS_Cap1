@@ -581,7 +581,198 @@ render_tabs(function(kk, amax, ns)
 
 ---
 
-# 4. Co-evolução — ainda não rodado
+# 4. Os três estudos no mesmo plano
+
+A ideia desta seção é do Miudo, e serve para responder a pergunta que as seções
+anteriores não conseguem fazer: **o que o Controle diz sobre onde os estudos evolutivos
+acabam parando?**
+
+O Controle varre o plano (σp, σz) inteiro, e os dois estudos evolutivos percorrem cada
+um uma linha dele. Mas essa linha não fica parada. Em Fêmeas variando, σp é imposto e
+é re-sorteado a cada geração, então a posição vertical não se mexe; já σz é livre, e a
+geração 100 pode estar num σz bem diferente do 1.0 de onde partiu. Em Machos variando é
+o espelho: σz fica onde foi posto e σp é que anda.
+
+Então aqui cada estudo aparece duas vezes, na geração 1 e na geração 100, sobre a
+mesma grade 7×7 do Controle e com a **mesma escala de cor** em todas as linhas da
+figura. É essa escala compartilhada que faz a comparação valer: se a célula do estudo
+evolutivo tem a mesma cor da célula do Controle onde ela caiu, a regra de acasalamento
+sozinha já explicava o resultado; se a cor difere, a evolução produziu algo que o
+Controle não previa.
+
+Só uma parte da grade fica pintada, e isso é o desenho e não falta de dado. Na geração
+1 de Fêmeas variando só existe a coluna σz = 1.0, porque é ali que todos os cenários
+começam; na de Machos variando, só a linha σp = 1.0.
+
+**Três avisos de leitura, que valem para os quatro painéis.**
+
+O primeiro é o mais importante. Este plano é uma projeção, e falta nele uma dimensão. No
+Controle o traço e a preferência estão sempre centrados em 5. Já na geração 100 de
+Fêmeas variando a média do traço pode ter se deslocado bastante, enquanto as preferências
+continuam sendo re-sorteadas em torno de 5. Duas situações com o mesmo (σp, σz) mas com
+médias diferentes não são a mesma situação, e o desencontro entre os sexos não aparece
+em lugar nenhum destes eixos. Por isso a legenda de cada figura diz o quanto a média se
+afastou: onde esse número é pequeno a comparação é direta, e onde é grande ela é apenas
+indicativa.
+
+O segundo: a posição das células evolutivas é a dispersão MEDIDA (a raiz da variância
+gravada), enquanto a grade do Controle é a dispersão IMPOSTA. Os dois coincidem quando a
+seleção natural está desligada, mas com ela ligada a viabilidade estreita a distribuição
+dos machos, e a medida fica abaixo da imposta. É mais uma razão para comparar as abas
+"com" e "sem" seleção natural entre si.
+
+O terceiro: a dispersão medida é contínua, e para caber na grade ela é arredondada para
+o nível mais próximo dos sete do desenho. Valores acima de 2.0 encostam todos no 2.0, e
+a legenda avisa quantos casos ficaram fora da grade. Quando esse número for alto, é
+sinal de que a grade do Controle deveria ser estendida na rodada final.
+
+```{r plano-dados}
+METS_PLANO <- c(Modularity = "Modularidade", Nestedness = "Aninhamento (NODF)",
+                Centralization = "Centralização", I_s = "Oportunidade (Is)")
+NIVEIS_SIGMA <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
+
+# Arredonda a dispersão medida para o nível mais próximo da grade do desenho.
+# `fora` marca quem estava acima do teto da grade, para poder ser contado.
+encaixar <- function(x) {
+  out <- rep(NA_real_, length(x))
+  ok_x <- !is.na(x)
+  if (any(ok_x)) {
+    i <- max.col(-abs(outer(x[ok_x], NIVEIS_SIGMA, "-")), ties.method = "first")
+    out[ok_x] <- NIVEIS_SIGMA[i]
+  }
+  out
+}
+
+CHAVE <- c("tipo_selecao", "encounters_n", "k_fixo", "selecao_natural")
+
+# Uma tabela pequena com tudo o que os painéis precisam, montada uma vez só:
+# são milhões de linhas nos dois estudos evolutivos e 72 figuras para desenhar.
+plano <- local({
+  partes <- list()
+
+  if (ok(ct)) {
+    partes$ct <- ct %>%
+      group_by(across(all_of(CHAVE)), sig_z = sigma_z, sig_p = sigma_p) %>%
+      summarise(across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
+                desvio_media = mean(abs(zbar_males - 5), na.rm = TRUE),
+                .groups = "drop") %>%
+      mutate(painel = "Controle (superfície completa)", fora = FALSE)
+  }
+
+  # Fêmeas variando: σp é imposto (fica), σz é medido (anda)
+  if (ok(d)) {
+    g <- max(d$generation, na.rm = TRUE)
+    partes$fem <- d %>%
+      filter(generation %in% c(1L, g)) %>%
+      group_by(across(all_of(CHAVE)), sig_p = sigma_p, generation) %>%
+      summarise(sig_z_medido = mean(sqrt(varz_males), na.rm = TRUE),
+                across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
+                desvio_media = mean(abs(zbar_males - 5), na.rm = TRUE),
+                .groups = "drop") %>%
+      mutate(sig_z  = encaixar(sig_z_medido),
+             fora   = sig_z_medido > max(NIVEIS_SIGMA),
+             painel = sprintf("Fêmeas variando · geração %d", generation)) %>%
+      dplyr::select(-generation, -sig_z_medido)
+  }
+
+  # Machos variando: σz é imposto (fica), σp é medido (anda)
+  if (ok(esp)) {
+    g <- max(esp$generation, na.rm = TRUE)
+    partes$esp <- esp %>%
+      filter(generation %in% c(1L, g)) %>%
+      group_by(across(all_of(CHAVE)), sig_z = sigma_z, generation) %>%
+      summarise(sig_p_medido = mean(sqrt(varp_femeas), na.rm = TRUE),
+                across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
+                desvio_media = mean(abs(pbar_femeas - 5), na.rm = TRUE),
+                .groups = "drop") %>%
+      mutate(sig_p  = encaixar(sig_p_medido),
+             fora   = sig_p_medido > max(NIVEIS_SIGMA),
+             painel = sprintf("Machos variando · geração %d", generation)) %>%
+      dplyr::select(-generation, -sig_p_medido)
+  }
+
+  if (!length(partes)) NULL else {
+    ordem <- c("Controle (superfície completa)",
+               "Fêmeas variando · geração 1", sprintf("Fêmeas variando · geração %d",
+                 if (ok(d)) max(d$generation, na.rm = TRUE) else 100),
+               "Machos variando · geração 1", sprintf("Machos variando · geração %d",
+                 if (ok(esp)) max(esp$generation, na.rm = TRUE) else 100))
+    bind_rows(partes) %>% mutate(painel = factor(painel, levels = unique(ordem)))
+  }
+})
+
+plot_plano <- function(metrica, kk, amax, ns) {
+  if (is.null(plano)) return(NULL)
+  dd <- plano %>%
+    filter(k_fixo == kk, encounters_n == amax, selecao_natural == ns,
+           !is.na(.data[[metrica]]))
+  if (nrow(dd) == 0) return(NULL)
+
+  n_fora <- sum(dd$fora, na.rm = TRUE)
+  desv   <- max(dd$desvio_media, na.rm = TRUE)
+
+  # Níveis explícitos nos dois eixos: sem isso o ggplot desenharia só as
+  # colunas e linhas que têm dado, e a grade do Controle deixaria de servir
+  # de referência. É justamente o vazio que mostra por onde o estudo passa.
+  dd <- dd %>% mutate(sig_z = factor(sig_z, levels = NIVEIS_SIGMA),
+                      sig_p = factor(sig_p, levels = NIVEIS_SIGMA))
+
+  ggplot(dd, aes(x = sig_z, y = sig_p, fill = .data[[metrica]])) +
+    geom_tile(color = "white", linewidth = 0.3) +
+    facet_grid(painel ~ tipo_selecao,
+               labeller = labeller(tipo_selecao = labels_4,
+                                   painel = label_wrap_gen(18))) +
+    scale_fill_viridis_c(option = "magma", name = METS_PLANO[[metrica]]) +
+    scale_x_discrete(drop = FALSE) + scale_y_discrete(drop = FALSE) +
+    labs(title = sprintf("%s · %s · A_max = %d · k = %d", METS_PLANO[[metrica]],
+                         if (ns) "com seleção natural" else "sem seleção natural", amax, kk),
+         x = "σz — variação do traço dos machos",
+         y = "σp — variação da preferência entre fêmeas",
+         caption = sprintf(paste("Mesma escala de cor nas cinco linhas: a comparação entre elas é direta.",
+                                 "Células vazias são combinações que aquele estudo não visita.",
+                                 "\nAfastamento máximo da média em relação a phi = 5 (do traço no Controle e em",
+                                 "Fêmeas variando, da preferência em Machos variando): %.2f.",
+                                 "\nCélulas cuja dispersão medida passou de 2.0 e foi encostada no teto da grade: %d."),
+                           desv, n_fora)) +
+    tema_painel() +
+    theme(panel.grid = element_blank(),
+          strip.text.y = element_text(color = "white", face = "bold", size = 8, angle = 0),
+          plot.title   = element_text(face = "bold", size = 13),
+          plot.caption = element_text(hjust = 0, face = "italic", size = 8.5))
+}
+```
+
+## 4.1 Modularidade {.tabset}
+
+```{r plano-mod, results='asis', fig.width=12, fig.height=11}
+if (is.null(plano)) cat("\n*Sem dados suficientes.*\n") else
+render_tabs(function(kk, amax, ns) plot_plano("Modularity", kk, amax, ns))
+```
+
+## 4.2 Aninhamento (NODF) {.tabset}
+
+```{r plano-nodf, results='asis', fig.width=12, fig.height=11}
+if (is.null(plano)) cat("\n*Sem dados suficientes.*\n") else
+render_tabs(function(kk, amax, ns) plot_plano("Nestedness", kk, amax, ns))
+```
+
+## 4.3 Centralização {.tabset}
+
+```{r plano-centr, results='asis', fig.width=12, fig.height=11}
+if (is.null(plano)) cat("\n*Sem dados suficientes.*\n") else
+render_tabs(function(kk, amax, ns) plot_plano("Centralization", kk, amax, ns))
+```
+
+## 4.4 Oportunidade de seleção sexual (Is) {.tabset}
+
+```{r plano-is, results='asis', fig.width=12, fig.height=11}
+if (is.null(plano)) cat("\n*Sem dados suficientes.*\n") else
+render_tabs(function(kk, amax, ns) plot_plano("I_s", kk, amax, ns))
+```
+
+---
+
+# 5. Co-evolução — ainda não rodado
 
 O quarto estudo, em que traço e preferência são herdáveis ao mesmo tempo e a grandeza central
 passa a ser a covariância genética entre os dois. O motor está rascunhado em
