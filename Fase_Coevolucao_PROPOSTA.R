@@ -96,8 +96,10 @@ if (FALSE) {
                                   tipo_selecao = "gaussian", encounters_n = 200,
                                   selecao_natural = TRUE, k_fixo = NULL,
                                   fecundidade_base = 50, eps_sd = 0.2,
-                                  segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05) {
+                                  segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
+                                  regra = c("best_of_n", "best_of_n_estrito", "sequencial")) {
     segregacao <- match.arg(segregacao)
+    regra      <- match.arg(regra)
     # O pool de juvenis não é parâmetro livre: é o que a fecundidade produz.
     N_juvenis <- N_femeas * fecundidade_base %/% 2
 
@@ -133,7 +135,8 @@ if (FALSE) {
 
       # (2) Rede de acasalamentos (sem regra de escape)
       M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_selecao,
-                               encounters_n = encounters_n, k_fixo = k_fixo)
+                               encounters_n = encounters_n, k_fixo = k_fixo,
+                               regra = regra)
       metrics <- calc_metrics_from_M(M, k_alvo = k_fixo)
 
       # (3) Registro. A GRANDEZA CENTRAL deste estudo é cov(z, p) no pool

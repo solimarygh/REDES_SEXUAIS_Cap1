@@ -19,7 +19,10 @@ suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(ggplot2)
 })
 
-ARQ <- "Resultados_Artigo/Fase_Controle/Dados/resultados_Controle_censoConst.rds"
+# Da rodada mais nova para a mais antiga: usa a primeira que existir.
+ARQ <- c("Resultados_Artigo/Fase_Controle/Dados/resultados_Controle_bestOfN.rds",
+         "Resultados_Artigo/Fase_Controle/Dados/resultados_Controle_censoConst.rds")
+ARQ <- ARQ[file.exists(ARQ)][1]
 if (!file.exists(ARQ)) stop("Não encontrei ", ARQ, ". Copie os dados do controle para cá.")
 
 df <- readRDS(ARQ)

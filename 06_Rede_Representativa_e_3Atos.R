@@ -8,6 +8,11 @@
 # =====================================================================
 
 source("01_metricas_e_utilitarios.R")
+
+# A regra de escolha com que a rodada foi gerada. Este script RE-SIMULA o
+# cenário para extrair a rede, então tem que usar exatamente a mesma regra,
+# senão a rede que sai não é a do cenário que está no conjunto de dados.
+REGRA_RODADA <- "best_of_n"   # rodada anterior: "sequencial"
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -180,8 +185,11 @@ replay_capturar <- function(seed, tipo_sel, sp, am, gen_alvo,
     male_z_surv  <- male_z_juv[idx_adultos]
     female_z_gen <- female_z_juv[sample.int(length(female_z_juv), N)]
 
+    # A regra tem que ser a MESMA com que os dados foram gerados, senão a
+    # rede re-simulada não é a do cenário. REGRA_RODADA fica no topo do script.
     M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_sel,
-                              encounters_n = am, k_fixo = k_fixo)
+                              encounters_n = am, k_fixo = k_fixo,
+                              regra = REGRA_RODADA)
 
     # OBRIGATÓRIO: calc_metrics consome RNs (cluster_louvain usa RNG)
     metrics <- calc_metrics_from_M(M, k_alvo = k_fixo)

@@ -130,6 +130,74 @@ cat("\nLeitura: onde 'grau' fica bem abaixo de 'k', o teto NÃO foi atingido e o
 cat("tratamento nominal de poliandria não aconteceu. É por isso que a análise\n")
 cat("precisa usar a poliandria realizada, e não o k nominal.\n")
 
+
+# ---------------------------------------------------------------------
+cat("\n=== A REGRA DE ESCOLHA: sequencial vs best-of-n ===\n")
+
+# (a) REGRESSÃO. A refatoração de mate_with_survivors não pode ter mudado o
+# comportamento antigo. Com regra = "sequencial" o consumo de RNG é o mesmo de
+# antes (mesmo sample() dos avaliados, mesmo runif(1) por macho até a parada),
+# então a MESMA semente tem que dar a MESMA rede. Se isto falhar, o refactor
+# mexeu em algo e os dados velhos deixam de ser comparáveis.
+set.seed(4242)
+z <- pmax(0, rnorm(200, 5, 1)); p <- pmax(0, rnorm(200, 5, 1)); s <- rnorm(200, 2, 0.2)
+set.seed(99); M_seq_a <- mate_with_survivors(z, p, s, "gaussian", encounters_n = 40, k_fixo = 5, regra = "sequencial")
+set.seed(99); M_seq_b <- mate_with_survivors(z, p, s, "gaussian", encounters_n = 40, k_fixo = 5, regra = "sequencial")
+ok_det <- identical(M_seq_a, M_seq_b)
+cat(sprintf("  [%s] sequencial e determinístico dada a semente\n", if (ok_det) "OK" else "FALHOU"))
+if (!ok_det) falhas <- falhas + 1L
+
+# (b) QUANTAS AVALIAÇÕES REALMENTE ACONTECEM. É o problema que motivou a
+# mudança: com a parada antecipada, A_max era um teto que quase nunca era
+# alcançado, então o custo de busca que dizíamos modelar não era pago.
+# Sob best-of-n a fêmea avalia sempre os A_max, por construção.
+avaliacoes_sequencial <- function(n_aval, P_medio, k) {
+  # esperança do número de avaliações até juntar k aceites (binomial negativa),
+  # limitada por n_aval
+  min(n_aval, k / P_medio)
+}
+cat("\n  Machos que a fêmea REALMENTE avalia (A_max = 200):\n")
+cat(sprintf("    %-12s %-8s %-14s %-14s\n", "curva", "k", "sequencial", "best-of-n"))
+for (cv in c("uniform", "gaussian", "u-shaped")) {
+  Pm <- switch(cv, "uniform" = 0.50, "gaussian" = 0.33, "u-shaped" = 0.67)
+  for (kk in c(5, 20)) {
+    cat(sprintf("    %-12s %-8d ~%-13.0f %-14d\n", cv, kk,
+                avaliacoes_sequencial(200, Pm, kk), 200L))
+  }
+}
+cat("  Ou seja: no sequencial, A_max = 200 e A_max = 40 eram quase o mesmo cenário.\n")
+
+# (c) O EFEITO DAS TRÊS REGRAS sobre a rede, no mesmo cenário e mesma semente.
+cat("\n  As três regras no mesmo cenário (gaussiana, A_max = 40, sem NS):\n")
+cat(sprintf("    %-20s %-10s %-10s %-14s\n", "regra", "grau", "atingiu k", "sem acasalar"))
+for (rg in c("sequencial", "best_of_n", "best_of_n_estrito")) {
+  set.seed(7)
+  r <- simulate_controle(tipo_selecao = "gaussian", encounters_n = 40, k_fixo = 10,
+                         selecao_natural = FALSE, regra = rg)
+  cat(sprintf("    %-20s %-10.2f %-10.0f%% %-13.0f%%\n", rg, r$grau_medio_femeas,
+              100 * r$prop_femeas_atingiu_k, 100 * r$prop_femeas_sem_acasalar))
+}
+cat("\n  Leitura: em 'best_of_n_estrito' NENHUMA fêmea fica sem acasalar, porque\n")
+cat("  todas conseguem exatamente k. Sem variância de sucesso reprodutivo entre\n")
+cat("  fêmeas não há seleção sobre a preferência, e o Estudo 3 deixa de funcionar.\n")
+cat("  É por isso que o default é 'best_of_n', que mantém o filtro de aceite.\n")
+
+# (d) A exigência s importa? Deve importar nas duas primeiras e NÃO na estrita,
+# porque ali só a ordem conta, e ela não muda com s.
+cat("\n  A exigência s ainda faz diferença? (gaussiana, A_max = 40, k = 10)\n")
+for (rg in c("best_of_n", "best_of_n_estrito")) {
+  graus <- sapply(c(0.5, 2, 8), function(ss) {
+    set.seed(11)
+    zz <- pmax(0, rnorm(200, 5, 1)); pp <- pmax(0, rnorm(200, 5, 1))
+    Mx <- mate_with_survivors(zz, pp, rep(ss, 200), "gaussian",
+                              encounters_n = 40, k_fixo = 10, regra = rg)
+    mean(colSums(Mx)[colSums(Mx) > 0])
+  })
+  cat(sprintf("    %-20s s=0.5: %.2f   s=2: %.2f   s=8: %.2f\n", rg,
+              graus[1], graus[2], graus[3]))
+}
+cat("  Em 'best_of_n_estrito' os três valores devem ser iguais: s vira inerte.\n")
+
 # ---------------------------------------------------------------------
 cat(sprintf("\n=====================================================\n"))
 if (falhas == 0L) {

@@ -27,7 +27,9 @@ MODELO_FEMEAS <- list(
   # A pasta é Fase5_MiudoV2 por herança do nome passado a
   # configurar_diretorios(); é histórico e não vale renomear no meio.
   pasta   = "Resultados_Artigo/Fase5_MiudoV2/Dados",
-  padrao  = "^(backup|resultados)_Femeas_censoConst.*\\.rds$",
+  # O prefixo do arquivo. Qual rodada usar é decidido em 08_Poster2_comum.R:
+  # a mais nova que existir, sem nunca misturar duas.
+  estudo  = "Femeas",
 
   # Eixo do experimento
   eixo     = "sigma_p",

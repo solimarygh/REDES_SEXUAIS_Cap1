@@ -56,16 +56,16 @@ juntar_estudo <- function(pasta, prefixo, n_replicas_esperado) {
 N_REPLICAS <- 20
 
 cat("\n=== ESTUDO 1: controle ===\n")
-d1 <- juntar_estudo("Resultados_Artigo/Fase_Controle/Dados", "(backup|resultados)_Controle_censoConst", N_REPLICAS)
+d1 <- juntar_estudo("Resultados_Artigo/Fase_Controle/Dados", "(backup|resultados)_Controle_bestOfN", N_REPLICAS)
 
 cat("\n=== ESTUDO 2: fêmeas variando ===\n")
 # Atenção ao nome da pasta: o Estudo 2 grava em Fase5_MiudoV2, e não em
 # Fase4_TodasAsCurvas, por causa do nome passado a configurar_diretorios() no
 # script. É histórico, e não vale renomear no meio de uma corrida.
-d2 <- juntar_estudo("Resultados_Artigo/Fase5_MiudoV2/Dados", "(backup|resultados)_Femeas_censoConst", N_REPLICAS)
+d2 <- juntar_estudo("Resultados_Artigo/Fase5_MiudoV2/Dados", "(backup|resultados)_Femeas_bestOfN", N_REPLICAS)
 
 cat("\n=== ESTUDO 3: machos variando ===\n")
-d3 <- juntar_estudo("Resultados_Artigo/Fase_Espelho/Dados", "(backup|resultados)_Espelho_censoConst", N_REPLICAS)
+d3 <- juntar_estudo("Resultados_Artigo/Fase_Espelho/Dados", "(backup|resultados)_Espelho_bestOfN", N_REPLICAS)
 
 dir.create("Resultados_Artigo/Reunidos", recursive = TRUE, showWarnings = FALSE)
 if (!is.null(d1)) saveRDS(d1, "Resultados_Artigo/Reunidos/Estudo1_controle.rds")

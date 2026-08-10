@@ -133,18 +133,29 @@ banner <- function(titulo, subtitulo, tam = 9.0) {
 # final, e junta os pedaços que cada máquina gravou. É a mesma lógica do
 # 99_juntar_resultados.R; as linhas repetidas são idênticas porque a
 # semente é set.seed(seed_base + idx_global), então distinct() basta.
-carregar_modelo <- function(pasta, padrao) {
-  arqs <- list.files(pasta, pattern = padrao, full.names = TRUE)
-  if (!length(arqs)) return(NULL)
-  pedacos <- lapply(arqs, function(a) {
-    obj <- readRDS(a)
-    if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
-  })
-  df <- distinct(bind_rows(pedacos))
-  cat(sprintf("  %d arquivo(s), %s linhas, %d réplicas\n",
-              length(arqs), format(nrow(df), big.mark = "."),
-              dplyr::n_distinct(df$replica)))
-  df
+#
+# `rodadas` vai da mais nova para a mais antiga, e a leitura PARA na primeira
+# que existir. Isso é de propósito: cada rodada é um modelo diferente, e juntar
+# duas daria um conjunto sem sentido. Um regex que casasse com as duas de uma
+# vez misturaria tudo em silêncio, que é justamente o que não pode acontecer.
+RODADAS <- c("bestOfN", "censoConst")
+
+carregar_modelo <- function(pasta, estudo) {
+  for (r in RODADAS) {
+    padrao <- sprintf("^(backup|resultados)_%s_%s.*\\.rds$", estudo, r)
+    arqs   <- list.files(pasta, pattern = padrao, full.names = TRUE)
+    if (!length(arqs)) next
+    pedacos <- lapply(arqs, function(a) {
+      obj <- readRDS(a)
+      if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
+    })
+    df <- distinct(bind_rows(pedacos))
+    cat(sprintf("  rodada '%s': %d arquivo(s), %s linhas, %d réplicas\n",
+                r, length(arqs), format(nrow(df), big.mark = "."),
+                dplyr::n_distinct(df$replica)))
+    return(df)
+  }
+  NULL
 }
 
 # =====================================================================
@@ -278,7 +289,7 @@ gerar_poster2 <- function(MODELO) {
   dir.create(dir_saida, recursive = TRUE, showWarnings = FALSE)
 
   cat(sprintf("\n=== POSTER 2 — %s ===\n", MODELO$nome))
-  df <- carregar_modelo(MODELO$pasta, MODELO$padrao)
+  df <- carregar_modelo(MODELO$pasta, MODELO$estudo)
   if (is.null(df)) {
     cat(sprintf("  Nenhum arquivo em %s. Rode %s primeiro.\n",
                 MODELO$pasta, MODELO$script))

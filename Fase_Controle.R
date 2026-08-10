@@ -42,7 +42,9 @@ simulate_controle <- function(N_machos = 200, N_femeas = 200,
                               phi = 5, gamma = 0.2,
                               tipo_selecao = "gaussian", encounters_n = 200,
                               selecao_natural = TRUE, k_fixo = NULL,
-                              fecundidade_base = 50) {
+                              fecundidade_base = 50,
+                              regra = c("best_of_n", "best_of_n_estrito", "sequencial")) {
+  regra <- match.arg(regra)
 
   # (1) Sorteio da população: nada vem de geração anterior.
   # Os machos são sorteados como JUVENIS, porque é sobre eles que a viabilidade
@@ -62,11 +64,11 @@ simulate_controle <- function(N_machos = 200, N_femeas = 200,
 
   # (3) Rede de acasalamentos (mesma função dos outros estudos, sem regra de escape)
   M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_selecao,
-                           encounters_n = encounters_n, k_fixo = k_fixo)
+                           encounters_n = encounters_n, k_fixo = k_fixo, regra = regra)
   metrics <- calc_metrics_from_M(M, k_alvo = k_fixo)
 
   data.frame(
-    tipo_selecao = tipo_selecao,
+    tipo_selecao = tipo_selecao, regra = regra,
     sigma_p = sigma_p, sigma_z = sigma_z,
     encounters_n = encounters_n,
     k_fixo = ifelse(is.null(k_fixo), NA_integer_, as.integer(k_fixo)),
@@ -107,9 +109,9 @@ if (!exists("CONTROLE_SO_FUNCOES") || !isTRUE(CONTROLE_SO_FUNCOES)) {
   cat(sprintf("Réplicas: %d a %d  (%d cenários, 1 geração cada)\n",
               REP_MIN, REP_MAX, nrow(cenarios)))
 
-  arquivo_backup <- file.path(diretorios$dados, paste0("backup_Controle_censoConst", sufixo_rep, ".rds"))
-  arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Controle_censoConst", sufixo_rep, ".rds"))
-  arquivo_backup_full <- file.path(diretorios$dados, "backup_Controle_censoConst.rds")
+  arquivo_backup <- file.path(diretorios$dados, paste0("backup_Controle_bestOfN", sufixo_rep, ".rds"))
+  arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Controle_bestOfN", sufixo_rep, ".rds"))
+  arquivo_backup_full <- file.path(diretorios$dados, "backup_Controle_bestOfN.rds")
 
   if (file.exists(arquivo_backup)) {
     lista <- readRDS(arquivo_backup)

@@ -46,11 +46,25 @@ juntar_pedacos <- function(pasta, padrao) {
   distinct(bind_rows(lapply(arqs, carregar)))
 }
 
-ct  <- carregar("Resultados_Artigo/Fase_Controle/Dados/resultados_Controle_censoConst.rds")
-d   <- juntar_pedacos("Resultados_Artigo/Fase5_MiudoV2/Dados",
-                      "^(backup|resultados)_Femeas_censoConst.*\\.rds$")
-esp <- juntar_pedacos("Resultados_Artigo/Fase_Espelho/Dados",
-                      "^(backup|resultados)_Espelho_censoConst.*\\.rds$")
+# Cada mudança de modelo grava com um sufixo próprio, e a leitura tenta da
+# rodada mais nova para a mais antiga, parando na primeira que existir. Nunca
+# junta duas: são modelos diferentes, e misturá-las daria um conjunto sem
+# sentido nenhum. A rodada efetivamente lida aparece na tabela de situação.
+RODADAS <- c("bestOfN", "censoConst")
+
+carregar_rodada <- function(pasta, estudo) {
+  for (r in RODADAS) {
+    df <- juntar_pedacos(pasta, sprintf("^(backup|resultados)_%s_%s.*\\.rds$", estudo, r))
+    if (!is.null(df) && nrow(df) > 0) { attr(df, "rodada") <- r; return(df) }
+  }
+  NULL
+}
+rodada_de <- function(x) if (is.null(x)) "-" else attr(x, "rodada") %||% "?"
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
+ct  <- carregar_rodada("Resultados_Artigo/Fase_Controle/Dados", "Controle")
+d   <- carregar_rodada("Resultados_Artigo/Fase5_MiudoV2/Dados", "Femeas")
+esp <- carregar_rodada("Resultados_Artigo/Fase_Espelho/Dados",  "Espelho")
 
 ok  <- function(x) !is.null(x) && nrow(x) > 0
 ```
@@ -299,6 +313,7 @@ tibble(
   Estudo     = c("Controle", "Fêmeas variando", "Machos variando", "Co-evolução"),
   Eixo       = c("σp × σz (superfície)", "σp", "σz", "os dois, só como início"),
   `O que evolui` = c("nada", "o traço do macho (z)", "a preferência da fêmea (p)", "os dois"),
+  Rodada     = c(rodada_de(ct), rodada_de(d), rodada_de(esp), "-"),
   Gerações   = c(n_ger(ct), n_ger(d), n_ger(esp), "-"),
   Cenários   = c(n_cen(ct, c("sigma_p", "sigma_z")), n_cen(d, "sigma_p"),
                  n_cen(esp, "sigma_z"), "-"),

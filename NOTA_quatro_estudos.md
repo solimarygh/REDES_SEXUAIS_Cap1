@@ -256,15 +256,48 @@ Quatro observações:
   geração seguinte.
 
 **3. Formação da rede de acasalamentos.** Cada fêmea avalia A_max machos distintos, sorteados
-sem reposição entre os sobreviventes (ou todos eles, se houver menos sobreviventes do que
-A_max). Para cada macho avaliado, ela aceita ou não com uma probabilidade dada pela curva de
-preferência, que depende da distância entre o traço dele e o pico dela, e da exigência dela (a
-choosiness s, sorteada de N(2, 0.2) a cada geração e nunca herdada, em todos os estudos). Ela
-para quando atinge k parceiros ou quando esgota os A_max machos. Se não aceitar nenhum, fica sem
-acasalar. A matriz é binária, então um mesmo par nunca conta duas vezes.
+sem reposição entre os disponíveis (ou todos eles, se houver menos machos do que A_max), numa
+ordem que é um sorteio novo para cada fêmea. Para cada macho avaliado, ela o considera aceitável
+ou não com uma probabilidade dada pela curva de preferência, que depende da distância entre o
+traço dele e o pico dela, e da exigência dela (a choosiness s, sorteada de N(2, 0.2) a cada
+geração e nunca herdada, em todos os estudos). Depois de avaliar todos, ela acasala com os k
+aceitáveis de maior probabilidade de aceite. Se nenhum for aceitável, fica sem acasalar. A matriz
+é binária, então um mesmo par nunca conta duas vezes.
 
 O resultado é uma matriz de quem acasalou com quem, que é a rede bipartita sobre a qual
 calculamos as métricas de topologia.
+
+**A regra de escolha mudou nesta rodada, e vale explicar por quê** (decisão da reunião com o
+Miudo, agosto de 2026). Até aqui a fêmea decidia de um em um, na hora, sem comparar nem voltar
+atrás, e parava assim que juntava k parceiros. É a regra de umbral fixo, ou busca sequencial
+(Janetos 1980; Real 1990), e continua disponível no código como `regra = "sequencial"`.
+
+O problema dela era a parada antecipada. Com A_max = 200 e k = 5, uma fêmea que aceita metade dos
+machos junta os 5 parceiros em umas 10 avaliações e nunca vê os outros 190. A_max deixava de ser
+o número de machos avaliados e virava um teto que quase nunca era alcançado, de modo que os
+cenários A_max = 200 e A_max = 40 eram na prática o mesmo tratamento: o custo de busca que
+dizíamos modelar não chegava a ser pago. Isso explica de outro ângulo por que, com A_max = 200,
+as quatro curvas davam exatamente 5.00, 10.00 e 20.00 de poliandria realizada.
+
+Agora a regra é de comparação em pool, ou best-of-n: ela avalia os A_max machos, todos, e só
+então escolhe. É a suposição típica de leks e agregações, em que ela consegue amostrar antes de
+decidir. A_max passa a ser literalmente o número de machos avaliados, e k continua sendo um teto,
+agora aplicado sobre o conjunto dos que ela achou aceitáveis.
+
+O filtro de aceitação foi mantido de propósito, e não é um detalhe. A alternativa mais simples
+seria ela ficar direto com os k machos mais bem ajustados, sem filtro, e essa versão existe no
+código como `regra = "best_of_n_estrito"`. Ela dá uma leitura elegante, de seleção por
+truncamento, com k/A_max como proporção selecionada: o diferencial de seleção padronizado é 2.34
+com k = 5 contra 1.76 com k = 20, sobre A_max = 200. Mas tem duas consequências que a
+inviabilizam como default. A exigência s vira um parâmetro inerte, porque o ranking só depende da
+ordem que a curva induz e `exp(-s d^2)` é monótona em d para qualquer s positivo. E, pior, toda
+fêmea consegue exatamente k parceiros, então nenhuma fica sem acasalar: sem variância de sucesso
+reprodutivo entre fêmeas não há seleção sobre a preferência, e Machos variando deixa de
+funcionar. É o mesmo problema que a regra de escape tinha, por outro caminho. Fica disponível
+para comparação num subconjunto de cenários, não para rodar o desenho inteiro.
+
+A regra usada fica gravada numa coluna `regra` na saída dos três estudos, como já fazíamos com
+`segregacao`.
 
 **4. Fecundidade e paternidade.** Cada fêmea que acasalou produz 50 filhotes, e as que não
 acasalaram produzem zero. O número de filhotes não depende de com quantos machos ela acasalou

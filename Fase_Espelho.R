@@ -107,8 +107,10 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
                              tipo_selecao = "gaussian", encounters_n = 200,
                              selecao_natural = TRUE, k_fixo = NULL,
                              fecundidade_base = 50,
-                             segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05) {
+                             segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
+                             regra = c("best_of_n", "best_of_n_estrito", "sequencial")) {
   segregacao <- match.arg(segregacao)
+  regra      <- match.arg(regra)
   # O pool de juvenis não é parâmetro livre: é o que a fecundidade produz.
   N_juvenis <- N_femeas * fecundidade_base %/% 2
 
@@ -139,7 +141,7 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
 
     # (3) Rede de acasalamentos (sem regra de escape)
     M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_selecao,
-                             encounters_n = encounters_n, k_fixo = k_fixo)
+                             encounters_n = encounters_n, k_fixo = k_fixo, regra = regra)
     metrics <- calc_metrics_from_M(M, k_alvo = k_fixo)
 
     # (4) Registro: o foco é a distribuição da PREFERÊNCIA.
@@ -150,6 +152,7 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
     pool_p <- c(male_p_surv, female_p_gen)
     out[[t]] <- data.frame(
       generation = t, tipo_selecao = tipo_selecao, segregacao = segregacao,
+      regra = regra,
       sigma_z = sigma_z, sigma_p_init = sigma_p_init,
       encounters_n = encounters_n,
       k_fixo = ifelse(is.null(k_fixo), NA_integer_, as.integer(k_fixo)),
@@ -219,13 +222,13 @@ if (!exists("ESPELHO_SO_FUNCOES") || !isTRUE(ESPELHO_SO_FUNCOES)) {
   sufixo_rep <- if (REP_MIN == 1 && REP_MAX == n_replicas) "" else sprintf("_rep%d-%d", REP_MIN, REP_MAX)
   cat(sprintf("Réplicas: %d a %d  (%d cenários)\n", REP_MIN, REP_MAX, nrow(cenarios)))
 
-  arquivo_backup <- file.path(diretorios$dados, paste0("backup_Espelho_censoConst", sufixo_rep, ".rds"))
-  arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Espelho_censoConst", sufixo_rep, ".rds"))
+  arquivo_backup <- file.path(diretorios$dados, paste0("backup_Espelho_bestOfN", sufixo_rep, ".rds"))
+  arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Espelho_bestOfN", sufixo_rep, ".rds"))
 
   # Se este intervalo ainda não tem backup próprio, aproveita o que já foi calculado
   # numa corrida inteira: o backup completo é indexado pelo índice GLOBAL, então
   # basta extrair as posições deste intervalo. Evita recalcular o que já existe.
-  arquivo_backup_full <- file.path(diretorios$dados, "backup_Espelho_censoConst.rds")
+  arquivo_backup_full <- file.path(diretorios$dados, "backup_Espelho_bestOfN.rds")
 
   if (file.exists(arquivo_backup)) {
     lista <- readRDS(arquivo_backup)

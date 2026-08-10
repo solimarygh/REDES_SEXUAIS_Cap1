@@ -73,13 +73,13 @@ cenarios_fase4 <- cenarios_fase4[cenarios_fase4$replica >= REP_MIN & cenarios_fa
 sufixo_rep <- if (REP_MIN == 1 && REP_MAX == n_replicas) "" else sprintf("_rep%d-%d", REP_MIN, REP_MAX)
 cat(sprintf("Réplicas: %d a %d  (%d cenários)\n", REP_MIN, REP_MAX, nrow(cenarios_fase4)))
 
-arquivo_backup <- file.path(diretorios$dados, paste0("backup_Femeas_censoConst", sufixo_rep, ".rds"))   # nome novo a cada mudança de modelo: censo adulto constante + poliandria realizada. Backups antigos NÃO servem.
-arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Femeas_censoConst", sufixo_rep, ".rds"))
+arquivo_backup <- file.path(diretorios$dados, paste0("backup_Femeas_bestOfN", sufixo_rep, ".rds"))   # nome novo a cada mudança de modelo: censo adulto constante + poliandria realizada. Backups antigos NÃO servem.
+arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Femeas_bestOfN", sufixo_rep, ".rds"))
 
 # Se este intervalo ainda não tem backup próprio, aproveita o que já foi calculado
 # numa corrida inteira: o backup completo é indexado pelo índice GLOBAL, então
 # basta extrair as posições deste intervalo. Evita recalcular o que já existe.
-arquivo_backup_full <- file.path(diretorios$dados, "backup_Femeas_censoConst.rds")
+arquivo_backup_full <- file.path(diretorios$dados, "backup_Femeas_bestOfN.rds")
 
 if (file.exists(arquivo_backup)) {
   lista_fase4 <- readRDS(arquivo_backup)

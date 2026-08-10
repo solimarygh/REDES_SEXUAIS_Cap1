@@ -315,40 +315,114 @@ selecionar_machos_adultos <- function(z_juv, N_adultos, phi = 5, gamma = 0.2,
   idx
 }
 
+# =====================================================================
+# A REGRA DE ESCOLHA (decisão da reunião com o Miudo, 2026-08)
+# =====================================================================
+# São duas famílias clássicas na literatura de escolha de parceiro, e a
+# diferença entre elas é biológica e não técnica: elas supõem coisas
+# diferentes sobre o que a fêmea consegue fazer.
+#
+# "sequencial" — regra de umbral fixo (Janetos 1980; Real 1990). A fêmea
+#   avalia um macho de cada vez, decide na hora, nunca compara nem volta
+#   atrás, e PARA assim que junta k parceiros. É o que o modelo fazia até
+#   agora. Barata cognitivamente, e realista quando os machos aparecem
+#   espalhados no tempo ou no espaço.
+#
+#   O problema que isso trouxe: com a parada antecipada, A_max deixava de
+#   ser o número de machos avaliados e virava um teto que quase nunca era
+#   alcançado. Com a curva aleatória e k = 5, a fêmea junta 5 aceites em
+#   umas 10 avaliações, então o cenário A_max = 200 e o cenário A_max = 40
+#   eram na prática o mesmo: o custo de busca que dizíamos modelar não
+#   chegava a ser pago.
+#
+# "best_of_n" — comparação em pool. A fêmea avalia os A_max machos, todos,
+#   e só depois escolhe. É o default agora. Supõe que ela consegue amostrar
+#   antes de decidir, que é o típico de leks e agregações.
+#
+#   Aqui a escolha tem dois passos, e os dois importam. Primeiro cada macho
+#   avaliado é aceitável ou não, com probabilidade P_ij, que é o filtro da
+#   curva de preferência. Depois, entre os aceitáveis, ela fica com os k de
+#   maior P_ij. Manter o primeiro passo é o que preserva duas coisas que o
+#   modelo precisa: a exigência s continua importando (ela governa quantos
+#   passam o filtro), e uma fêmea que não aceita ninguém continua ficando
+#   sem acasalar, que é a variância de fitness de que o estudo dos machos
+#   depende.
+#
+# "best_of_n_estrito" — a versão sem filtro: ela avalia os A_max e fica
+#   direto com os k de maior P_ij. É a leitura literal de "os k mais bem
+#   ajustados", e dá a interpretação limpa de seleção por truncamento, com
+#   k/A_max como proporção selecionada.
+#
+#   ATENÇÃO ao usá-la. Como o ranking só depende da ORDEM que a curva
+#   induz, e exp(-s d^2) é monótona em d para qualquer s > 0, a exigência s
+#   vira um parâmetro inerte. E toda fêmea consegue exatamente k parceiros,
+#   então NENHUMA fica sem acasalar: sem variância de sucesso reprodutivo
+#   entre fêmeas, não há seleção sobre a preferência e o estudo dos machos
+#   variando deixa de funcionar. Fica disponível para comparação, não para
+#   rodar o desenho inteiro.
+#
+# Nas três regras o ranking por P_ij faz a coisa certa em cada curva:
+# gaussiana ordena do mais parecido ao mais diferente, u-shaped o inverso,
+# sigmoide do maior z ao menor, e a aleatória empata tudo — e como a ordem
+# de avaliação já é um sorteio, o empate se resolve ao acaso, que é
+# exatamente o que "não discriminar" quer dizer.
+# =====================================================================
 mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
                                 min_cop = 1, max_cop = 5, encounters_n = 200,
-                                k_fixo = NULL) {
+                                k_fixo = NULL,
+                                regra = c("best_of_n", "best_of_n_estrito", "sequencial")) {
+  regra <- match.arg(regra)
   n_m <- length(male_z_surv); n_f <- length(female_p)
   matings_per_female <- if (!is.null(k_fixo)) rep(as.integer(k_fixo), n_f) else sample(min_cop:max_cop, n_f, replace = TRUE)
   M <- matrix(0L, nrow = n_m, ncol = n_f)
-  
-  for (i in seq_len(n_f)) {
-    p_i <- female_p[i]; s_i <- female_s[i]
-    evaluacoes_reais <- min(encounters_n, n_m)
-    encounters <- sample(seq_len(n_m), size = evaluacoes_reais, replace = FALSE)  # SEM reposição: A_max = nº de machos DISTINTOS avaliados (decisão reunião Erika/Miudo)
-    matings_done <- 0L
-    
-    for (idx in encounters) {
-      if (matings_done >= matings_per_female[i]) break
-      z_j <- male_z_surv[idx]
-      
-      if (tipo_selecao == "uniform") { P_ij <- 0.5 
-      } else if (tipo_selecao == "gaussian") { P_ij <- exp(-s_i * (z_j - p_i)^2)
-      } else if (tipo_selecao == "sigmoid") { P_ij <- 1 / (1 + exp(-s_i * (z_j - p_i)))
-      } else if (tipo_selecao == "u-shaped") { P_ij <- 1 - exp(-s_i * (z_j - p_i)^2) }
-      
-      # CORREÇÃO DO REVISOR: Só conta o acasalamento se ELES AINDA NÃO CRUZARAM ANTES!
-      if (runif(1) <= P_ij && M[idx, i] == 0L) {
-        M[idx, i] <- 1L
-        matings_done <- matings_done + 1L
-      }
-    }
-    # SEM regra de escape (decisão Erika/Miudo, 2026-07):
-    # uma fêmea que não aceita nenhum macho fica SEM acasalar (0 filhotes).
-    # Isso cria variância de fitness entre fêmeas — condição necessária para
-    # que a preferência possa estar sob seleção (modelo espelho).
+
+  prob_aceite <- function(z, p_i, s_i) {
+    if (tipo_selecao == "uniform")       rep(0.5, length(z))
+    else if (tipo_selecao == "gaussian") exp(-s_i * (z - p_i)^2)
+    else if (tipo_selecao == "sigmoid")  1 / (1 + exp(-s_i * (z - p_i)))
+    else if (tipo_selecao == "u-shaped") 1 - exp(-s_i * (z - p_i)^2)
+    else stop("tipo_selecao desconhecido: ", tipo_selecao)
   }
-  return(M)
+
+  for (i in seq_len(n_f)) {
+    p_i <- female_p[i]; s_i <- female_s[i]; k_i <- matings_per_female[i]
+
+    # SEM reposição: A_max é o número de machos DISTINTOS avaliados
+    # (decisão da reunião com Erika e Miudo). A ordem é um sorteio novo
+    # para cada fêmea, então não existe viés de posição.
+    n_aval    <- min(encounters_n, n_m)
+    avaliados <- sample(seq_len(n_m), size = n_aval, replace = FALSE)
+    P         <- prob_aceite(male_z_surv[avaliados], p_i, s_i)
+
+    escolhidos <-
+      if (regra == "sequencial") {
+        aceitos <- integer(0)
+        for (j in seq_len(n_aval)) {
+          if (length(aceitos) >= k_i) break          # PARA ao atingir k
+          if (runif(1) <= P[j]) aceitos <- c(aceitos, avaliados[j])
+        }
+        aceitos
+
+      } else if (regra == "best_of_n") {
+        aceitos <- which(runif(n_aval) <= P)         # avalia TODOS, sem parar
+        if (length(aceitos) > k_i)                    # e só então compara
+          aceitos <- aceitos[order(P[aceitos], decreasing = TRUE)][seq_len(k_i)]
+        avaliados[aceitos]
+
+      } else {                                       # best_of_n_estrito
+        if (n_aval <= k_i) avaliados
+        else avaliados[order(P, decreasing = TRUE)[seq_len(k_i)]]
+      }
+
+    if (length(escolhidos)) M[escolhidos, i] <- 1L
+  }
+
+  # SEM regra de escape (decisão Erika/Miudo, 2026-07): uma fêmea que não
+  # aceita nenhum macho fica SEM acasalar e deixa 0 filhotes. Isso cria
+  # variância de fitness entre fêmeas, que é condição necessária para a
+  # preferência poder estar sob seleção no estudo dos machos variando.
+  # Em "best_of_n_estrito" isso deixa de valer, como avisado acima.
+  M
 }
 
 # =====================================================================
@@ -537,8 +611,10 @@ simulate_evolution <- function(
     tipo_selecao = "gaussian", encounters_n = 200, phi = 5, gamma = 0.2, eps_sd = 0.2,
     segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05, fecundidade_base = 50,
     return_details = FALSE, salvar_redes = FALSE, pasta_redes = NULL, replica_id = 1,
-    selecao_natural = TRUE, k_fixo = NULL
+    selecao_natural = TRUE, k_fixo = NULL,
+    regra = c("best_of_n", "best_of_n_estrito", "sequencial")
 ) {
+  regra <- match.arg(regra)
   segregacao <- match.arg(segregacao)   # sem isto o vetor de 2 elementos duplicaria cada linha do output
 
   # Os dois sexos entram na geração como JUVENIS, em número igual (razão sexual
@@ -580,7 +656,8 @@ simulate_evolution <- function(
     male_z_surv  <- male_z_juv[idx_adultos]
     female_z_gen <- female_z_juv[sample.int(length(female_z_juv), N_femeas)]
 
-    M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_selecao, encounters_n = encounters_n, k_fixo = k_fixo)
+    M <- mate_with_survivors(male_z_surv, female_p, female_s, tipo_selecao,
+                             encounters_n = encounters_n, k_fixo = k_fixo, regra = regra)
     metrics <- calc_metrics_from_M(M, k_alvo = k_fixo)
     
     if (t == generations && salvar_redes && !is.null(pasta_redes)) {
@@ -590,6 +667,7 @@ simulate_evolution <- function(
     # CORREÇÃO: Salvamos a Média e a Variância apenas dos machos que SOBREVIVERAM (male_z_surv)!!!
     out[[t]] <- data.frame(
       generation = t, tipo_selecao = tipo_selecao, segregacao = segregacao,
+      regra = regra,
       sigma_p = sigma_p, sigma_z_init = sigma_z_init, encounters_n = encounters_n,
       k_fixo = ifelse(is.null(k_fixo), NA_integer_, as.integer(k_fixo)),
       selecao_natural = selecao_natural,

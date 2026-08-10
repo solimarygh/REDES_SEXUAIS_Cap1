@@ -40,7 +40,9 @@ MODELO_MACHOS <- list(
   script  = "Fase_Espelho.R",
 
   pasta   = "Resultados_Artigo/Fase_Espelho/Dados",
-  padrao  = "^(backup|resultados)_Espelho_censoConst.*\\.rds$",
+  # O prefixo do arquivo. Qual rodada usar é decidido em 08_Poster2_comum.R:
+  # a mais nova que existir, sem nunca misturar duas.
+  estudo  = "Espelho",
 
   # Eixo do experimento
   eixo     = "sigma_z",
