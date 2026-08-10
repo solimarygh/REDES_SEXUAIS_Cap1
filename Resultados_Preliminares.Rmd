@@ -45,18 +45,18 @@ ok <- function(x) !is.null(x) && nrow(x) > 0
 tem <- function(x, col) ok(x) && col %in% names(x)
 ```
 
-Esta nota traz os resultados preliminares dos três estudos já rodados, com 20 réplicas cada, e
-está organizada pelas **quatro hipóteses**, não por estudo. A descrição do desenho e a formulação
-completa das hipóteses estão em `NOTA_quatro_estudos.md`; o que mudou no modelo desde a última
-conversa está em `RESUMO_mudancas_para_Miudo.md`.
+Aqui estão os resultados dos três estudos que já rodaram, com 20 réplicas cada. Organizei por
+hipótese e não por estudo, porque duas delas se testam com mais de um estudo ao mesmo tempo.
 
-São 20 réplicas e não 100 porque os problemas que motivaram esta rodada são vieses sistemáticos e
-não ruído: mais réplicas não os tocariam.
+O desenho e a formulação das hipóteses estão em `NOTA_quatro_estudos.md`. O que mudou no modelo
+desde a última conversa está em `RESUMO_mudancas_para_Miudo.md`.
 
-**Cada figura e cada tabela diz, no subtítulo ou na legenda, exatamente que combinação de
-parâmetros está mostrando.** Onde diz "todos os k", os três valores (5, 10 e 20) estão sendo
-promediados juntos, e como k tem efeito grande, vale conferir no anexo se o padrão se mantém em
-cada um deles separadamente.
+São 20 réplicas e não 100 de propósito: os problemas que motivaram esta rodada são vieses
+sistemáticos e não ruído, então mais réplicas não os tocariam.
+
+Um aviso de leitura. Cada figura e cada tabela diz no subtítulo ou na legenda que combinação de
+parâmetros está mostrando. Onde estiver escrito "todos os k", os três valores estão promediados
+juntos, e como k pesa bastante, vale conferir no anexo se o padrão se mantém em cada um deles.
 
 ```{r status}
 n_cen <- function(x, eixos) {
@@ -79,7 +79,9 @@ tibble(
 
 ### Conferência das invariantes
 
-Antes de qualquer resultado, as verificações do modelo novo.
+Antes de olhar qualquer resultado, três verificações do modelo novo: o censo de machos tem que
+dar 200 em todos os cenários, nenhuma réplica pode ter sido encerrada antes das 100 gerações, e a
+proporção de fêmeas sem acasalar precisa estar longe dos 92% que disparariam o caso degenerado.
 
 ```{r invariantes}
 checar_um <- function(x, nome) {
@@ -106,36 +108,37 @@ bind_rows(checar_um(ct, "Controle"), checar_um(d, "Fêmeas variando"),
 > A estrutura da rede é determinada por fatores em três níveis (a regra de escolha, a variação
 > disponível, a restrição ecológica), e a questão é qual domina e como interagem.
 
-Quem testa: o **Controle**, o único desenho que cruza os três níveis.
+Quem testa é o Controle, o único desenho que cruza os três níveis por inteiro.
+
+As quatro métricas de topologia que aparecem daqui em diante: **modularidade** é o quanto a rede se
+divide em grupos que acasalam preferencialmente entre si; **aninhamento** (NODF) é o quanto os
+parceiros dos machos menos procurados são um subconjunto dos parceiros dos mais procurados, ou
+seja, o quanto existe hierarquia; **centralização** é o quanto os acasalamentos se concentram em
+poucos indivíduos; e **Is** é a desigualdade no número de parceiras entre os machos, que é a
+oportunidade de seleção sexual.
 
 ## O nível ecológico domina
 
-**Como a divergência entre curvas é medida.** Cada célula do desenho, ou seja, cada combinação de
-sigma_p, sigma_z, A_max, k e regime de seleção natural, contém as quatro curvas de preferência
-rodadas nas mesmas condições. Para cada curva calculamos a média de cada uma das quatro métricas
-de topologia sobre as 20 réplicas.
+Antes da tabela, o que é a divergência entre curvas, porque é uma medida que construímos e não um
+índice de prateleira.
 
-As quatro métricas são padronizadas antes (subtraindo a média e dividindo pelo desvio, sobre o
-conjunto todo), porque estão em escalas diferentes: sem isso, a de maior variância dominaria a
-conta e o resultado seria um artefato de unidades.
+Uma célula do desenho é uma combinação de sigma_p, sigma_z, A_max, k e regime de seleção natural.
+Dentro dela, as quatro curvas de preferência rodaram nas mesmas condições, e cada uma tem a sua
+média de cada métrica sobre as 20 réplicas. Padronizamos as quatro métricas antes de comparar,
+porque vêm em escalas diferentes e sem isso a de maior variância mandaria no resultado.
 
-Cada curva vira então um ponto num espaço de quatro dimensões. **A divergência daquela célula é a
-distância média dos quatro pontos ao centro comum deles.** Vale zero se as quatro curvas produzem
-exatamente a mesma topologia, e cresce quanto mais elas se separam umas das outras. São 882
-células no total.
+Feito isso, cada curva é um ponto num espaço de quatro dimensões, e a divergência daquela célula é
+a distância média desses quatro pontos ao centro comum deles. Zero quer dizer que as quatro
+produzem a mesma topologia; quanto maior, mais separadas estão. São 882 células ao todo.
 
-**De onde saem os três números da tabela.** O primeiro é o R² comum de um modelo linear que prevê
-a divergência a partir de A_max, k e seleção natural, com todas as interações entre eles. Ele diz
-quanto da variação na divergência o regime de busca explica sozinho.
+Os números da tabela vêm de dois lugares diferentes, e é por isso que ela tem uma coluna dizendo
+qual é qual. O primeiro é o R² de um modelo que prevê a divergência a partir de A_max, k e seleção
+natural, com as interações entre eles: é o quanto o regime de busca explica sozinho. Os outros
+dois são R² parciais, ou seja, quanto cada termo de dispersão explica do que ainda sobrava depois
+desse modelo, pela conta `(R² com o termo − R² do base) / (1 − R² do base)`.
 
-Os outros dois são **R² parciais**: quanto cada termo de dispersão explica **do que ainda sobrava**
-depois de descontar o primeiro modelo, pela conta `(R² com o termo − R² do base) / (1 − R² do
-base)`.
-
-Usamos o R² parcial e não o comum porque o regime de busca domina o fenômeno. Num R² comum, sem
-descontá-lo, todos os outros efeitos apareceriam esmagados perto de zero e a comparação entre eles
-não diria nada. Por isso os três números **não são comparáveis entre si de forma direta**: o
-primeiro é sobre o total, os outros dois são sobre o resíduo.
+Fomos por aí porque o regime de busca domina tanto que, num R² comum, todo o resto apareceria
+colado no zero e a comparação entre os termos não diria nada.
 
 ```{r h1-niveis}
 if (ok(ct)) {
@@ -172,10 +175,8 @@ if (ok(ct)) {
 }
 ```
 
-**Leitura.** O regime de busca explica mais de dois terços da divergência entre curvas. Dentro do
-que sobra, a assimetria entre os sexos explica vinte vezes mais que a variabilidade total. Ou
-seja: o que mais determina se as quatro curvas produzem redes distinguíveis é quanto a fêmea
-consegue procurar; e, depois disso, de que lado está a variação, não quanta há.
+O regime de busca explica mais de dois terços da divergência. Dentro do que sobra, a assimetria
+entre os sexos explica cerca de vinte vezes mais que a variabilidade total.
 
 ## Dentro do material, o que importa é de que lado está a variação
 
@@ -214,13 +215,15 @@ if (ok(ct)) {
 }
 ```
 
-A divergência entre curvas é máxima quando as **fêmeas são homogêneas e os machos variados**. A
-leitura é direta: quando todas as fêmeas querem a mesma coisa, a geometria da curva se traduz sem
-ruído em quem acasala com quem; quando elas discordam entre si, a variação individual delas borra
-a assinatura. E é preciso haver machos variados para que exista algo a discriminar.
+A divergência é máxima quando as fêmeas são homogêneas e os machos variados, e cai à medida que se
+caminha para o outro lado do eixo.
 
-Isso responde à pergunta que originou o capítulo: **a heterogeneidade das preferências femininas
-não tem significado absoluto, só relativo à variabilidade dos machos.**
+Uma leitura possível, que ainda não testamos: quando todas as fêmeas querem a mesma coisa, a
+geometria da curva se traduz sem ruído em quem acasala com quem, e quando elas discordam entre si
+a variação individual delas borra a assinatura. Mas isso é conjectura por enquanto.
+
+O que os dados dizem, sem interpretação, é que sigma_p sozinho não prediz bem a divergência:
+sigma_p e sigma_z entram juntos, pela razão entre eles.
 
 ## O teto de k, e a poliandria realizada
 
@@ -302,17 +305,12 @@ if (ok(d)) {
 }
 ```
 
-**A segunda predição se confirma e a primeira se inverte.** A modularidade prediz a variância
-genética com sinal positivo e forte, que é exatamente o "resgate de diversidade" previsto. Já o
-aninhamento aparece associado a médias de traço MENORES, e não maiores, com o sinal contrário ao
-previsto e estatisticamente bem definido.
+A segunda predição se confirma: a modularidade prediz a variância genética com sinal positivo e
+forte, que é o resgate de diversidade previsto.
 
-Uma explicação candidata, que precisa ser checada e não afirmada: o aninhamento é alto quando há
-hierarquia forte, e a hierarquia é forte quando poucos machos são aceitáveis, o que acontece
-quando as fêmeas concordam entre si. Mas fêmeas que concordam em torno de phi não empurram o
-traço para lugar nenhum, então ele fica onde está. A exageração precisaria de fêmeas que
-discordem, e essas produzem redes menos hierárquicas. Se for isso, aninhamento e exageração são
-consequências alternativas do mesmo eixo, e não causa e efeito.
+A primeira se inverte. O aninhamento aparece associado a médias de traço menores, e não maiores. O
+sinal é firme estatisticamente, mas não temos explicação para ele, e prefiro deixá-lo anotado como
+coisa a entender antes de escrever qualquer coisa a respeito.
 
 ## H2b. A preferência da fêmea (Machos variando)
 
@@ -333,9 +331,9 @@ if (ok(esp)) {
 }
 ```
 
-O espelho do anterior, e responde diretamente à pergunta que a Erika formulou. Quando há pouca
-variedade de machos, só as fêmeas cuja preferência coincide com eles conseguem acasalar, e a
-variação de preferência é eliminada.
+O espelho do anterior, e a resposta direta à pergunta que a Erika formulou. Quando há pouca
+variedade de machos, a variação de preferência acaba eliminada; quando há muita, ela se mantém
+perto do valor neutro.
 
 ### A seleção apaga a própria causa
 
@@ -358,8 +356,12 @@ if (ok(esp)) {
 }
 ```
 
-É uma seleção **autolimitante**: olhando só a geração 100 parece não haver seleção nenhuma, porque
-ela já terminou o seu trabalho. Só é visível na dinâmica inicial.
+As duas curvas caem juntas. Na geração 1 uma parte das fêmeas não consegue acasalar; conforme a
+seleção elimina as preferências mal posicionadas, a variância cai e as falhas de acasalamento
+somem com ela.
+
+Vale registrar pelo efeito prático: olhando só a geração 100, parece não ter havido seleção
+nenhuma. Ela só aparece na dinâmica inicial.
 
 ## A assinatura é estrutural, não evolutiva
 
@@ -388,10 +390,8 @@ if (ok(ct) && ok(d)) {
 }
 ```
 
-Os dois valores são praticamente iguais nos três níveis de A_max. **Cem gerações de evolução do
-traço quase não alteram o quanto as curvas diferem entre si em topologia.** A assinatura é uma
-consequência direta da regra de acasalamento, e não da resposta evolutiva, o que justifica o
-Controle ter um papel próprio no paper e não ser apenas uma linha de base.
+Os dois valores são praticamente iguais nos três níveis de A_max. Cem gerações de evolução do
+traço quase não alteram o quanto as curvas diferem entre si em topologia.
 
 ---
 
@@ -418,8 +418,8 @@ if (ok(d)) {
 }
 ```
 
-No resultado evolutivo, as três linhas de A_max ficam muito próximas: restringir a fêmea a
-avaliar 10 machos em vez de 200 quase não muda para onde o traço vai parar.
+No resultado evolutivo, as três linhas de A_max ficam praticamente sobrepostas: restringir a fêmea
+a avaliar 10 machos em vez de 200 quase não muda para onde o traço vai parar.
 
 ```{r h3-topo}
 if (ok(ct)) {
@@ -432,13 +432,12 @@ if (ok(ct)) {
 }
 ```
 
-**Mas na topologia H3 se confirma.** A divergência entre curvas cai de forma monotônica ao
-restringir a busca, e é máxima em A_max = 200, exatamente como a predição original diz.
+Na topologia, sim. A divergência cai de forma monotônica ao restringir a busca e é máxima em
+A_max = 200, que é exatamente o que a predição original diz.
 
-As duas coisas juntas dão a leitura mais interessante desta rodada: **restringir a busca apaga a
-assinatura topológica sem apagar a consequência evolutiva.** A cadeia se rompe no meio. Se isso se
-sustentar, é um resultado que reformula H3 em vez de confirmá-la ou refutá-la: a topologia responde
-ao custo de busca, mas a trajetória do traço parece chegar ao mesmo lugar por outro caminho.
+Então os dois lados de H3 não vão juntos: restringir a busca muda a topologia, mas não muda para
+onde o traço vai parar. É o achado mais desconcertante desta rodada, e por enquanto está só
+anotado.
 
 ---
 
@@ -447,9 +446,9 @@ ao custo de busca, mas a trajetória do traço parece chegar ao mesmo lugar por 
 > Quando o traço e a preferência são ambos herdáveis, a topologia determina se a covariância
 > genética entre eles chega a se acumular.
 
-Ainda não rodado. O desenho está descrito em `NOTA_quatro_estudos.md`: três níveis de variância
-inicial cruzados entre os sexos, 12.960 cenários, com a previsão de que a ignição do ciclo de
-Fisher seja um limiar e não uma resposta gradual.
+Ainda não rodou. O desenho está em `NOTA_quatro_estudos.md`: três níveis de variância inicial
+cruzados entre os sexos, 12.960 cenários. A previsão que escrevemos é de limiar e não de dose, ou
+seja, que exista uma variância de partida abaixo da qual o ciclo não se acende.
 
 ---
 
@@ -457,8 +456,11 @@ Fisher seja um limiar e não uma resposta gradual.
 
 ## A curva disruptiva produz estados alternativos
 
-Sob a curva disruptiva as populações não convergem para um valor intermediário: divergem para um
-dos dois extremos, e a média entre réplicas não descreve nenhuma população real.
+Sob a curva disruptiva as populações não convergem para um valor intermediário: cada réplica vai
+parar num dos dois extremos. A média entre réplicas cai no meio, onde não há nenhuma população.
+
+O teste de dip de Hartigan, na tabela abaixo, testa se uma distribuição é unimodal. Um p pequeno
+quer dizer que não é.
 
 ```{r bimodal, fig.height=5}
 if (ok(d)) {
@@ -503,13 +505,16 @@ if (ok(d) && requireNamespace("diptest", quietly = TRUE)) {
 ## A variância de segregação
 
 O desvio dos filhotes em relação à média dos pais passou de um ruído fixo (0.2) para variância
-proporcional à variância parental (modelo infinitesimal). Com o ruído fixo, a variância genética
-erodia até um piso de 2 vezes 0.2 ao quadrado, ou seja 0.08, **idêntico em todos os cenários**,
-o que tornava a pergunta sobre manutenção de variância genética irrespondível por construção.
+proporcional à variância parental. Com o ruído fixo, a variância genética erodia sempre até 0.08,
+que é 2 vezes 0.2 ao quadrado, e chegava lá em todos os cenários igualmente. Ou seja, a pergunta
+sobre manutenção de variância genética vinha com a resposta escrita de antemão.
 
-Fica pendente a limitação descrita em `RESUMO_mudancas_para_Miudo.md`: o código usa a variância
-total realizada do pool parental, e não a variância génica, o que sob acasalamento assortativo
-não é exatamente a mesma coisa. É a primeira das perguntas para o Miudo.
+O que a mudança comprou não foi mais variância, foi um equilíbrio que depende da seleção. Agora
+cada curva e cada regime chegam a um valor diferente, e é isso que torna H2 respondível.
+
+Fica pendente a limitação que está em `RESUMO_mudancas_para_Miudo.md`: o código usa a variância
+total do pool parental e não a variância génica, que sob acasalamento assortativo não são a mesma
+coisa. É a primeira das perguntas para o Miudo.
 
 ---
 
