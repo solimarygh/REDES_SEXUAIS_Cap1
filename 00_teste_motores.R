@@ -86,9 +86,33 @@ checar("censo adulto constante em todas as gerações", all(d2$n_machos_surv == 
 checar("réplica completa: extincao_gen é NA", all(is.na(d2$extincao_gen)))
 checar("poliandria realizada <= k em todas as gerações",
        all(is.na(d2$grau_medio_femeas) | d2$grau_medio_femeas <= K))
-checar("variância do traço NÃO colapsa (modelo infinitesimal)",
-       d2$varz_males[10] > 0.2 * d2$varz_males[1],
-       sprintf("gen 1 = %.3f, gen 10 = %.3f", d2$varz_males[1], d2$varz_males[10]))
+# O que o modelo infinitesimal comprou NÃO foi mais variância: foi que o
+# equilíbrio passasse a DEPENDER DO CENÁRIO. Com ruído fixo todo cenário
+# terminava no mesmo piso, V* = 2*eps^2 = 0.08, e por isso a H2 tinha a
+# resposta escrita de antemão. Um limiar absoluto ("a variância não pode cair
+# abaixo de X") testa a coisa errada e ainda é frágil: sob best-of-n com a
+# sigmoide a seleção direcional é forte, todas as fêmeas concordam em quem é o
+# melhor macho, e a variância CAIR é o comportamento correto.
+#
+# O teste certo é comparativo: duas curvas com regimes de seleção diferentes
+# têm que chegar a variâncias diferentes. Com ruído fixo as duas dariam 0.08.
+set.seed(10)
+d2_nulo <- simulate_evolution(generations = 10, N_machos = N, N_femeas = N,
+                              tipo_selecao = "uniform", sigma_p = 1.0, sigma_z_init = 1.0,
+                              encounters_n = 40, k_fixo = K, selecao_natural = TRUE)
+v_sig  <- d2$varz_males[10]        # sigmoide: seleção sexual direcional forte
+v_nulo <- d2_nulo$varz_males[10]   # aleatória: nenhuma seleção sexual
+checar("o equilíbrio da variância depende do cenário (com ruído fixo daria 0.08 nos dois)",
+       v_nulo > 1.5 * v_sig,
+       sprintf("sigmoide = %.3f, aleatória = %.3f, razão = %.1fx",
+               v_sig, v_nulo, v_nulo / v_sig))
+
+cat(sprintf("     (trajetória da variância na sigmoide: %s)\n",
+            paste(sprintf("%.2f", d2$varz_males), collapse = " ")))
+cat("     Cair é esperado: com best-of-n a fêmea fica com os machos de maior z\n")
+cat("     entre os avaliados, e como todas concordam em quem é o melhor, poucos\n")
+cat("     machos monopolizam. O que não pode acontecer é as quatro curvas caírem\n")
+cat("     todas para o MESMO valor, que era o defeito do ruído fixo.\n")
 
 # ---------------------------------------------------------------------
 cat("\n=== ESTUDO 3: machos variando (preferência herdável) ===\n")
@@ -174,8 +198,9 @@ for (rg in c("sequencial", "best_of_n")) {
   set.seed(7)
   r <- simulate_controle(tipo_selecao = "gaussian", encounters_n = 40, k_fixo = 10,
                          selecao_natural = FALSE, regra = rg)
-  cat(sprintf("    %-14s %-10.2f %-11.0f%% %-13.0f%%\n", rg, r$grau_medio_femeas,
-              100 * r$prop_femeas_atingiu_k, 100 * r$prop_femeas_sem_acasalar))
+  cat(sprintf("    %-14s %-10.2f %-12s %-14s\n", rg, r$grau_medio_femeas,
+              sprintf("%.0f%%", 100 * r$prop_femeas_atingiu_k),
+              sprintf("%.0f%%", 100 * r$prop_femeas_sem_acasalar)))
 }
 
 # (d) Sob best-of-n a fêmea que não aceita ninguém CONTINUA ficando sem

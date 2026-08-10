@@ -1264,7 +1264,22 @@ células no Controle. Se também se confirmar, a leitura é que a evolução nã
 topologia nova, apenas moveu o sistema para outro ponto da mesma superfície. Para a H2 e a
 H3 isso seria uma afirmação forte.
 
-**Três coisas para conferir antes de acreditar.**
+**A erosão de variância sob a regra nova.** Apareceu no teste de fumaça, e é a segunda coisa a
+olhar. Num cenário de dez gerações com a curva sigmoide, A_max = 40 e k = 5, a variância do traço
+caiu de 0.69 para 0.12, enquanto na rodada anterior, com a regra sequencial, ela se sustentava. A
+explicação é direta: com best-of-n e uma curva direcional, a fêmea fica com os machos de maior
+traço entre os que avaliou, e como todas as fêmeas concordam sobre quem é o melhor, poucos machos
+monopolizam. Isso soma seleção por truncamento forte e deriva por número efetivo de pais pequeno,
+e as duas coisas erodem variância.
+
+Não é um defeito, é o que a regra faz. Mas importa para a H2, porque a resposta à seleção é
+proporcional à variância disponível: se ela se esgotar cedo, a trajetória do traço trava por falta
+de material e não por equilíbrio entre forças. Vale olhar a variância ao longo das 100 gerações e
+ver se ela estabiliza num valor próprio de cada cenário, que é o que o modelo infinitesimal
+deveria dar, ou se continua caindo até o piso mutacional em todos eles. Se for o segundo caso, o
+valor de `mut_sd` volta para a mesa.
+
+**Três coisas para conferir antes de acreditar na diagonal.**
 
 Primeiro, se o padrão sobrevive à mudança de regra. Com best-of-n a fêmea passa a avaliar os
 A_max machos e a ficar com os melhores entre os aceitáveis, o que muda a intensidade da
