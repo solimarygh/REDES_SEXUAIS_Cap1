@@ -338,6 +338,97 @@ acasalaram, ou seja, quantos parceiros elas de fato conseguiram, que não
 > seção "O censo de machos sob a regra nova" explica melhor esse ponto e
 > as dúvidas que me surgiram.
 
+### Por que o censo desanda: a conta da viabilidade
+
+A figura abaixo não usa dado nenhum, é só a conta do modelo. Serve para deixar
+claro o que a seleção natural de viabilidade faz e por que ela deixa de
+conseguir preencher o censo quando o traço se afasta do ótimo.
+
+Cada macho juvenil sobrevive com probabilidade
+
+$$V = \exp\!\left(-\gamma\,(z - \phi)^2\right), \qquad \gamma = 0.2,\ \phi = 5$$
+
+Cada geração produz 10.000 filhotes (200 fêmeas x 50 cada), dos quais metade,
+5.000, são machos juvenis. É sobre esses 5.000 que a viabilidade age, e de
+quem sobreviver saem os 200 adultos.
+
+```{r viabilidade-conta, fig.width=11, fig.height=4.4}
+GAMMA <- 0.2; PHI <- 5; SIG <- 1; N_JUV <- 5000; N_AD <- 200
+
+# (a) A curva de viabilidade, e onde a população a encontra.
+# As densidades estão reescaladas para caber no mesmo eixo da probabilidade;
+# o que importa nelas é a POSIÇÃO, não a altura.
+z     <- seq(0, 22, length.out = 800)
+curva <- data.frame(z = z, V = exp(-GAMMA * (z - PHI)^2))
+medias <- c(5, 10, 15)
+dens <- do.call(rbind, lapply(medias, function(m)
+  data.frame(z = z, d = dnorm(z, m, SIG) / dnorm(0, 0, SIG),
+             media = factor(sprintf("média do traço = %d", m),
+                            levels = sprintf("média do traço = %d", medias)))))
+
+pa <- ggplot() +
+  geom_area(data = dens, aes(z, d, fill = media), position = "identity",
+            alpha = 0.30, color = NA) +
+  geom_line(data = curva, aes(z, V), linewidth = 1.3, color = "#2C3E50") +
+  geom_vline(xintercept = PHI, linetype = "dashed", color = "red", alpha = 0.6) +
+  annotate("text", x = PHI + 0.3, y = 1.02, label = "phi == 5", parse = TRUE,
+           hjust = 0, color = "red", size = 3.4, fontface = "italic") +
+  scale_fill_manual(values = c("#3BA273", "#E6B800", "#9932CC"), name = NULL) +
+  labs(title = "a. A viabilidade, e onde a população a encontra",
+       x = "z — traço do macho", y = "probabilidade de sobreviver") +
+  theme_light(base_size = 11) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", size = 11))
+
+# (b) Quantos dos 5.000 juvenis sobrevivem, em função de onde está a média.
+# Para z ~ N(mu, sigma^2), a média de exp(-gamma (z-phi)^2) tem forma fechada,
+# então não é preciso simular nada aqui.
+mu   <- seq(5, 18, length.out = 600)
+EV   <- (1 / sqrt(1 + 2*GAMMA*SIG^2)) *
+        exp(-GAMMA * (mu - PHI)^2 / (1 + 2*GAMMA*SIG^2))
+surv <- data.frame(mu = mu, n = N_JUV * EV)
+limiar <- uniroot(function(m)
+  N_JUV * (1/sqrt(1 + 2*GAMMA*SIG^2)) *
+    exp(-GAMMA*(m - PHI)^2 / (1 + 2*GAMMA*SIG^2)) - N_AD, c(5, 18))$root
+
+pb <- ggplot(surv, aes(mu, pmax(n, 1e-3))) +
+  geom_hline(yintercept = N_AD, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = limiar, linetype = "dotted", color = "red") +
+  geom_line(linewidth = 1.3, color = "#2C3E50") +
+  annotate("text", x = 5.2, y = N_AD * 1.6, label = "os 200 adultos necessários",
+           hjust = 0, color = "red", size = 3.4, fontface = "italic") +
+  annotate("text", x = limiar + 0.3, y = 3e3,
+           label = sprintf("a partir de z = %.1f\nnão dá mais", limiar),
+           hjust = 0, color = "red", size = 3.4, fontface = "italic", lineheight = 0.95) +
+  scale_y_log10(breaks = c(1e-2, 1, 100, 1e4),
+                labels = c("0,01", "1", "100", "10.000")) +
+  labs(title = "b. Quantos dos 5.000 juvenis sobrevivem",
+       x = "média do traço na população", y = "machos sobreviventes (escala log)") +
+  theme_light(base_size = 11) +
+  theme(panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", size = 11))
+
+pa | pb
+```
+
+O painel (a) mostra por que o problema aparece: enquanto a população está sobre
+o ótimo, a distribuição dos juvenis cai bem embaixo do pico da curva e quase
+todos sobrevivem. Conforme a média se desloca, a sobreposição some, e a
+sobrevivência não cai um pouco, cai por ordens de grandeza, porque a curva é uma
+gaussiana no expoente.
+
+O painel (b) põe número nisso. Com sigma_z = 1, o traço pode se afastar até
+cerca de 9,5 e ainda sobram os 200 machos de que o censo precisa. Passando
+disso, não sobram: com a média em 15 o esperado é menos de um sobrevivente entre
+os 5.000. Nos dados desta rodada a curva sigmoide chega a passar de 20, o que
+explica de onde saíram as redes de 200 fêmeas por 2 machos.
+
+E deixa claro também por que a cota resolve: sorteando 200 com peso proporcional
+a V, o que importa passa a ser a viabilidade **relativa** entre os juvenis, que
+continua discriminando normalmente mesmo quando o valor absoluto de todos é
+minúsculo.
+
+
 ```{r status}
 n_cen <- function(x, eixos) {
   if (!ok(x)) return("-")
