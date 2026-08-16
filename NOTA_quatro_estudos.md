@@ -608,45 +608,46 @@ covariância. - U-shaped: gera acasalamento dissortativo, ou seja, seria
 a única curva em que a preferência e o traço podem ser puxados em
 direções opostas.
 
-
----
+------------------------------------------------------------------------
 
 ## Uma ideia que estou tendo: como fixar sigma em Co-evolução
 
-Isto ainda não é decisão, é uma coisa que estou pensando e que queria discutir
-com vocês.
+Isto ainda não é decisão, é uma coisa que estou pensando e que queria
+discutir com vocês.
 
-Nos outros três estudos sigma é re-aplicado a cada geração, mas em Co-evolução
-não dá para fazer isso: as duas características são herdáveis, e re-sortear é
-exatamente o que impede a herança. Então os dois sigmas só podem ser condição
-inicial, e da geração 2 em diante a dispersão vira o que a seleção e a deriva
-fizerem dela.
+Nos outros três estudos sigma é re-aplicado a cada geração, mas em
+Co-evolução não dá para fazer isso: as duas características são
+herdáveis, e re-sortear é exatamente o que impede a herança. Então os
+dois sigmas só podem ser condição inicial, e da geração 2 em diante a
+dispersão vira o que a seleção e a deriva fizerem dela.
 
-Minha ideia é usar três níveis bem separados, 0.5, 1.0 e 2.0, mas cruzados entre
-os dois sexos em vez de ao longo da diagonal. A diagonal prenderia a assimetria
-em zero, e é justamente a assimetria que a análise do Controle mostrou ser o que
-manda. Neste cruzamento a assimetria e a variabilidade total ficam
-descorrelacionadas (r = 0), porque cada assimetria positiva tem o seu espelho
-negativo com a mesma norma, e aí dá para estimar os dois efeitos separadamente.
+Minha ideia é usar três níveis bem separados, 0.5, 1.0 e 2.0, mas
+cruzados entre os dois sexos em vez de ao longo da diagonal. A diagonal
+prenderia a assimetria em zero, e é justamente a assimetria que a
+análise do Controle mostrou ser o que manda. Neste cruzamento a
+assimetria e a variabilidade total ficam descorrelacionadas (r = 0),
+porque cada assimetria positiva tem o seu espelho negativo com a mesma
+norma, e aí dá para estimar os dois efeitos separadamente.
 
-| sigma_p | sigma_z | assimetria | |
-|---|---|---|---|
-| 2.0 | 0.5 | -1.39 | fêmeas variadas, machos homogêneos |
-| 1.0 | 0.5 | -0.69 | |
-| 2.0 | 1.0 | -0.69 | |
-| 0.5 | 0.5 | 0 | a diagonal |
-| 1.0 | 1.0 | 0 | a diagonal |
-| 2.0 | 2.0 | 0 | a diagonal |
-| 0.5 | 1.0 | +0.69 | |
-| 1.0 | 2.0 | +0.69 | |
-| 0.5 | 2.0 | +1.39 | fêmeas homogêneas, machos variados |
+| sigma_p | sigma_z | assimetria |                                    |
+|---------|---------|------------|------------------------------------|
+| 2.0     | 0.5     | -1.39      | fêmeas variadas, machos homogêneos |
+| 1.0     | 0.5     | -0.69      |                                    |
+| 2.0     | 1.0     | -0.69      |                                    |
+| 0.5     | 0.5     | 0          | a diagonal                         |
+| 1.0     | 1.0     | 0          | a diagonal                         |
+| 2.0     | 2.0     | 0          | a diagonal                         |
+| 0.5     | 1.0     | +0.69      |                                    |
+| 1.0     | 2.0     | +0.69      |                                    |
+| 0.5     | 2.0     | +1.39      | fêmeas homogêneas, machos variados |
 
-Da geração 2 em diante a assimetria deixaria de ser imposta e passaria a ser
-medida, a partir do que já gravamos: `0.5 * log(varz_pop / varp_pop)`. Entraria
-na análise como covariável geração a geração, e a pergunta passa a ser se a
-relação que o Controle encontrou se mantém quando as duas características
-evoluem. Se mantiver ou não, é resultado.
+Da geração 2 em diante a assimetria deixaria de ser imposta e passaria a
+ser medida, a partir do que já gravamos:
+`0.5 * log(varz_pop / varp_pop)`. Entraria na análise como covariável
+geração a geração, e a pergunta passa a ser se a relação que o Controle
+encontrou se mantém quando as duas características evoluem. Se mantiver
+ou não, é resultado.
 
-O raciocínio completo, com os números da análise diagonal que me levaram à
-assimetria, está em `NOTA_material_removido_2026-08-16.md`. Aqueles números são
-da rodada com a regra sequencial e precisam ser refeitos.
+O raciocínio completo, com os números da análise diagonal que me levaram
+à assimetria, está em `NOTA_material_removido_2026-08-16.md`. Aqueles
+números são da rodada com a regra sequencial e precisam ser refeitos.
