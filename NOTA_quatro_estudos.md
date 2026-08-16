@@ -1,1046 +1,1278 @@
-# Os quatro estudos complementares
-
-Olá Erika e Paulo. O que está aqui é o que cada estudo faz, e não os resultados, que vão num
-documento à parte (`Resultados_Preliminares.Rmd`).
-
-Esta versão foi conferida linha a linha contra o código, e a última seção diz, para cada
-afirmação, em que arquivo e em que função ela pode ser verificada. O histórico das decisões que
-levaram a este desenho está em duas notas de reunião aparte: esta nota descreve o desenho,
-aquelas contam por que ele é assim.
-
+---
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
-## Vocabulário usado nesta nota
+# Os quatro estudos complementares
 
-Para evitar ambiguidade, alguns termos aparecem sempre com o mesmo sentido:
+Olá Erika e Paulo. O que está aqui é o que cada estudo faz, e não os
+resultados, que vão no documento de Exploracao de Paneis que mandarei
+junto.
 
-**Traço do macho (z).** A característica sexualmente selecionada que os machos expressam
-(por exemplo, o tamanho de uma estrutura ou a intensidade de uma coloração). É o que as
-fêmeas avaliam na hora de decidir se aceitam ou não.
+------------------------------------------------------------------------
 
-**Preferência da fêmea (p).** O valor de traço que cada fêmea considera ideal, ou seja, o
-pico da sua função de preferência. Não é o mesmo que exigência: a exigência (choosiness, s)
-é o quão estrita ela é em torno desse pico, e nesta rodada s fica fixo em todos os estudos.
+Para evitar ambiguidade, alguns termos aparecem sempre com o mesmo
+sentido:
 
-**Curva de preferência.** A regra que traduz o pico p da fêmea em uma probabilidade de
-aceitar um macho de traço z. São quatro regras diferentes, descritas mais adiante. É uma
-propriedade fixa do cenário, não evolui em nenhum dos estudos.
+**Traço do macho (z).** A característica sexualmente selecionada que os
+machos expressam (por exemplo, o tamanho de uma estrutura ou a
+intensidade de uma coloração). É o que as fêmeas avaliam na hora de
+decidir se aceitam ou não.
 
-**sigma_p.** O quanto o pico de preferência varia entre as fêmeas da população. Valor baixo
-significa que quase todas as fêmeas preferem o mesmo tipo de macho; valor alto significa que
-elas discordam bastante entre si.
+**Preferência da fêmea (p).** O valor de traço que cada fêmea considera
+ideal, ou seja, o pico da sua função de preferência. Não é o mesmo que
+exigência: a exigência (choosiness, s) é o quão estrita ela é em torno
+desse pico, e nesta rodada s fica fixo em todos os estudos.
 
-**sigma_z.** O quanto o traço varia entre os machos da população, ou seja, quanta variedade
-de machos existe disponível para as fêmeas escolherem.
+**Curva de preferência.** A regra que traduz o pico p da fêmea em uma
+probabilidade de aceitar um macho de traço z. São quatro regras
+diferentes, descritas mais adiante. É uma propriedade fixa do cenário,
+não evolui em nenhum dos estudos.
 
-**Variabilidade total, ou a norma.** Quanta variação existe no sistema como um todo, somando os
-dois sexos: `sqrt(sigma_p^2 + sigma_z^2)`. É alta quando os dois sexos são heterogêneos e baixa
-quando os dois são homogêneos. Não diz nada sobre qual dos dois contribui mais.
+**sigma_p.** O quanto o pico de preferência varia entre as fêmeas da
+população. Valor baixo significa que quase todas as fêmeas preferem o
+mesmo tipo de macho; valor alto significa que elas discordam bastante
+entre si.
 
-**Assimetria.** De que lado está a variação: `log(sigma_z / sigma_p)`. Vale zero quando os dois
-sexos variam o mesmo, é positiva quando os machos variam mais que as fêmeas e negativa no caso
-contrário. O logaritmo está ali porque a comparação é de razão e não de diferença: os machos
-variarem o dobro das fêmeas e as fêmeas variarem o dobro dos machos são situações igualmente
-assimétricas em sentidos opostos, e o logaritmo as coloca à mesma distância de zero (mais e menos
-0.69). Sem ele, a razão 2 ficaria a 1 de distância e a razão 0.5 ficaria a apenas 0.5.
+**sigma_z.** O quanto o traço varia entre os machos da população, ou
+seja, quanta variedade de machos existe disponível para as fêmeas
+escolherem.
 
-As duas juntas são apenas outra forma de escrever o par (sigma_p, sigma_z), como trocar
-coordenadas cartesianas por polares: a mesma informação, reorganizada para separar duas perguntas
-que se confundiam. Quanta variação existe é uma coisa; de que lado está é outra. A análise do
-Controle mostrou que a segunda pergunta é a que importa, e é por isso que estes dois termos
-aparecem aqui em vez de sigma_p e sigma_z crus.
+**Variabilidade total, ou a norma.** Quanta variação existe no sistema
+como um todo, somando os dois sexos: `sqrt(sigma_p^2 + sigma_z^2)`. É
+alta quando os dois sexos são heterogêneos e baixa quando os dois são
+homogêneos. Não diz nada sobre qual dos dois contribui mais.
 
-**Característica herdável.** Uma característica que os filhotes recebem dos pais. Ser
-herdável é uma condição necessária para que ela possa responder à seleção, mas não garante
-que ela vá mudar. Se evoluiu ou não, e em que direção,
-é um resultado a ser observado.
+**Assimetria.** De que lado está a variação: `log(sigma_z / sigma_p)`.
+Vale zero quando os dois sexos variam o mesmo, é positiva quando os
+machos variam mais que as fêmeas e negativa no caso contrário. O
+logaritmo está ali porque a comparação é de razão e não de diferença: os
+machos variarem o dobro das fêmeas e as fêmeas variarem o dobro dos
+machos são situações igualmente assimétricas em sentidos opostos, e o
+logaritmo as coloca à mesma distância de zero (mais e menos 0.69). Sem
+ele, a razão 2 ficaria a 1 de distância e a razão 0.5 ficaria a apenas
+0.5.
 
-**Característica re-sorteada (congelada).** Uma característica que não é herdada: a cada
-geração seus valores são sorteados de novo da mesma distribuição, independentemente de quem
-eram os pais. Ela nunca pode responder à seleção, por construção.
+As duas juntas são apenas outra forma de escrever o par (sigma_p,
+sigma_z), como trocar coordenadas cartesianas por polares: a mesma
+informação, reorganizada para separar duas perguntas que se confundiam.
+Quanta variação existe é uma coisa; de que lado está é outra. A análise
+do Controle mostrou que a segunda pergunta é a que importa, e é por isso
+que estes dois termos aparecem aqui em vez de sigma_p e sigma_z crus.
 
-**Característica  re-sorteada (ambiental).** Mesma coisa que re-sorteada, mas com uma leitura biológica
-específica (pensando mais específicamente no trait z dos machos): o valor que o indivíduo expressa depende da condição em que ele se desenvolveu
-(alimento, ambiente), não do que ele herdou. Por isso não passa para os filhotes.
+**Característica herdável.** Uma característica que os filhotes recebem
+dos pais. Ser herdável é uma condição necessária para que ela possa
+responder à seleção, mas não garante que ela vá mudar. Se evoluiu ou
+não, e em que direção, é um resultado a ser observado.
 
-**Parâmetro imposto e condição inicial.** Uma distinção que importa na hora de comparar os
-estudos. Um parâmetro imposto é re-aplicado a cada geração e portanto continua valendo do começo
-ao fim da réplica. Já uma condição inicial vale só na geração 1, e daí em diante a distribuição
-fica por conta da seleção e da deriva. Em Fêmeas variando, os 7 níveis de sigma_p são impostos e
-sigma_z_init é apenas condição inicial (fixa em 1.0). Em Machos variando, o espelho, os 7 níveis
-de sigma_z são impostos e sigma_p_init é apenas condição inicial (fixa em 1.0).
-Nesse aspecto os dois estudos são simétricos. A assimetria real está noutro ponto: a seleção natural de viabilidade age sobre z nos dois estudos, mas em Fêmeas variando ela age diretamente sobre a característica que evolui, competindo com a seleção sexual, enquanto em Machos variando ela age sobre uma característica ambiental e não tem consequência evolutiva nenhuma. A preferência, que é o que evolui ali, não recebe seleção natural.
+**Característica re-sorteada (congelada).** Uma característica que não é
+herdada: a cada geração seus valores são sorteados de novo da mesma
+distribuição, independentemente de quem eram os pais. Ela nunca pode
+responder à seleção, por construção.
+
+**Característica re-sorteada (ambiental).** Mesma coisa que re-sorteada,
+mas com uma leitura biológica específica (pensando mais específicamente
+no trait z dos machos): o valor que o indivíduo expressa depende da
+condição em que ele se desenvolveu (alimento, ambiente), não do que ele
+herdou. Por isso não passa para os filhotes.
+
+**Parâmetro imposto e condição inicial.** Uma distinção que importa na
+hora de comparar os estudos. Um parâmetro imposto é re-aplicado a cada
+geração e portanto continua valendo do começo ao fim da réplica. Já uma
+condição inicial vale só na geração 1, e daí em diante a distribuição
+fica por conta da seleção e da deriva. Em Fêmeas variando, os 7 níveis
+de sigma_p são impostos e sigma_z_init é apenas condição inicial (fixa
+em 1.0). Em Machos variando, o espelho, os 7 níveis de sigma_z são
+impostos e sigma_p_init é apenas condição inicial (fixa em 1.0). Nesse
+aspecto os dois estudos são simétricos. A assimetria real está noutro
+ponto: a seleção natural de viabilidade age sobre z nos dois estudos,
+mas em Fêmeas variando ela age diretamente sobre a característica que
+evolui, competindo com a seleção sexual, enquanto em Machos variando ela
+age sobre uma característica ambiental e não tem consequência evolutiva
+nenhuma. A preferência, que é o que evolui ali, não recebe seleção
+natural.
 
 ### Vocabulário do desenho
 
-**Cenário e réplica.** Um cenário é uma combinação concreta de valores dos fatores do desenho:
-uma curva de preferência, um sigma, um A_max, um k e um regime de seleção natural. Uma réplica é
-uma repetição independente do mesmo cenário, com outra semente aleatória. Quando dizemos "70.560
-cenários", as réplicas já estão contadas dentro.
+**Cenário e réplica.** Um cenário é uma combinação concreta de valores
+dos fatores do desenho: uma curva de preferência, um sigma, um A_max, um
+k e um regime de seleção natural. Uma réplica é uma repetição
+independente do mesmo cenário, com outra semente aleatória. Quando
+dizemos "70.560 cenários", as réplicas já estão contadas dentro.
 
-**Célula.** Usado só nas análises, e não é sinônimo de cenário: uma célula é uma combinação de
-tudo MENOS a curva de preferência. Serve para comparar as quatro curvas entre si mantendo o resto
-igual, que é a única forma de isolar o efeito da curva.
+**Célula.** Usado só nas análises e especialmente num grafico, e não é
+sinônimo de cenário: uma célula é uma combinação de tudo MENOS a curva
+de preferência. Serve para comparar as quatro curvas entre si mantendo o
+resto igual, que é a única forma de isolar o efeito da curva.
 
-**A_max.** Quantos machos distintos cada fêmea consegue avaliar antes de decidir com quem
-acasalar. Representa o custo ecológico de procurar parceiro: quanto menor, mais cara é a busca.
-Assume os valores 200, 40 e 10.
+**A_max.** Quantos machos distintos cada fêmea consegue avaliar antes de
+decidir com quem acasalar. Representa o custo ecológico de procurar
+parceiro: quanto menor, mais cara é a busca. Assume os valores 200, 40 e
+10.
 
-**k, e a poliandria realizada.** k é o número máximo de parceiros que a fêmea busca (5, 10 ou
-20). Ela para quando o atinge ou quando esgota os A_max machos que avaliou, o que vier primeiro,
-então k é um teto e não uma cota. A poliandria realizada é quantos parceiros ela de fato
-conseguiu, e é uma variável resposta e não um parâmetro. A seção sobre a interação entre A_max, k
-e a curva de preferência mostra o quanto as duas coisas podem diferir.
+**k, e a poliandria realizada.** k é o número máximo de parceiros que a
+fêmea busca (5, 10 ou 20). Ela para quando o atinge ou quando esgota os
+A_max machos que avaliou, o que vier primeiro, então k é um teto e não
+uma cota. A poliandria realizada é quantos parceiros ela de fato
+conseguiu, e é uma variável resposta e não um parâmetro. A seção sobre a
+interação entre A_max, k e a curva de preferência mostra o quanto as
+duas coisas podem diferir.
 
 ### Vocabulário das respostas
 
-**As quatro métricas de topologia.** Calculadas sobre a rede bipartita de acasalamentos.
-Modularidade é o quanto a rede se divide em grupos que acasalam preferencialmente entre si.
-Aninhamento (NODF) é o quanto os parceiros dos machos menos procurados são um subconjunto dos
-parceiros dos mais procurados, ou seja, o quanto existe hierarquia. Centralização é o quanto os
-acasalamentos se concentram em poucos indivíduos. Oportunidade de seleção sexual (Is) é a
-desigualdade no número de parceiras entre os machos. A seção sobre as métricas dá as definições
+**As quatro métricas de topologia.** Calculadas sobre a rede bipartita
+de acasalamentos. Modularidade é o quanto a rede se divide em grupos que
+acasalam preferencialmente entre si. Aninhamento (NODF) é o quanto os
+parceiros dos machos menos procurados são um subconjunto dos parceiros
+dos mais procurados, ou seja, o quanto existe hierarquia. Centralização
+é o quanto os acasalamentos se concentram em poucos indivíduos.
+Oportunidade de seleção sexual (Is) é a desigualdade no número de
+parceiras entre os machos. A seção sobre as métricas dá as definições
 completas.
 
-**Divergência entre curvas de preferência.** Uma grandeza construída por nós para a análise, e o
-resultado principal do Controle. Dentro de uma célula, calcula-se a média de cada uma das quatro
-métricas para cada curva, e a divergência é o quanto essas quatro posições se afastam do centro
-comum delas. Vale zero se as quatro curvas produzem a mesma topologia, e cresce quanto mais elas
-se separam.
+**Divergência entre curvas de preferência.** Uma grandeza construída por
+nós para a análise, e o resultado principal do Controle. Dentro de uma
+célula, calcula-se a média de cada uma das quatro métricas para cada
+curva, e a divergência é o quanto essas quatro posições se afastam do
+centro comum delas. Vale zero se as quatro curvas produzem a mesma
+topologia, e cresce quanto mais elas se separam.
 
-**A padronização, que é o passo delicado.** Antes de qualquer conta, cada métrica é convertida em
-z-score: subtrai-se a média e divide-se pelo desvio padrão, de modo que ela passe a ser lida como
-"a quantos desvios padrão do valor típico este cenário está". Depois disso as quatro métricas
-estão na mesma unidade e podem ser somadas dentro de uma distância.
+**A padronização, que é o passo delicado.** Antes de qualquer conta,
+cada métrica é convertida em z-score: subtrai-se a média e divide-se
+pelo desvio padrão, de modo que ela passe a ser lida como "a quantos
+desvios padrão do valor típico este cenário está". Depois disso as
+quatro métricas estão na mesma unidade e podem ser somadas dentro de uma
+distância.
 
-Sem esse passo a conta seria dominada por uma métrica só. As quatro vivem em escalas muito
-diferentes: a modularidade e a centralização ficam entre 0 e 1, o Is é um número positivo sem
-teto, e o NODF é definido de 0 a 100, ainda que nos nossos cenários ande numa faixa de poucos
-pontos. Como a distância euclidiana soma quadrados, a métrica de maior amplitude entra elevada ao
-quadrado e as outras viram arredondamento. A divergência mediria o aninhamento e mais nada, e
-isso seria um artefato de unidades e não um resultado.
+Sem esse passo a conta seria dominada por uma métrica só. As quatro
+vivem em escalas muito diferentes: a modularidade e a centralização
+ficam entre 0 e 1, o Is é um número positivo sem teto, e o NODF é
+definido de 0 a 100, ainda que nos nossos cenários ande numa faixa de
+poucos pontos. Como a distância euclidiana soma quadrados, a métrica de
+maior amplitude entra elevada ao quadrado e as outras viram
+arredondamento. A divergência mediria o aninhamento e mais nada, e isso
+seria um artefato de unidades e não um resultado.
 
-**E a padronização é feita uma vez só, sobre a tabela inteira**, com uma média e um desvio por
-métrica calculados sobre todos os 70.560 cenários. Isso importa mais do que parece. Se
-padronizássemos dentro de cada célula, cada uma seria reescalada pela sua própria dispersão, e
-uma célula onde as curvas mal se distinguem sairia com o mesmo valor de uma onde elas se separam
-muito, porque em ambas as diferenças teriam sido esticadas até preencher a mesma escala. A
-comparação entre células, que é justamente a pergunta ("em que ponto do plano as curvas divergem
-mais?"), desapareceria. Padronizando uma vez só, a operação é uma troca de unidades e nada mais:
-muda o número, preserva quem é maior que quem.
+**E a padronização é feita uma vez só, sobre a tabela inteira**, com uma
+média e um desvio por métrica calculados sobre todos os 70.560 cenários.
+Isso importa mais do que parece. Se padronizássemos dentro de cada
+célula, cada uma seria reescalada pela sua própria dispersão, e uma
+célula onde as curvas mal se distinguem sairia com o mesmo valor de uma
+onde elas se separam muito, porque em ambas as diferenças teriam sido
+esticadas até preencher a mesma escala. A comparação entre células, que
+é justamente a pergunta ("em que ponto do plano as curvas divergem
+mais?"), desapareceria. Padronizando uma vez só, a operação é uma troca
+de unidades e nada mais: muda o número, preserva quem é maior que quem.
 
 ### Vocabulário do modelo
 
-**Regra de escape.** Uma regra da versão antiga do modelo, já removida. Se a fêmea avaliava os
-machos e não aceitava nenhum, ela acabava acasalando à força com o último avaliado, de modo que
-nenhuma fêmea ficava sem acasalar. Como a fecundidade é neutra, isso fazia com que todas as
-fêmeas tivessem exatamente o mesmo sucesso reprodutivo, e sem variância de sucesso não pode haver
-seleção sobre a preferência. Agora quem não aceita ninguém fica sem acasalar.
+**Regra de escape.** Uma regra da versão antiga do modelo, já removida.
+Se a fêmea avaliava os machos e não aceitava nenhum, ela acabava
+acasalando à força com o último avaliado, de modo que nenhuma fêmea
+ficava sem acasalar. Como a fecundidade é neutra, isso fazia com que
+todas as fêmeas tivessem exatamente o mesmo sucesso reprodutivo, e sem
+variância de sucesso não pode haver seleção sobre a preferência. Agora
+quem não aceita ninguém fica sem acasalar.
 
-**Variância de segregação.** O quanto um filhote se desvia da média dos seus dois pais. Vem de
-qual metade dos genes de cada pai ele calhou de receber. No modelo infinitesimal, que é o que
-usamos, esse desvio é proporcional à variância que existe entre os pais, e não um ruído de
-tamanho fixo escolhido por nós.
+**Variância de segregação.** O quanto um filhote se desvia da média dos
+seus dois pais. Vem de qual metade dos genes de cada pai ele calhou de
+receber. No modelo infinitesimal, que é o que usamos mais recentemen,
+esse desvio é proporcional à variância que existe entre os pais, e não
+um ruído de tamanho fixo escolhido por nós. - quero estudar melhor isso.
 
-**R^2 parcial.** Nas análises, o quanto um termo explica do que ainda sobrava depois de já
-descontar outros. Aparece porque o regime de busca (A_max, k e seleção natural) domina o
-fenômeno, e um R^2 comum, sem descontá-lo, esmagaria todos os outros efeitos e os faria parecer
-nulos.
----
+## Resumindo os quatro estudos
 
-## A lógica: por que quatro estudos
-
-Todos os estudos compartilham o mesmo ciclo de vida e as mesmas quatro curvas de preferência.
-O que muda entre eles é quais características são herdadas, ou seja, quais delas estão
-livres para responder à seleção. Cada estudo isola uma peça diferente do sistema:
+Todos os estudos compartilham o mesmo ciclo de vida e as mesmas quatro
+curvas de preferência. O que muda entre eles é quais características são
+herdadas, ou seja, quais delas estão livres para responder à seleção.
+Cada estudo isola uma peça diferente do sistema:
 
 | Estudo | O que varia | Traço do macho (z) | Preferência da fêmea (p) | O que o estudo isola |
-|---|---|---|---|---|
+|---------------|---------------|---------------|---------------|---------------|
 | **Controle** | sigma_p e sigma_z | sorteado | sorteada | o efeito das regras de acasalamento sozinhas, sem nenhuma resposta evolutiva |
 | **Fêmeas variando** | sigma_p | herdável, livre para evoluir | re-sorteada | como a heterogeneidade de preferência afeta a resposta evolutiva do traço |
 | **Machos variando** | sigma_z | re-sorteado (ambiental) | herdável, livre para evoluir | como a disponibilidade de machos afeta a resposta evolutiva da preferência |
 | **Co-evolução** | os dois, só como condição inicial | herdável, livre para evoluir | herdável, livre para evoluir | o feedback entre as duas (mecanismo de Fisher) |
 
-Repare na última coluna da esquerda: nos três primeiros estudos o que varia é um parâmetro
-imposto, que vale do começo ao fim. Em Co-evolução isso é impossível, e a razão está explicada
-na seção daquele estudo.
+Reparem que nos três primeiros estudos o que varia é um parâmetro
+imposto, que vale do começo ao fim. Em Co-evolução isso é impossível, e
+mostro mais detalhes na seção daquele estudo.
 
-Vale insistir num ponto: "livre para evoluir" descreve o desenho, não o resultado. Em vários
-cenários a característica herdável pode simplesmente não mudar. O exemplo mais claro é a curva
-de preferência aleatória, em que as fêmeas não discriminam entre machos: ali o traço continua
-sendo herdável, mas como nenhuma seleção sexual age sobre ele, ele apenas deriva ao acaso. A comparação entre curvas de preferência é justamente o que revela quando a herdabilidade
-se traduz em mudança evolutiva e quando não.
+Vale insistir num ponto: "livre para evoluir" descreve o desenho, não o
+resultado. Em vários cenários a característica herdável pode
+simplesmente não mudar. O exemplo mais claro é a curva de preferência
+aleatória, em que as fêmeas não discriminam entre machos: ali o traço
+continua sendo herdável, mas como nenhuma seleção sexual age sobre ele,
+ele apenas deriva ao acaso. A comparação entre curvas de preferência é
+justamente o que revela quando a herdabilidade se traduz em mudança
+evolutiva e quando não.
 
-A comparação entre os estudos nos ajuda a entender o sistema melhor: 
-- A diferença entre Fêmeas variando e o Controle mostra o que a resposta evolutiva do traço acrescenta.
-- A diferença entre Machos variando e o Controle mostra o que a resposta evolutiva da preferência acrescenta.
-- O Co-evolução mostra o que emerge quando as duas evoluem juntas, que não é a soma dos anteriores.
+A comparação entre os estudos nos ajuda a entender o sistema melhor: - A
+diferença entre Fêmeas variando e o Controle mostra o qué a resposta
+evolutiva do traço acrescenta. - A diferença entre Machos variando e o
+Controle mostra o qué a resposta evolutiva da preferência acrescenta. -
+O Co-evolução mostra o que emerge quando as duas evoluem juntas, que não
+é a soma dos anteriores.
 
----
+------------------------------------------------------------------------
 
 ## O que é comum aos quatro estudos
 
-Antes de descrever cada estudo, o que todos compartilham. Os quatro usam exatamente o mesmo
-ciclo de vida, as mesmas quatro curvas de preferência e os mesmos fatores cruzados, e é por isso
-que as diferenças entre eles podem ser atribuídas ao que de fato muda: quais características são
-herdadas. Cada seção de estudo mais adiante descreve só o que aquele estudo altera.
+Antes de descrever cada estudo, o que todos compartilham. Os quatro usam
+exatamente o mesmo ciclo de vida, as mesmas quatro curvas de preferência
+e os mesmos fatores cruzados, e é por isso que as diferenças entre eles
+podem ser atribuídas ao que de fato muda: quais características são
+herdadas. Cada seção de estudo mais adiante descreve só o que aquele
+estudo altera.
 
-**População.** 200 machos e 200 fêmeas, gerações discretas e não sobrepostas, tamanho
-populacional constante. Cem gerações por réplica em Fêmeas variando, Machos variando e Co-evolução; uma geração no Controle.
+**População.** 200 machos e 200 fêmeas, gerações discretas e não
+sobrepostas, tamanho populacional constante. Cem gerações por réplica em
+Fêmeas variando, Machos variando e Co-evolução; uma geração no Controle.
 
-**As quatro curvas de preferência.** P_ij é a probabilidade de a fêmea i aceitar o macho j,
-onde s é a exigência dela, p é o pico dela e z é o traço dele. Todas partem do mesmo pico médio,
-de modo que as diferenças entre elas vêm da geometria da regra e não de as fêmeas quererem
-coisas diferentes em média:
-- Aleatória (nula): P = 0.5, constante. A fêmea aceita qualquer macho com a mesma probabilidade.
-  Serve de controle: aqui não existe seleção sexual, então qualquer mudança no traço é deriva.
-- Gaussiana (estabilizadora): P = exp(-s (z - p)^2). A fêmea aceita machos cujo traço está
-  próximo do seu pico, e rejeita tanto os muito maiores quanto os muito menores.
-- Sigmoide (direcional): P = 1 / (1 + exp(-s (z - p))). A fêmea aceita machos cujo traço supera
-  o seu pico, e quanto mais o supera, mais provável é o aceite.
-- U-shaped (disruptiva): P = 1 - exp(-s (z - p)^2). A fêmea evita machos parecidos com o seu
-  pico e aceita os que estão distantes dele, para mais ou para menos.
+**As quatro curvas de preferência.** P_ij é a probabilidade de a fêmea i
+aceitar o macho j, onde s é a exigência dela, p é o pico dela e z é o
+traço dele. Todas partem do mesmo pico médio, de modo que as diferenças
+entre elas vêm da geometria da regra e não de as fêmeas quererem coisas
+diferentes em média: - Aleatória (nula): P = 0.5, constante. A fêmea
+aceita qualquer macho com a mesma probabilidade. Serve de controle: aqui
+não existe seleção sexual, então qualquer mudança no traço é deriva. -
+Gaussiana (estabilizadora): P = exp(-s (z - p)\^2). A fêmea aceita
+machos cujo traço está próximo do seu pico, e rejeita tanto os muito
+maiores quanto os muito menores. - Sigmoide (direcional): P = 1 / (1 +
+exp(-s (z - p))). A fêmea aceita machos cujo traço supera o seu pico, e
+quanto mais o supera, mais provável é o aceite. - U-shaped (disruptiva):
+P = 1 - exp(-s (z - p)\^2). A fêmea evita machos parecidos com o seu
+pico e aceita os que estão distantes dele, para mais ou para menos.
 
-**Fatores cruzados em todos os estudos.**
-- A_max: quantos machos distintos cada fêmea consegue avaliar antes de decidir (200, 40 ou 10,
-  em número absoluto). Representa o custo ecológico de procurar parceiro. O nível 200 é a
-  condição de saturação, "sem restrição de busca", e não um terceiro ponto equidistante do
-  gradiente. Ver a seção sobre o tamanho do pool de machos: os rótulos percentuais que usávamos
-  antes eram enganosos.
-- k: quantos parceiros cada fêmea acasala (5, 10 ou 20). Representa o grau de poliandria.
-- Seleção natural de viabilidade sobre o traço do macho, ligada ou desligada.
+**Fatores cruzados em todos os estudos.** - A_max: quantos machos
+distintos cada fêmea consegue avaliar antes de decidir (200, 40 ou 10,
+em número absoluto). Representa o custo ecológico de procurar parceiro.
+O nível 200 é a condição de saturação, "sem restrição de busca", e não
+um terceiro ponto equidistante do gradiente. Ver a seção sobre o tamanho
+do pool de machos: os rótulos percentuais que usávamos antes eram
+enganosos. - k: quantos parceiros cada fêmea idealmente se acasalaria
+(5, 10 ou 20). - Seleção natural de viabilidade sobre o traço do macho,
+ligada ou desligada.
 
----
+------------------------------------------------------------------------
 
 ## O ciclo de vida, passo a passo
 
-Cada geração segue sempre a mesma sequência, nos quatro estudos. O que muda entre os estudos
-é apenas quais características são herdadas no passo 5.
+Cada geração segue sempre a mesma sequência nos quatro estudos. O que
+muda entre os estudos é apenas quais características são herdadas no
+passo 5.
 
-**1. Ponto de partida.** Todas as distribuições são centradas em phi = 5, que é ao mesmo tempo
-a média inicial do traço, a média inicial do pico de preferência e o ótimo da seleção natural.
-Os machos começam com traço sorteado de N(5, sigma_z) e as fêmeas com pico de preferência
-sorteado de N(5, sigma_p). Todos os valores são truncados em zero, ou seja, nem o traço nem a
-preferência podem ser negativos.
+**1. Ponto de partida.** Todas as distribuições são centradas em phi =
+5, que é ao mesmo tempo a média inicial do traço, a média inicial do
+pico de preferência e o ótimo da seleção natural. Os machos começam com
+traço sorteado de N(5, sigma_z) e as fêmeas com pico de preferência
+sorteado de N(5, sigma_p). Todos os valores são truncados em zero, ou
+seja, nem o traço nem a preferência podem ser negativos.
 
-**2. Seleção natural de viabilidade (ligada ou desligada), e o censo de adultos.** A seleção de
-viabilidade age sobre os JUVENIS, antes do censo de adultos. Quando ela está ligada, cada um dos
-cerca de 5.000 juvenis machos sobrevive com probabilidade
+**2. Seleção natural de viabilidade (ligada ou desligada), e o censo de
+adultos.** A seleção de viabilidade age sobre os JUVENIS, antes do censo
+de adultos. Quando ela está ligada, cada um dos cerca de 5.000 juvenis
+machos sobrevive com probabilidade
 
-    V = exp(-gamma * (z - phi)^2),  com gamma = 0.2
+```         
+V = exp(-gamma * (z - phi)^2),  com gamma = 0.2
+```
 
-ou seja, quanto mais o traço se afasta do ótimo ecológico phi = 5, menor a chance de sobreviver.
-Entre os juvenis que sobrevivem, sorteiam-se ao acaso os 200 que formam o censo adulto de machos.
-As fêmeas não passam por viabilidade: sorteiam-se 200 ao acaso.
+ou seja, quanto mais o traço se afasta do ótimo ecológico phi = 5, menor
+a chance de sobreviver. Entre os juvenis que sobrevivem, sorteiam-se ao
+acaso os 200 que formam o censo adulto de machos. As fêmeas não passam
+por viabilidade: sorteiam-se 200 ao acaso.
 
-A ordem dos dois passos é o que faz a diferença. Como a seleção age antes do censo, o número de
-machos disponíveis para acasalar é sempre 200, com ou sem seleção natural e para qualquer valor
-de sigma_z: ela muda quais machos estão disponíveis, que é o efeito que nos interessa, e não
-quantos, que seria um confundimento de densidade. Na versão anterior a viabilidade agia depois do
-censo, o pool caía de 198 para 124 ao longo do gradiente de sigma_z, e isso sozinho mexia em Is,
-centralização e aninhamento. A seção sobre o tamanho do pool de machos conta essa história por
-inteiro.
+A ordem dos dois passos é o que faz a diferença. Como a seleção age
+antes do censo, o número de machos disponíveis para acasalar é sempre
+200, com ou sem seleção natural e para qualquer valor de sigma_z: ela
+muda quais machos estão disponíveis, que é o efeito que nos interessa, e
+não quantos, que seria um confundimento de densidade. Na versão anterior
+a viabilidade agia depois do censo, o pool caía de 198 para 124 ao longo
+do gradiente de sigma_z, e isso sozinho mexia em Is, centralização e
+aninhamento. A seção sobre o tamanho do pool de machos conta essa
+história por inteiro.
 
-Quatro observações:
-- A seleção natural age apenas sobre os machos e apenas sobre o traço, nunca sobre a
-  preferência.
-- Quando está desligada, todos os juvenis são equivalentes (V = 1) e o censo é um sorteio
-  aleatório, o que isola o efeito puro da escolha feminina.
-- Há uma trava de segurança: se menos de 2 juvenis sobrevivessem, os 2 de maior viabilidade são
-  resgatados, para que a rede nunca fique degenerada demais para calcular as métricas. A coluna
-  `n_machos_surv` grava o censo efetivo, então qualquer cenário em que a trava tenha entrado é
-  identificável na hora.
-- Em Machos variando, em que o traço do macho é ambiental, a seleção natural continua funcionando como
-  filtro ecológico (muda quais machos estão disponíveis), mas não tem consequência evolutiva,
-  porque o traço não é transmitido aos filhotes. O mesmo vale para o Controle, por não haver
-  geração seguinte.
+Quatro observações: - A seleção natural age apenas sobre os machos e
+apenas sobre o traço, nunca sobre a preferência. - Quando está
+desligada, todos os juvenis são equivalentes (V = 1) e o censo é um
+sorteio aleatório, o que isola o efeito puro da escolha feminina. - Há
+uma trava de segurança: se menos de 2 juvenis sobrevivessem, os 2 de
+maior viabilidade são resgatados, para que a rede nunca fique degenerada
+demais para calcular as métricas. A coluna `n_machos_surv` grava o censo
+efetivo, então qualquer cenário em que a trava tenha entrado é
+identificável na hora. - Em Machos variando, em que o traço do macho é
+ambiental, a seleção natural continua funcionando como filtro ecológico
+(muda quais machos estão disponíveis), mas não tem consequência
+evolutiva, porque o traço não é transmitido aos filhotes. O mesmo vale
+para o Controle, por não haver geração seguinte.
 
-**3. Formação da rede de acasalamentos.** Cada fêmea avalia A_max machos distintos, sorteados
-sem reposição entre os disponíveis (ou todos eles, se houver menos machos do que A_max), numa
-ordem que é um sorteio novo para cada fêmea. Para cada macho avaliado, ela o considera aceitável
-ou não com uma probabilidade dada pela curva de preferência, que depende da distância entre o
-traço dele e o pico dela, e da exigência dela (a choosiness s, sorteada de N(2, 0.2) a cada
-geração e nunca herdada, em todos os estudos). Depois de avaliar todos, ela acasala com os k
-aceitáveis de maior probabilidade de aceite. Se nenhum for aceitável, fica sem acasalar. A matriz
-é binária, então um mesmo par nunca conta duas vezes.
+**3. Formação da rede de acasalamentos.** Cada fêmea avalia A_max machos
+distintos, sorteados sem reposição entre os disponíveis (ou todos eles,
+se houver menos machos do que A_max), numa ordem que é um sorteio novo
+para cada fêmea. Para cada macho avaliado, ela o considera aceitável ou
+não com uma probabilidade dada pela curva de preferência, que depende da
+distância entre o traço dele e o pico dela, e da exigência dela (a
+choosiness s, sorteada de N(2, 0.2) a cada geração e nunca herdada, em
+todos os estudos). Depois de avaliar todos, ela acasala com os k
+aceitáveis de maior probabilidade de aceite. Se nenhum for aceitável,
+fica sem acasalar. A matriz é binária, então um mesmo par nunca conta
+duas vezes.
 
-O resultado é uma matriz de quem acasalou com quem, que é a rede bipartita sobre a qual
-calculamos as métricas de topologia.
+O resultado é uma matriz de quem acasalou com quem, que é a rede
+bipartita sobre a qual calculamos as métricas de topologia.
 
-**A regra de escolha mudou nesta rodada, e vale explicar por quê** (decisão da reunião com o
-Miudo, agosto de 2026). Até aqui a fêmea decidia de um em um, na hora, sem comparar nem voltar
-atrás, e parava assim que juntava k parceiros. É a regra de umbral fixo, ou busca sequencial
-(Janetos 1980; Real 1990), e continua disponível no código como `regra = "sequencial"`.
+**A regra de escolha mudou nesta rodada, e vale explicar por quê**
+(decisão da reunião com o Miudo, agosto de 2026). Até aqui a fêmea
+decidia de um em um, na hora, sem comparar nem voltar atrás, e parava
+assim que juntava k parceiros. É a regra de umbral fixo, ou busca
+sequencial (Janetos 1980; Real 1990), e continua disponível no código
+como `regra = "sequencial"`.
 
-O problema dela era a parada antecipada. Com A_max = 200 e k = 5, uma fêmea que aceita metade dos
-machos junta os 5 parceiros em umas 10 avaliações e nunca vê os outros 190. A_max deixava de ser
-o número de machos avaliados e virava um teto que quase nunca era alcançado, de modo que os
-cenários A_max = 200 e A_max = 40 eram na prática o mesmo tratamento: o custo de busca que
-dizíamos modelar não chegava a ser pago. Isso explica de outro ângulo por que, com A_max = 200,
-as quatro curvas davam exatamente 5.00, 10.00 e 20.00 de poliandria realizada.
+O problema dela era a parada antecipada. Com A_max = 200 e k = 5, uma
+fêmea que aceita metade dos machos junta os 5 parceiros em umas 10
+avaliações e nunca vê os outros 190. A_max deixava de ser o número de
+machos avaliados e virava um teto que quase nunca era alcançado, de modo
+que os cenários A_max = 200 e A_max = 40 eram na prática o mesmo
+tratamento: o custo de busca que dizíamos modelar não chegava a ser
+pago. Isso explica de outro ângulo por que, com A_max = 200, as quatro
+curvas davam exatamente 5.00, 10.00 e 20.00 de poliandria realizada.
 
-Agora a regra é de comparação em pool, ou best-of-n: ela avalia os A_max machos, todos, e só
-então escolhe. É a suposição típica de leks e agregações, em que ela consegue amostrar antes de
-decidir. A_max passa a ser literalmente o número de machos avaliados, e k continua sendo um teto,
-agora aplicado sobre o conjunto dos que ela achou aceitáveis.
+Agora a regra é de comparação em pool, ou best-of-n: ela avalia os A_max
+machos, todos, e só então escolhe. É a suposição típica de leks e
+agregações, em que ela consegue amostrar antes de decidir. A_max passa a
+ser literalmente o número de machos avaliados, e k continua sendo um
+teto, agora aplicado sobre o conjunto dos que ela achou aceitáveis.
 
-O filtro de aceitação foi mantido de propósito, e não é um detalhe de implementação. Chegou a
-ser considerada uma versão sem ele, em que a fêmea ficaria direto com os k machos mais bem
-ajustados, e foi descartada por duas razões. A exigência s viraria um parâmetro inerte, porque o
-ranking só depende da ordem que a curva induz e `exp(-s d^2)` é monótona em d para qualquer s
-positivo. E toda fêmea conseguiria exatamente k parceiros, de modo que nenhuma ficaria sem
-acasalar: sem variância de sucesso reprodutivo entre fêmeas não há seleção sobre a preferência, e
-Machos variando deixaria de funcionar. É o mesmo problema que a regra de escape tinha, chegando
-por outro caminho.
+O filtro de aceitação foi mantido de propósito, e não é um detalhe de
+implementação. Chegou a ser considerada uma versão sem ele, em que a
+fêmea ficaria direto com os k machos mais bem ajustados, e foi
+descartada por duas razões. A exigência s viraria um parâmetro inerte,
+porque o ranking só depende da ordem que a curva induz e `exp(-s d^2)` é
+monótona em d para qualquer s positivo. E toda fêmea conseguiria
+exatamente k parceiros, de modo que nenhuma ficaria sem acasalar: sem
+variância de sucesso reprodutivo entre fêmeas não há seleção sobre a
+preferência, e Machos variando deixaria de funcionar. É o mesmo problema
+que a regra de escape tinha, chegando por outro caminho.
 
-A regra usada fica gravada numa coluna `regra` na saída dos três estudos, como já fazíamos com
-`segregacao`.
+A regra usada fica gravada numa coluna `regra` na saída dos três
+estudos, como já fazíamos com `segregacao`.
 
-**4. Fecundidade e paternidade.** Cada fêmea que acasalou produz 50 filhotes, e as que não
-acasalaram produzem zero. O número de filhotes não depende de com quantos machos ela acasalou
-(fecundidade neutra). A paternidade de cada filhote é sorteada ao acaso entre os parceiros
-daquela fêmea, o que equivale a uma competição espermática justa, sem viés para nenhum macho.
+**4. Fecundidade e paternidade.** Cada fêmea que acasalou produz 50
+filhotes, e as que não acasalaram produzem zero. O número de filhotes
+não depende de com quantos machos ela acasalou (fecundidade neutra). A
+paternidade de cada filhote é sorteada ao acaso entre os parceiros
+daquela fêmea, o que equivale a uma competição espermática justa, sem
+viés para nenhum macho.
 
-**5. Herança.** É aqui que os quatro estudos diferem. Cada característica herdável do filhote é
-a média dos dois pais mais um desvio de segregação com variância igual a metade da variância
-parental, mais um termo mutacional pequeno (desvio padrão 0.05). As características não
-herdáveis são simplesmente re-sorteadas na geração seguinte.
+**5. Herança.** É aqui que os quatro estudos diferem. Cada
+característica herdável do filhote é a média dos dois pais mais um
+desvio de segregação com variância igual a metade da variância parental,
+mais um termo mutacional pequeno (desvio padrão 0.05). As
+características não herdáveis são simplesmente re-sorteadas na geração
+seguinte.
 
-**6. Os juvenis da geração seguinte.** Todos os filhotes (cerca de 10.000, quando quase todas as
-fêmeas acasalam) recebem sexo ao acaso, metade machos e metade fêmeas. São eles os juvenis da
-geração seguinte, e é sobre eles que o passo 2 volta a agir. Não há nenhum corte aqui: a
-capacidade de carga é imposta uma vez só, no censo de adultos do passo 2.
+**6. Os juvenis da geração seguinte.** Todos os filhotes (cerca de
+10.000, quando quase todas as fêmeas acasalam) recebem sexo ao acaso,
+metade machos e metade fêmeas. São eles os juvenis da geração seguinte,
+e é sobre eles que o passo 2 volta a agir. Não há nenhum corte aqui: a
+capacidade de carga é imposta uma vez só, no censo de adultos do passo
+2.
 
-O modelo tem portanto duas mortalidades, e a diferença entre elas é o ponto todo. A viabilidade é
-seletiva e age só sobre os machos. O censo é sorteio puro, sem seleção nenhuma, e é a fonte de
-deriva genética do modelo. Uma característica só evolui de forma dirigida se alguns pais
+O modelo tem portanto duas mortalidades, e a diferença entre elas é o
+ponto todo. A viabilidade é seletiva e age só sobre os machos. O censo é
+sorteio puro, sem seleção nenhuma, e é a fonte de deriva genética do
+modelo. Uma característica só evolui de forma dirigida se alguns pais
 colocaram mais filhotes no pote do que outros.
 
-Falta o caso degenerado, que merece uma regra explícita. Pode acontecer de o pote não dar para
-formar a geração seguinte, seja porque nenhuma fêmea acasalou, seja porque acasalaram tão poucas
-que os filhotes não bastam para formar a população adulta (o que exigiria que menos de 16 das 200
-fêmeas acasalassem, ou seja, mais de 92% sem acasalar). A regra agora é a mesma nos três motores:
-a réplica é encerrada ali, as gerações já rodadas são mantidas, e a coluna `extincao_gen` guarda
-em que geração isso aconteceu. Quando a réplica chega ao fim normalmente, `extincao_gen` fica NA.
+Falta o caso degenerado, que merece uma regra explícita. Pode acontecer
+de o pote não dar para formar a geração seguinte, seja porque nenhuma
+fêmea acasalou, seja porque acasalaram tão poucas que os filhotes não
+bastam para formar a população adulta (o que exigiria que menos de 16
+das 200 fêmeas acasalassem, ou seja, mais de 92% sem acasalar). A regra
+agora é a mesma nos três motores: a réplica é encerrada ali, as gerações
+já rodadas são mantidas, e a coluna `extincao_gen` guarda em que geração
+isso aconteceu. Quando a réplica chega ao fim normalmente,
+`extincao_gen` fica NA.
 
 Nenhuma das duas soluções anteriores servia. Fêmeas variando devolvia a
-geração anterior, o que fabrica uma geração de pais imortais que não deixaram descendência mas
-continuam na população. E devolvia apenas os machos sobreviventes, não os 200: a população
-encolhia em silêncio, e a partir dali o passo de viabilidade reciclava um vetor mais curto,
-`male_z_gen[survive]` passava a devolver NA, e a réplica seguia rodando produzindo lixo sem
-nenhum aviso. Machos variando encerrava a réplica, que é o correto, mas sem deixar registro: ela
-entrava no conjunto de dados apenas com menos gerações, e desaparecia depois no filtro
-`generation == 100`. Como as réplicas que falham são justamente as dos cenários mais duros, essa
-perda silenciosa seria enviesada.
+geração anterior, o que fabrica uma geração de pais imortais que não
+deixaram descendência mas continuam na população. E devolvia apenas os
+machos sobreviventes, não os 200: a população encolhia em silêncio, e a
+partir dali o passo de viabilidade reciclava um vetor mais curto,
+`male_z_gen[survive]` passava a devolver NA, e a réplica seguia rodando
+produzindo lixo sem nenhum aviso. Machos variando encerrava a réplica,
+que é o correto, mas sem deixar registro: ela entrava no conjunto de
+dados apenas com menos gerações, e desaparecia depois no filtro
+`generation == 100`. Como as réplicas que falham são justamente as dos
+cenários mais duros, essa perda silenciosa seria enviesada.
 
-Com a coluna `extincao_gen`, quantas réplicas se extinguem por cenário passa a ser um resultado
-que se pode reportar: é a medida de quando as regras de acasalamento foram restritivas demais
-para a população se sustentar. Na prática esperamos que seja zero em todos os cenários já
-rodados, porque a proporção de fêmeas sem acasalar nunca chegou perto de 92%, mas isso agora fica
-verificável em vez de suposto.
+Com a coluna `extincao_gen`, quantas réplicas se extinguem por cenário
+passa a ser um resultado que se pode reportar: é a medida de quando as
+regras de acasalamento foram restritivas demais para a população se
+sustentar. Na prática esperamos que seja zero em todos os cenários já
+rodados, porque a proporção de fêmeas sem acasalar nunca chegou perto de
+92%, mas isso agora fica verificável em vez de suposto.
 
----
+------------------------------------------------------------------------
 
 ## Controle
 
 *Variam sigma_p e sigma_z. Nada é herdado.*
 
-Daqui em diante, um estudo por seção. Tudo o que não estiver dito é o que ficou descrito acima,
-no ciclo de vida e nos fatores comuns.
+Daqui em diante, um estudo por seção. Tudo o que não estiver dito é o
+que ficou descrito acima, no ciclo de vida e nos fatores comuns.
 
-**Pergunta.** Que topologia de rede as regras de acasalamento produzem por si só, antes de
-qualquer resposta evolutiva?
+**Pergunta.** Que topologia de rede as regras de acasalamento produzem
+por si só, antes de qualquer resposta evolutiva?
 
-**Como funciona.** Nenhuma característica é herdada. O traço dos machos e o pico de preferência
-das fêmeas são sorteados, a seleção natural de viabilidade filtra os machos (quando está
-ligada), a rede de acasalamentos se forma, medem-se as métricas de topologia, e acabou. Não
-existe geração seguinte nem feedback. A seleção natural entra aqui como filtro puramente
-ecológico: ela muda quais machos estão disponíveis para as fêmeas, mas não tem consequência
-evolutiva nenhuma, porque não há geração seguinte para receber o efeito.
+**Como funciona.** Nenhuma característica é herdada. O traço dos machos
+e o pico de preferência das fêmeas são sorteados, a seleção natural de
+viabilidade filtra os machos (quando está ligada), a rede de
+acasalamentos se forma, medem-se as métricas de topologia, e acabou. Não
+existe geração seguinte nem feedback. A seleção natural entra aqui como
+filtro puramente ecológico: ela muda quais machos estão disponíveis para
+as fêmeas, mas não tem consequência evolutiva nenhuma, porque não há
+geração seguinte para receber o efeito.
 
-Uma única geração basta, e a razão é simples: sem herança, a geração 2 seria um sorteio
-independente da geração 1, com exatamente a mesma distribuição. Rodar 100 gerações seria fazer
-100 réplicas disfarçadas. Rodamos uma só e usamos as réplicas para estimar a variabilidade, o que
-torna cada cenário cerca de cem vezes mais barato que nos outros estudos. É justamente esse
-desconto que permite cruzar sigma_p com sigma_z por inteiro.
+Uma única geração basta, e a razão é simples: sem herança, a geração 2
+seria um sorteio independente da geração 1, com exatamente a mesma
+distribuição. Rodar 100 gerações seria fazer 100 réplicas disfarçadas.
+Rodamos uma só e usamos as réplicas para estimar a variabilidade, o que
+torna cada cenário cerca de cem vezes mais barato que nos outros
+estudos. É justamente esse desconto que permite cruzar sigma_p com
+sigma_z por inteiro.
 
-Ainda assim, ele precisa ser um estudo à parte. A geração 1 dos outros estudos já é um controle,
-porque na primeira geração nada evoluiu ainda, mas cada um cobre apenas uma linha do espaço de
-parâmetros:
-- A geração 1 de Fêmeas variando varre sigma_p, mas com sigma_z fixo em 1.0.
-- A geração 1 de Machos variando varre sigma_z, mas com sigma_p fixo em 1.0.
+Ainda assim, ele precisa ser um estudo à parte. A geração 1 dos outros
+estudos já é um controle, porque na primeira geração nada evoluiu ainda,
+mas cada um cobre apenas uma linha do espaço de parâmetros: - A geração
+1 de Fêmeas variando varre sigma_p, mas com sigma_z fixo em 1.0. - A
+geração 1 de Machos variando varre sigma_z, mas com sigma_p fixo em 1.0.
 
-As duas se cruzam exatamente no ponto sigma_p = sigma_z = 1.0, que é literalmente o mesmo
-cenário nos dois estudos. Juntas, portanto, elas formam uma cruz no espaço de parâmetros, e as
-combinações extremas ficam de fora: nunca se observa, por exemplo, fêmeas muito heterogêneas
-diante de machos muito homogêneos, ou o contrário. Como justamente essas combinações extremas
-são as mais informativas sobre o que a regra de acasalamento faz sozinha, vale a pena rodar a
-superfície inteira.
+As duas se cruzam exatamente no ponto sigma_p = sigma_z = 1.0, que é
+literalmente o mesmo cenário nos dois estudos. Juntas, portanto, elas
+formam uma cruz no espaço de parâmetros, e as combinações extremas ficam
+de fora: nunca se observa, por exemplo, fêmeas muito heterogêneas diante
+de machos muito homogêneos, ou o contrário. Como justamente essas
+combinações extremas são as mais informativas sobre o que a regra de
+acasalamento faz sozinha, vale a pena rodar a superfície inteira.
 
-Poderíamos, em tese, aproveitar a geração 1 de Co-evolução: se ele cruzasse sigma_p com sigma_z
-nas condições iniciais, essa primeira geração daria a superfície completa de graça. O problema é
-que isso obrigaria Co-evolução a ter um desenho sete vezes maior por uma razão que não é dele,
-porque ali o que interessa é a dinâmica da covariância entre preferência e traço, e não quanta
-variância havia no ponto de partida. Como este controle é barato, sai mais em conta mantê-lo
+Poderíamos, em tese, aproveitar a geração 1 de Co-evolução: se ele
+cruzasse sigma_p com sigma_z nas condições iniciais, essa primeira
+geração daria a superfície completa de graça. O problema é que isso
+obrigaria Co-evolução a ter um desenho sete vezes maior por uma razão
+que não é dele, porque ali o que interessa é a dinâmica da covariância
+entre preferência e traço, e não quanta variância havia no ponto de
+partida. Como este controle é barato, sai mais em conta mantê-lo
 separado e deixar Co-evolução livre para responder à própria pergunta.
 
-**Desenho.** Cruzamento completo de sigma_p (7 valores: 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0) por
-sigma_z (os mesmos 7 valores), somado aos mesmos fatores dos outros estudos: 4 curvas de
-preferência, 3 valores de A_max, 3 valores de k e 2 regimes de seleção natural. Com 20 réplicas,
-isso dá 4 x 7 x 7 x 3 x 3 x 2 x 20 = 70.560 cenários, de uma geração cada.
+**Desenho.** Cruzamento completo de sigma_p (7 valores: 0.2, 0.5, 0.8,
+1.0, 1.2, 1.5, 2.0) por sigma_z (os mesmos 7 valores), somado aos mesmos
+fatores dos outros estudos: 4 curvas de preferência, 3 valores de A_max,
+3 valores de k e 2 regimes de seleção natural. Com 20 réplicas, isso dá
+4 x 7 x 7 x 3 x 3 x 2 x 20 = 70.560 cenários, de uma geração cada.
 
-**Estado.** Concluído com o modelo atual (censo de adultos constante e poliandria realizada):
-70.560 cenários, 20 réplicas, sem falhas. As análises do plano de Co-evolução citadas mais adiante
-vêm de uma rodada anterior, com 30 réplicas e o modelo antigo, e devem ser refeitas sobre estes
-dados. Script `Fase_Controle.R`, semente base 2029.
+**Estado.** Concluído com o modelo atual (censo de adultos constante e
+poliandria realizada): 70.560 cenários, 20 réplicas, sem falhas. As
+análises do plano de Co-evolução citadas mais adiante vêm de uma rodada
+anterior, com 30 réplicas e o modelo antigo, e devem ser refeitas sobre
+estes dados. Script `Fase_Controle.R`, semente base 2029.
 
----
+------------------------------------------------------------------------
 
 ## Fêmeas variando
 
 *Varia sigma_p. Evolui o traço do macho.*
 
-**Pergunta.** Como a variação do pico de preferência entre as fêmeas (sigma_p) afeta a
-topologia da rede de acasalamentos e a resposta evolutiva do traço masculino?
+**Pergunta.** Como a variação do pico de preferência entre as fêmeas
+(sigma_p) afeta a topologia da rede de acasalamentos e a resposta
+evolutiva do traço masculino?
 
-**Como funciona.**
-- O eixo do experimento é sigma_p, que varia de 0.2 (fêmeas quase todas iguais no que
-  preferem) a 2.0 (fêmeas bem diferentes entre si).
-- A preferência é re-sorteada a cada geração de uma distribuição fixa N(5, sigma_p). Ela não é
-  herdada e portanto não pode evoluir, por construção. Isso é intencional: fixa a distribuição
-  de preferências e permite isolar o efeito da forma da curva de preferência e da largura dessa
-  distribuição, sem o confundimento de a preferência estar mudando ao mesmo tempo.
-- O traço do macho é herdável e portanto livre para evoluir: os filhotes recebem a média
-  dos pais mais a variância de segregação, e os dois sexos carregam o traço. A fêmea carrega
-  sem expressar, o que é o que permite que o traço passe pela linhagem materna também.
-- O traço da fêmea, na geração 1, é sorteado da mesma distribuição N(5, sigma_z_init) que o dos
-  machos. Nos cenários deste estudo sigma_z_init fica fixo em 1.0.
+**Como funciona.** - O eixo do experimento é sigma_p, que varia de 0.2
+(fêmeas quase todas iguais no que preferem) a 2.0 (fêmeas bem diferentes
+entre si). - A preferência é re-sorteada a cada geração de uma
+distribuição fixa N(5, sigma_p). Ela não é herdada e portanto não pode
+evoluir, por construção. Isso é intencional: fixa a distribuição de
+preferências e permite isolar o efeito da forma da curva de preferência
+e da largura dessa distribuição, sem o confundimento de a preferência
+estar mudando ao mesmo tempo. - O traço do macho é herdável e portanto
+livre para evoluir: os filhotes recebem a média dos pais mais a
+variância de segregação, e os dois sexos carregam o traço. A fêmea
+carrega sem expressar, o que é o que permite que o traço passe pela
+linhagem materna também. - O traço da fêmea, na geração 1, é sorteado da
+mesma distribuição N(5, sigma_z_init) que o dos machos. Nos cenários
+deste estudo sigma_z_init fica fixo em 1.0.
 
-A escolha da fêmea, aqui, é a causa da seleção. Ela não muda ao longo do tempo; é ela que gera a
-pressão seletiva sobre o traço masculino. Se o traço vai de fato mudar, e quanto, depende da
-curva de preferência, e é justamente isso que o estudo mede.
+A escolha da fêmea, aqui, é a causa da seleção. Ela não muda ao longo do
+tempo; é ela que gera a pressão seletiva sobre o traço masculino. Se o
+traço vai de fato mudar, e quanto, depende da curva de preferência, e é
+justamente isso que o estudo mede.
 
-**Variáveis resposta.** Métricas de topologia da rede (modularidade, aninhamento, centralização
-e oportunidade de seleção sexual Is), média e variância do traço dos machos sobreviventes ao
-longo das gerações, e a proporção de fêmeas que ficaram sem acasalar.
+**Variáveis resposta.** Métricas de topologia da rede (modularidade,
+aninhamento, centralização e oportunidade de seleção sexual Is), média e
+variância do traço dos machos sobreviventes ao longo das gerações, e a
+proporção de fêmeas que ficaram sem acasalar.
 
-**Estado.** Rodando com o modelo atual: 10.080 cenários (4 curvas de preferência x 7 valores de
-sigma_p x 3 valores de A_max x 3 valores de k x 2 regimes de seleção natural x 20 réplicas), 100
-gerações cada, repartido entre duas máquinas Linux. As réplicas 1 a 8 já terminaram, sem falhas e
-sem nenhum cenário encerrado antes das 100 gerações. Script `Fase4_TodasAsCurvas.R`, semente
-base 2026.
+**Estado.** Rodando com o modelo atual: 10.080 cenários (4 curvas de
+preferência x 7 valores de sigma_p x 3 valores de A_max x 3 valores de k
+x 2 regimes de seleção natural x 20 réplicas), 100 gerações cada,
+repartido entre duas máquinas Linux. As réplicas 1 a 8 já terminaram,
+sem falhas e sem nenhum cenário encerrado antes das 100 gerações. Script
+`Fase4_TodasAsCurvas.R`, semente base 2026.
 
----
+------------------------------------------------------------------------
 
 ## Machos variando
 
 *Varia sigma_z. Evolui a preferência da fêmea.*
 
-**Pergunta.** Como a disponibilidade de machos com traços variados (sigma_z) afeta a resposta
-evolutiva da preferência feminina?
+**Pergunta.** Como a disponibilidade de machos com traços variados
+(sigma_z) afeta a resposta evolutiva da preferência feminina?
 
-**Como funciona.** É o espelho de Fêmeas variando: os papéis se invertem.
-- O eixo do experimento é sigma_z, que varia de 0.2 (machos quase todos parecidos) a 2.0
-  (machos muito variados).
-- O traço do macho passa a ser ambiental: é re-sorteado a cada geração de N(5, sigma_z) e não é
-  herdado. A leitura biológica é de dependência de condição, ou seja, o macho expressa aquele
-  traço por causa do ambiente em que se desenvolveu, e não por causa dos genes que vai transmitir.
-- O pico de preferência da fêmea passa a ser herdável e bi-parental, portanto livre para
-  evoluir: os dois sexos carregam p (o macho carrega sem expressar, do mesmo modo que no
-  Fêmeas variando a fêmea carrega o traço sem expressar) e o filhote recebe a média dos pais mais a
-  variância de segregação.
+**Como funciona.** É o espelho de Fêmeas variando: os papéis se
+invertem. - O eixo do experimento é sigma_z, que varia de 0.2 (machos
+quase todos parecidos) a 2.0 (machos muito variados). - O traço do macho
+passa a ser ambiental: é re-sorteado a cada geração de N(5, sigma_z) e
+não é herdado. A leitura biológica é de dependência de condição, ou
+seja, o macho expressa aquele traço por causa do ambiente em que se
+desenvolveu, e não por causa dos genes que vai transmitir. - O pico de
+preferência da fêmea passa a ser herdável e bi-parental, portanto livre
+para evoluir: os dois sexos carregam p (o macho carrega sem expressar,
+do mesmo modo que no Fêmeas variando a fêmea carrega o traço sem
+expressar) e o filhote recebe a média dos pais mais a variância de
+segregação.
 
-O papel da escolha da fêmea se inverte: ela deixa de ser a causa da seleção e passa a ser o alvo
-dela. A força seletiva que age sobre a preferência é ecológica, não sexual: é a disponibilidade
-de machos. É a analogia que a Erika propôs, de que a planta não escolhe, mas a disponibilidade de
-plantas gera seleção sobre a preferência do herbívoro que escolhe. O que pode evoluir é o pico p,
-ou seja, qual valor de traço a fêmea prefere; a exigência (choosiness) continua fixa.
+O papel da escolha da fêmea se inverte: ela deixa de ser a causa da
+seleção e passa a ser o alvo dela. A força seletiva que age sobre a
+preferência é ecológica, não sexual: é a disponibilidade de machos. É a
+analogia que a Erika propôs, de que a planta não escolhe, mas a
+disponibilidade de plantas gera seleção sobre a preferência do herbívoro
+que escolhe. O que pode evoluir é o pico p, ou seja, qual valor de traço
+a fêmea prefere; a exigência (choosiness) continua fixa.
 
-Há uma condição necessária para o estudo funcionar. Para que exista seleção sobre a preferência
-é preciso que haja variância de sucesso reprodutivo entre as fêmeas. Se todas deixassem o mesmo
-número de filhotes, nenhuma preferência seria mais bem-sucedida que outra e a preferência apenas
-derivaria. Por isso tiramos a regra de escape: agora uma fêmea que não aceita nenhum macho fica
-sem acasalar e deixa zero filhotes. A fecundidade continua neutra (quem acasalou deixa sempre o
-mesmo número de filhotes, independentemente de com quantos machos acasalou), como tínhamos
-combinado.
+Há uma condição necessária para o estudo funcionar. Para que exista
+seleção sobre a preferência é preciso que haja variância de sucesso
+reprodutivo entre as fêmeas. Se todas deixassem o mesmo número de
+filhotes, nenhuma preferência seria mais bem-sucedida que outra e a
+preferência apenas derivaria. Por isso tiramos a regra de escape: agora
+uma fêmea que não aceita nenhum macho fica sem acasalar e deixa zero
+filhotes. A fecundidade continua neutra (quem acasalou deixa sempre o
+mesmo número de filhotes, independentemente de com quantos machos
+acasalou), como tínhamos combinado.
 
-Há uma assimetria estrutural entre os dois estudos que precisa ser declarada no paper. Em Fêmeas
-variando, sigma_p é um parâmetro imposto: a distribuição de preferências é re-sorteada com aquela
-largura a cada uma das 100 gerações, então o tratamento continua valendo até o fim. Em Machos
-variando, sigma_z também é imposto
-a cada geração (o traço é re-sorteado), mas sigma_p_init é apenas condição inicial, fixada em
-1.0 em todos os cenários: da geração 2 em diante a largura da distribuição de preferências é o
-que a seleção e a deriva fizerem dela. Os dois estudos são espelhos no que diz respeito ao eixo
-do experimento, que é imposto nos dois casos, mas não no que diz respeito à característica que
-evolui. Foi exatamente por causa dessa assimetria que descartamos a primeira versão do
-experimento inverso (`Fase_MachoVariando.R`), em que o eixo era sigma_z_init, ou seja, uma
-condição inicial e não uma propriedade permanente da população. Esse script continua no
-repositório apenas como registro dessa tentativa, e não é um dos quatro estudos.
+Há uma assimetria estrutural entre os dois estudos que precisa ser
+declarada no paper. Em Fêmeas variando, sigma_p é um parâmetro imposto:
+a distribuição de preferências é re-sorteada com aquela largura a cada
+uma das 100 gerações, então o tratamento continua valendo até o fim. Em
+Machos variando, sigma_z também é imposto a cada geração (o traço é
+re-sorteado), mas sigma_p_init é apenas condição inicial, fixada em 1.0
+em todos os cenários: da geração 2 em diante a largura da distribuição
+de preferências é o que a seleção e a deriva fizerem dela. Os dois
+estudos são espelhos no que diz respeito ao eixo do experimento, que é
+imposto nos dois casos, mas não no que diz respeito à característica que
+evolui. Foi exatamente por causa dessa assimetria que descartamos a
+primeira versão do experimento inverso (`Fase_MachoVariando.R`), em que
+o eixo era sigma_z_init, ou seja, uma condição inicial e não uma
+propriedade permanente da população. Esse script continua no repositório
+apenas como registro dessa tentativa, e não é um dos quatro estudos.
 
-**Variáveis resposta.** As mesmas métricas de topologia da rede, mais a média e a variância do
-pico de preferência ao longo das gerações, e a proporção de fêmeas sem acasalar, que aqui deixa
-de ser apenas descritiva e passa a ser o indicador direto da força de seleção agindo sobre a
-preferência. A preferência é registrada de duas formas: no pool genotípico (os dois sexos
-juntos, que é a variável evolutiva propriamente dita) e apenas nas fêmeas (que é a preferência
-efetivamente expressa e que gera a rede).
+**Variáveis resposta.** As mesmas métricas de topologia da rede, mais a
+média e a variância do pico de preferência ao longo das gerações, e a
+proporção de fêmeas sem acasalar, que aqui deixa de ser apenas
+descritiva e passa a ser o indicador direto da força de seleção agindo
+sobre a preferência. A preferência é registrada de duas formas: no pool
+genotípico (os dois sexos juntos, que é a variável evolutiva
+propriamente dita) e apenas nas fêmeas (que é a preferência efetivamente
+expressa e que gera a rede).
 
-**Estado.** Concluído com o modelo atual: 10.080 cenários, mesmo desenho fatorial de Fêmeas variando,
-20 réplicas, 100 gerações cada. Script `Fase_Espelho.R`, semente base 2028.
+**Estado.** Concluído com o modelo atual: 10.080 cenários, mesmo desenho
+fatorial de Fêmeas variando, 20 réplicas, 100 gerações cada. Script
+`Fase_Espelho.R`, semente base 2028.
 
----
+------------------------------------------------------------------------
 
 ## Co-evolução (proposta)
 
 *Evoluem os dois. Os dois sigmas são apenas condição inicial.*
 
-**Pergunta.** O que acontece quando as duas características são herdáveis ao mesmo tempo?
+**Pergunta.** O que acontece quando as duas características são
+herdáveis ao mesmo tempo?
 
-**Como funciona.** Traço e preferência são ambos herdáveis, e cada indivíduo carrega os dois
-genótipos: o macho carrega o pico de preferência sem expressar, e a fêmea carrega o traço sem
-expressar. A expressão continua sendo dimórfica (só o macho mostra z, só a fêmea usa p), mas a
-transmissão é bi-parental para as duas características.
+**Como funciona.** Traço e preferência são ambos herdáveis, e cada
+indivíduo carrega os dois genótipos: o macho carrega o pico de
+preferência sem expressar, e a fêmea carrega o traço sem expressar. A
+expressão continua sendo dimórfica (só o macho mostra z, só a fêmea usa
+p), mas a transmissão é bi-parental para as duas características.
 
-A grandeza central deixa de ser a média de cada característica e passa a ser a covariância
-genética entre elas, cov(z, p). O acasalamento assortativo constrói essa covariância: fêmeas
-que preferem machos com traço alto acasalam com machos de traço alto, e os filhotes desses casais
-herdam juntos os genes da preferência e os genes do traço. Uma vez que essa associação existe, a
-seleção que age sobre o traço arrasta a preferência junto, mesmo sem nenhuma seleção agindo
-diretamente sobre a preferência. Esse é o mecanismo do Fisherian runaway (Lande 1981;
+A grandeza central deixa de ser a média de cada característica e passa a
+ser a covariância genética entre elas, cov(z, p). O acasalamento
+assortativo constrói essa covariância: fêmeas que preferem machos com
+traço alto acasalam com machos de traço alto, e os filhotes desses
+casais herdam juntos os genes da preferência e os genes do traço. Uma
+vez que essa associação existe, a seleção que age sobre o traço arrasta
+a preferência junto, mesmo sem nenhuma seleção agindo diretamente sobre
+a preferência. Esse é o mecanismo do Fisherian runaway (Lande 1981;
 Kirkpatrick 1982).
 
-Vale uma previsão sobre a variância inicial. No Controle, em Fêmeas variando e em Machos variando,
-sigma é um parâmetro imposto e por isso vale do começo ao fim. Em Co-evolução isso é impossível:
-como as duas características são herdáveis, impor a variância significaria re-sortear os valores a
-cada geração, e re-sortear é exatamente o que impede a herança. Os dois sigmas só podem ser
-condição inicial.
+Vale uma previsão sobre a variância inicial. No Controle, em Fêmeas
+variando e em Machos variando, sigma é um parâmetro imposto e por isso
+vale do começo ao fim. Em Co-evolução isso é impossível: como as duas
+características são herdáveis, impor a variância significaria re-sortear
+os valores a cada geração, e re-sortear é exatamente o que impede a
+herança. Os dois sigmas só podem ser condição inicial.
 
-Isso não os torna irrelevantes, muda a pergunta que eles fazem. A resposta à seleção é
-proporcional à variância genética disponível: com pouca variância de partida o sistema responde
-devagar, com muita responde rápido. E como o mecanismo de Fisher é um ciclo de retroalimentação,
-a velocidade inicial pode decidir se ele chega a se acender. Se a covariância cresce devagar
-demais, a seleção natural puxa o traço de volta para phi antes que o ciclo se estabeleça, e a
-seleção também vai erodindo a própria variância que alimentaria a resposta.
+Isso não os torna irrelevantes, muda a pergunta que eles fazem. A
+resposta à seleção é proporcional à variância genética disponível: com
+pouca variância de partida o sistema responde devagar, com muita
+responde rápido. E como o mecanismo de Fisher é um ciclo de
+retroalimentação, a velocidade inicial pode decidir se ele chega a se
+acender. Se a covariância cresce devagar demais, a seleção natural puxa
+o traço de volta para phi antes que o ciclo se estabeleça, e a seleção
+também vai erodindo a própria variância que alimentaria a resposta.
 
-A previsão, então, é de limiar e não de dose: esperamos uma variância inicial abaixo da qual o
-runaway não acontece e acima da qual acontece, e não uma resposta que cresça suavemente com
-sigma_init. O limiar deve depender da curva de preferência, sendo mais baixo na sigmoide, que é a
-única direcional, e deve subir quando a seleção natural está ligada, porque ela é a força que
-compete com o ciclo.
+A previsão, então, é de limiar e não de dose: esperamos uma variância
+inicial abaixo da qual o runaway não acontece e acima da qual acontece,
+e não uma resposta que cresça suavemente com sigma_init. O limiar deve
+depender da curva de preferência, sendo mais baixo na sigmoide, que é a
+única direcional, e deve subir quando a seleção natural está ligada,
+porque ela é a força que compete com o ciclo.
 
-Uma ressalva teórica: no modelo analítico de Lande, se o runaway ocorre é uma condição sobre os
-parâmetros, e não sobre a variância inicial: esta determina só a direção ao longo da linha de
-equilíbrios. O limiar que esperamos aqui é um efeito de população finita, em que a variância
-erode sob seleção e a deriva atua, então ele é uma previsão sobre a simulação e não sobre a
-teoria. Vale declarar isso ao reportar.
+Uma ressalva teórica: no modelo analítico de Lande, se o runaway ocorre
+é uma condição sobre os parâmetros, e não sobre a variância inicial:
+esta determina só a direção ao longo da linha de equilíbrios. O limiar
+que esperamos aqui é um efeito de população finita, em que a variância
+erode sob seleção e a deriva atua, então ele é uma previsão sobre a
+simulação e não sobre a teoria. Vale declarar isso ao reportar.
 
-Isso tem consequência para o desenho: procurar um limiar não exige um gradiente fino. Três níveis
-bem separados de variância inicial (baixa, média, alta) bastam para localizá-lo, e os cenários
-economizados podem ir para o eixo que a análise do Controle mostrou ser o que manda.
+Isso tem consequência para o desenho: procurar um limiar não exige um
+gradiente fino. Três níveis bem separados de variância inicial (baixa,
+média, alta) bastam para localizá-lo, e os cenários economizados podem
+ir para o eixo que a análise do Controle mostrou ser o que manda.
 
-O que o estudo testa, no fim das contas, é como as quatro curvas de preferência devem se
-comportar:
-- Aleatória: a probabilidade de aceite não depende de z nem de p, então o acasalamento não é
-  assortativo e cov(z, p) deve ficar em torno de zero o tempo todo. É o controle: qualquer
-  mudança nas médias é deriva.
-- Sigmoide (direcional): é a curva onde o runaway pode aparecer, porque o aceite cresce
-  monotonicamente com z. Fêmeas de pico alto são as mais exigentes em termos absolutos, acasalam
-  com os machos de traço mais alto, e a covariância se acumula com sinal positivo.
-- Gaussiana (estabilizadora): gera acasalamento assortativo forte, porque cada fêmea acasala com
-  machos parecidos com o seu próprio pico, e portanto deve gerar a maior covariância. Mas como a
-  seleção sobre z é estabilizadora, o esperado é um deslocamento contido e não uma fuga.
-- U-shaped (disruptiva): gera acasalamento dissortativo, ou seja, covariância negativa, e é a
-  única curva em que a preferência e o traço podem ser puxados em direções opostas.
+O que o estudo testa, no fim das contas, é como as quatro curvas de
+preferência devem se comportar: - Aleatória: a probabilidade de aceite
+não depende de z nem de p, então o acasalamento não é assortativo e
+cov(z, p) deve ficar em torno de zero o tempo todo. É o controle:
+qualquer mudança nas médias é deriva. - Sigmoide (direcional): é a curva
+onde o runaway pode aparecer, porque o aceite cresce monotonicamente com
+z. Fêmeas de pico alto são as mais exigentes em termos absolutos,
+acasalam com os machos de traço mais alto, e a covariância se acumula
+com sinal positivo. - Gaussiana (estabilizadora): gera acasalamento
+assortativo forte, porque cada fêmea acasala com machos parecidos com o
+seu próprio pico, e portanto deve gerar a maior covariância. Mas como a
+seleção sobre z é estabilizadora, o esperado é um deslocamento contido e
+não uma fuga. - U-shaped (disruptiva): gera acasalamento dissortativo,
+ou seja, covariância negativa, e é a única curva em que a preferência e
+o traço podem ser puxados em direções opostas.
 
-Um cuidado de implementação, porque é uma armadilha silenciosa. Como cada indivíduo carrega duas
-características que precisam viajar juntas, os filhotes têm que ser amostrados por índice, e não
-por valor. Se o traço e a preferência forem embaralhados separadamente, a covariância entre eles
-é destruída e o runaway desaparece por causa de um erro de programação, e não por causa da
-biologia, sem que nada no console avise. Em Fêmeas variando e em Machos variando o problema não
-existia, porque só havia uma característica herdável em cada um.
+Um cuidado de implementação, porque é uma armadilha silenciosa. Como
+cada indivíduo carrega duas características que precisam viajar juntas,
+os filhotes têm que ser amostrados por índice, e não por valor. Se o
+traço e a preferência forem embaralhados separadamente, a covariância
+entre eles é destruída e o runaway desaparece por causa de um erro de
+programação, e não por causa da biologia, sem que nada no console avise.
+Em Fêmeas variando e em Machos variando o problema não existia, porque
+só havia uma característica herdável em cada um.
 
 ### O que já existe e o que falta
 
-Já há um rascunho no repositório, `Fase_Coevolucao.R`, escrito antes das decisões da reunião
-com Erika e Miudo. Ele acertou o essencial: os dois sexos carregam as duas características, o
-macho sobrevivente leva o seu p junto (`male_p_surv <- male_p_gen[survive]`), a herança é de
-ponto médio para as duas, os juvenis são amostrados por índice, e `cov_zp` já é registrado como
-a grandeza central. A parte de baixo do arquivo é um teste rápido (`testar_coevolucao`), com 4
-curvas de preferência e 5 réplicas.
+Já há um rascunho no repositório, `Fase_Coevolucao.R`, escrito antes das
+decisões da reunião com Erika e Miudo. Ele acertou o essencial: os dois
+sexos carregam as duas características, o macho sobrevivente leva o seu
+p junto (`male_p_surv <- male_p_gen[survive]`), a herança é de ponto
+médio para as duas, os juvenis são amostrados por índice, e `cov_zp` já
+é registrado como a grandeza central. A parte de baixo do arquivo é um
+teste rápido (`testar_coevolucao`), com 4 curvas de preferência e 5
+réplicas.
 
-Uma coisa já foi ajustada: o teste não roda mais sozinho ao dar source. Para rodá-lo de
-propósito é `COEVO_SO_FUNCOES <- FALSE; source("Fase_Coevolucao.R")`. A convenção ficou
-invertida em relação aos outros scripts, onde o bloco roda a menos que se peça o contrário
-(`ESPELHO_SO_FUNCOES`, `CONTROLE_SO_FUNCOES`), e é de propósito: enquanto o motor estiver
-desatualizado, o default seguro é não rodar nada.
+Uma coisa já foi ajustada: o teste não roda mais sozinho ao dar source.
+Para rodá-lo de propósito é
+`COEVO_SO_FUNCOES <- FALSE; source("Fase_Coevolucao.R")`. A convenção
+ficou invertida em relação aos outros scripts, onde o bloco roda a menos
+que se peça o contrário (`ESPELHO_SO_FUNCOES`, `CONTROLE_SO_FUNCOES`), e
+é de propósito: enquanto o motor estiver desatualizado, o default seguro
+é não rodar nada.
 
-O que continua desatualizado em relação ao que combinamos depois:
-1. A segregação é de ruído fixo (`eps_sd`, `eps_p`), sem a opção infinitesimal. É a mesma coisa
-   que corrigimos em Fêmeas variando e em Machos variando: com ruído fixo a variância genética cai até o piso 2 vezes
-   eps^2 e a resposta evolutiva fica artificialmente comprimida. Num estudo cuja grandeza central
-   é a covariância, isso é especialmente grave, porque a covariância é limitada pelas variâncias.
-2. Não há coluna `segregacao` na saída, que foi o que adotamos nos outros estudos para saber
-   depois qual modo foi usado.
-3. Quando ninguém acasala, o rascunho devolve a geração anterior em vez de encerrar a réplica.
-4. A viabilidade age depois do censo, e não sobre os juvenis, então o pool de machos não é
-   constante. É o mesmo problema descrito na seção sobre o tamanho do pool.
-5. Não há bloco de desenho experimental: nem `expand.grid`, nem `rodar_cenarios`, nem backup,
-   nem reparto entre máquinas, nem semente própria. Ou seja, ele ainda não é um estudo, é um
-   motor com um teste.
-6. `phi_p` existe como parâmetro separado de `phi`, o que permitiria começar a preferência
-   centrada num valor diferente do ótimo ecológico. É uma possibilidade interessante, mas nesta
-   rodada os dois ficam em 5, como nos outros estudos.
+O que continua desatualizado em relação ao que combinamos depois: 1. A
+segregação é de ruído fixo (`eps_sd`, `eps_p`), sem a opção
+infinitesimal. É a mesma coisa que corrigimos em Fêmeas variando e em
+Machos variando: com ruído fixo a variância genética cai até o piso 2
+vezes eps\^2 e a resposta evolutiva fica artificialmente comprimida. Num
+estudo cuja grandeza central é a covariância, isso é especialmente
+grave, porque a covariância é limitada pelas variâncias. 2. Não há
+coluna `segregacao` na saída, que foi o que adotamos nos outros estudos
+para saber depois qual modo foi usado. 3. Quando ninguém acasala, o
+rascunho devolve a geração anterior em vez de encerrar a réplica. 4. A
+viabilidade age depois do censo, e não sobre os juvenis, então o pool de
+machos não é constante. É o mesmo problema descrito na seção sobre o
+tamanho do pool. 5. Não há bloco de desenho experimental: nem
+`expand.grid`, nem `rodar_cenarios`, nem backup, nem reparto entre
+máquinas, nem semente própria. Ou seja, ele ainda não é um estudo, é um
+motor com um teste. 6. `phi_p` existe como parâmetro separado de `phi`,
+o que permitiria começar a preferência centrada num valor diferente do
+ótimo ecológico. É uma possibilidade interessante, mas nesta rodada os
+dois ficam em 5, como nos outros estudos.
 
-A proposta abaixo é a versão atualizada desse arquivo, já com as quatro decisões do modelo e
-com o desenho experimental.
+A proposta abaixo é a versão atualizada desse arquivo, já com as quatro
+decisões do modelo e com o desenho experimental.
 
 ### Proposta de desenho: medir a assimetria em vez de impô-la
 
-Cruzar sigma_p_init com sigma_z_init em Co-evolução custaria 70.560 cenários com 100 gerações
-cada, o que é inviável. Fêmeas variando e Machos variando gastam 10.080 cada um para varrer um
-eixo só. É preciso um corte, e a análise do Controle diz qual.
+Cruzar sigma_p_init com sigma_z_init em Co-evolução custaria 70.560
+cenários com 100 gerações cada, o que é inviável. Fêmeas variando e
+Machos variando gastam 10.080 cada um para varrer um eixo só. É preciso
+um corte, e a análise do Controle diz qual.
 
-O que o Controle mostrou (`10_Analise_Diagonal.R`, sobre os 70.560 cenários da superfície
-completa): a divergência entre as quatro curvas de preferência, medida como a distância média ao
-centroide delas no espaço das quatro métricas padronizadas, foi modelada em função da posição no
-plano. O regime de busca domina: A_max, k e seleção natural sozinhos explicam R^2 = 0.679. Sobre
-essa base, o que cada termo de dispersão acrescenta é:
+O que o Controle mostrou (`10_Analise_Diagonal.R`, sobre os 70.560
+cenários da superfície completa): a divergência entre as quatro curvas
+de preferência, medida como a distância média ao centroide delas no
+espaço das quatro métricas padronizadas, foi modelada em função da
+posição no plano. O regime de busca domina: A_max, k e seleção natural
+sozinhos explicam R\^2 = 0.679. Sobre essa base, o que cada termo de
+dispersão acrescenta é:
 
-| Termo | R^2 parcial (dentro do regime de busca) | R^2 (agregado nas 49 células) |
-|---|---|---|
+| Termo | R\^2 parcial (dentro do regime de busca) | R\^2 (agregado nas 49 células) |
+|------------------------|------------------------|------------------------|
 | Assimetria, `log(sigma_z / sigma_p)` | **0.428** | **0.639** |
 | Descasamento, `abs(log(sigma_p / sigma_z))` | 0.103 | 0.154 |
 | Máximo, `max(sigma_p, sigma_z)` | 0.049 | 0.074 |
 | Variabilidade total, `sqrt(sigma_p^2 + sigma_z^2)` | 0.020 | 0.030 |
 
-Ou seja: o que importa não é quanta variabilidade existe, é de que lado ela está. A divergência é
-máxima quando as fêmeas são homogêneas e os machos variados. Das 37 células cuja divergência
-ultrapassa o máximo alcançado pela diagonal, todas têm sigma_p baixo e sigma_z alto, e nenhuma o
-contrário. A leitura biológica é direta. Quando todas as fêmeas querem a mesma coisa, a geometria
-da curva se traduz sem ruído em quem acasala com quem; quando as fêmeas discordam entre si, a
-variação individual delas borra a assinatura. E é preciso haver machos variados para que exista
-algo a discriminar.
+Ou seja: o que importa não é quanta variabilidade existe, é de que lado
+ela está. A divergência é máxima quando as fêmeas são homogêneas e os
+machos variados. Das 37 células cuja divergência ultrapassa o máximo
+alcançado pela diagonal, todas têm sigma_p baixo e sigma_z alto, e
+nenhuma o contrário. A leitura biológica é direta. Quando todas as
+fêmeas querem a mesma coisa, a geometria da curva se traduz sem ruído em
+quem acasala com quem; quando as fêmeas discordam entre si, a variação
+individual delas borra a assinatura. E é preciso haver machos variados
+para que exista algo a discriminar.
 
-Repare na diferença entre as duas primeiras linhas da tabela. As duas medem a repartição entre os
-sexos, mas o descasamento em valor absoluto trata como equivalentes duas situações biologicamente
-opostas, fêmeas homogêneas com machos variados e o contrário, e por isso subestima as duas. É
-preciso medir com sinal.
+Repare na diferença entre as duas primeiras linhas da tabela. As duas
+medem a repartição entre os sexos, mas o descasamento em valor absoluto
+trata como equivalentes duas situações biologicamente opostas, fêmeas
+homogêneas com machos variados e o contrário, e por isso subestima as
+duas. É preciso medir com sinal.
 
-Saiu daí um resultado colateral que vale para o paper. O espalhamento da poliandria realizada entre as
-curvas acrescenta R^2 parcial de 0.0097, e somado à assimetria acrescenta 0.0003, com AIC pior. A
-divergência entre curvas de preferência não é, portanto, um artefato de densidade de rede. A
-ressalva é que o modelo base já contém A_max e k, que são os maiores determinantes do grau
-realizado, então o que este teste mostra é que a densidade residual não explica nada. Não é uma
-análise de mediação completa.
+Saiu daí um resultado colateral que vale para o paper. O espalhamento da
+poliandria realizada entre as curvas acrescenta R\^2 parcial de 0.0097,
+e somado à assimetria acrescenta 0.0003, com AIC pior. A divergência
+entre curvas de preferência não é, portanto, um artefato de densidade de
+rede. A ressalva é que o modelo base já contém A_max e k, que são os
+maiores determinantes do grau realizado, então o que este teste mostra é
+que a densidade residual não explica nada. Não é uma análise de mediação
+completa.
 
-Só que nada disso pode ser imposto em Co-evolução. Como as duas características são herdáveis, os
-dois sigmas são apenas condição inicial (ver a previsão sobre a variância inicial, acima), e a
+Só que nada disso pode ser imposto em Co-evolução. Como as duas
+características são herdáveis, os dois sigmas são apenas condição
+inicial (ver a previsão sobre a variância inicial, acima), e a
 assimetria da geração 50 não é a que fixamos na geração 1.
 
-Isso não anula o resultado do Controle, muda o seu papel. Ele é um fato sobre a regra de
-acasalamento, não sobre o desenho: dada uma população com estas dispersões, as curvas divergem
-isto. Vale em qualquer geração de qualquer estudo, porque as quatro usam a mesma
-`mate_with_survivors`. O que deixa de valer é usá-lo para desenhar a grade de sigma_init.
+Isso não anula o resultado do Controle, muda o seu papel. Ele é um fato
+sobre a regra de acasalamento, não sobre o desenho: dada uma população
+com estas dispersões, as curvas divergem isto. Vale em qualquer geração
+de qualquer estudo, porque as quatro usam a mesma `mate_with_survivors`.
+O que deixa de valer é usá-lo para desenhar a grade de sigma_init.
 
-A proposta, então, é medir em vez de impor. A assimetria realizada é calculável a cada geração a
-partir do que já gravamos:
+A proposta, então, é medir em vez de impor. A assimetria realizada é
+calculável a cada geração a partir do que já gravamos:
 
-    assimetria_realizada(t) = 0.5 * log( varz_pop(t) / varp_pop(t) )
+```         
+assimetria_realizada(t) = 0.5 * log( varz_pop(t) / varp_pop(t) )
+```
 
-Ela entra na análise como covariável geração a geração, e a pergunta passa a ser se a relação que
-o Controle encontrou se mantém quando as duas características evoluem. Manter-se ou não é
-resultado.
+Ela entra na análise como covariável geração a geração, e a pergunta
+passa a ser se a relação que o Controle encontrou se mantém quando as
+duas características evoluem. Manter-se ou não é resultado.
 
-Para a condição inicial bastam três níveis bem separados de variância (0.5, 1.0 e 2.0), porque o
-que se procura ali é o limiar de ignição descrito acima, e não uma curva de resposta. Mas os três
-níveis vão cruzados entre os dois sexos, e não ao longo da diagonal. A razão é que a geração 1 de
-Co-evolução é uma situação de tipo controle, onde a assimetria inicial afeta de verdade a rede
-que se forma, e a pergunta em aberto é se esse efeito se propaga ou se dissolve. Só o cruzamento
-permite perguntá-lo; a diagonal fixaria a assimetria inicial em zero e a pergunta desapareceria.
+Para a condição inicial bastam três níveis bem separados de variância
+(0.5, 1.0 e 2.0), porque o que se procura ali é o limiar de ignição
+descrito acima, e não uma curva de resposta. Mas os três níveis vão
+cruzados entre os dois sexos, e não ao longo da diagonal. A razão é que
+a geração 1 de Co-evolução é uma situação de tipo controle, onde a
+assimetria inicial afeta de verdade a rede que se forma, e a pergunta em
+aberto é se esse efeito se propaga ou se dissolve. Só o cruzamento
+permite perguntá-lo; a diagonal fixaria a assimetria inicial em zero e a
+pergunta desapareceria.
 
-As nove combinações, ordenadas pela assimetria. As duas colunas da direita são as grandezas
-definidas no vocabulário: a norma diz quanta variação há, a assimetria diz de que lado está.
+As nove combinações, ordenadas pela assimetria. As duas colunas da
+direita são as grandezas definidas no vocabulário: a norma diz quanta
+variação há, a assimetria diz de que lado está.
 
-| sigma_p | sigma_z | Assimetria log(sigma_z/sigma_p) | Norma sqrt(sigma_p^2+sigma_z^2) | |
-|---|---|---|---|---|
+| sigma_p | sigma_z | Assimetria log(sigma_z/sigma_p) | Norma sqrt(sigma_p^2+sigma_z^2) |   |
+|---------------|---------------|---------------|---------------|---------------|
 | 2.0 | 0.5 | -1.39 | 2.06 | fêmeas muito variadas, machos homogêneos |
-| 1.0 | 0.5 | -0.69 | 1.12 | |
-| 2.0 | 1.0 | -0.69 | 2.24 | |
+| 1.0 | 0.5 | -0.69 | 1.12 |  |
+| 2.0 | 1.0 | -0.69 | 2.24 |  |
 | 0.5 | 0.5 | 0.00 | 0.71 | a diagonal, pouca variação |
 | 1.0 | 1.0 | 0.00 | 1.41 | a diagonal, média |
 | 2.0 | 2.0 | 0.00 | 2.83 | a diagonal, muita |
-| 0.5 | 1.0 | +0.69 | 1.12 | |
-| 1.0 | 2.0 | +0.69 | 2.24 | |
+| 0.5 | 1.0 | +0.69 | 1.12 |  |
+| 1.0 | 2.0 | +0.69 | 2.24 |  |
 | 0.5 | 2.0 | +1.39 | 2.06 | fêmeas homogêneas, machos variados |
 
-São cinco valores de assimetria e seis de variabilidade total. As três linhas do meio são a
-diagonal que havíamos proposto: percorre a norma de 0.71 a 2.83 e deixa a assimetria presa em
-zero, exatamente ao contrário do que interessa. A última linha é o canto onde o Controle
-encontrou a divergência máxima, e o desenho diagonal a deixaria de fora por completo.
+São cinco valores de assimetria e seis de variabilidade total. As três
+linhas do meio são a diagonal que havíamos proposto: percorre a norma de
+0.71 a 2.83 e deixa a assimetria presa em zero, exatamente ao contrário
+do que interessa. A última linha é o canto onde o Controle encontrou a
+divergência máxima, e o desenho diagonal a deixaria de fora por
+completo.
 
-Neste desenho a assimetria com sinal e a norma ficam exatamente descorrelacionadas (r = 0),
-porque cada assimetria positiva tem o seu espelho negativo com a mesma norma e as contribuições
-se cancelam. Os dois efeitos podem então ser estimados separadamente, sem colinearidade, que era
-o risco de qualquer redução. Um limite honesto: as assimetrias extremas (mais e menos 1.39) só
-aparecem com norma 2.06, e não há como evitar isso com três níveis.
+Neste desenho a assimetria com sinal e a norma ficam exatamente
+descorrelacionadas (r = 0), porque cada assimetria positiva tem o seu
+espelho negativo com a mesma norma e as contribuições se cancelam. Os
+dois efeitos podem então ser estimados separadamente, sem colinearidade,
+que era o risco de qualquer redução. Um limite honesto: as assimetrias
+extremas (mais e menos 1.39) só aparecem com norma 2.06, e não há como
+evitar isso com três níveis.
 
-O desenho fica em 4 curvas x 9 combinações x 3 A_max x 3 k x 2 regimes x 20 réplicas = 12.960
-cenários, cerca de um quinto a mais que Fêmeas variando e Machos variando, e menos de um quinto
-da superfície completa.
+O desenho fica em 4 curvas x 9 combinações x 3 A_max x 3 k x 2 regimes x
+20 réplicas = 12.960 cenários, cerca de um quinto a mais que Fêmeas
+variando e Machos variando, e menos de um quinto da superfície completa.
 
-E daqui sai uma previsão que liga as duas coisas. Em Co-evolução o traço está sob seleção de
-viabilidade e sob seleção sexual, enquanto a preferência não recebe seleção direta nenhuma. Se
-sigma_z erodir mais depressa que sigma_p, a assimetria realizada deriva para valores negativos, e
-o Controle diz que essa é a região de divergência baixa. A previsão é que a assinatura topológica
-das curvas de preferência se desvaneça ao longo das gerações, a menos que o runaway se acenda e
-reponha variância no traço. A persistência da assinatura seria, ela mesma, um indicador de que o
-ciclo de Fisher está ativo.
+E daqui sai uma previsão que liga as duas coisas. Em Co-evolução o traço
+está sob seleção de viabilidade e sob seleção sexual, enquanto a
+preferência não recebe seleção direta nenhuma. Se sigma_z erodir mais
+depressa que sigma_p, a assimetria realizada deriva para valores
+negativos, e o Controle diz que essa é a região de divergência baixa. A
+previsão é que a assinatura topológica das curvas de preferência se
+desvaneça ao longo das gerações, a menos que o runaway se acenda e
+reponha variância no traço. A persistência da assinatura seria, ela
+mesma, um indicador de que o ciclo de Fisher está ativo.
 
 ### Código proposto
 
-O código está em `Fase_Coevolucao_PROPOSTA.R`, e não aqui, para esta nota continuar sendo um
-documento de leitura. Nada nele roda ao dar source: é a proposta escrita, não o estudo.
+O código está em `Fase_Coevolucao_PROPOSTA.R`, e não aqui, para esta
+nota continuar sendo um documento de leitura. Nada nele roda ao dar
+source: é a proposta escrita, não o estudo.
 
-Ele substitui o conteúdo de `Fase_Coevolucao.R` quando os quatro pontos abaixo estiverem
-decididos. O motor reaproveita tudo o que já existe em `01_metricas_e_utilitarios.R`
-(`mate_with_survivors`, `calc_metrics_from_M`, `selecionar_machos_adultos`, `rodar_cenarios`),
-e o que é novo em relação ao rascunho são as quatro decisões do modelo, o registro da
-covariância dentro dos casais (`cov_casais`) e o bloco de desenho experimental.
+Ele substitui o conteúdo de `Fase_Coevolucao.R` quando os quatro pontos
+abaixo estiverem decididos. O motor reaproveita tudo o que já existe em
+`01_metricas_e_utilitarios.R` (`mate_with_survivors`,
+`calc_metrics_from_M`, `selecionar_machos_adultos`, `rodar_cenarios`), e
+o que é novo em relação ao rascunho são as quatro decisões do modelo, o
+registro da covariância dentro dos casais (`cov_casais`) e o bloco de
+desenho experimental.
 
-Dois pontos do código que vale ter em mente ao lê-lo. O primeiro é que os filhotes são
-amostrados por índice, com um único sorteio, e os vetores de z e de p são indexados pelo mesmo
-`idx`: é isso que mantém o par de cada filhote junto e permite a covariância existir. O segundo
-é que o pool genotípico registrado é o censo adulto, e não a população pré-seleção, porque aqui
-a viabilidade sobre os machos deixa de ser neutra em relação a p, já que z e p estão
-correlacionados.
+Dois pontos do código que vale ter em mente ao lê-lo. O primeiro é que
+os filhotes são amostrados por índice, com um único sorteio, e os
+vetores de z e de p são indexados pelo mesmo `idx`: é isso que mantém o
+par de cada filhote junto e permite a covariância existir. O segundo é
+que o pool genotípico registrado é o censo adulto, e não a população
+pré-seleção, porque aqui a viabilidade sobre os machos deixa de ser
+neutra em relação a p, já que z e p estão correlacionados.
 
 **Quatro pontos para discutir antes de rodar.**
 
-**1. O gradiente de k**, que é o mais urgente. Como está detalhado na seção sobre a interação
-entre A_max, k e a curva de preferência, das nove células do cruzamento A_max por k, as com
-A_max = 10 e k igual a 10 ou 20 não são tratamentos distintos: nelas o k nunca é atingido e o que
-sobra é sempre "ela acasala com quem aceitar entre dez machos". Copiar o desenho de Fêmeas
-variando e Machos variando gastaria cenários em células que não separam nada. Três saídas, em
-ordem crescente de ambição: (a) manter o cruzamento como está, para conservar a comparabilidade
-com os outros estudos, e apenas declarar a limitação; (b) substituir o k fixo por um k
-proporcional a A_max, de modo que o gradiente de poliandria seja o mesmo em todos os níveis de
-custo de busca; (c) deixar o k de fora de Co-evolução, já que ele foi varrido nos outros dois, e
-usar os cenários economizados para outra coisa. A opção (a) é a mais conservadora; a (c) é a que
-aproveita melhor o tempo.
+**1. O gradiente de k**, que é o mais urgente. Como está detalhado na
+seção sobre a interação entre A_max, k e a curva de preferência, das
+nove células do cruzamento A_max por k, as com A_max = 10 e k igual a 10
+ou 20 não são tratamentos distintos: nelas o k nunca é atingido e o que
+sobra é sempre "ela acasala com quem aceitar entre dez machos". Copiar o
+desenho de Fêmeas variando e Machos variando gastaria cenários em
+células que não separam nada. Três saídas, em ordem crescente de
+ambição: (a) manter o cruzamento como está, para conservar a
+comparabilidade com os outros estudos, e apenas declarar a limitação;
+(b) substituir o k fixo por um k proporcional a A_max, de modo que o
+gradiente de poliandria seja o mesmo em todos os níveis de custo de
+busca; (c) deixar o k de fora de Co-evolução, já que ele foi varrido nos
+outros dois, e usar os cenários economizados para outra coisa. A opção
+(a) é a mais conservadora; a (c) é a que aproveita melhor o tempo.
 
-**2. Os três níveis de variância inicial bastam?** A previsão é de limiar e não de dose, o que
-justifica três níveis bem separados. Mas se o limiar cair entre dois deles, saberemos que existe
-e não onde está. Vale acrescentar um quarto nível, ou é melhor localizá-lo depois, com uma
-varredura fina só na curva de preferência onde ele aparecer?
+**2. Os três níveis de variância inicial bastam?** A previsão é de
+limiar e não de dose, o que justifica três níveis bem separados. Mas se
+o limiar cair entre dois deles, saberemos que existe e não onde está.
+Vale acrescentar um quarto nível, ou é melhor localizá-lo depois, com
+uma varredura fina só na curva de preferência onde ele aparecer?
 
-**3. A `cov_casais`**, que mede a covariância entre traço e preferência dentro dos casais que
-efetivamente acasalaram. É o passo anterior na cadeia causal, acasalamento assortativo primeiro e
-covariância genética depois, e permite separar os dois. Vale registrar as duas ou é redundante?
+**3. A `cov_casais`**, que mede a covariância entre traço e preferência
+dentro dos casais que efetivamente acasalaram. É o passo anterior na
+cadeia causal, acasalamento assortativo primeiro e covariância genética
+depois, e permite separar os dois. Vale registrar as duas ou é
+redundante?
 
-**4. A explosão numérica.** Se o runaway aparecer com a curva sigmoide e sem seleção natural, o
-traço pode crescer sem limite. Em Fêmeas variando e Machos variando isso não acontecia porque só
-uma característica evoluía. Talvez valha registrar um indicador de fuga, por exemplo a geração em
-que a média do traço passa de algum múltiplo de phi, em vez de deixar a réplica correr até a
-geração 100 sem aviso.
+**4. A explosão numérica.** Se o runaway aparecer com a curva sigmoide e
+sem seleção natural, o traço pode crescer sem limite. Em Fêmeas variando
+e Machos variando isso não acontecia porque só uma característica
+evoluía. Talvez valha registrar um indicador de fuga, por exemplo a
+geração em que a média do traço passa de algum múltiplo de phi, em vez
+de deixar a réplica correr até a geração 100 sem aviso.
 
-**Estado.** Motor rascunhado em `Fase_Coevolucao.R`, com os pontos de atualização listados acima
-ainda pendentes. Nada rodado, aguardando a discussão dos quatro pontos de desenho.
+**Estado.** Motor rascunhado em `Fase_Coevolucao.R`, com os pontos de
+atualização listados acima ainda pendentes. Nada rodado, aguardando a
+discussão dos quatro pontos de desenho.
 
----
+------------------------------------------------------------------------
 
 ## A interação entre A_max, k e a curva de preferência
 
-Este ponto precisa ficar explícito porque afeta a leitura de todos os estudos já rodados e,
-principalmente, a escolha de parâmetros de Co-evolução, que ainda está aberta.
+Este ponto precisa ficar explícito porque afeta a leitura de todos os
+estudos já rodados e, principalmente, a escolha de parâmetros de
+Co-evolução, que ainda está aberta.
 
-O parâmetro k não é o número de parceiros, é um teto. O número de parceiros que uma fêmea de fato
-consegue é
+O parâmetro k não é o número de parceiros, é um teto. O número de
+parceiros que uma fêmea de fato consegue é
 
-    parceiros = min( k , número de machos que ela aceitou entre os A_max avaliados )
+```         
+parceiros = min( k , número de machos que ela aceitou entre os A_max avaliados )
+```
 
-e, como a amostragem é sem reposição, ela nunca pode acasalar com mais machos do que os que
-avaliou. Nos cenários com A_max = 10 e k = 20, portanto, o k é inalcançável por construção: o
-máximo absoluto é 10. Isso não é um defeito do modelo, é exatamente o custo de busca que
-queremos representar, mas significa que o efeito de k não pode ser lido isoladamente do de A_max.
+e, como a amostragem é sem reposição, ela nunca pode acasalar com mais
+machos do que os que avaliou. Nos cenários com A_max = 10 e k = 20,
+portanto, o k é inalcançável por construção: o máximo absoluto é 10.
+Isso não é um defeito do modelo, é exatamente o custo de busca que
+queremos representar, mas significa que o efeito de k não pode ser lido
+isoladamente do de A_max.
 
-E o teto morde muito antes do que o limite aritmético sugere, porque ela não acasala com os dez
-que avaliou, acasala com os que aceitou entre esses dez. Com A_max = 10 e uma taxa média de
-aceite de 0.5, o número esperado de aceites é 5: mesmo o cenário k = 5 já fica no limite, e o
+E o teto morde muito antes do que o limite aritmético sugere, porque ela
+não acasala com os dez que avaliou, acasala com os que aceitou entre
+esses dez. Com A_max = 10 e uma taxa média de aceite de 0.5, o número
+esperado de aceites é 5: mesmo o cenário k = 5 já fica no limite, e o
 cenário k = 10 exigiria que ela aceitasse todos os dez.
 
-O agravante é que a taxa de aceite depende da curva de preferência, o que transforma uma interação
-entre dois fatores de desenho numa interação com a variável de interesse do paper. Tomando s = 2
-e sigma_p = sigma_z = 1.0, a probabilidade média de aceite por macho avaliado é aproximadamente:
+O agravante é que a taxa de aceite depende da curva de preferência, o
+que transforma uma interação entre dois fatores de desenho numa
+interação com a variável de interesse do paper. Tomando s = 2 e sigma_p
+= sigma_z = 1.0, a probabilidade média de aceite por macho avaliado é
+aproximadamente:
 
-| Curva de preferência | Fórmula | Aceite médio |
-|---|---|---|
-| Aleatória | P = 0.5 | 0.50 |
-| Sigmoide | P = 1 / (1 + exp(-s (z - p))) | 0.50 |
-| Gaussiana | P = exp(-s (z - p)^2) | 0.33 |
-| U-shaped | P = 1 - exp(-s (z - p)^2) | 0.67 |
+| Curva de preferência | Fórmula                       | Aceite médio |
+|----------------------|-------------------------------|--------------|
+| Aleatória            | P = 0.5                       | 0.50         |
+| Sigmoide             | P = 1 / (1 + exp(-s (z - p))) | 0.50         |
+| Gaussiana            | P = exp(-s (z - p)\^2)        | 0.33         |
+| U-shaped             | P = 1 - exp(-s (z - p)\^2)    | 0.67         |
 
-(Para a gaussiana, a diferença z - p tem variância sigma_z^2 + sigma_p^2, e a média de
-exp(-s d^2) para d normal de variância v é 1 / sqrt(1 + 2 s v). A u-shaped é o complemento.)
+(Para a gaussiana, a diferença z - p tem variância sigma_z\^2 +
+sigma_p\^2, e a média de exp(-s d\^2) para d normal de variância v é 1 /
+sqrt(1 + 2 s v). A u-shaped é o complemento.)
 
-Os números medidos (`00_teste_motores.R`, uma réplica por célula, sem seleção natural). Em cada
-célula, a poliandria realizada e, entre parênteses, a proporção que atingiu o k nominal:
+Os números medidos (`00_teste_motores.R`, uma réplica por célula, sem
+seleção natural). Em cada célula, a poliandria realizada e, entre
+parênteses, a proporção que atingiu o k nominal:
 
-| A_max | curva | k = 5 | k = 10 | k = 20 |
-|---|---|---|---|---|
-| 200 | gaussiana | 4.98 (100%) | 9.91 (98%) | 19.68 (95%) |
-| 200 | aleatória | 5.00 (100%) | 10.00 (100%) | 20.00 (100%) |
-| 200 | U-shaped | 5.00 (100%) | 10.00 (100%) | 20.00 (100%) |
-| 40 | gaussiana | 4.83 (93%) | 9.15 (79%) | 13.08 (10%) |
-| 40 | aleatória | 5.00 (100%) | 10.00 (100%) | 18.91 (62%) |
-| 40 | U-shaped | 5.00 (100%) | 10.00 (100%) | 19.90 (94%) |
-| 10 | gaussiana | 3.32 (26%) | 3.56 (0%) | 3.51 (0%) |
-| 10 | aleatória | 4.45 (66%) | 5.15 (0%) | 5.10 (0%) |
-| 10 | U-shaped | 4.78 (84%) | 6.55 (4%) | 6.89 (0%) |
+| A_max | curva     | k = 5       | k = 10       | k = 20       |
+|-------|-----------|-------------|--------------|--------------|
+| 200   | gaussiana | 4.98 (100%) | 9.91 (98%)   | 19.68 (95%)  |
+| 200   | aleatória | 5.00 (100%) | 10.00 (100%) | 20.00 (100%) |
+| 200   | U-shaped  | 5.00 (100%) | 10.00 (100%) | 20.00 (100%) |
+| 40    | gaussiana | 4.83 (93%)  | 9.15 (79%)   | 13.08 (10%)  |
+| 40    | aleatória | 5.00 (100%) | 10.00 (100%) | 18.91 (62%)  |
+| 40    | U-shaped  | 5.00 (100%) | 10.00 (100%) | 19.90 (94%)  |
+| 10    | gaussiana | 3.32 (26%)  | 3.56 (0%)    | 3.51 (0%)    |
+| 10    | aleatória | 4.45 (66%)  | 5.15 (0%)    | 5.10 (0%)    |
+| 10    | U-shaped  | 4.78 (84%)  | 6.55 (4%)    | 6.89 (0%)    |
 
-Os números seguem uma regra simples: a poliandria realizada é aproximadamente
-`min(k, A_max x taxa de aceite)`. Confira na faixa de A_max = 10, onde o teto nunca ata:
-10 x 0.33 = 3.3 contra 3.56 medido na gaussiana, 10 x 0.50 = 5.0 contra 5.15 na aleatória,
-10 x 0.67 = 6.7 contra 6.55 na U-shaped. É de passagem uma validação do motor, que se comporta
-como a teoria prevê.
+Os números seguem uma regra simples: a poliandria realizada é
+aproximadamente `min(k, A_max x taxa de aceite)`. Confira na faixa de
+A_max = 10, onde o teto nunca ata: 10 x 0.33 = 3.3 contra 3.56 medido na
+gaussiana, 10 x 0.50 = 5.0 contra 5.15 na aleatória, 10 x 0.67 = 6.7
+contra 6.55 na U-shaped. É de passagem uma validação do motor, que se
+comporta como a teoria prevê.
 
-A conclusão prática é forte: com A_max = 10, as células k = 10 e k = 20 não são dois tratamentos
-distintos de poliandria, são o mesmo tratamento, que na prática é "ela acasala com quem aceitar
-entre dez machos". O gradiente de poliandria simplesmente não existe nessa faixa de A_max. E com
-A_max = 40 o problema não desapareceu de todo: na curva gaussiana só 10% das fêmeas chega a
-k = 20, enquanto na U-shaped chegam 94%.
+A conclusão prática é forte: com A_max = 10, as células k = 10 e k = 20
+não são dois tratamentos distintos de poliandria, são o mesmo
+tratamento, que na prática é "ela acasala com quem aceitar entre dez
+machos". O gradiente de poliandria simplesmente não existe nessa faixa
+de A_max. E com A_max = 40 o problema não desapareceu de todo: na curva
+gaussiana só 10% das fêmeas chega a k = 20, enquanto na U-shaped chegam
+94%.
 
-Com A_max = 200, em compensação, está tudo limpo. Todas as curvas atingem o k, e o grau realizado
-é idêntico entre elas (5.00, 10.00, 20.00), ou seja, a densidade da rede está equiparada. Isso dá
-um caminho analítico direto, descrito na seção sobre as hipóteses.
+Com A_max = 200, em compensação, está tudo limpo. Todas as curvas
+atingem o k, e o grau realizado é idêntico entre elas (5.00, 10.00,
+20.00), ou seja, a densidade da rede está equiparada. Isso dá um caminho
+analítico direto, descrito na seção sobre as hipóteses.
 
-Uma nota metodológica: as estimativas analíticas que fizemos antes destes números (21%, 2%, 92%,
-99% nas células críticas) erraram de forma sistemática, sempre para baixo na gaussiana e para
-cima na U-shaped. O cálculo binomial trata todas as fêmeas como iguais, mas o pico p varia entre
-elas: uma fêmea com p perto de 5, onde estão quase todos os machos, aceita muito mais que a
-média, e uma com p extremo aceita muito menos. Isso gera sobredispersão, e as caudas é justamente
-onde o teto é ou não atingido. Valem os números medidos.
+Uma nota metodológica: as estimativas analíticas que fizemos antes
+destes números (21%, 2%, 92%, 99% nas células críticas) erraram de forma
+sistemática, sempre para baixo na gaussiana e para cima na U-shaped. O
+cálculo binomial trata todas as fêmeas como iguais, mas o pico p varia
+entre elas: uma fêmea com p perto de 5, onde estão quase todos os
+machos, aceita muito mais que a média, e uma com p extremo aceita muito
+menos. Isso gera sobredispersão, e as caudas é justamente onde o teto é
+ou não atingido. Valem os números medidos.
 
 Duas consequências para a análise, então.
 
-Primeira, o k realizado difere sistematicamente entre curvas de preferência, o que é um
-confundimento direto sobre a H1. Se a gaussiana e a u-shaped produzem topologias diferentes, uma
-parte dessa diferença pode vir simplesmente de as fêmeas da u-shaped terem mais parceiros, e não
-da geometria da escolha. Densidade de arestas afeta modularidade, aninhamento e centralização.
+Primeira, o k realizado difere sistematicamente entre curvas de
+preferência, o que é um confundimento direto sobre a H1. Se a gaussiana
+e a u-shaped produzem topologias diferentes, uma parte dessa diferença
+pode vir simplesmente de as fêmeas da u-shaped terem mais parceiros, e
+não da geometria da escolha. Densidade de arestas afeta modularidade,
+aninhamento e centralização.
 
-Segunda, o efeito de A_max e o de k estão parcialmente confundidos entre si, então nenhum dos
-dois pode entrar num modelo como fator aditivo sem o termo de interação, e a interpretação de
-qualquer coeficiente marginal de k é enganosa.
+Segunda, o efeito de A_max e o de k estão parcialmente confundidos entre
+si, então nenhum dos dois pode entrar num modelo como fator aditivo sem
+o termo de interação, e a interpretação de qualquer coeficiente marginal
+de k é enganosa.
 
-Uma ressalva sobre esses números: são aproximações analíticas com s fixo em 2, ignorando o
-truncamento em zero, a variação de s entre fêmeas e o efeito da seleção natural, que estreita a
-distribuição dos machos e portanto aumenta a taxa de aceite da gaussiana. Servem para mostrar a
+Uma ressalva sobre esses números: são aproximações analíticas com s fixo
+em 2, ignorando o truncamento em zero, a variação de s entre fêmeas e o
+efeito da seleção natural, que estreita a distribuição dos machos e
+portanto aumenta a taxa de aceite da gaussiana. Servem para mostrar a
 ordem de grandeza do problema, não como estimativa exata.
 
-A decisão que tomamos foi tratar k como apetite, e não como cota. A fêmea busca até k parceiros; quantos consegue depende da
-disponibilidade e da própria seletividade. A poliandria realizada passa a ser variável resposta,
-e não parâmetro. Três razões sustentam isso. É o que o código sempre fez, porque
-`matings_per_female` é condição de parada e não cota garantida. Converte as células degeneradas
-nas mais interessantes: A_max = 10 com k = 20 não é lixo, é poliandria frustrada, e comparada
-com A_max = 200 e k = 20 é exatamente o teste da H3. E é mais defensável biologicamente, porque
-nenhum organismo tem garantido o seu número de parceiros.
+A decisão que tomamos foi tratar k como apetite, e não como cota. A
+fêmea busca até k parceiros; quantos consegue depende da disponibilidade
+e da própria seletividade. A poliandria realizada passa a ser variável
+resposta, e não parâmetro. Três razões sustentam isso. É o que o código
+sempre fez, porque `matings_per_female` é condição de parada e não cota
+garantida. Converte as células degeneradas nas mais interessantes: A_max
+= 10 com k = 20 não é lixo, é poliandria frustrada, e comparada com
+A_max = 200 e k = 20 é exatamente o teste da H3. E é mais defensável
+biologicamente, porque nenhum organismo tem garantido o seu número de
+parceiros.
 
-O reenquadramento exige medir, e por isso `calc_metrics_from_M` passou a gravar
-`grau_medio_femeas` (a poliandria realizada), `prop_femeas_atingiu_k` e `arestas`. Nenhuma delas
-podia ser recuperada dos dados antigos: o Is é calculado sobre os machos e não permite
-reconstruir o grau das fêmeas. Foi a razão mais forte para refazer os três estudos.
+O reenquadramento exige medir, e por isso `calc_metrics_from_M` passou a
+gravar `grau_medio_femeas` (a poliandria realizada),
+`prop_femeas_atingiu_k` e `arestas`. Nenhuma delas podia ser recuperada
+dos dados antigos: o Is é calculado sobre os machos e não permite
+reconstruir o grau das fêmeas. Foi a razão mais forte para refazer os
+três estudos.
 
-O desenho fatorial fica intacto, os 3 por 3 de A_max e k. Chegou a ser proposto cortar a célula
-A_max = 10 com k = 10, por ser estatisticamente indistinguível de k = 20, mas a proposta foi
-retirada: agora que a poliandria realizada é medida, a convergência entre as duas células é
-justamente a evidência de que k é apetite e não cota. Manter o fatorial balanceado vale mais que
-os 11% de computação economizados.
+O desenho fatorial fica intacto, os 3 por 3 de A_max e k. Chegou a ser
+proposto cortar a célula A_max = 10 com k = 10, por ser estatisticamente
+indistinguível de k = 20, mas a proposta foi retirada: agora que a
+poliandria realizada é medida, a convergência entre as duas células é
+justamente a evidência de que k é apetite e não cota. Manter o fatorial
+balanceado vale mais que os 11% de computação economizados.
 
-Fica uma dúvida de inferência causal, para levar ao Miudo. Se o grau realizado depende da curva de
-preferência, e o usamos como covariável para comparar curvas, estamos controlando por um mediador
-e não por um confundidor: a curva causa o grau realizado e a topologia, então controlar remove
-parte do efeito causal que queremos medir. A saída provável é reportar as duas coisas, o efeito
-total da curva e o efeito líquido de densidade, declarando que respondem a perguntas diferentes.
+Fica uma dúvida de inferência causal, para levar ao Miudo. Se o grau
+realizado depende da curva de preferência, e o usamos como covariável
+para comparar curvas, estamos controlando por um mediador e não por um
+confundidor: a curva causa o grau realizado e a topologia, então
+controlar remove parte do efeito causal que queremos medir. A saída
+provável é reportar as duas coisas, o efeito total da curva e o efeito
+líquido de densidade, declarando que respondem a perguntas diferentes.
 
----
+------------------------------------------------------------------------
 
 ## O tamanho do pool de machos não é constante
 
-Esta seção nasceu de uma observação sobre o rótulo de A_max, mas o problema de fundo acabou
-sendo outro, e maior.
+Esta seção nasceu de uma observação sobre o rótulo de A_max, mas o
+problema de fundo acabou sendo outro, e maior.
 
-Comecemos pelo que não é um problema. Descrevemos os níveis de A_max como "100%, 20% e 5% de
-N = 200". Os rótulos percentuais estão errados quando a seleção natural está ligada, mas o
-tratamento em si continua comparável: A_max = 40 quer dizer "ela avalia 40 machos" com a seleção
-ligada ou desligada, e A_max = 200 quer dizer "ela avalia todos os disponíveis" nos dois casos,
-porque o código faz `min(A_max, número de sobreviventes)`. A correção aqui é só de rótulo:
-descrever A_max em número absoluto de machos avaliados, e não em porcentagem. O que muda é a
-interpretação de A_max = 200, que não é um terceiro ponto equidistante num gradiente, e sim a
-condição de saturação, "sem restrição de busca". Por isso A_max deve entrar nos modelos como
-fator, nunca como covariável contínua.
+Comecemos pelo que não é um problema. Descrevemos os níveis de A_max
+como "100%, 20% e 5% de N = 200". Os rótulos percentuais estão errados
+quando a seleção natural está ligada, mas o tratamento em si continua
+comparável: A_max = 40 quer dizer "ela avalia 40 machos" com a seleção
+ligada ou desligada, e A_max = 200 quer dizer "ela avalia todos os
+disponíveis" nos dois casos, porque o código faz
+`min(A_max, número de sobreviventes)`. A correção aqui é só de rótulo:
+descrever A_max em número absoluto de machos avaliados, e não em
+porcentagem. O que muda é a interpretação de A_max = 200, que não é um
+terceiro ponto equidistante num gradiente, e sim a condição de
+saturação, "sem restrição de busca". Por isso A_max deve entrar nos
+modelos como fator, nunca como covariável contínua.
 
-O problema de verdade é outro, e só existia com a seleção natural ligada. Com ela desligada, o
-código fazia `survive <- rep(TRUE, N_machos)` e os 200 machos passavam todos, de modo que o pool
-era constante. Com ela ligada, o número de machos disponíveis muda de cenário
-para cenário, porque a viabilidade remove uma fração que depende de sigma_z. A fração que
-sobrevive é aproximadamente `1 / sqrt(1 + 2 gamma sigma_z^2)`, ou seja, com gamma = 0.2:
+O problema de verdade é outro, e só existia com a seleção natural
+ligada. Com ela desligada, o código fazia
+`survive <- rep(TRUE, N_machos)` e os 200 machos passavam todos, de modo
+que o pool era constante. Com ela ligada, o número de machos disponíveis
+muda de cenário para cenário, porque a viabilidade remove uma fração que
+depende de sigma_z. A fração que sobrevive é aproximadamente
+`1 / sqrt(1 + 2 gamma sigma_z^2)`, ou seja, com gamma = 0.2:
 
-| sigma_z | 0.2 | 0.5 | 0.8 | 1.0 | 1.2 | 1.5 | 2.0 |
-|---|---|---|---|---|---|---|---|
+| sigma_z                       | 0.2 | 0.5 | 0.8 | 1.0 | 1.2 | 1.5 | 2.0 |
+|-------------------------------|-----|-----|-----|-----|-----|-----|-----|
 | Machos sobreviventes (de 200) | 198 | 191 | 178 | 169 | 159 | 145 | 124 |
 
-O pool encolhe 37% ao longo do gradiente, e isso muda as dimensões da matriz sobre a qual as
-métricas são calculadas. Modularidade, aninhamento e centralização dependem do tamanho da matriz,
-e não apenas da sua densidade, então qualquer tendência ao longo de sigma_z já estaria
-contaminada só por isso, sem nenhuma relação com a escolha feminina.
+O pool encolhe 37% ao longo do gradiente, e isso muda as dimensões da
+matriz sobre a qual as métricas são calculadas. Modularidade,
+aninhamento e centralização dependem do tamanho da matriz, e não apenas
+da sua densidade, então qualquer tendência ao longo de sigma_z já
+estaria contaminada só por isso, sem nenhuma relação com a escolha
+feminina.
 
-Convém tomar cuidado com o argumento de densidade, que é mais fraco do que parece. Seria tentador
-dizer que o mesmo número de arestas se reparte entre menos machos e que o grau médio dos machos
-sobe, mas isso não se sustenta, por duas razões. O número de fêmeas na rede também não é constante, porque as
-que não acasalam são excluídas do cálculo das métricas. E o número de arestas cai com sigma_z,
-porque a taxa de aceite diminui quando os machos estão mais dispersos: mesmo depois da
-viabilidade estreitar a distribuição, o desvio padrão dos sobreviventes ainda sobe de cerca de
-0.20 para cerca de 1.24 ao longo do gradiente. Numerador e denominador caem os dois, e sem medir
-não dá para afirmar qual ganha.
+Convém tomar cuidado com o argumento de densidade, que é mais fraco do
+que parece. Seria tentador dizer que o mesmo número de arestas se
+reparte entre menos machos e que o grau médio dos machos sobe, mas isso
+não se sustenta, por duas razões. O número de fêmeas na rede também não
+é constante, porque as que não acasalam são excluídas do cálculo das
+métricas. E o número de arestas cai com sigma_z, porque a taxa de aceite
+diminui quando os machos estão mais dispersos: mesmo depois da
+viabilidade estreitar a distribuição, o desvio padrão dos sobreviventes
+ainda sobe de cerca de 0.20 para cerca de 1.24 ao longo do gradiente.
+Numerador e denominador caem os dois, e sem medir não dá para afirmar
+qual ganha.
 
-Há uma distinção importante entre os dois sumiços. As fêmeas somem da rede por um resultado
-biológico que queremos medir, o de não terem acasalado, e ele fica gravado à parte em
-`prop_femeas_sem_acasalar`. Os machos sumiam por um artefato de onde tínhamos colocado o passo da
-viabilidade, e em quantidade que dependia justamente do eixo do experimento.
+Há uma distinção importante entre os dois sumiços. As fêmeas somem da
+rede por um resultado biológico que queremos medir, o de não terem
+acasalado, e ele fica gravado à parte em `prop_femeas_sem_acasalar`. Os
+machos sumiam por um artefato de onde tínhamos colocado o passo da
+viabilidade, e em quantidade que dependia justamente do eixo do
+experimento.
 
-Onde isso morde: em Fêmeas variando pouco, porque sigma_z fica fixo em 1.0 e o pool é estável. No
-Controle e em Machos variando morde de frente, porque ali sigma_z é o eixo do experimento, e
-parte de qualquer tendência das métricas ao longo dele, nos cenários com seleção natural ligada,
-era só o pool encolhendo.
+Onde isso morde: em Fêmeas variando pouco, porque sigma_z fica fixo em
+1.0 e o pool é estável. No Controle e em Machos variando morde de
+frente, porque ali sigma_z é o eixo do experimento, e parte de qualquer
+tendência das métricas ao longo dele, nos cenários com seleção natural
+ligada, era só o pool encolhendo.
 
-Pior ainda, o confundimento estava alinhado com o contraste que interessa. Como o pool só
-encolhia com a seleção natural ligada, comparar os dois regimes não comparava apenas "há seleção"
-contra "não há": comparava também "há menos machos" contra "há 200". Um artefato de densidade
-teria se apresentado como um efeito da seleção natural, que é o pior lugar possível para ele
-estar.
+Pior ainda, o confundimento estava alinhado com o contraste que
+interessa. Como o pool só encolhia com a seleção natural ligada,
+comparar os dois regimes não comparava apenas "há seleção" contra "não
+há": comparava também "há menos machos" contra "há 200". Um artefato de
+densidade teria se apresentado como um efeito da seleção natural, que é
+o pior lugar possível para ele estar.
 
-O lado prático disso é bom: para a metade do desenho sem seleção natural, o censo constante é uma
-mudança cosmética. O código antigo entregava 200 machos e o novo entrega 200 machos, com a mesma
+O lado prático disso é bom: para a metade do desenho sem seleção
+natural, o censo constante é uma mudança cosmética. O código antigo
+entregava 200 machos e o novo entrega 200 machos, com a mesma
 distribuição.
 
-A solução foi o censo de adultos constante. A seleção de viabilidade passou a agir sobre juvenis,
-antes do censo. Cada geração começa com vários machos juvenis por vaga, a viabilidade age sobre
-eles, e o censo adulto fica sempre em 200 machos. A seleção natural continua mudando quais machos
-estão disponíveis, que é o efeito que nos interessa, e deixa de mudar quantos, que era o
-confundimento. Biologicamente é a formulação mais comum, aliás: a mortalidade de viabilidade age
-sobre juvenis e o censo é de adultos.
+A solução foi o censo de adultos constante. A seleção de viabilidade
+passou a agir sobre juvenis, antes do censo. Cada geração começa com
+vários machos juvenis por vaga, a viabilidade age sobre eles, e o censo
+adulto fica sempre em 200 machos. A seleção natural continua mudando
+quais machos estão disponíveis, que é o efeito que nos interessa, e
+deixa de mudar quantos, que era o confundimento. Biologicamente é a
+formulação mais comum, aliás: a mortalidade de viabilidade age sobre
+juvenis e o censo é de adultos.
 
-Vale registrar as duas alternativas que foram descartadas, porque o argumento pode voltar.
+Vale registrar as duas alternativas que foram descartadas, porque o
+argumento pode voltar.
 
-Registrar e controlar, ou seja, gravar `n_machos_surv` e usá-lo como covariável nos modelos.
-Custo zero e sem mudar o modelo, mas deixa o confundimento na estrutura dos dados e obriga a
-confiar num ajuste estatístico para algo que dá para resolver na origem. Foi a recomendação
-inicial, feita quando ainda supúnhamos que os três estudos não seriam refeitos. A partir do
-momento em que o recorrido completo entrou em cena, ela deixou de fazer sentido. A coluna
-`n_machos_surv` continua sendo gravada, mas agora como verificação e não como correção.
+Registrar e controlar, ou seja, gravar `n_machos_surv` e usá-lo como
+covariável nos modelos. Custo zero e sem mudar o modelo, mas deixa o
+confundimento na estrutura dos dados e obriga a confiar num ajuste
+estatístico para algo que dá para resolver na origem. Foi a recomendação
+inicial, feita quando ainda supúnhamos que os três estudos não seriam
+refeitos. A partir do momento em que o recorrido completo entrou em
+cena, ela deixou de fazer sentido. A coluna `n_machos_surv` continua
+sendo gravada, mas agora como verificação e não como correção.
 
-Redefinir A_max como proporção do pool. Tornaria o custo de busca comparável entre regimes, mas
-não resolve o problema principal, que é a densidade, e além disso deixaria A_max e o tamanho do
-pool colineares por construção.
+Redefinir A_max como proporção do pool. Tornaria o custo de busca
+comparável entre regimes, mas não resolve o problema principal, que é a
+densidade, e além disso deixaria A_max e o tamanho do pool colineares
+por construção.
 
-Sobre a comparabilidade entre estudos, que foi a objeção original ao censo constante: mudar a
-regra faria Co-evolução deixar de ser comparável com Controle, Fêmeas variando e Machos variando,
-e a inferência inteira depende dessa comparação, já que a diferença entre Co-evolução e o
-Controle é o que a co-evolução acrescentou, e essa subtração não vale se os dois também diferirem
-na demografia. A objeção era correta, mas valia apenas enquanto os três primeiros estudos
-ficassem como estavam. Como o recorrido completo vai acontecer de qualquer maneira, o censo
-constante passa a valer para os quatro e a comparabilidade fica intacta.
+Sobre a comparabilidade entre estudos, que foi a objeção original ao
+censo constante: mudar a regra faria Co-evolução deixar de ser
+comparável com Controle, Fêmeas variando e Machos variando, e a
+inferência inteira depende dessa comparação, já que a diferença entre
+Co-evolução e o Controle é o que a co-evolução acrescentou, e essa
+subtração não vale se os dois também diferirem na demografia. A objeção
+era correta, mas valia apenas enquanto os três primeiros estudos
+ficassem como estavam. Como o recorrido completo vai acontecer de
+qualquer maneira, o censo constante passa a valer para os quatro e a
+comparabilidade fica intacta.
 
-Em resumo, as decisões de modelo desta rodada foram quatro:
-1. Amostragem sem reposição. A_max passa a ser literalmente o número de machos distintos
-   que a fêmea avalia. Antes, com reposição, ela reencontrava o mesmo macho várias vezes e via
-   menos machos distintos do que o parâmetro sugeria.
-2. Sem regra de escape. Antes, uma fêmea que não aceitasse ninguém acasalava com o último
-   macho avaliado, de modo que todas acasalavam. Agora ela fica sem acasalar e deixa zero
-   filhotes. Sem essa mudança não existiria variância de sucesso reprodutivo entre fêmeas, e o
-   Machos variando seria impossível.
-3. Fecundidade neutra. A poliandria não aumenta o número de filhotes; ela só distribui a
-   paternidade entre os parceiros.
-4. Variância de segregação proporcional (modelo infinitesimal de Falconer e Mackay). O
-   desvio dos filhotes em relação à média dos pais tem variância igual a metade da variância
-   parental, em vez de um ruído fixo. A conta está logo abaixo. O modo antigo continua disponível
-   no código (`segregacao = "fixa"`) para comparação, e o modo usado fica registrado numa coluna
-   da saída de cada simulação.
+Em resumo, as decisões de modelo desta rodada foram quatro: 1.
+Amostragem sem reposição. A_max passa a ser literalmente o número de
+machos distintos que a fêmea avalia. Antes, com reposição, ela
+reencontrava o mesmo macho várias vezes e via menos machos distintos do
+que o parâmetro sugeria. 2. Sem regra de escape. Antes, uma fêmea que
+não aceitasse ninguém acasalava com o último macho avaliado, de modo que
+todas acasalavam. Agora ela fica sem acasalar e deixa zero filhotes. Sem
+essa mudança não existiria variância de sucesso reprodutivo entre
+fêmeas, e o Machos variando seria impossível. 3. Fecundidade neutra. A
+poliandria não aumenta o número de filhotes; ela só distribui a
+paternidade entre os parceiros. 4. Variância de segregação proporcional
+(modelo infinitesimal de Falconer e Mackay). O desvio dos filhotes em
+relação à média dos pais tem variância igual a metade da variância
+parental, em vez de um ruído fixo. A conta está logo abaixo. O modo
+antigo continua disponível no código (`segregacao = "fixa"`) para
+comparação, e o modo usado fica registrado numa coluna da saída de cada
+simulação.
 
 A conta da segregação, passo a passo. Cada filhote recebe
 
-    z_filhote = (z_pai + z_mae)/2 + D
+```         
+z_filhote = (z_pai + z_mae)/2 + D
+```
 
-O primeiro termo é a média dos dois pais. Se os pais forem tomados ao acaso na população, cada um
-com variância V, então `Var((z_pai + z_mae)/2) = (V + V)/4 = V/2`: a média de dois números varia
-menos que um número sozinho. É por isso que a herança de ponto médio, sozinha, corta a variância
-pela metade a cada geração.
+O primeiro termo é a média dos dois pais. Se os pais forem tomados ao
+acaso na população, cada um com variância V, então
+`Var((z_pai + z_mae)/2) = (V + V)/4 = V/2`: a média de dois números
+varia menos que um número sozinho. É por isso que a herança de ponto
+médio, sozinha, corta a variância pela metade a cada geração.
 
-O segundo termo, D, é o desvio de segregação: o quanto cada filhote se afasta da média dos pais,
-por ter calhado de receber uma metade dos genes de cada um e não a outra. É ele que faz irmãos
-diferirem entre si, e toda a diferença entre os dois modos está em quanto vale a sua variância.
+O segundo termo, D, é o desvio de segregação: o quanto cada filhote se
+afasta da média dos pais, por ter calhado de receber uma metade dos
+genes de cada um e não a outra. É ele que faz irmãos diferirem entre si,
+e toda a diferença entre os dois modos está em quanto vale a sua
+variância.
 
-Com ruído fixo, `Var(D) = eps^2`, um número que nós escolhemos e que não depende de nada. Então
-`V' = V/2 + eps^2`, e repetindo isso geração após geração V converge para o ponto fixo
-`V* = V*/2 + eps^2`, ou seja `V* = 2 eps^2`. Com eps = 0.2 dá 0.08, que é exatamente o valor em
-que a variância travava.
+Com ruído fixo, `Var(D) = eps^2`, um número que nós escolhemos e que não
+depende de nada. Então `V' = V/2 + eps^2`, e repetindo isso geração após
+geração V converge para o ponto fixo `V* = V*/2 + eps^2`, ou seja
+`V* = 2 eps^2`. Com eps = 0.2 dá 0.08, que é exatamente o valor em que a
+variância travava.
 
-No modelo infinitesimal, `Var(D) = V/2`, proporcional à variância que existe entre os pais. Então
-`V' = V/2 + V/2 = V`: a metade que o blending tira é exatamente a metade que a segregação repõe.
+No modelo infinitesimal, `Var(D) = V/2`, proporcional à variância que
+existe entre os pais. Então `V' = V/2 + V/2 = V`: a metade que o
+blending tira é exatamente a metade que a segregação repõe.
 
-O infinitesimal é o certo por um motivo que se vê num caso limite. Com ruído fixo, uma população
-em que todos os pais fossem idênticos ainda produziria filhotes variados, do nada. Isso é
-impossível: se não há variação
-entre os pais, não pode haver variação entre irmãos. O infinitesimal respeita isso, porque faz a
-variação entre irmãos ser proporcional à que existe na população. É o resultado clássico de
-Falconer e Mackay: um pai transmite metade dos seus genes ao acaso, e a variância entre os
-gametas que ele pode produzir é V_A/2.
+O infinitesimal é o certo por um motivo que se vê num caso limite. Com
+ruído fixo, uma população em que todos os pais fossem idênticos ainda
+produziria filhotes variados, do nada. Isso é impossível: se não há
+variação entre os pais, não pode haver variação entre irmãos. O
+infinitesimal respeita isso, porque faz a variação entre irmãos ser
+proporcional à que existe na população. É o resultado clássico de
+Falconer e Mackay: um pai transmite metade dos seus genes ao acaso, e a
+variância entre os gametas que ele pode produzir é V_A/2.
 
-No código isso é `rnorm(n, 0, sqrt(var_pais / 2))`, mais um termo mutacional pequeno
-(`mut_sd = 0.05`) que repõe o que a deriva remove ao longo de muitas gerações.
+No código isso é `rnorm(n, 0, sqrt(var_pais / 2))`, mais um termo
+mutacional pequeno (`mut_sd = 0.05`) que repõe o que a deriva remove ao
+longo de muitas gerações.
 
-O que a mudança comprou não foi mais variância, foi que o equilíbrio passasse a depender da
-seleção. Com ruído fixo, `V* = 2 eps^2` dava o mesmo em todos os cenários: a mesma curva de
-preferência, o mesmo sigma_p, com ou sem seleção natural, sempre 0.08. A pergunta da H2 tinha a
-resposta escrita de antemão, e a resposta era "não" por construção. Aumentar eps não resolveria
-nada: mudaria o número e manteria o artefato, porque o piso continuaria sendo idêntico em todo
-lado. Com o infinitesimal, cada curva de preferência, cada sigma e cada regime de seleção natural
-chegam a um equilíbrio diferente, e é isso que torna a H2 respondível.
+O que a mudança comprou não foi mais variância, foi que o equilíbrio
+passasse a depender da seleção. Com ruído fixo, `V* = 2 eps^2` dava o
+mesmo em todos os cenários: a mesma curva de preferência, o mesmo
+sigma_p, com ou sem seleção natural, sempre 0.08. A pergunta da H2 tinha
+a resposta escrita de antemão, e a resposta era "não" por construção.
+Aumentar eps não resolveria nada: mudaria o número e manteria o
+artefato, porque o piso continuaria sendo idêntico em todo lado. Com o
+infinitesimal, cada curva de preferência, cada sigma e cada regime de
+seleção natural chegam a um equilíbrio diferente, e é isso que torna a
+H2 respondível.
 
-Sobre o valor da mutação: com `mut_sd = 0.05`, a entrada mutacional por geração é 0.0025. Com
-uma variância do traço da ordem de 1, isso dá uma heredabilidade mutacional em torno de
-2.5 x 10^-3, que está na faixa empiricamente reportada para caracteres quantitativos, entre 10^-3
-e 10^-2. Não é um número escolhido ao acaso. A ressalva é que a heredabilidade mutacional se
-define sobre a variância ambiental, e aqui o traço não tem componente ambiental separada, então a
-comparação é aproximada.
+Sobre o valor da mutação: com `mut_sd = 0.05`, a entrada mutacional por
+geração é 0.0025. Com uma variância do traço da ordem de 1, isso dá uma
+heredabilidade mutacional em torno de 2.5 x 10\^-3, que está na faixa
+empiricamente reportada para caracteres quantitativos, entre 10\^-3 e
+10\^-2. Não é um número escolhido ao acaso. A ressalva é que a
+heredabilidade mutacional se define sobre a variância ambiental, e aqui
+o traço não tem componente ambiental separada, então a comparação é
+aproximada.
 
-Há uma limitação da nossa implementação que precisa ser declarada. O resultado `Var(D) = V_A/2`
-não vale sempre: ele supõe acasalamento aleatório, equilíbrio de ligamento e pais não aparentados.
-Três situações o quebram, e as três estão presentes aqui. O acasalamento assortativo gera
-desequilíbrio de ligamento positivo, e a variância total da população passa a ser maior que a
-génica, sendo a génica a que governa a segregação. A seleção gera desequilíbrio negativo (efeito
-Bulmer) e empurra na direção contrária. E em população finita a segregação decai com o parentesco
-acumulado, como `(1 - F) V_A/2`.
+Há uma limitação da nossa implementação que precisa ser declarada. O
+resultado `Var(D) = V_A/2` não vale sempre: ele supõe acasalamento
+aleatório, equilíbrio de ligamento e pais não aparentados. Três
+situações o quebram, e as três estão presentes aqui. O acasalamento
+assortativo gera desequilíbrio de ligamento positivo, e a variância
+total da população passa a ser maior que a génica, sendo a génica a que
+governa a segregação. A seleção gera desequilíbrio negativo (efeito
+Bulmer) e empurra na direção contrária. E em população finita a
+segregação decai com o parentesco acumulado, como `(1 - F) V_A/2`.
 
-O nosso `var_pais <- var(c(male_z_surv, female_z_gen))` usa a variância total realizada do pool
-parental, com os machos já pós-seleção, misturando as duas componentes em vez de separá-las. O
-modelo infinitesimal estrito acompanha a variância génica à parte.
+O nosso `var_pais <- var(c(male_z_surv, female_z_gen))` usa a variância
+total realizada do pool parental, com os machos já pós-seleção,
+misturando as duas componentes em vez de separá-las. O modelo
+infinitesimal estrito acompanha a variância génica à parte.
 
-Os dois desvios vão em sentidos opostos e se compensam em parte, mas não se compensam igual nas
-quatro curvas de preferência, porque cada uma gera uma quantidade diferente de acasalamento
-assortativo: a gaussiana gera muito, a aleatória nenhum. Isso poderia produzir diferenças
-aparentes de manutenção de variância entre curvas que fossem de implementação e não biológicas,
-bem em cima da H2. É verificável implementando a versão estrita num subconjunto de cenários e
-comparando, e está na lista de perguntas para o Miudo.
+Os dois desvios vão em sentidos opostos e se compensam em parte, mas não
+se compensam igual nas quatro curvas de preferência, porque cada uma
+gera uma quantidade diferente de acasalamento assortativo: a gaussiana
+gera muito, a aleatória nenhum. Isso poderia produzir diferenças
+aparentes de manutenção de variância entre curvas que fossem de
+implementação e não biológicas, bem em cima da H2. É verificável
+implementando a versão estrita num subconjunto de cenários e comparando,
+e está na lista de perguntas para o Miudo.
 
-Quanto às réplicas, são 20 nesta rodada de exploração e mais na rodada final. São 20 e não mais
-porque os problemas que motivaram o recorrido (o teto de k, o pool de machos, o caso degenerado)
-são vieses sistemáticos e não ruído: mais réplicas não os tocariam.
+Quanto às réplicas, são 20 nesta rodada de exploração e mais na rodada
+final. São 20 e não mais porque os problemas que motivaram o recorrido
+(o teto de k, o pool de machos, o caso degenerado) são vieses
+sistemáticos e não ruído: mais réplicas não os tocariam.
 
----
+------------------------------------------------------------------------
 
 ## Parâmetros do modelo
 
 | Símbolo | O que é | Valor |
-|---|---|---|
+|------------------------|------------------------|------------------------|
 | N | machos e fêmeas adultos por geração | 200 de cada |
 | gerações | duração de cada réplica | 100 (1 no Controle) |
 | phi | ótimo da seleção natural e média inicial das distribuições | 5 |
@@ -1057,320 +1289,397 @@ são vieses sistemáticos e não ruído: mais réplicas não os tocariam.
 | réplicas | repetições independentes por cenário | 20 (final: subir depois) |
 | semente base | por estudo, para reprodutibilidade | 2026 (E2), 2028 (E3), 2029 (E1), 2030 (E4) |
 
-Todos os cenários são reprodutíveis: a semente de cada um é `semente base + índice global do
-cenário`, definida dentro da tarefa. Isso vale mesmo quando as réplicas são repartidas entre
-máquinas diferentes, porque o índice usado é o do desenho completo e não o da fatia.
+Todos os cenários são reprodutíveis: a semente de cada um é
+`semente base + índice global do cenário`, definida dentro da tarefa.
+Isso vale mesmo quando as réplicas são repartidas entre máquinas
+diferentes, porque o índice usado é o do desenho completo e não o da
+fatia.
 
-Duas ressalvas sobre reprodutibilidade, que valem para os Métodos. A primeira é de
-plataforma: ao rodar o mesmo teste com a mesma semente no Mac e no servidor Linux, um valor
-divergiu na segunda casa decimal (5.10 contra 5.09), enquanto as outras 24 comparações saíram
-idênticas. A explicação provável é uma diferença de um bit na implementação de `exp()`, virando
-uma comparação de aceite que estava no limite. Não é erro nem viés, cada réplica continua sendo
-um sorteio válido do modelo, mas significa que a reprodução exata exige a mesma plataforma, e que
-re-simular um cenário para extrair a rede deve ser feito na máquina que o gerou. A segunda é de
-versão: a semente só reproduz os dados junto com o código que os gerou, e o motor mudou várias
-vezes. Por isso vale etiquetar o commit de cada rodada.
+Duas ressalvas sobre reprodutibilidade, que valem para os Métodos. A
+primeira é de plataforma: ao rodar o mesmo teste com a mesma semente no
+Mac e no servidor Linux, um valor divergiu na segunda casa decimal (5.10
+contra 5.09), enquanto as outras 24 comparações saíram idênticas. A
+explicação provável é uma diferença de um bit na implementação de
+`exp()`, virando uma comparação de aceite que estava no limite. Não é
+erro nem viés, cada réplica continua sendo um sorteio válido do modelo,
+mas significa que a reprodução exata exige a mesma plataforma, e que
+re-simular um cenário para extrair a rede deve ser feito na máquina que
+o gerou. A segunda é de versão: a semente só reproduz os dados junto com
+o código que os gerou, e o motor mudou várias vezes. Por isso vale
+etiquetar o commit de cada rodada.
 
----
+------------------------------------------------------------------------
 
 ## As métricas de topologia da rede
 
 Calculadas a cada geração sobre a rede bipartita de acasalamentos:
 
-- **Modularidade.** O quanto a rede se divide em grupos que acasalam preferencialmente entre si.
-  Calculada com o algoritmo de Louvain sobre a projeção não dirigida da rede bipartita. A
-  alternativa seria a modularidade bipartida do pacote `bipartite`, que é mais defensável mas
-  centenas de vezes mais lenta, e inviável no número de redes que geramos. Vale confirmar com o
-  Miudo se a escolha se sustenta.
-- **Aninhamento (NODF).** O quanto os parceiros dos machos menos procurados são um subconjunto
-  dos parceiros dos machos mais procurados, ou seja, o quanto existe uma hierarquia.
-- **Centralização.** O quanto os acasalamentos se concentram em poucos indivíduos. Calculada
-  sobre todos os nós, machos e fêmeas juntos.
-- **Oportunidade de seleção sexual (Is).** A variância no número de parceiras por macho dividida
-  pelo quadrado da média. Mede o quanto o sucesso reprodutivo é desigual entre os machos.
-- **Proporção de fêmeas sem acasalar.** Variável nova nesta rodada. É descritiva nos Estudos 1 e
-  2, mas em Machos variando é o indicador direto da força de seleção agindo sobre a preferência.
+-   **Modularidade.** O quanto a rede se divide em grupos que acasalam
+    preferencialmente entre si. Calculada com o algoritmo de Louvain
+    sobre a projeção não dirigida da rede bipartita. A alternativa seria
+    a modularidade bipartida do pacote `bipartite`, que é mais
+    defensável mas centenas de vezes mais lenta, e inviável no número de
+    redes que geramos. Vale confirmar com o Miudo se a escolha se
+    sustenta.
 
-- **Poliandria realizada (`grau_medio_femeas`).** O grau médio das fêmeas que acasalaram, ou
-  seja, quantos parceiros elas de fato conseguiram. Atenção ao denominador: esta média exclui as
-  fêmeas que não acasalaram, enquanto `prop_femeas_atingiu_k` é calculada sobre TODAS. Os dois
-  denominadores são diferentes de propósito, e como `prop_femeas_sem_acasalar` também é gravada,
-  qualquer das duas pode ser recalculada na base que se preferir. Sob o reenquadramento de k como apetite (ver
-  a seção sobre a interação entre A_max, k e a curva de preferência), esta é a variável de
-  poliandria do paper, e não o k nominal.
-- **Proporção que atingiu o teto (`prop_femeas_atingiu_k`).** Quantas fêmeas chegaram ao k que
-  buscavam. Mede diretamente o quanto o teto foi vinculante em cada cenário.
-- **Arestas (`arestas`).** O total de acasalamentos da rede, ou seja, a densidade.
-- **Censo adulto de machos (`n_machos_surv`).** Deve ser sempre 200 com o censo constante; fica
-  gravado como verificação.
-- **Geração de encerramento (`extincao_gen`).** NA quando a réplica chegou ao fim.
+-   **Aninhamento (NODF).** O quanto os parceiros dos machos menos
+    procurados são um subconjunto dos parceiros dos machos mais
+    procurados, ou seja, o quanto existe uma hierarquia.
 
-Quando a rede é pequena ou degenerada demais para uma métrica fazer sentido (por exemplo, menos
-de dois machos ou menos de duas cópulas para o NODF), a métrica devolve NA em vez de zero. Isso
-é deliberado: devolver zero introduziria um viés, fazendo parecer que a topologia foi medida e
-deu zero, quando na verdade ela não pôde ser medida.
+-   **Centralização.** O quanto os acasalamentos se concentram em poucos
+    indivíduos. Calculada sobre todos os nós, machos e fêmeas juntos.
 
-Uma última decisão de cálculo, que é fácil esquecer depois. As fêmeas que não acasalaram são
-excluídas do cálculo das métricas de topologia, porque entrariam como nós isolados e inflariam
-artificialmente a modularidade e o número de subgrupos; elas são contabilizadas separadamente, na
-proporção de fêmeas sem acasalar. Já os machos com zero acasalamentos ficam no cálculo, porque
-eles são justamente o sinal da seleção sexual (é a variação no sucesso deles que o Is mede).
+-   **Oportunidade de seleção sexual (Is).** A variância no número de
+    parceiras por macho dividida pelo quadrado da média. Mede o quanto o
+    sucesso reprodutivo é desigual entre os machos.
 
----
+-   **Proporção de fêmeas sem acasalar.** Variável nova nesta rodada. É
+    descritiva nos Estudos 1 e 2, mas em Machos variando é o indicador
+    direto da força de seleção agindo sobre a preferência.
+
+-   **Poliandria realizada (`grau_medio_femeas`).** O grau médio das
+    fêmeas que acasalaram, ou seja, quantos parceiros elas de fato
+    conseguiram. Atenção ao denominador: esta média exclui as fêmeas que
+    não acasalaram, enquanto `prop_femeas_atingiu_k` é calculada sobre
+    TODAS. Os dois denominadores são diferentes de propósito, e como
+    `prop_femeas_sem_acasalar` também é gravada, qualquer das duas pode
+    ser recalculada na base que se preferir. Sob o reenquadramento de k
+    como apetite (ver a seção sobre a interação entre A_max, k e a curva
+    de preferência), esta é a variável de poliandria do paper, e não o k
+    nominal.
+
+-   **Proporção que atingiu o teto (`prop_femeas_atingiu_k`).** Quantas
+    fêmeas chegaram ao k que buscavam. Mede diretamente o quanto o teto
+    foi vinculante em cada cenário.
+
+-   **Arestas (`arestas`).** O total de acasalamentos da rede, ou seja,
+    a densidade.
+
+-   **Censo adulto de machos (`n_machos_surv`).** Deve ser sempre 200
+    com o censo constante; fica gravado como verificação.
+
+-   **Geração de encerramento (`extincao_gen`).** NA quando a réplica
+    chegou ao fim.
+
+Quando a rede é pequena ou degenerada demais para uma métrica fazer
+sentido (por exemplo, menos de dois machos ou menos de duas cópulas para
+o NODF), a métrica devolve NA em vez de zero. Isso é deliberado:
+devolver zero introduziria um viés, fazendo parecer que a topologia foi
+medida e deu zero, quando na verdade ela não pôde ser medida.
+
+Uma última decisão de cálculo, que é fácil esquecer depois. As fêmeas
+que não acasalaram são excluídas do cálculo das métricas de topologia,
+porque entrariam como nós isolados e inflariam artificialmente a
+modularidade e o número de subgrupos; elas são contabilizadas
+separadamente, na proporção de fêmeas sem acasalar. Já os machos com
+zero acasalamentos ficam no cálculo, porque eles são justamente o sinal
+da seleção sexual (é a variação no sucesso deles que o Is mede).
+
+------------------------------------------------------------------------
 
 ## As hipóteses, e qual estudo testa cada uma
 
-Esta formulação substitui a que está em `Paper_JEB_Cl.Rmd` e nos Métodos, que foi escrita antes
-de termos o controle e que precisa ser atualizada. A mudança principal é que nenhuma hipótese se
-compromete mais com uma direção que os dados possam desmentir: as direções passam a ser
-resultados.
+Esta formulação substitui a que está em `Paper_JEB_Cl.Rmd` e nos
+Métodos, que foi escrita antes de termos o controle e que precisa ser
+atualizada. A mudança principal é que nenhuma hipótese se compromete
+mais com uma direção que os dados possam desmentir: as direções passam a
+ser resultados.
 
 ### H1. Os determinantes da estrutura da rede
 
-**A estrutura da rede de acasalamento é determinada por fatores que atuam em três níveis, e a
-questão é qual deles domina e como interagem.**
+**A estrutura da rede de acasalamento é determinada por fatores que
+atuam em três níveis, e a questão é qual deles domina e como
+interagem.**
 
 | Nível | O que é | Fatores |
-|---|---|---|
+|------------------------|------------------------|------------------------|
 | A regra | como a fêmea escolhe | as quatro curvas de preferência |
 | O material | quanta variação existe para escolher | sigma_p, sigma_z, ou os dois |
 | A ecologia | quanto se pode buscar e quem está disponível | A_max, k, seleção natural |
 
-Quem testa: o **Controle**, que é o único desenho que cruza os três níveis por inteiro.
+Quem testa: o **Controle**, que é o único desenho que cruza os três
+níveis por inteiro.
 
-É uma hipótese exploratória, mas não é uma lista: ela é falsificável porque qualquer um dos três
-níveis poderia dominar, e cada resposta conta uma história diferente. Se a regra dominar, a
-escolha feminina desenha a rede. Se a ecologia dominar, o custo de buscar importa mais do que o
-que as fêmeas querem.
+É uma hipótese exploratória, mas não é uma lista: ela é falsificável
+porque qualquer um dos três níveis poderia dominar, e cada resposta
+conta uma história diferente. Se a regra dominar, a escolha feminina
+desenha a rede. Se a ecologia dominar, o custo de buscar importa mais do
+que o que as fêmeas querem.
 
-Falta dizer onde entra a variação no pico das preferências femininas, que é a pergunta que
-originou o capítulo. Ela é o nível do material, junto com sigma_z. A literatura quase sempre atribui uma
-única função de preferência a toda a população, e por isso não pode nem formular a pergunta de o
-que acontece quando as fêmeas discordam entre si. Deixar sigma_p variar é o que permite fazê-la,
-e cruzar sigma_p com sigma_z é o que permite responder se a heterogeneidade feminina tem
-significado absoluto ou apenas relativo à variabilidade dos machos.
+Falta dizer onde entra a variação no pico das preferências femininas,
+que é a pergunta que originou o capítulo. Ela é o nível do material,
+junto com sigma_z. A literatura quase sempre atribui uma única função de
+preferência a toda a população, e por isso não pode nem formular a
+pergunta de o que acontece quando as fêmeas discordam entre si. Deixar
+sigma_p variar é o que permite fazê-la, e cruzar sigma_p com sigma_z é o
+que permite responder se a heterogeneidade feminina tem significado
+absoluto ou apenas relativo à variabilidade dos machos.
 
 ### H2. A topologia não é epifenômeno
 
-**A topologia da rede prediz a trajetória evolutiva da característica que estiver livre para
-evoluir.**
+**A topologia da rede prediz a trajetória evolutiva da característica
+que estiver livre para evoluir.**
 
-- **H2a**, com Fêmeas variando: prediz a trajetória do traço do macho.
-- **H2b**, com Machos variando: prediz a trajetória da preferência da fêmea.
+-   **H2a**, com Fêmeas variando: prediz a trajetória do traço do macho.
+-   **H2b**, com Machos variando: prediz a trajetória da preferência da
+    fêmea.
 
-O espelho deixa de ser uma curiosidade e passa a ser replicação interna: se a relação for da rede
-e não da característica em particular, ela tem que aparecer nos dois lados. Aparecer só num deles
-também é resultado, e dos interessantes.
+O espelho deixa de ser uma curiosidade e passa a ser replicação interna:
+se a relação for da rede e não da característica em particular, ela tem
+que aparecer nos dois lados. Aparecer só num deles também é resultado, e
+dos interessantes.
 
-Este é o par de hipóteses que carrega o peso de teste direcional do paper, já que H1 é
-exploratória.
+Este é o par de hipóteses que carrega o peso de teste direcional do
+paper, já que H1 é exploratória.
 
 ### H3. A ecologia modula a cadeia inteira
 
-**Restringir a capacidade de amostragem (A_max) erode a assinatura topológica e, com ela, as suas
-consequências evolutivas.**
+**Restringir a capacidade de amostragem (A_max) erode a assinatura
+topológica e, com ela, as suas consequências evolutivas.**
 
-Não tem estudo próprio: A_max está cruzado nos quatro, então H3 atravessa H1, H2 e H4. É a
-hipótese que liga a ecologia à evolução.
+Não tem estudo próprio: A_max está cruzado nos quatro, então H3
+atravessa H1, H2 e H4. É a hipótese que liga a ecologia à evolução.
 
 ### H4. Com as duas livres, a topologia governa o ciclo de Fisher
 
-**Quando o traço e a preferência são ambos herdáveis, a topologia da rede determina se a
-covariância genética entre eles chega a se acumular.**
+**Quando o traço e a preferência são ambos herdáveis, a topologia da
+rede determina se a covariância genética entre eles chega a se
+acumular.**
 
-Quem testa: **Co-evolução**, que é o único desenho em que essa covariância pode existir. A
-previsão de limiar descrita na seção daquele estudo entra aqui.
+Quem testa: **Co-evolução**, que é o único desenho em que essa
+covariância pode existir. A previsão de limiar descrita na seção daquele
+estudo entra aqui.
 
 ### Uma nota sobre o que o Controle pode e não pode fazer
 
-O Controle caracteriza o que a regra de acasalamento faz sozinha, na superfície inteira. Fêmeas
-variando e Machos variando mostram o que sobra disso depois de 100 gerações, cada um ao longo de
-uma linha.
+O Controle caracteriza o que a regra de acasalamento faz sozinha, na
+superfície inteira. Fêmeas variando e Machos variando mostram o que
+sobra disso depois de 100 gerações, cada um ao longo de uma linha.
 
-Não é "derivar aqui e testar independentemente ali". A geração 1 de Fêmeas variando é exatamente
-a linha sigma_z = 1.0 do Controle, e a de Machos variando é a coluna sigma_p = 1.0, por
-construção do desenho. O que os estudos evolutivos acrescentam não é uma amostra independente, é
-a resposta a uma pergunta diferente: se a assinatura persiste quando a característica responde à
-seleção.
+Não é "derivar aqui e testar independentemente ali". A geração 1 de
+Fêmeas variando é exatamente a linha sigma_z = 1.0 do Controle, e a de
+Machos variando é a coluna sigma_p = 1.0, por construção do desenho. O
+que os estudos evolutivos acrescentam não é uma amostra independente, é
+a resposta a uma pergunta diferente: se a assinatura persiste quando a
+característica responde à seleção.
 
-O que é exclusivo do Controle são as células fora dessas duas linhas, e é justamente onde a
-divergência entre curvas é máxima.
+O que é exclusivo do Controle são as células fora dessas duas linhas, e
+é justamente onde a divergência entre curvas é máxima.
 
----
+------------------------------------------------------------------------
 
 ## Convenção de nomes entre os estudos
 
-Os motores de Fêmeas variando e de Machos variando fazem a mesma coisa com características diferentes, mas tinham sido
-escritos em momentos diferentes e usavam nomes distintos para os mesmos objetos. Isso dificultava
-comparar as duas funções lado a lado, que é justamente o que a gente precisa fazer para explicar
-o desenho. Os nomes foram uniformizados assim:
+Os motores de Fêmeas variando e de Machos variando fazem a mesma coisa
+com características diferentes, mas tinham sido escritos em momentos
+diferentes e usavam nomes distintos para os mesmos objetos. Isso
+dificultava comparar as duas funções lado a lado, que é justamente o que
+a gente precisa fazer para explicar o desenho. Os nomes foram
+uniformizados assim:
 
-| O que é | Nome padrão |
-|---|---|
-| Filhotes por fêmea | `num_filhotes_por_femea` |
-| Total de filhotes na geração | `total_filhotes` |
-| Índice da mãe de cada filhote | `moms` |
-| Índice do pai de cada filhote | `dads` |
-| Valor paterno e materno | `z_dads` / `z_moms`, `p_dads` / `p_moms` |
-| Média dos pais | `midparent` |
-| Desvio de segregação | `desvio` |
-| Variância parental | `var_pais` |
-| Valor dos filhotes | `z_filhotes` / `p_filhotes` |
-| Vagas da próxima geração | `vagas` |
-| Ruído fixo do modo antigo | `eps_sd` (era `eps_p` em Machos variando) |
+| O que é                       | Nome padrão                               |
+|------------------------------------|------------------------------------|
+| Filhotes por fêmea            | `num_filhotes_por_femea`                  |
+| Total de filhotes na geração  | `total_filhotes`                          |
+| Índice da mãe de cada filhote | `moms`                                    |
+| Índice do pai de cada filhote | `dads`                                    |
+| Valor paterno e materno       | `z_dads` / `z_moms`, `p_dads` / `p_moms`  |
+| Média dos pais                | `midparent`                               |
+| Desvio de segregação          | `desvio`                                  |
+| Variância parental            | `var_pais`                                |
+| Valor dos filhotes            | `z_filhotes` / `p_filhotes`               |
+| Vagas da próxima geração      | `vagas`                                   |
+| Ruído fixo do modo antigo     | `eps_sd` (era `eps_p` em Machos variando) |
 
-A regra é que a letra da característica não muda. Em Machos variando o que se herda é a
-preferência, então continua sendo `p_filhotes` e não `z_filhotes`: a letra diz qual característica
-é, e é justamente ela que distingue um estudo do outro. O que se uniformiza é todo o resto do nome.
+A regra é que a letra da característica não muda. Em Machos variando o
+que se herda é a preferência, então continua sendo `p_filhotes` e não
+`z_filhotes`: a letra diz qual característica é, e é justamente ela que
+distingue um estudo do outro. O que se uniformiza é todo o resto do
+nome.
 
-Uma assimetria ficou de propósito: `sigma_p` em Fêmeas variando contra `sigma_p_init` em Machos
-variando. Os nomes são diferentes porque as coisas são diferentes, um é parâmetro imposto a cada
-geração e o outro é condição inicial, como está explicado na seção de Machos variando.
+Uma assimetria ficou de propósito: `sigma_p` em Fêmeas variando contra
+`sigma_p_init` em Machos variando. Os nomes são diferentes porque as
+coisas são diferentes, um é parâmetro imposto a cada geração e o outro é
+condição inicial, como está explicado na seção de Machos variando.
 
-O sorteio dos sobreviventes agora é por índice nos três motores. Fêmeas variando sorteava por
-valor (`sample(z_filhotes, ...)`) e Machos variando por índice
-(`sample(seq_len(total_filhotes), ...)`). Com uma única característica herdável os dois são
-equivalentes, porque `sample` sobre um vetor é implementado como sorteio de índices seguido de
-indexação, e portanto consome o mesmo RNG. Mas em Co-evolução só a forma por índice funciona, então
-o motor de Fêmeas variando foi padronizado para ela: assim o padrão do código já está correto quando as duas
-características entrarem. Como a mudança mexe numa chamada de sorteio, vale confirmar num cenário
-com semente fixa que o resultado sai idêntico.
+O sorteio dos sobreviventes agora é por índice nos três motores. Fêmeas
+variando sorteava por valor (`sample(z_filhotes, ...)`) e Machos
+variando por índice (`sample(seq_len(total_filhotes), ...)`). Com uma
+única característica herdável os dois são equivalentes, porque `sample`
+sobre um vetor é implementado como sorteio de índices seguido de
+indexação, e portanto consome o mesmo RNG. Mas em Co-evolução só a forma
+por índice funciona, então o motor de Fêmeas variando foi padronizado
+para ela: assim o padrão do código já está correto quando as duas
+características entrarem. Como a mudança mexe numa chamada de sorteio,
+vale confirmar num cenário com semente fixa que o resultado sai
+idêntico.
 
----
+------------------------------------------------------------------------
 
 ## O que olhar primeiro quando a rodada nova terminar
 
-Esta seção é um bilhete para nós mesmos. A rodada anterior, ainda com a regra sequencial,
-deixou uma observação que vale conferir assim que a rodada best-of-n estiver pronta. Nada
-aqui é resultado: é uma coisa vista de relance numa figura, com dados que já foram
-substituídos, e está escrita só para não se perder.
+Esta seção é um bilhete para nós mesmos. A rodada anterior, ainda com a
+regra sequencial, deixou uma observação que vale conferir assim que a
+rodada best-of-n estiver pronta. Nada aqui é resultado: é uma coisa
+vista de relance numa figura, com dados que já foram substituídos, e
+está escrita só para não se perder.
 
-**A diagonal em Fêmeas variando.** Na seção do plano compartilhado (a que põe os três
-estudos sobre a grade do Controle), o painel da curva gaussiana na geração 100 mostrava as
-células acomodadas sobre uma diagonal quase perfeita: cada cenário partia de sigma_z = 1.0 e
-terminava com a dispersão do traço aproximadamente igual ao sigma_p que lhe tinha sido
-imposto. Nas outras curvas não era assim. Na sigmoide a dispersão colapsava para perto de
-0.5 em quase todos os cenários, na aleatória ficava em torno de 1.0 com deriva pequena, e na
-disruptiva ficava espalhada sem padrão claro.
+**A diagonal em Fêmeas variando.** Na seção do plano compartilhado (a
+que põe os três estudos sobre a grade do Controle), o painel da curva
+gaussiana na geração 100 mostrava as células acomodadas sobre uma
+diagonal quase perfeita: cada cenário partia de sigma_z = 1.0 e
+terminava com a dispersão do traço aproximadamente igual ao sigma_p que
+lhe tinha sido imposto. Nas outras curvas não era assim. Na sigmoide a
+dispersão colapsava para perto de 0.5 em quase todos os cenários, na
+aleatória ficava em torno de 1.0 com deriva pequena, e na disruptiva
+ficava espalhada sem padrão claro.
 
-Se isso se confirmar, tem mecanismo plausível: com preferência estabilizadora cada fêmea
-acasala com machos próximos do seu próprio pico, então o conjunto de machos que se reproduz
-fica repartido segundo a distribuição dos picos, e os filhotes herdam essa repartição. Com a
-segregação infinitesimal a variância não está presa a piso nenhum e pode se acomodar onde o
-acasalamento assortativo a levar. É justamente o tipo de coisa que o ruído fixo escondia.
+Se isso se confirmar, tem mecanismo plausível: com preferência
+estabilizadora cada fêmea acasala com machos próximos do seu próprio
+pico, então o conjunto de machos que se reproduz fica repartido segundo
+a distribuição dos picos, e os filhotes herdam essa repartição. Com a
+segregação infinitesimal a variância não está presa a piso nenhum e pode
+se acomodar onde o acasalamento assortativo a levar. É justamente o tipo
+de coisa que o ruído fixo escondia.
 
-E havia um segundo pedaço: a cor daquelas células era aproximadamente a cor das mesmas
-células no Controle. Se também se confirmar, a leitura é que a evolução não produziu uma
-topologia nova, apenas moveu o sistema para outro ponto da mesma superfície. Para a H2 e a
-H3 isso seria uma afirmação forte.
+E havia um segundo pedaço: a cor daquelas células era aproximadamente a
+cor das mesmas células no Controle. Se também se confirmar, a leitura é
+que a evolução não produziu uma topologia nova, apenas moveu o sistema
+para outro ponto da mesma superfície. Para a H2 e a H3 isso seria uma
+afirmação forte.
 
-**A erosão de variância sob a regra nova.** Apareceu no teste de fumaça, e é a segunda coisa a
-olhar. Num cenário de dez gerações com a curva sigmoide, A_max = 40 e k = 5, a variância do traço
-caiu de 0.69 para 0.12, enquanto na rodada anterior, com a regra sequencial, ela se sustentava. A
-explicação é direta: com best-of-n e uma curva direcional, a fêmea fica com os machos de maior
-traço entre os que avaliou, e como todas as fêmeas concordam sobre quem é o melhor, poucos machos
-monopolizam. Isso soma seleção por truncamento forte e deriva por número efetivo de pais pequeno,
-e as duas coisas erodem variância.
+**A erosão de variância sob a regra nova.** Apareceu no teste de fumaça,
+e é a segunda coisa a olhar. Num cenário de dez gerações com a curva
+sigmoide, A_max = 40 e k = 5, a variância do traço caiu de 0.69 para
+0.12, enquanto na rodada anterior, com a regra sequencial, ela se
+sustentava. A explicação é direta: com best-of-n e uma curva direcional,
+a fêmea fica com os machos de maior traço entre os que avaliou, e como
+todas as fêmeas concordam sobre quem é o melhor, poucos machos
+monopolizam. Isso soma seleção por truncamento forte e deriva por número
+efetivo de pais pequeno, e as duas coisas erodem variância.
 
-Não é um defeito, é o que a regra faz. Mas importa para a H2, porque a resposta à seleção é
-proporcional à variância disponível: se ela se esgotar cedo, a trajetória do traço trava por falta
-de material e não por equilíbrio entre forças. Vale olhar a variância ao longo das 100 gerações e
-ver se ela estabiliza num valor próprio de cada cenário, que é o que o modelo infinitesimal
-deveria dar, ou se continua caindo até o piso mutacional em todos eles. Se for o segundo caso, o
-valor de `mut_sd` volta para a mesa.
+Não é um defeito, é o que a regra faz. Mas importa para a H2, porque a
+resposta à seleção é proporcional à variância disponível: se ela se
+esgotar cedo, a trajetória do traço trava por falta de material e não
+por equilíbrio entre forças. Vale olhar a variância ao longo das 100
+gerações e ver se ela estabiliza num valor próprio de cada cenário, que
+é o que o modelo infinitesimal deveria dar, ou se continua caindo até o
+piso mutacional em todos eles. Se for o segundo caso, o valor de
+`mut_sd` volta para a mesa.
 
 **Três coisas para conferir antes de acreditar na diagonal.**
 
-Primeiro, se o padrão sobrevive à mudança de regra. Com best-of-n a fêmea passa a avaliar os
-A_max machos e a ficar com os melhores entre os aceitáveis, o que muda a intensidade da
-seleção sexual e pode muito bem mover a diagonal, ou desfazê-la.
+Primeiro, se o padrão sobrevive à mudança de regra. Com best-of-n a
+fêmea passa a avaliar os A_max machos e a ficar com os melhores entre os
+aceitáveis, o que muda a intensidade da seleção sexual e pode muito bem
+mover a diagonal, ou desfazê-la.
 
-Segundo, o afastamento da média. Naquela figura ele chegava a 4.63, quase certamente na
-sigmoide, onde a média do traço vai para perto de 10 enquanto as preferências continuam
-sendo re-sorteadas em torno de 5. Onde isso acontece, a célula não é comparável com o
-Controle, porque lá os dois sexos estão sempre centrados em phi. A figura agora reporta esse
-afastamento por curva justamente para separar os painéis em que a comparação vale.
+Segundo, o afastamento da média. Naquela figura ele chegava a 4.63,
+quase certamente na sigmoide, onde a média do traço vai para perto de 10
+enquanto as preferências continuam sendo re-sorteadas em torno de 5.
+Onde isso acontece, a célula não é comparável com o Controle, porque lá
+os dois sexos estão sempre centrados em phi. A figura agora reporta esse
+afastamento por curva justamente para separar os painéis em que a
+comparação vale.
 
-Terceiro, se a diagonal é mesmo diagonal ou um efeito do arredondamento. A dispersão medida
-é encaixada nos sete níveis da grade para a figura sair legível, e convém confirmar o padrão
-com os valores contínuos antes de escrever qualquer coisa.
+Terceiro, se a diagonal é mesmo diagonal ou um efeito do arredondamento.
+A dispersão medida é encaixada nos sete níveis da grade para a figura
+sair legível, e convém confirmar o padrão com os valores contínuos antes
+de escrever qualquer coisa.
 
----
+------------------------------------------------------------------------
 
 ## O censo de machos sob a regra nova, e o que fazer com ele
 
-Esta seção é sobre uma consequência do best-of-n que só apareceu quando os dados da rodada
-nova ficaram prontos. Não é um erro de programação: a função do censo foi escrita supondo um
-regime em que o traço fica perto de phi, e a regra nova empurrou o sistema para fora desse
-regime.
+Esta seção é sobre uma consequência do best-of-n que só apareceu quando
+os dados da rodada nova ficaram prontos. Não é um erro de programação: a
+função do censo foi escrita supondo um regime em que o traço fica perto
+de phi, e a regra nova empurrou o sistema para fora desse regime.
 
-**O que aconteceu.** Com o best-of-n a seleção sexual ficou bem mais forte, que era a
-intenção. Na curva sigmoide isso leva a média do traço para longe do ótimo ecológico, e como
-a viabilidade é `V = exp(-gamma (z - phi)^2)`, ela desaba para todo mundo ao mesmo tempo. O
-passo de aceitação e rejeição passa a não devolver praticamente ninguém, entra a trava de
-segurança dos 2 machos, e a rede daquela geração vira 200 fêmeas por 2 machos. Modularidade,
-aninhamento e centralização calculados sobre uma matriz dessas não são comparáveis com os das
-outras células.
+**O que aconteceu.** Com o best-of-n a seleção sexual ficou bem mais
+forte, que era a intenção. Na curva sigmoide isso leva a média do traço
+para longe do ótimo ecológico, e como a viabilidade é
+`V = exp(-gamma (z - phi)^2)`, ela desaba para todo mundo ao mesmo
+tempo. O passo de aceitação e rejeição passa a não devolver praticamente
+ninguém, entra a trava de segurança dos 2 machos, e a rede daquela
+geração vira 200 fêmeas por 2 machos. Modularidade, aninhamento e
+centralização calculados sobre uma matriz dessas não são comparáveis com
+os das outras células.
 
-Onde bate: apenas no estudo das fêmeas, e dentro dele apenas nas curvas sigmoide e u-shaped
-com seleção natural ligada. No Controle e em Machos variando o traço é sorteado de novo a cada
-geração, sempre centrado em phi, então a viabilidade nunca chega perto de zerar e o censo fica
-nos 200 em todos os cenários.
+Onde bate: apenas no estudo das fêmeas, e dentro dele apenas nas curvas
+sigmoide e u-shaped com seleção natural ligada. No Controle e em Machos
+variando o traço é sorteado de novo a cada geração, sempre centrado em
+phi, então a viabilidade nunca chega perto de zerar e o censo fica nos
+200 em todos os cenários.
 
-**O que 200 deve ser, afinal.** A pergunta de fundo é como tratar a capacidade de suporte da
-população, e há duas leituras.
+**O que 200 deve ser, afinal.** A pergunta de fundo é como tratar a
+capacidade de suporte da população, e há duas leituras.
 
-Como **cota**, a população está sempre na capacidade de suporte: os 200 adultos são sempre
-sorteados, com probabilidade proporcional à viabilidade, e a seleção decide quais machos e
-nunca quantos. As redes ficam sempre comparáveis entre si. Como **teto**, a capacidade de
-suporte é um limite que a população pode não alcançar quando está mal adaptada, o que é
-biologicamente mais honesto, mas devolve redes de 200 fêmeas por 2 machos.
+Como **cota**, a população está sempre na capacidade de suporte: os 200
+adultos são sempre sorteados, com probabilidade proporcional à
+viabilidade, e a seleção decide quais machos e nunca quantos. As redes
+ficam sempre comparáveis entre si. Como **teto**, a capacidade de
+suporte é um limite que a população pode não alcançar quando está mal
+adaptada, o que é biologicamente mais honesto, mas devolve redes de 200
+fêmeas por 2 machos.
 
-É a mesma discussão que tivemos sobre k, e vale reparar em que ela se resolve para o outro
-lado. Com k decidimos que era teto e não cota, porque a poliandria realizada continua sendo
-uma quantidade que se lê e se reporta. Aqui não: um censo de 2 machos não é uma variável
-resposta que se interprete junto com a topologia, é uma condição que impede a medição.
+É a mesma discussão que tivemos sobre k, e vale reparar em que ela se
+resolve para o outro lado. Com k decidimos que era teto e não cota,
+porque a poliandria realizada continua sendo uma quantidade que se lê e
+se reporta. Aqui não: um censo de 2 machos não é uma variável resposta
+que se interprete junto com a topologia, é uma condição que impede a
+medição.
 
-**O que vamos testar.** A cota, implementada como sorteio sem reposição de exatamente 200
-juvenis com peso proporcional a V. Dois argumentos a favor. Fica simétrico com o que já
-fazemos com as fêmeas, que também têm censo exato de 200 por sorteio, e a única diferença
-entre os sexos passa a ser a que interessa, que é a seleção agir sobre eles. E torna a
-viabilidade relativa em vez de absoluta: em vez de ninguém sobreviver, sobrevivem os menos mal
-adaptados, que é o que acontece numa população real mal adaptada.
+**O que vamos testar.** A cota, implementada como sorteio sem reposição
+de exatamente 200 juvenis com peso proporcional a V. Dois argumentos a
+favor. Fica simétrico com o que já fazemos com as fêmeas, que também têm
+censo exato de 200 por sorteio, e a única diferença entre os sexos passa
+a ser a que interessa, que é a seleção agir sobre eles. E torna a
+viabilidade relativa em vez de absoluta: em vez de ninguém sobreviver,
+sobrevivem os menos mal adaptados, que é o que acontece numa população
+real mal adaptada.
 
-No regime saudável as duas formas são quase a mesma coisa, o que ajuda a decidir: aceitar e
-rejeitar e depois sub-amostrar uniformemente entre os sobreviventes equivale a sortear direto
-com peso V. A cota não muda a biologia do que já vínhamos fazendo, é a versão exata e sem
-ponto de quebra da mesma coisa.
+No regime saudável as duas formas são quase a mesma coisa, o que ajuda a
+decidir: aceitar e rejeitar e depois sub-amostrar uniformemente entre os
+sobreviventes equivale a sortear direto com peso V. A cota não muda a
+biologia do que já vínhamos fazendo, é a versão exata e sem ponto de
+quebra da mesma coisa.
 
-Na prática são cinco linhas, e o sorteio é feito em escala logarítmica porque V pode chegar à
-casa de 1e-40 e estourar por baixo:
+Na prática são cinco linhas, e o sorteio é feito em escala logarítmica
+porque V pode chegar à casa de 1e-40 e estourar por baixo:
 
-    chaves <- log(-log(runif(n))) + gamma * (z_juv - phi)^2
-    order(chaves)[seq_len(N_adultos)]
+```         
+chaves <- log(-log(runif(n))) + gamma * (z_juv - phi)^2
+order(chaves)[seq_len(N_adultos)]
+```
 
 **Duas ressalvas antes de fechar o assunto.**
 
-A primeira é que a mudança altera o fluxo de números aleatórios, então os três estudos
-precisam ser refeitos juntos para o conjunto sair de uma única versão do motor.
+A primeira é que a mudança altera o fluxo de números aleatórios, então
+os três estudos precisam ser refeitos juntos para o conjunto sair de uma
+única versão do motor.
 
-A segunda é sobre gamma, e ainda está em aberto. Com gamma = 0.2 e a regra nova a mortalidade
-fica altíssima e mesmo assim o traço continua subindo, o que à primeira vista sugere que a
-viabilidade está fraca demais. Mas matar muito e segurar o traço não são a mesma coisa: o que
-freia o traço é a diferença de sobrevivência entre indivíduos, e quando sobram dois machos
-essa diferença passa a se expressar por um canal estreito demais. As fêmeas, que também
-carregam z, nunca passam por viabilidade nenhuma. Ou seja, parte do escape pode vir do censo
-ter colapsado e não de gamma ser pequeno. Só dá para saber depois de rodar com a cota, e por
-isso a decisão sobre gamma fica para depois dessa rodada.
+A segunda é sobre gamma, e ainda está em aberto. Com gamma = 0.2 e a
+regra nova a mortalidade fica altíssima e mesmo assim o traço continua
+subindo, o que à primeira vista sugere que a viabilidade está fraca
+demais. Mas matar muito e segurar o traço não são a mesma coisa: o que
+freia o traço é a diferença de sobrevivência entre indivíduos, e quando
+sobram dois machos essa diferença passa a se expressar por um canal
+estreito demais. As fêmeas, que também carregam z, nunca passam por
+viabilidade nenhuma. Ou seja, parte do escape pode vir do censo ter
+colapsado e não de gamma ser pequeno. Só dá para saber depois de rodar
+com a cota, e por isso a decisão sobre gamma fica para depois dessa
+rodada.
 
----
+------------------------------------------------------------------------
 
 ## Correspondência com o código
 
-Esta nota foi conferida contra os scripts. A tabela abaixo diz onde verificar cada bloco.
+Esta nota foi conferida contra os scripts. A tabela abaixo diz onde
+verificar cada bloco.
 
 | Afirmação da nota | Onde verificar |
-|---|---|
+|------------------------------------|------------------------------------|
 | Curvas de preferência e suas fórmulas | `01_metricas_e_utilitarios.R`, `mate_with_survivors` |
 | Amostragem sem reposição, parada em k, ausência de regra de escape | `01_metricas_e_utilitarios.R`, `mate_with_survivors` |
 | Teto de parceiros: `evaluacoes_reais <- min(encounters_n, n_m)` e `if (matings_done >= matings_per_female[i]) break` | `01_metricas_e_utilitarios.R`, `mate_with_survivors` |
