@@ -366,27 +366,12 @@ paternidade de cada filhote é sorteada ao acaso entre os parceiros
 daquela fêmea, o que equivale a uma competição espermática justa, sem
 viés para nenhum macho.
 
-**5. Herança.** É aqui que os quatro estudos diferem. Cada característica
-herdável do filhote é a média dos dois pais mais um desvio de segregação, e a
-esse desvio se soma ainda um termo mutacional pequeno (desvio padrão 0.05),
-sorteado para cada filhote. As características não herdáveis são simplesmente
-re-sorteadas na geração seguinte.
-
-O desvio de segregação tem variância igual a **metade da variância parental**, e
-é essa a escolha que se chama modelo infinitesimal: a variação entre irmãos não
-é um ruído de tamanho fixo que nós escolhemos, é proporcional à variação que
-existe entre os pais. A conta de por que isso mantém a variância estável está na
-seção sobre a segregação, mais adiante.
-
-Dois detalhes que valem para quem for conferir o código. A variância parental
-usada é a do **pool adulto inteiro daquela geração**, `var(c(male_z_surv,
-female_z_gen))`, e não a variância dentro de cada casal. E ela é calculada uma
-vez por geração e vale para todos os filhotes, o que pode parecer um atalho mas
-não é: sob o modelo infinitesimal a variância de segregação é a mesma para
-qualquer casal não aparentado, de modo que um valor único é o comportamento
-correto. O que o nosso atalho de fato simplifica é outra coisa, e está descrito
-na seção sobre a limitação da implementação: o modelo estrito acompanha a
-variância *génica*, e nós usamos a total realizada.
+**5. Herança.** É aqui que os quatro estudos diferem. Cada
+característica herdável do filhote é a média dos dois pais mais um
+desvio de segregação com variância igual a metade da variância parental,
+mais um termo mutacional pequeno (desvio padrão 0.05). As
+características não herdáveis são simplesmente re-sorteadas na geração
+seguinte.
 
 **6. Os juvenis da geração seguinte.** Todos os filhotes (cerca de
 10.000, quando quase todas as fêmeas acasalam) recebem sexo ao acaso,
