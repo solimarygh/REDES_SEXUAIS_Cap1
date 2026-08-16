@@ -70,6 +70,27 @@ Um aviso de leitura. Cada figura e cada tabela diz no subtítulo ou na legenda q
 parâmetros está mostrando. Onde estiver escrito "todos os k", os três valores estão promediados
 juntos, e como k pesa bastante, vale conferir no anexo se o padrão se mantém em cada um deles.
 
+> **E um aviso mais sério, que vale para o documento inteiro.** Esta rodada usa a versão mais
+> recente do modelo, com a regra de escolha que apelidamos de **best-of-n**: a fêmea avalia os
+> A_max machos, todos, e só depois fica com os k melhores entre os que aceitou. O desenho está
+> em `NOTA_quatro_estudos.md`.
+>
+> A regra deixou a seleção sexual bem mais forte, que era a intenção, e isso teve uma
+> consequência que ainda não está resolvida. Em **Fêmeas variando**, nas curvas **sigmoide** e
+> **disruptiva com seleção natural ligada**, o traço se afasta tanto do ótimo ecológico que a
+> viabilidade `V = exp(-gamma (z - phi)^2)` desaba para todos ao mesmo tempo, e sobram
+> pouquíssimos machos adultos. Nessas células a rede saiu de 200 fêmeas por dois ou três
+> machos, e modularidade, aninhamento e centralização não são comparáveis com as das outras. A
+> tabela de invariantes logo abaixo diz exatamente quanto do conjunto está nessa situação.
+>
+> O Controle e Machos variando não têm esse problema: neles o traço é sorteado de novo a cada
+> geração, sempre centrado em phi, então o censo fica nos 200 em todos os cenários.
+>
+> A próxima rodada vai tratar os 200 como cota, sorteando sempre 200 juvenis com peso
+> proporcional à viabilidade, de modo que a seleção decida quais machos e nunca quantos. A
+> seção "O censo de machos sob a regra nova" da nota explica a decisão e o que fica em aberto,
+> inclusive se gamma precisa mudar junto.
+
 ```{r status}
 n_cen <- function(x, eixos) {
   if (!ok(x)) return("-")
@@ -92,17 +113,26 @@ tibble(
 
 ### Conferência das invariantes
 
-Antes de olhar qualquer resultado, três verificações do modelo novo: o censo de machos tem que
-dar 200 em todos os cenários, nenhuma réplica pode ter sido encerrada antes das 100 gerações, e a
+Antes de olhar qualquer resultado, as verificações do modelo: o censo de machos deveria dar 200
+em todos os cenários, nenhuma réplica pode ter sido encerrada antes das 100 gerações, e a
 proporção de fêmeas sem acasalar precisa estar longe dos 92% que disparariam o caso degenerado.
+
+A coluna do censo é a que denuncia o problema descrito acima. Onde a proporção abaixo de 200 for
+maior que zero, aquele estudo tem células cuja topologia não é comparável com o resto.
 
 ```{r invariantes}
 checar_um <- function(x, nome) {
   if (!ok(x)) return(NULL)
   tibble(
     Estudo = nome,
+    # Não vale despejar os valores únicos: quando o censo desanda, isso vira uma
+    # lista de duzentos números. O que interessa é o mínimo e o quanto do conjunto
+    # ficou abaixo dos 200.
     `Censo de machos` = if (tem(x, "n_machos_surv"))
-      paste(sort(unique(x$n_machos_surv)), collapse = ", ") else "não gravado",
+      sprintf("mín %d, máx %d", min(x$n_machos_surv, na.rm = TRUE),
+              max(x$n_machos_surv, na.rm = TRUE)) else "não gravado",
+    `Linhas com censo < 200` = if (tem(x, "n_machos_surv"))
+      sprintf("%.2f%%", 100 * mean(x$n_machos_surv < 200, na.rm = TRUE)) else "-",
     `Réplicas encerradas antes do fim` = if (tem(x, "extincao_gen"))
       as.character(sum(!is.na(x$extincao_gen))) else "não se aplica",
     `Fêmeas sem acasalar (máx)` = if (tem(x, "prop_femeas_sem_acasalar"))
@@ -271,6 +301,16 @@ O espelho funciona como replicação interna: se a relação for da rede e não 
 particular, tem que aparecer nos dois lados.
 
 ## H2a. O traço do macho (Fêmeas variando)
+
+> **Esta é a seção que o problema do censo mais atinge**, e por isso vale repetir o aviso aqui.
+> As curvas sigmoide e disruptiva, com seleção natural ligada, são justamente onde o traço se
+> afasta do ótimo e o censo de machos desanda. Ou seja, o problema mora exatamente no canto do
+> desenho em que a resposta evolutiva é mais forte, que é o canto que esta hipótese quer olhar.
+>
+> A figura logo abaixo é uma exceção e pode ser lida sem ressalva, porque mostra o regime **sem
+> seleção natural**, em que o censo é sempre 200 por construção. As tabelas e figuras desta
+> seção que juntam os dois regimes carregam a ressalva, e as conclusões que dependerem das duas
+> curvas com seleção natural precisam esperar a rodada com a cota.
 
 ```{r h2a-varz, fig.height=4.2}
 if (ok(d)) {
