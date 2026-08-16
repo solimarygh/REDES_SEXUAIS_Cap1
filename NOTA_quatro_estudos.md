@@ -607,3 +607,46 @@ machos parecidos com o seu próprio pico, e portanto pode gerar a maior
 covariância. - U-shaped: gera acasalamento dissortativo, ou seja, seria
 a única curva em que a preferência e o traço podem ser puxados em
 direções opostas.
+
+
+---
+
+## Uma ideia que estou tendo: como fixar sigma em Co-evolução
+
+Isto ainda não é decisão, é uma proposta que quero discutir.
+
+**O problema.** Nos outros três estudos sigma é re-aplicado a cada geração. Em
+Co-evolução não dá: as duas características são herdáveis, e re-sortear é
+exatamente o que impede a herança. Os dois sigmas só podem ser condição inicial,
+e da geração 2 em diante a dispersão é o que a seleção e a deriva fizerem dela.
+
+**A proposta** é usar três níveis bem separados (0.5, 1.0 e 2.0) **cruzados entre
+os dois sexos**, e não ao longo da diagonal. A diagonal prenderia a assimetria em
+zero, e é justamente a assimetria que a análise do Controle mostrou ser o que
+manda. Neste cruzamento a assimetria e a variabilidade total ficam
+descorrelacionadas (r = 0), porque cada assimetria positiva tem o seu espelho
+negativo com a mesma norma, então os dois efeitos podem ser estimados
+separadamente.
+
+| sigma_p | sigma_z | assimetria | |
+|---|---|---|---|
+| 2.0 | 0.5 | -1.39 | fêmeas variadas, machos homogêneos |
+| 1.0 | 0.5 | -0.69 | |
+| 2.0 | 1.0 | -0.69 | |
+| 0.5 | 0.5 | 0 | a diagonal |
+| 1.0 | 1.0 | 0 | a diagonal |
+| 2.0 | 2.0 | 0 | a diagonal |
+| 0.5 | 1.0 | +0.69 | |
+| 1.0 | 2.0 | +0.69 | |
+| 0.5 | 2.0 | +1.39 | fêmeas homogêneas, machos variados |
+
+Da geração 2 em diante a assimetria deixa de ser imposta e passa a ser
+**medida**, a partir do que já gravamos: `0.5 * log(varz_pop / varp_pop)`. Ela
+entra na análise como covariável geração a geração, e a pergunta passa a ser se a
+relação que o Controle encontrou se mantém quando as duas características
+evoluem. Manter-se ou não é resultado. O desenho fica em 12.960 cenários.
+
+O raciocínio completo por trás disto, com os números da análise diagonal que
+levaram à escolha da assimetria, está em `NOTA_material_removido_2026-08-16.md`.
+Vale lembrar que aqueles números vêm da rodada com a regra sequencial e precisam
+ser refeitos com o best-of-n.
