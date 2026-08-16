@@ -340,9 +340,9 @@ acasalaram, ou seja, quantos parceiros elas de fato conseguiram, que não
 
 ### Um parêntese
 
-Fiz esta figura para tentar entender melhor o que pode estar acontecendo com
-o censo. Ela não usa dado nenhum, é só a conta do modelo, mas me ajudou a
-enxergar, então deixo aqui.
+Fiz esta figura para tentar entender melhor o que pode estar acontecendo
+com o censo. Ela não usa dado nenhum, é só a conta do modelo, mas me
+ajudou a enxergar, então deixo aqui.
 
 Cada macho juvenil sobrevive com probabilidade
 
@@ -412,17 +412,17 @@ pa | pb
 ```
 
 No painel (a) dá para ver de onde vem o problema. Enquanto a população
-está sobre o ótimo, a distribuição dos juvenis cai bem embaixo do pico da
-curva e quase todos sobrevivem. Conforme a média se desloca, a sobreposição
-vai sumindo, e a sobrevivência não cai um pouco: cai por ordens de grandeza,
-porque a curva é uma gaussiana no expoente.
+está sobre o ótimo, a distribuição dos juvenis cai bem embaixo do pico
+da curva e quase todos sobrevivem. Conforme a média se desloca, a
+sobreposição vai sumindo, e a sobrevivência não cai um pouco: cai por
+ordens de grandeza, porque a curva é uma gaussiana no expoente.
 
-E o painel (b) põe número nisso. Com sigma_z = 1, o traço pode se afastar
-até cerca de 9,5 e ainda sobram os 200 machos de que o censo precisa.
-Passando disso, não sobram: com a média em 15 o esperado é menos de um
-sobrevivente entre os 5.000. Nos dados desta rodada a curva sigmoide
-chega a passar de 20, o que explica de onde saíram as redes de 200
-fêmeas por 2 machos.
+E o painel (b) põe número nisso. Com sigma_z = 1, o traço pode se
+afastar até cerca de 9,5 e ainda sobram os 200 machos de que o censo
+precisa. Passando disso, não sobram: com a média em 15 o esperado é
+menos de um sobrevivente entre os 5.000. Nos dados desta rodada a curva
+sigmoide chega a passar de 20, o que explica de onde saíram as redes de
+200 fêmeas por 2 machos.
 
 E deixa claro também por que a cota resolve: sorteando 200 com peso
 proporcional a V, o que importa passa a ser a viabilidade **relativa**

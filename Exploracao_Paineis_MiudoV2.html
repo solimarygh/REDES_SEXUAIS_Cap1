@@ -308,13 +308,11 @@ sorteando sempre 200 juvenis com peso proporcional à viabilidade. A
 seção “O censo de machos sob a regra nova” explica melhor esse ponto e
 as dúvidas que me surgiram.</p>
 </blockquote>
-<div id="por-que-o-censo-desanda-a-conta-da-viabilidade"
-class="section level3">
-<h3>Por que o censo desanda: a conta da viabilidade</h3>
-<p>A figura abaixo não usa dado nenhum, é só a conta do modelo. Serve
-para deixar claro o que a seleção natural de viabilidade faz e por que
-ela deixa de conseguir preencher o censo quando o traço se afasta do
-ótimo.</p>
+<div id="um-parêntese" class="section level3">
+<h3>Um parêntese</h3>
+<p>Fiz esta figura para tentar entender melhor o que pode estar
+acontecendo com o censo. Ela não usa dado nenhum, é só a conta do
+modelo, mas me ajudou a enxergar, então deixo aqui.</p>
 <p>Cada macho juvenil sobrevive com probabilidade</p>
 <p><span class="math display">\[V = \exp\!\left(-\gamma\,(z -
 \phi)^2\right), \qquad \gamma = 0.2,\ \phi = 5\]</span></p>
@@ -322,12 +320,12 @@ ela deixa de conseguir preencher o censo quando o traço se afasta do
 metade, 5.000, são machos juvenis. É sobre esses 5.000 que a viabilidade
 age, e de quem sobreviver saem os 200 adultos.</p>
 <p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/viabilidade-conta-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
-<p>O painel (a) mostra por que o problema aparece: enquanto a população
-está sobre o ótimo, a distribuição dos juvenis cai bem embaixo do pico
-da curva e quase todos sobrevivem. Conforme a média se desloca, a
-sobreposição some, e a sobrevivência não cai um pouco, cai por ordens de
-grandeza, porque a curva é uma gaussiana no expoente.</p>
-<p>O painel (b) põe número nisso. Com sigma_z = 1, o traço pode se
+<p>No painel (a) dá para ver de onde vem o problema. Enquanto a
+população está sobre o ótimo, a distribuição dos juvenis cai bem embaixo
+do pico da curva e quase todos sobrevivem. Conforme a média se desloca,
+a sobreposição vai sumindo, e a sobrevivência não cai um pouco: cai por
+ordens de grandeza, porque a curva é uma gaussiana no expoente.</p>
+<p>E o painel (b) põe número nisso. Com sigma_z = 1, o traço pode se
 afastar até cerca de 9,5 e ainda sobram os 200 machos de que o censo
 precisa. Passando disso, não sobram: com a média em 15 o esperado é
 menos de um sobrevivente entre os 5.000. Nos dados desta rodada a curva
