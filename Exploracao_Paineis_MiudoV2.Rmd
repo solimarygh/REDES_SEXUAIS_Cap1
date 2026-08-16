@@ -338,11 +338,12 @@ acasalaram, ou seja, quantos parceiros elas de fato conseguiram, que não
 > seção "O censo de machos sob a regra nova" explica melhor esse ponto e
 > as dúvidas que me surgiram.
 
-### Por que o censo desanda: a conta da viabilidade
+### A conta da viabilidade
 
-A figura abaixo não usa dado nenhum, é só a conta do modelo. Serve para
-deixar claro o que a seleção natural de viabilidade faz e por que ela
-deixa de conseguir preencher o censo quando o traço se afasta do ótimo.
+Fiz esta figura com o Claude para entender melhor o que estava acontecendo
+com o censo. Ela não usa dado nenhum, é só a conta do modelo, e ajuda a ver
+o que a seleção natural de viabilidade faz e por que ela deixa de conseguir
+preencher o censo quando o traço se afasta do ótimo.
 
 Cada macho juvenil sobrevive com probabilidade
 
