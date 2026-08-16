@@ -12,6 +12,9 @@ output:
       collapsed: false
       smooth_scroll: true
     self_contained: false
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{css, echo=FALSE}
@@ -277,48 +280,57 @@ rotulo <- function(base, ns, amax, kk) {
 
 # Como ler este documento
 
-Este é o documento de exploração: mostra os painéis crus, um estudo de cada vez, sem
-tentar responder às hipóteses. Quem organiza os mesmos dados por hipótese é o
-`Resultados_Preliminares.Rmd`, e o desenho está descrito em `NOTA_quatro_estudos.md`.
+Este é o documento de exploração: mostra os painéis crus, um estudo de
+cada vez, e o desenho está descrito em `NOTA_quatro_estudos.md`.
 
-A barra lateral tem uma entrada por estudo, e dentro de cada uma as variáveis resposta que
-faz sentido olhar naquele estudo. Já a navegação por dentro de cada painel é por abas, sempre
-na mesma ordem: **seleção natural** (sem, com), depois **A_max** (200, 40, 10), depois **k**
-(5, 10, 20). São as 18 combinações do desenho ecológico, e a aba que abre por default é a mais
-permissiva de todas, sem seleção natural e com A_max = 200.
+A barra lateral tem uma entrada por estudo, e dentro de cada uma as
+variáveis resposta que faz sentido olhar naquele estudo. Já a navegação
+por dentro de cada painel é por abas, sempre na mesma ordem: **seleção
+natural** (sem, com), depois **A_max** (200, 40, 10), depois **k** (5,
+10, 20). São as 18 combinações do desenho ecológico, e a aba que abre
+por default é a mais permissiva de todas, sem seleção natural e com
+A_max = 200.
 
-As quatro curvas de preferência aparecem sempre nas mesmas cores: <span style="color:gray55">**aleatória**</span>,
-<span style="color:#E6B800">**gaussiana**</span>, <span style="color:#3BA273">**sigmoide**</span> e
-<span style="color:#9932CC">**disruptiva**</span>.
+As quatro curvas de preferência aparecem sempre nas mesmas cores:
+[**aleatória**]{style="color:gray55"},
+[**gaussiana**]{style="color:#E6B800"},
+[**sigmoide**]{style="color:#3BA273"} e
+[**disruptiva**]{style="color:#9932CC"}.
 
-E as métricas, para não ter que ir procurar: **modularidade** é o quanto a rede se divide em
-grupos que acasalam preferencialmente entre si; **aninhamento** (NODF) é o quanto os parceiros
-dos machos menos procurados são um subconjunto dos parceiros dos mais procurados; **centralização**
-é o quanto os acasalamentos se concentram em poucos indivíduos; e **Is** é a desigualdade no
-número de parceiras entre os machos. A **poliandria realizada** é o grau médio das fêmeas que
-acasalaram, ou seja, quantos parceiros elas de fato conseguiram, que não é o mesmo que o k que
-buscavam.
+Lembrando as métricas que estamos medindo: **modularidade** é o quanto a
+rede se divide em grupos que acasalam preferencialmente entre si;
+**aninhamento** (NODF) é o quanto os parceiros dos machos menos
+procurados são um subconjunto dos parceiros dos mais procurados;
+**centralização** é o quanto os acasalamentos se concentram em poucos
+indivíduos; e **Is** é a desigualdade no número de parceiras entre os
+machos. A **poliandria realizada** é o grau médio das fêmeas que
+acasalaram, ou seja, quantos parceiros elas de fato conseguiram, que não
+é o mesmo que o k que buscavam.
 
-
-> **Um aviso que vale para todo o documento.** Esta rodada usa a versão mais recente do
-> modelo, com a regra de escolha que apelidamos de **best-of-n**: a fêmea avalia os A_max
-> machos, todos, e só depois fica com os k melhores entre os que aceitou. O desenho está em
-> `NOTA_quatro_estudos.md`.
+> **NOvidade:** Esta rodada usa a versão mais recente do modelo depois
+> da minha última conversa com Miudo, agora inclui a regra de escolha
+> que apelidamos de **best-of-n**: a fêmea avalia os A_max machos,
+> todos, e só depois fica com os k melhores entre os que aceitou. O
+> desenho está em `NOTA_quatro_estudos.md`.
 >
-> A regra deixou a seleção sexual bem mais forte, que era a intenção, e isso teve uma
-> consequência que ainda não está resolvida. Em **Fêmeas variando**, nas curvas **sigmoide** e
-> **disruptiva com seleção natural ligada**, o traço se afasta tanto do ótimo ecológico que a
-> viabilidade desaba para todos ao mesmo tempo, e sobram pouquíssimos machos adultos. Nessas
-> células a rede saiu de 200 fêmeas por dois ou três machos, e modularidade, aninhamento e
-> centralização não são comparáveis com as das outras. Elas aparecem marcadas com um **X
-> branco** nos painéis da seção 4.
+> A regra deixou a seleção sexual bem mais forte, que era a intenção, e
+> isso teve uma consequência que ainda não está resolvida. Em Fêmeas
+> variando, nas curvas sigmoide e disruptiva com seleção natural ligada,
+> o traço se afasta tanto do ótimo ecológico que a viabilidade desaba
+> para todos ao mesmo tempo, e sobram pouquíssimos machos adultos.
+> Nessas células a rede saiu de 200 fêmeas por dois ou três machos, e
+> modularidade, aninhamento e centralização não são comparáveis com as
+> das outras. Elas aparecem marcadas com um X branco nos painéis da
+> seção 4.
 >
-> O Controle e Machos variando não têm esse problema: neles o traço é sorteado de novo a cada
-> geração, sempre centrado em phi, então o censo fica nos 200 em todos os cenários.
+> O Controle e Machos variando não têm esse problema: neles o traço é
+> sorteado de novo a cada geração, sempre centrado em phi, então o censo
+> fica nos 200 em todos os cenários.
 >
-> A próxima rodada vai tratar os 200 como cota, sorteando sempre 200 juvenis com peso
-> proporcional à viabilidade. A seção "O censo de machos sob a regra nova" da nota explica a
-> decisão e o que fica em aberto.
+> Estou pensando rodadar novamente mas tratando os 200 como cota,
+> sorteando sempre 200 juvenis com peso proporcional à viabilidade. A
+> seção "O censo de machos sob a regra nova" explica melhor esse ponto e
+> as dúvidas que me surgiram.
 
 ```{r status}
 n_cen <- function(x, eixos) {
@@ -345,26 +357,30 @@ tibble(
 ) %>% kable(caption = "O que está neste documento. Cenários inclui as 20 réplicas.")
 ```
 
----
+------------------------------------------------------------------------
 
 # 1. Controle — σp × σz, uma geração
 
-> Nada é herdado. Os traços são sorteados, a rede se forma, as métricas são medidas, e acabou.
-> É o único estudo que cruza os dois eixos de variação por inteiro, e por isso o único em que
-> dá para ver a superfície toda em vez de uma linha dela.
+> Nada é herdado. Os traços são sorteados, a rede se forma, as métricas
+> são medidas, e acabou. É o único estudo que cruza os dois eixos de
+> variação por inteiro, e por isso o único em que dá para ver a
+> superfície toda em vez de uma linha dela.
 
-Como não há geração seguinte, aqui não existe trajetória: cada cenário é um ponto, e o que se
-explora é o plano (σp, σz). Os dois eixos vão de 0.2 a 2.0 em sete níveis, e a diagonal
-σp = σz é onde os dois sexos são igualmente heterogêneos.
+Como não há geração seguinte, aqui não existe trajetória: cada cenário é
+um ponto, e o que se explora é o plano (σp, σz). Os dois eixos vão de
+0.2 a 2.0 em sete níveis, e a diagonal σp = σz é onde os dois sexos são
+igualmente heterogêneos.
 
-A seleção natural entra como filtro puramente ecológico: muda quais machos estão disponíveis,
-mas não tem consequência evolutiva nenhuma, porque não há descendência.
+A seleção natural entra como filtro puramente ecológico: muda quais
+machos estão disponíveis, mas não tem consequência evolutiva nenhuma,
+porque não há descendência.
 
 ## 1.1 Superfície das métricas de rede {.tabset}
 
-Cada faixa é uma métrica, com escala de cor própria. Dentro da faixa, as quatro colunas são as
-quatro curvas de preferência. Vale reparar em duas coisas ao percorrer as abas: se o gradiente
-corre na vertical (σp manda), na horizontal (σz manda) ou na diagonal, e se as quatro curvas
+Cada faixa é uma métrica, com escala de cor própria. Dentro da faixa, as
+quatro colunas são as quatro curvas de preferência. Vale reparar em duas
+coisas ao percorrer as abas: se o gradiente corre na vertical (σp
+manda), na horizontal (σz manda) ou na diagonal, e se as quatro curvas
 desenham a mesma superfície ou superfícies diferentes.
 
 ```{r ct-superficie, results='asis', fig.width=12, fig.height=13}
@@ -376,10 +392,11 @@ render_tabs(function(kk, amax, ns)
 
 ## 1.2 Cortes ao longo de σz {.tabset}
 
-A mesma informação da superfície, mas em linhas, que às vezes é mais fácil de ler. Cada linha
-é um nível de σp: as escuras são fêmeas homogêneas, as claras são fêmeas heterogêneas. Se as
-linhas forem paralelas, σp e σz agem de forma aditiva; se cruzarem ou abrirem em leque, há
-interação entre os dois.
+A mesma informação da superfície, mas em linhas, que às vezes é mais
+fácil de ler. Cada linha é um nível de σp: as escuras são fêmeas
+homogêneas, as claras são fêmeas heterogêneas. Se as linhas forem
+paralelas, σp e σz agem de forma aditiva; se cruzarem ou abrirem em
+leque, há interação entre os dois.
 
 ```{r ct-cortes, results='asis', fig.width=12, fig.height=10}
 if (!ok(ct)) cat("\n*Sem dados do Controle.*\n") else
@@ -388,103 +405,189 @@ render_tabs(function(kk, amax, ns)
               rotulo("CONTROLE — cortes ao longo de σz", ns, amax, kk)))
 ```
 
-## 1.3 Divergência entre as curvas de preferência
+<!-- ## 1.3 Divergência entre as curvas de preferência -->
 
-Esta é a grandeza que construímos para perguntar *onde no plano as quatro curvas produzem
-topologias diferentes umas das outras*. Dentro de cada célula do desenho tira-se a média de
-cada métrica para cada curva, e a divergência é o quanto essas quatro posições se afastam do
-centro comum delas, no espaço das quatro métricas padronizadas. Vale zero se as quatro curvas
-produzem exatamente a mesma rede, e cresce quanto mais elas se separam.
+<!-- Esta é a grandeza que construímos para perguntar *onde no plano as -->
 
-Padronizar aqui quer dizer converter cada métrica em z-score, subtraindo a média e dividindo pelo
-desvio padrão, para que as quatro fiquem na mesma unidade antes de entrarem numa distância. Sem
-isso a conta seria dominada pelo aninhamento, que é definido de 0 a 100 enquanto a modularidade e
-a centralização ficam entre 0 e 1, e a divergência mediria uma métrica só. A padronização é feita
-uma vez sobre a tabela inteira, e não dentro de cada célula: se fosse por célula, cada uma seria
-esticada pela sua própria dispersão e todas sairiam parecidas, que é exatamente o contrário do
-que este mapa quer mostrar.
+<!-- quatro curvas produzem topologias diferentes umas das outras*. Dentro de -->
 
-```{r ct-divergencia, fig.width=11, fig.height=7.5}
-if (!ok(ct)) {
-  cat("*Sem dados do Controle.*")
-} else {
-  mets <- intersect(c("Modularity", "Nestedness", "Centralization", "I_s"), names(ct))
-  chave <- c("sigma_p", "sigma_z", "encounters_n", "k_fixo", "selecao_natural")
+<!-- cada célula do desenho tira-se a média de cada métrica para cada curva, -->
 
-  padr <- ct %>%
-    filter(if_all(all_of(mets), ~ !is.na(.x))) %>%
-    mutate(across(all_of(mets), ~ as.numeric(scale(.x))))
+<!-- e a divergência é o quanto essas quatro posições se afastam do centro -->
 
-  cel <- padr %>%
-    group_by(across(all_of(c(chave, "tipo_selecao")))) %>%
-    summarise(across(all_of(mets), ~ mean(.x, na.rm = TRUE)), .groups = "drop") %>%
-    pivot_longer(all_of(mets), names_to = "met", values_to = "v")
+<!-- comum delas, no espaço das quatro métricas padronizadas. Vale zero se as -->
 
-  centro <- cel %>%
-    group_by(across(all_of(c(chave, "met")))) %>%
-    summarise(centro = mean(v, na.rm = TRUE), .groups = "drop")
+<!-- quatro curvas produzem exatamente a mesma rede, e cresce quanto mais -->
 
-  div <- cel %>%
-    left_join(centro, by = c(chave, "met")) %>%
-    group_by(across(all_of(c(chave, "tipo_selecao")))) %>%
-    summarise(dist = sqrt(sum((v - centro)^2)), .groups = "drop") %>%
-    group_by(across(all_of(chave))) %>%
-    summarise(divergencia = mean(dist), .groups = "drop")
+<!-- elas se separam. -->
 
-  # Para o mapa, os três valores de k entram promediados; a figura seguinte
-  # abre por k para conferir se essa média não está escondendo nada.
-  div_mapa <- div %>%
-    group_by(sigma_p, sigma_z, encounters_n, selecao_natural) %>%
-    summarise(divergencia = mean(divergencia), .groups = "drop")
+<!-- Padronizar aqui quer dizer converter cada métrica em z-score, subtraindo -->
 
-  ggplot(div_mapa, aes(x = factor(sigma_z), y = factor(sigma_p), fill = divergencia)) +
-    geom_tile(color = "white", linewidth = 0.3) +
-    facet_grid(selecao_natural ~ encounters_n,
-               labeller = labeller(
-                 encounters_n    = function(x) paste0("A_max = ", x),
-                 selecao_natural = function(x) ifelse(as.logical(x), "com seleção natural",
-                                                      "sem seleção natural"))) +
-    scale_fill_viridis_c(option = "magma", name = "divergência") +
-    labs(title = "CONTROLE — onde as quatro curvas de preferência divergem mais",
-         subtitle = "Média sobre os três valores de k. Eixo y = σp, eixo x = σz.",
-         x = "σz — variação do traço dos machos",
-         y = "σp — variação da preferência entre fêmeas",
-         caption = "Distância média das quatro curvas ao centroide delas, no espaço das quatro métricas padronizadas.") +
-    tema_painel() +
-    theme(panel.grid = element_blank(),
-          plot.title = element_text(face = "bold", size = 13),
-          plot.caption = element_text(hjust = 0, face = "italic", size = 8.5))
-}
-```
+<!-- a média e dividindo pelo desvio padrão, para que as quatro fiquem na -->
 
-```{r ct-divergencia-k, fig.width=11, fig.height=4.2}
-if (ok(ct)) {
-  # A mesma divergência, agora aberta por k e contra a assimetria com sinal.
-  divk <- div %>% mutate(assimetria = log(sigma_z / sigma_p))
+<!-- mesma unidade antes de entrarem numa distância. Sem isso a conta seria -->
 
-  ggplot(divk, aes(x = assimetria, y = divergencia, color = factor(k_fixo))) +
-    geom_point(alpha = 0.5, size = 1.3) +
-    geom_smooth(method = "loess", formula = y ~ x, se = FALSE, linewidth = 1) +
-    facet_grid(selecao_natural ~ encounters_n,
-               labeller = labeller(
-                 encounters_n    = function(x) paste0("A_max = ", x),
-                 selecao_natural = function(x) ifelse(as.logical(x), "com NS", "sem NS"))) +
-    scale_color_viridis_d(name = "k", end = 0.85) +
-    labs(title = "A mesma divergência contra a assimetria log(σz/σp)",
-         x = "assimetria — negativa: fêmeas variam mais; positiva: machos variam mais",
-         y = "divergência",
-         caption = "Cada ponto é uma célula (σp, σz). Zero no eixo x é a diagonal, onde os dois sexos variam igual.") +
-    tema_painel() +
-    theme(plot.title = element_text(face = "bold", size = 12),
-          plot.caption = element_text(hjust = 0, face = "italic", size = 8.5))
-}
-```
+<!-- dominada pelo aninhamento, que é definido de 0 a 100 enquanto a -->
+
+<!-- modularidade e a centralização ficam entre 0 e 1, e a divergência -->
+
+<!-- mediria uma métrica só. A padronização é feita uma vez sobre a tabela -->
+
+<!-- inteira, e não dentro de cada célula: se fosse por célula, cada uma -->
+
+<!-- seria esticada pela sua própria dispersão e todas sairiam parecidas, que -->
+
+<!-- é exatamente o contrário do que este mapa quer mostrar. -->
+
+<!-- ```{r ct-divergencia, fig.width=11, fig.height=7.5} -->
+
+<!-- if (!ok(ct)) { -->
+
+<!--   cat("*Sem dados do Controle.*") -->
+
+<!-- } else { -->
+
+<!--   mets <- intersect(c("Modularity", "Nestedness", "Centralization", "I_s"), names(ct)) -->
+
+<!--   chave <- c("sigma_p", "sigma_z", "encounters_n", "k_fixo", "selecao_natural") -->
+
+<!--   padr <- ct %>% -->
+
+<!--     filter(if_all(all_of(mets), ~ !is.na(.x))) %>% -->
+
+<!--     mutate(across(all_of(mets), ~ as.numeric(scale(.x)))) -->
+
+<!--   cel <- padr %>% -->
+
+<!--     group_by(across(all_of(c(chave, "tipo_selecao")))) %>% -->
+
+<!--     summarise(across(all_of(mets), ~ mean(.x, na.rm = TRUE)), .groups = "drop") %>% -->
+
+<!--     pivot_longer(all_of(mets), names_to = "met", values_to = "v") -->
+
+<!--   centro <- cel %>% -->
+
+<!--     group_by(across(all_of(c(chave, "met")))) %>% -->
+
+<!--     summarise(centro = mean(v, na.rm = TRUE), .groups = "drop") -->
+
+<!--   div <- cel %>% -->
+
+<!--     left_join(centro, by = c(chave, "met")) %>% -->
+
+<!--     group_by(across(all_of(c(chave, "tipo_selecao")))) %>% -->
+
+<!--     summarise(dist = sqrt(sum((v - centro)^2)), .groups = "drop") %>% -->
+
+<!--     group_by(across(all_of(chave))) %>% -->
+
+<!--     summarise(divergencia = mean(dist), .groups = "drop") -->
+
+<!--   # Para o mapa, os três valores de k entram promediados; a figura seguinte -->
+
+<!--   # abre por k para conferir se essa média não está escondendo nada. -->
+
+<!--   div_mapa <- div %>% -->
+
+<!--     group_by(sigma_p, sigma_z, encounters_n, selecao_natural) %>% -->
+
+<!--     summarise(divergencia = mean(divergencia), .groups = "drop") -->
+
+<!--   ggplot(div_mapa, aes(x = factor(sigma_z), y = factor(sigma_p), fill = divergencia)) + -->
+
+<!--     geom_tile(color = "white", linewidth = 0.3) + -->
+
+<!--     facet_grid(selecao_natural ~ encounters_n, -->
+
+<!--                labeller = labeller( -->
+
+<!--                  encounters_n    = function(x) paste0("A_max = ", x), -->
+
+<!--                  selecao_natural = function(x) ifelse(as.logical(x), "com seleção natural", -->
+
+<!--                                                       "sem seleção natural"))) + -->
+
+<!--     scale_fill_viridis_c(option = "magma", name = "divergência") + -->
+
+<!--     labs(title = "CONTROLE — onde as quatro curvas de preferência divergem mais", -->
+
+<!--          subtitle = "Média sobre os três valores de k. Eixo y = σp, eixo x = σz.", -->
+
+<!--          x = "σz — variação do traço dos machos", -->
+
+<!--          y = "σp — variação da preferência entre fêmeas", -->
+
+<!--          caption = "Distância média das quatro curvas ao centroide delas, no espaço das quatro métricas padronizadas.") + -->
+
+<!--     tema_painel() + -->
+
+<!--     theme(panel.grid = element_blank(), -->
+
+<!--           plot.title = element_text(face = "bold", size = 13), -->
+
+<!--           plot.caption = element_text(hjust = 0, face = "italic", size = 8.5)) -->
+
+<!-- } -->
+
+<!-- ``` -->
+
+<!-- ```{r ct-divergencia-k, fig.width=11, fig.height=4.2} -->
+
+<!-- if (ok(ct)) { -->
+
+<!--   # A mesma divergência, agora aberta por k e contra a assimetria com sinal. -->
+
+<!--   divk <- div %>% mutate(assimetria = log(sigma_z / sigma_p)) -->
+
+<!--   ggplot(divk, aes(x = assimetria, y = divergencia, color = factor(k_fixo))) + -->
+
+<!--     geom_point(alpha = 0.5, size = 1.3) + -->
+
+<!--     geom_smooth(method = "loess", formula = y ~ x, se = FALSE, linewidth = 1) + -->
+
+<!--     facet_grid(selecao_natural ~ encounters_n, -->
+
+<!--                labeller = labeller( -->
+
+<!--                  encounters_n    = function(x) paste0("A_max = ", x), -->
+
+<!--                  selecao_natural = function(x) ifelse(as.logical(x), "com NS", "sem NS"))) + -->
+
+<!--     scale_color_viridis_d(name = "k", end = 0.85) + -->
+
+<!--     labs(title = "A mesma divergência contra a assimetria log(σz/σp)", -->
+
+<!--          x = "assimetria — negativa: fêmeas variam mais; positiva: machos variam mais", -->
+
+<!--          y = "divergência", -->
+
+<!--          caption = "Cada ponto é uma célula (σp, σz). Zero no eixo x é a diagonal, onde os dois sexos variam igual.") + -->
+
+<!--     tema_painel() + -->
+
+<!--     theme(plot.title = element_text(face = "bold", size = 12), -->
+
+<!--           plot.caption = element_text(hjust = 0, face = "italic", size = 8.5)) -->
+
+<!-- } -->
+
+<!-- ``` -->
 
 ## 1.4 Poliandria realizada e fêmeas sem acasalar {.tabset}
 
-Aqui está o que motivou refazer os três estudos: k é um teto e não uma cota, então quantos
-parceiros a fêmea de fato consegue depende da curva de preferência e de A_max. Estas superfícies
-mostram o quanto o teto foi vinculante em cada canto do plano.
+Erika, esta foi uma modificação recente também. Antes, descrevíamos k
+como "com quantos machos cada fêmea acasala", com os níveis 5, 10 e 20.
+A fêmea acasala com
+`min(k, machos que ela aceitou entre os A_max avaliados)`. Ela para
+quando atinge k OU quando esgota os machos que conseguiu avaliar, o que
+vier primeiro. Como a amostragem é sem reposição, ela nunca acasala com
+mais machos do que avaliou. Então, com A_max = 10 e k = 20, as femeas
+nunca podem chegar nesses 20. E talvez nem a 10, pois as femeas não
+acasalam com os dez que avaliaram, e sim com os que aceitou entre esses
+dez. AGORA: k é um teto e não uma cota, então quantos parceiros a fêmea
+de fato consegue depende da curva de preferência e de A_max. E estamos
+anotando o número de machos com os que as femeas estão se acasalando.
+Aqui dá para ver o panomarama completo.
 
 ```{r ct-poliandria, results='asis', fig.width=12, fig.height=13}
 if (!ok(ct)) cat("\n*Sem dados do Controle.*\n") else
@@ -493,20 +596,25 @@ render_tabs(function(kk, amax, ns)
                   rotulo("CONTROLE — poliandria e acesso", ns, amax, kk)))
 ```
 
----
+------------------------------------------------------------------------
 
-# 2. Fêmeas variando — σp, o traço evolui
+# 2. Fêmeas variando (σp), o traço do macho evolui
 
-> O eixo é σp, a variação do pico de preferência entre as fêmeas. A preferência é re-sorteada a
-> cada geração de N(5, σp), então não evolui, e o traço do macho é herdável e livre para
-> responder à seleção. σz fica fixo em 1.0 como condição inicial.
+> O eixo é σp, a variação do pico de preferência entre as fêmeas. A
+> preferência é re-sorteada a cada geração de N(5, σp), então não
+> evolui, e o traço do macho é herdável e livre para responder à
+> seleção. σz fica fixo em 1.0 como condição inicial.
 
-Cem gerações por réplica. A escolha da fêmea, aqui, é a **causa** da seleção: ela não muda ao
-longo do tempo, e é ela que gera a pressão seletiva sobre o traço masculino.
+Cem gerações por réplica. A escolha da fêmea, aqui, é a causa da
+seleção: ela não muda ao longo do tempo, e é ela que gera a pressão
+seletiva sobre o traço masculino.
 
-Em todos os painéis desta seção, a coluna 1 mostra o gradiente ao longo de σp na geração 100, e
-as colunas 2 e 3 mostram como cada coisa chegou até lá, nos dois extremos do gradiente
-(σp = 0.2 e σp = 2.0).
+Em todos os painéis desta seção, a coluna 1 mostra o gradiente ao longo
+de σp na geração 100, e as colunas 2 e 3 mostram como cada coisa chegou
+até lá, nos dois extremos do gradiente (σp = 0.2 e σp = 2.0). Notem como
+agora (que a femea escolhe os melhores), como os resultados diferem em
+relação ao graficos que veiamos antes: as metricas evoluem ao longo do
+tempo.
 
 ## 2.1 Métricas de rede {.tabset}
 
@@ -519,10 +627,11 @@ render_tabs(function(kk, amax, ns)
 
 ## 2.2 O traço do macho (z) {.tabset}
 
-A variável evolutiva deste estudo. A média diz se o traço se deslocou, e a variância diz se
-sobrou material para continuar respondendo à seleção. Com a segregação infinitesimal a
-variância deixou de travar no piso de 0.08 que o ruído fixo impunha, então cada cenário chega
-a um equilíbrio próprio.
+z é variável evolutiva deste estudo. Notem como agora, sem SelNat o
+tamanho do trait sobre além do ótimo (era 5). Também, agora, com a
+segregação infinitesimal (quero estudar mais disso) a variância deixou
+de ficar no piso de 0.08, então cada cenário chega a um equilíbrio
+próprio.
 
 ```{r fem-traco, results='asis', fig.width=13, fig.height=5.5}
 if (!ok(d)) cat("\n*Sem dados.*\n") else
@@ -534,6 +643,8 @@ render_tabs(function(kk, amax, ns)
 
 ## 2.3 Poliandria realizada {.tabset}
 
+Gráfico preliminar...
+
 ```{r fem-poliandria, results='asis', fig.width=13, fig.height=9}
 if (!ok(d)) cat("\n*Sem dados.*\n") else
 render_tabs(function(kk, amax, ns)
@@ -542,20 +653,23 @@ render_tabs(function(kk, amax, ns)
                 cor_faixa = "#1F6F8B"))
 ```
 
----
+------------------------------------------------------------------------
 
-# 3. Machos variando — σz, a preferência evolui
+# 3. Machos variando (σz), a preferência evolui
 
-> O espelho do anterior. O traço do macho passa a ser ambiental, re-sorteado a cada geração de
-> N(5, σz) e não herdado, e o pico de preferência da fêmea passa a ser herdável e bi-parental.
-> σp fica em 1.0, mas só como condição inicial.
+> O espelho do anterior. O traço do macho passa a ser ambiental,
+> re-sorteado a cada geração de N(5, σz) e não herdado, e o pico de
+> preferência da fêmea passa a ser herdável e bi-parental. σp fica em
+> 1.0, mas só como condição inicial.
 
-Aqui o papel da escolha da fêmea se inverte: ela deixa de ser a causa da seleção e passa a ser o
-**alvo** dela. A força seletiva é ecológica, a disponibilidade de machos.
+Aqui o papel da escolha da fêmea se inverte: ela deixa de ser a causa da
+seleção e passa a ser o alvo dela. Aqui podemos pensar que a força
+seletiva é a disponibilidade de machos.
 
-Um detalhe do desenho que vale ter em mente ao comparar com a seção 2: σz é imposto a cada
-geração, igual a σp lá, mas σp aqui é só o ponto de partida. Da geração 2 em diante a largura da
-distribuição de preferências é o que a seleção e a deriva fizerem dela.
+Um detalhe do desenho que vale ter em mente ao comparar com a seção 2:
+σz é imposto a cada geração, igual a σp lá, mas σp aqui é só o ponto de
+partida. Da geração 2 em diante a largura da distribuição de
+preferências é o que a seleção e a deriva fizerem dela.
 
 ## 3.1 Métricas de rede {.tabset}
 
@@ -568,15 +682,10 @@ render_tabs(function(kk, amax, ns)
 
 ## 3.2 A preferência da fêmea (p) {.tabset}
 
-A variável evolutiva deste estudo, medida nas fêmeas adultas. É o espelho exato do painel 2.2:
-lá o traço no sexo que o expressa, aqui a preferência no sexo que a usa, então as duas figuras
-se leem lado a lado.
-
-O motor também grava a preferência no pool genotípico, `pbar_pop` e `varp_pop`, que junta os dois
-sexos e é a variável evolutiva em sentido estrito, já que o macho carrega p sem expressar. As
-duas versões andam praticamente coladas nesta rodada, e por isso ficou só uma aqui; se em alguma
-rodada elas descolarem, é sinal de que a seleção de viabilidade sobre os machos está mexendo no
-pool, e aí vale trazer a outra de volta.
+A variável evolutiva deste estudo, medida nas fêmeas adultas. É o
+espelho exato do painel 2.2: lá o traço no sexo que o expressa, aqui a
+preferência no sexo que a usa, então as duas figuras se leem lado a
+lado.
 
 ```{r mac-pref, results='asis', fig.width=13, fig.height=5.5}
 if (!ok(esp)) cat("\n*Sem dados.*\n") else
@@ -588,9 +697,10 @@ render_tabs(function(kk, amax, ns)
 
 ## 3.3 Poliandria realizada {.tabset}
 
-A proporção de fêmeas sem acasalar, que nos outros dois estudos é descritiva, aqui é o indicador
-direto da força de seleção agindo sobre a preferência: quem não aceita ninguém deixa zero
-filhotes, e é essa variância de sucesso que permite a preferência evoluir.
+A proporção de fêmeas sem acasalar, que nos outros dois estudos é
+descritiva, aqui é o indicador direto da força de seleção agindo sobre a
+preferência: quem não aceita ninguém deixa zero filhotes, e é essa
+variância de sucesso que permite a preferência evoluir.
 
 ```{r mac-poliandria, results='asis', fig.width=13, fig.height=9}
 if (!ok(esp)) cat("\n*Sem dados.*\n") else
@@ -600,52 +710,59 @@ render_tabs(function(kk, amax, ns)
                 cor_faixa = "#1F6F8B"))
 ```
 
----
+------------------------------------------------------------------------
 
-# 4. Os três estudos no mesmo plano
+# 4. Os três estudos no mesmo plano modo heatmap ;)
 
-A ideia desta seção é do Miudo, e serve para responder a pergunta que as seções
-anteriores não conseguem fazer: **o que o Controle diz sobre onde os estudos evolutivos
-acabam parando?**
+A ideia desta seção legal é do Miudo, e serve para responder a pergunta
+que as seções anteriores não conseguem fazer: o que o Controle diz sobre
+onde os estudos evolutivos acabam parando? 0rigininalmente pensamos
+fazer para Modularidade, mas fiz para todas as métricas
 
-O Controle varre o plano (σp, σz) inteiro, e os dois estudos evolutivos percorrem cada
-um uma linha dele. Mas essa linha não fica parada. Em Fêmeas variando, σp é imposto e
-é re-sorteado a cada geração, então a posição vertical não se mexe; já σz é livre, e a
-geração 100 pode estar num σz bem diferente do 1.0 de onde partiu. Em Machos variando é
-o espelho: σz fica onde foi posto e σp é que anda.
+O Controle varre o plano (σp, σz) inteiro, e os dois estudos evolutivos
+percorrem cada um uma linha dele. Mas essa linha não fica parada. Em
+Fêmeas variando, σp é imposto e é re-sorteado a cada geração, então a
+posição vertical não se mexe; já σz é livre, e a geração 100 pode estar
+num σz bem diferente do 1.0 de onde partiu. Em Machos variando é o
+espelho: σz fica onde foi posto e σp é que anda.
 
-Então aqui cada estudo aparece duas vezes, na geração 1 e na geração 100, sobre a
-mesma grade 7×7 do Controle e com a **mesma escala de cor** em todas as linhas da
-figura. É essa escala compartilhada que faz a comparação valer: se a célula do estudo
-evolutivo tem a mesma cor da célula do Controle onde ela caiu, a regra de acasalamento
-sozinha já explicava o resultado; se a cor difere, a evolução produziu algo que o
+Então aqui cada estudo aparece duas vezes, na geração 1 e na geração
+100, sobre a mesma grade 7×7 do Controle e com a mesma escala de cor em
+todas as linhas da figura. É essa escala compartilhada que faz a
+comparação valer: se a célula do estudo evolutivo tem a mesma cor da
+célula do Controle onde ela caiu, a regra de acasalamento sozinha já
+explicava o resultado; se a cor difere, a evolução produziu algo que o
 Controle não previa.
 
-Só uma parte da grade fica pintada, e isso é o desenho e não falta de dado. Na geração
-1 de Fêmeas variando só existe a coluna σz = 1.0, porque é ali que todos os cenários
-começam; na de Machos variando, só a linha σp = 1.0.
+Só uma parte da grade fica pintada, e isso é o desenho e não falta de
+dado. Na geração 1 de Fêmeas variando só existe a coluna σz = 1.0,
+porque é ali que todos os cenários começam; na de Machos variando, só a
+linha σp = 1.0.
 
-**Três avisos de leitura, que valem para os quatro painéis.**
+**Avisos:**
 
-O primeiro é o mais importante. Este plano é uma projeção, e falta nele uma dimensão. No
-Controle o traço e a preferência estão sempre centrados em 5. Já na geração 100 de
-Fêmeas variando a média do traço pode ter se deslocado bastante, enquanto as preferências
-continuam sendo re-sorteadas em torno de 5. Duas situações com o mesmo (σp, σz) mas com
-médias diferentes não são a mesma situação, e o desencontro entre os sexos não aparece
-em lugar nenhum destes eixos. Por isso a legenda de cada figura diz o quanto a média se
-afastou: onde esse número é pequeno a comparação é direta, e onde é grande ela é apenas
-indicativa.
+-Este plano é uma projeção, e falta nele uma dimensão. No Controle o
+traço e a preferência estão sempre centrados em 5. Já na geração 100 de
+Fêmeas variando a média do traço pode ter se deslocado bastante,
+enquanto as preferências continuam sendo re-sorteadas em torno de 5.
+Duas situações com o mesmo (σp, σz) mas com médias diferentes não são a
+mesma situação, e o desencontro entre os sexos não aparece em lugar
+nenhum destes eixos. Por isso a legenda de cada figura diz o quanto a
+média se afastou: onde esse número é pequeno a comparação é direta, e
+onde é grande ela é apenas indicativa.
 
-O segundo: a posição das células evolutivas é a dispersão MEDIDA (a raiz da variância
-gravada), enquanto a grade do Controle é a dispersão IMPOSTA. Os dois coincidem quando a
-seleção natural está desligada, mas com ela ligada a viabilidade estreita a distribuição
-dos machos, e a medida fica abaixo da imposta. É mais uma razão para comparar as abas
-"com" e "sem" seleção natural entre si.
+-A posição das células evolutivas é a dispersão MEDIDA (a raiz da
+variância gravada), enquanto a grade do Controle é a dispersão IMPOSTA.
+Os dois coincidem quando a seleção natural está desligada, mas com ela
+ligada a viabilidade estreita a distribuição dos machos, e a medida fica
+abaixo da imposta. Essa é mais uma razão para comparar as abas "com" e
+"sem" seleção natural entre si.
 
-O terceiro: a dispersão medida é contínua, e para caber na grade ela é arredondada para
-o nível mais próximo dos sete do desenho. Valores acima de 2.0 encostam todos no 2.0, e
-a legenda avisa quantos casos ficaram fora da grade. Quando esse número for alto, é
-sinal de que a grade do Controle deveria ser estendida na rodada final.
+-a dispersão medida é contínua, e para caber na grade ela é arredondada
+para o nível mais próximo dos sete do desenho. Valores acima de 2.0
+encostam todos no 2.0, e a legenda avisa quantos casos ficaram fora da
+grade. Quando esse número for alto, é sinal de que a grade do Controle
+deveria ser estendida na rodada final.
 
 ```{r plano-dados}
 METS_PLANO <- c(Modularity = "Modularidade", Nestedness = "Aninhamento (NODF)",
@@ -820,29 +937,25 @@ if (is.null(plano)) cat("\n*Sem dados suficientes.*\n") else
 render_tabs(function(kk, amax, ns) plot_plano("I_s", kk, amax, ns))
 ```
 
----
+------------------------------------------------------------------------
 
-# 5. Co-evolução — ainda não rodado
+# 5. Co-evolução (ainda não rodado)
 
-O quarto estudo, em que traço e preferência são herdáveis ao mesmo tempo e a grandeza central
-passa a ser a covariância genética entre os dois. O motor está rascunhado em
-`Fase_Coevolucao.R` e a proposta de desenho está em `NOTA_quatro_estudos.md`, com quatro pontos
+O quarto estudo, em que traço e preferência são herdáveis ao mesmo tempo
+e a grandeza central passa a ser a covariância genética entre os dois.A
+proposta de desenho está em `NOTA_quatro_estudos.md`, com quatro pontos
 ainda em aberto para discutir antes de rodar.
 
-Quando rodar, esta seção ganha os mesmos painéis das anteriores mais um específico: a trajetória
-de `cov_zp` ao longo das gerações, que é onde o ciclo de Fisher apareceria ou não.
+Quando rodar, penso que esta seção ganha os mesmos painéis das
+anteriores mais um com a trajetória de `cov_zp` ao longo das gerações,
+que é onde o ciclo de Fisher apareceria ou não, o que vcs acham?
 
----
+------------------------------------------------------------------------
 
-# Nota técnica
+# 
 
-São 18 combinações ecológicas por painel e sete painéis, ou seja, mais de 150 figuras. Duas
-consequências práticas. A primeira é que o knit demora, na casa da meia hora, e o gargalo é
-desenhar as figuras e não ler os dados. A segunda é que o documento é gerado com
-`self_contained: false`, então o arquivo `.html` precisa viajar junto com a pasta
-`Exploracao_Paineis_MiudoV2_files/`: embutir tudo num arquivo único daria um HTML grande demais
-para abrir com conforto. Para mandar por e-mail, o jeito é zipar os dois juntos.
-
-Os dados vêm de `Resultados_Artigo/`, lidos com a mesma função do `Resultados_Preliminares.Rmd`.
-Se uma combinação aparecer como *sem dados*, é porque aquele pedaço ainda não foi baixado ou
-juntado; `99_juntar_resultados.R` faz a junção dos arquivos repartidos entre máquinas.
+Nota para eu nao esquecer: Os dados vêm de `Resultados_Artigo/`, lidos
+com a mesma função do `Resultados_Preliminares.Rmd`. Se uma combinação
+aparecer como *sem dados*, é porque aquele pedaço ainda não foi baixado
+ou juntado; `99_juntar_resultados.R` faz a junção dos arquivos
+repartidos entre máquinas.
