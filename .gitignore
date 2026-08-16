@@ -3,3 +3,15 @@
 .RData
 .Ruserdata
 *.rds
+
+# Chaves SSH: nunca, e menos ainda num repositório público
+id_rsa
+id_ed25519
+*.pem
+*.ppk
+ssh-copy-id*
+
+# Saída de execução, que não vale versionar
+log_*.txt
+nohup.out
+Rplots.pdf
