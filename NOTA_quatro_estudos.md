@@ -1297,6 +1297,74 @@ com os valores contínuos antes de escrever qualquer coisa.
 
 ---
 
+## O censo de machos sob a regra nova, e o que fazer com ele
+
+Esta seção é sobre uma consequência do best-of-n que só apareceu quando os dados da rodada
+nova ficaram prontos. Não é um erro de programação: a função do censo foi escrita supondo um
+regime em que o traço fica perto de phi, e a regra nova empurrou o sistema para fora desse
+regime.
+
+**O que aconteceu.** Com o best-of-n a seleção sexual ficou bem mais forte, que era a
+intenção. Na curva sigmoide isso leva a média do traço para longe do ótimo ecológico, e como
+a viabilidade é `V = exp(-gamma (z - phi)^2)`, ela desaba para todo mundo ao mesmo tempo. O
+passo de aceitação e rejeição passa a não devolver praticamente ninguém, entra a trava de
+segurança dos 2 machos, e a rede daquela geração vira 200 fêmeas por 2 machos. Modularidade,
+aninhamento e centralização calculados sobre uma matriz dessas não são comparáveis com os das
+outras células.
+
+Onde bate: apenas no estudo das fêmeas, e dentro dele apenas nas curvas sigmoide e u-shaped
+com seleção natural ligada. No Controle e em Machos variando o traço é sorteado de novo a cada
+geração, sempre centrado em phi, então a viabilidade nunca chega perto de zerar e o censo fica
+nos 200 em todos os cenários.
+
+**O que 200 deve ser, afinal.** A pergunta de fundo é como tratar a capacidade de suporte da
+população, e há duas leituras.
+
+Como **cota**, a população está sempre na capacidade de suporte: os 200 adultos são sempre
+sorteados, com probabilidade proporcional à viabilidade, e a seleção decide quais machos e
+nunca quantos. As redes ficam sempre comparáveis entre si. Como **teto**, a capacidade de
+suporte é um limite que a população pode não alcançar quando está mal adaptada, o que é
+biologicamente mais honesto, mas devolve redes de 200 fêmeas por 2 machos.
+
+É a mesma discussão que tivemos sobre k, e vale reparar em que ela se resolve para o outro
+lado. Com k decidimos que era teto e não cota, porque a poliandria realizada continua sendo
+uma quantidade que se lê e se reporta. Aqui não: um censo de 2 machos não é uma variável
+resposta que se interprete junto com a topologia, é uma condição que impede a medição.
+
+**O que vamos testar.** A cota, implementada como sorteio sem reposição de exatamente 200
+juvenis com peso proporcional a V. Dois argumentos a favor. Fica simétrico com o que já
+fazemos com as fêmeas, que também têm censo exato de 200 por sorteio, e a única diferença
+entre os sexos passa a ser a que interessa, que é a seleção agir sobre eles. E torna a
+viabilidade relativa em vez de absoluta: em vez de ninguém sobreviver, sobrevivem os menos mal
+adaptados, que é o que acontece numa população real mal adaptada.
+
+No regime saudável as duas formas são quase a mesma coisa, o que ajuda a decidir: aceitar e
+rejeitar e depois sub-amostrar uniformemente entre os sobreviventes equivale a sortear direto
+com peso V. A cota não muda a biologia do que já vínhamos fazendo, é a versão exata e sem
+ponto de quebra da mesma coisa.
+
+Na prática são cinco linhas, e o sorteio é feito em escala logarítmica porque V pode chegar à
+casa de 1e-40 e estourar por baixo:
+
+    chaves <- log(-log(runif(n))) + gamma * (z_juv - phi)^2
+    order(chaves)[seq_len(N_adultos)]
+
+**Duas ressalvas antes de fechar o assunto.**
+
+A primeira é que a mudança altera o fluxo de números aleatórios, então os três estudos
+precisam ser refeitos juntos para o conjunto sair de uma única versão do motor.
+
+A segunda é sobre gamma, e ainda está em aberto. Com gamma = 0.2 e a regra nova a mortalidade
+fica altíssima e mesmo assim o traço continua subindo, o que à primeira vista sugere que a
+viabilidade está fraca demais. Mas matar muito e segurar o traço não são a mesma coisa: o que
+freia o traço é a diferença de sobrevivência entre indivíduos, e quando sobram dois machos
+essa diferença passa a se expressar por um canal estreito demais. As fêmeas, que também
+carregam z, nunca passam por viabilidade nenhuma. Ou seja, parte do escape pode vir do censo
+ter colapsado e não de gamma ser pequeno. Só dá para saber depois de rodar com a cota, e por
+isso a decisão sobre gamma fica para depois dessa rodada.
+
+---
+
 ## Correspondência com o código
 
 Esta nota foi conferida contra os scripts. A tabela abaixo diz onde verificar cada bloco.

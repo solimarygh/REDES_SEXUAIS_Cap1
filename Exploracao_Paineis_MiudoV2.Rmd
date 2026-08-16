@@ -299,6 +299,27 @@ número de parceiras entre os machos. A **poliandria realizada** é o grau médi
 acasalaram, ou seja, quantos parceiros elas de fato conseguiram, que não é o mesmo que o k que
 buscavam.
 
+
+> **Um aviso que vale para todo o documento.** Esta rodada usa a versão mais recente do
+> modelo, com a regra de escolha que apelidamos de **best-of-n**: a fêmea avalia os A_max
+> machos, todos, e só depois fica com os k melhores entre os que aceitou. O desenho está em
+> `NOTA_quatro_estudos.md`.
+>
+> A regra deixou a seleção sexual bem mais forte, que era a intenção, e isso teve uma
+> consequência que ainda não está resolvida. Em **Fêmeas variando**, nas curvas **sigmoide** e
+> **disruptiva com seleção natural ligada**, o traço se afasta tanto do ótimo ecológico que a
+> viabilidade desaba para todos ao mesmo tempo, e sobram pouquíssimos machos adultos. Nessas
+> células a rede saiu de 200 fêmeas por dois ou três machos, e modularidade, aninhamento e
+> centralização não são comparáveis com as das outras. Elas aparecem marcadas com um **X
+> branco** nos painéis da seção 4.
+>
+> O Controle e Machos variando não têm esse problema: neles o traço é sorteado de novo a cada
+> geração, sempre centrado em phi, então o censo fica nos 200 em todos os cenários.
+>
+> A próxima rodada vai tratar os 200 como cota, sorteando sempre 200 juvenis com peso
+> proporcional à viabilidade. A seção "O censo de machos sob a regra nova" da nota explica a
+> decisão e o que fica em aberto.
+
 ```{r status}
 n_cen <- function(x, eixos) {
   if (!ok(x)) return("-")
@@ -655,6 +676,7 @@ plano <- local({
       group_by(across(all_of(CHAVE)), sig_z = sigma_z, sig_p = sigma_p) %>%
       summarise(across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
                 desvio_media = mean(abs(zbar_males - 5), na.rm = TRUE),
+                censo_curto = mean(n_machos_surv < 200, na.rm = TRUE),
                 .groups = "drop") %>%
       mutate(painel = "Controle (superfície completa)", fora = FALSE)
   }
@@ -668,6 +690,10 @@ plano <- local({
       summarise(sig_z_medido = mean(sqrt(varz_males), na.rm = TRUE),
                 across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
                 desvio_media = mean(abs(zbar_males - 5), na.rm = TRUE),
+                # fração de réplicas em que o censo adulto não chegou a 200.
+                # Onde isso for alto, a rede foi calculada sobre pouquíssimos
+                # machos e a célula não é comparável com o Controle.
+                censo_curto = mean(n_machos_surv < 200, na.rm = TRUE),
                 .groups = "drop") %>%
       mutate(sig_z  = encaixar(sig_z_medido),
              fora   = sig_z_medido > max(NIVEIS_SIGMA),
@@ -684,6 +710,7 @@ plano <- local({
       summarise(sig_p_medido = mean(sqrt(varp_femeas), na.rm = TRUE),
                 across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
                 desvio_media = mean(abs(pbar_femeas - 5), na.rm = TRUE),
+                censo_curto = mean(n_machos_surv < 200, na.rm = TRUE),
                 .groups = "drop") %>%
       mutate(sig_p  = encaixar(sig_p_medido),
              fora   = sig_p_medido > max(NIVEIS_SIGMA),
@@ -710,6 +737,13 @@ plot_plano <- function(metrica, kk, amax, ns) {
 
   n_fora <- sum(dd$fora, na.rm = TRUE)
 
+  # Células em que o censo adulto não chegou aos 200 em pelo menos metade das
+  # réplicas. Nelas a rede foi calculada sobre pouquíssimos machos, então a
+  # topologia não é comparável com a do Controle. Ficam marcadas com um X na
+  # figura, e não só avisadas no texto: numa aba lá pelo painel 40 ninguém se
+  # lembra de um aviso que ficou na introdução.
+  curtas <- dd %>% filter(!is.na(censo_curto), censo_curto >= 0.5)
+
   # O afastamento da média POR CURVA, e não um máximo só para a figura toda.
   # Um número global não serve: basta uma curva fugir para o aviso contaminar
   # os quatro painéis, quando na verdade três deles podem estar comparáveis.
@@ -730,6 +764,8 @@ plot_plano <- function(metrica, kk, amax, ns) {
 
   ggplot(dd, aes(x = sig_z, y = sig_p, fill = .data[[metrica]])) +
     geom_tile(color = "white", linewidth = 0.3) +
+    { if (nrow(curtas)) geom_point(data = curtas, shape = 4, size = 3,
+                                   stroke = 1.1, color = "white") } +
     facet_grid(painel ~ tipo_selecao,
                labeller = labeller(tipo_selecao = labels_4,
                                    painel = label_wrap_gen(18))) +
@@ -744,8 +780,10 @@ plot_plano <- function(metrica, kk, amax, ns) {
                                  "\nAfastamento máximo da média em relação a phi = 5, por curva: %s.",
                                  "\nAcima de ~1 a comparação com o Controle deixa de ser direta, porque lá os dois",
                                  "sexos estão sempre centrados em 5 e aqui não.",
-                                 "\nCélulas cuja dispersão medida passou de 2.0 e foi encostada no teto da grade: %d."),
-                           desv_txt, n_fora)) +
+                                 "\nCélulas cuja dispersão medida passou de 2.0 e foi encostada no teto da grade: %d.",
+                                 "\nX branco = censo adulto abaixo de 200 na maioria das réplicas (%d células):",
+                                 "a rede saiu de pouquíssimos machos e a topologia não é comparável."),
+                           desv_txt, n_fora, nrow(curtas))) +
     tema_painel() +
     theme(panel.grid = element_blank(),
           strip.text.y = element_text(color = "white", face = "bold", size = 8, angle = 0),
