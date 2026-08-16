@@ -33,11 +33,13 @@ fi
 cat > "$DESTINO/README.md" <<'MD'
 # Redes sexuais — Capítulo 1
 
-Resultados da rodada de exploração do modelo baseado em indivíduos de redes
-sexuais. Este repositório existe só para publicar os documentos; o código e os
-dados ficam no repositório de trabalho.
+Parte pública do meu repositório, para compartilhar documentos dinâmicos com os
+colaboradores. O código e os dados ficam no repositório de trabalho.
 
 **Site:** https://solimarygh.github.io/redes-sexuais-cap1/
+
+- **Exploração por painéis** — os três estudos, um de cada vez
+- **Nota: os quatro estudos complementares** — o desenho, o ciclo de vida e as hipóteses
 MD
 
 echo
