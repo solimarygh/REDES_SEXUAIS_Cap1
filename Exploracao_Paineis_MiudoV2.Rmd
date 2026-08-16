@@ -338,12 +338,11 @@ acasalaram, ou seja, quantos parceiros elas de fato conseguiram, que não
 > seção "O censo de machos sob a regra nova" explica melhor esse ponto e
 > as dúvidas que me surgiram.
 
-### A conta da viabilidade
+### Um parêntese
 
-Fiz esta figura com o Claude para entender melhor o que estava acontecendo
-com o censo. Ela não usa dado nenhum, é só a conta do modelo, e ajuda a ver
-o que a seleção natural de viabilidade faz e por que ela deixa de conseguir
-preencher o censo quando o traço se afasta do ótimo.
+Fiz esta figura para tentar entender melhor o que pode estar acontecendo com
+o censo. Ela não usa dado nenhum, é só a conta do modelo, mas me ajudou a
+enxergar, então deixo aqui.
 
 Cada macho juvenil sobrevive com probabilidade
 
@@ -412,13 +411,13 @@ pb <- ggplot(surv, aes(mu, pmax(n, 1e-3))) +
 pa | pb
 ```
 
-O painel (a) mostra por que o problema aparece: enquanto a população
-está sobre o ótimo, a distribuição dos juvenis cai bem embaixo do pico
-da curva e quase todos sobrevivem. Conforme a média se desloca, a
-sobreposição some, e a sobrevivência não cai um pouco, cai por ordens de
-grandeza, porque a curva é uma gaussiana no expoente.
+No painel (a) dá para ver de onde vem o problema. Enquanto a população
+está sobre o ótimo, a distribuição dos juvenis cai bem embaixo do pico da
+curva e quase todos sobrevivem. Conforme a média se desloca, a sobreposição
+vai sumindo, e a sobrevivência não cai um pouco: cai por ordens de grandeza,
+porque a curva é uma gaussiana no expoente.
 
-O painel (b) põe número nisso. Com sigma_z = 1, o traço pode se afastar
+E o painel (b) põe número nisso. Com sigma_z = 1, o traço pode se afastar
 até cerca de 9,5 e ainda sobram os 200 machos de que o censo precisa.
 Passando disso, não sobram: com a média em 15 o esperado é menos de um
 sobrevivente entre os 5.000. Nos dados desta rodada a curva sigmoide
