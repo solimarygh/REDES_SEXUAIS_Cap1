@@ -16,31 +16,31 @@ junto.
 
 Alguns termos aparecem sempre com o mesmo sentido:
 
-Traço do macho (z). A característica sexualmente selecionada, que só os
+**Traço do macho (z):** a característica sexualmente selecionada, que só os
 machos expressam.
 
-Preferência da fêmea (p). O pico da função de preferência de cada fêmea. Não
+**Preferência da fêmea (p):** o pico da função de preferência de cada fêmea. Não
 confundir com a exigência (choosiness, s), que é o quão estrita ela é em torno
 desse pico e fica fixa em todos os estudos.
 
-Curva de preferência. A regra que traduz p em probabilidade de aceitar um
+**Curva de preferência:** a regra que traduz p em probabilidade de aceitar um
 macho de traço z. São quatro, descritas mais adiante, e nenhuma evolui.
 
-sigma_p e sigma_z. A dispersão do pico de preferência entre as fêmeas e a do
+**sigma_p e sigma_z:** a dispersão do pico de preferência entre as fêmeas e a do
 traço entre os machos.
 
-Norma e assimetria. `sqrt(sigma_p^2 + sigma_z^2)` e `log(sigma_z / sigma_p)`.
+**Norma e assimetria:** `sqrt(sigma_p^2 + sigma_z^2)` e `log(sigma_z / sigma_p)`.
 É o mesmo par (sigma_p, sigma_z) em outras coordenadas, e serve para separar duas
 perguntas que estavam se confundindo: quanta variação existe, e de que lado ela
 está. A análise do Controle mostrou que a segunda é a que importa.
 
-Característica herdável, re-sorteada e ambiental. Herdável é transmitida aos
+**Característica herdável, re-sorteada e ambiental:** herdável é transmitida aos
 filhotes. Re-sorteada é sorteada de novo a cada geração da mesma distribuição, e
 por construção não pode responder à seleção. "Ambiental" é o mesmo mecanismo com
 leitura de dependência de condição: o macho expressa aquele z por causa do
 ambiente em que se desenvolveu, e não o transmite.
 
-Parâmetro imposto e condição inicial. Imposto é re-aplicado a cada geração e
+**Parâmetro imposto e condição inicial:** imposto é re-aplicado a cada geração e
 vale até o fim da réplica; condição inicial vale só na geração 1. Em Fêmeas
 variando os sete níveis de sigma_p são impostos e sigma_z_init é condição inicial
 (1.0); em Machos variando é o espelho. Nesse aspecto os dois são simétricos, mas
@@ -50,27 +50,27 @@ característica que evolui, enquanto em Machos variando ela age sobre uma
 característica ambiental e não tem consequência evolutiva nenhuma. A preferência
 nunca recebe seleção natural.
 
-Cenário e réplica. Cenário é uma combinação concreta dos fatores do desenho;
+**Cenário e réplica:** cenário é uma combinação concreta dos fatores do desenho;
 réplica é uma repetição do mesmo cenário com outra semente. Quando digo "70.560
 cenários", as réplicas já estão contadas dentro.
 
-Célula. Só nas análises, e não é sinônimo de cenário: é uma combinação de
+**Célula:** só nas análises, e não é sinônimo de cenário: é uma combinação de
 tudo menos a curva de preferência, para comparar as quatro curvas mantendo o
 resto igual.
 
-A_max. Quantos machos distintos cada fêmea avalia antes de decidir. É o custo
+**A_max:** quantos machos distintos cada fêmea avalia antes de decidir. É o custo
 ecológico da busca, e assume os valores 200, 40 e 10.
 
-k, e a poliandria realizada. k é o número de parceiros que a fêmea busca (5,
+**k, e a poliandria realizada:** k é o número de parceiros que a fêmea busca (5,
 10 ou 20), mas ela para quando o atinge ou quando esgota os A_max avaliados, o
 que vier primeiro. Ou seja, k é teto e não cota, e a poliandria realizada,
 quantos parceiros ela de fato conseguiu, é variável resposta.
 
-As quatro métricas de topologia. Calculadas sobre a rede bipartita de
+**As quatro métricas de topologia:** calculadas sobre a rede bipartita de
 acasalamentos: modularidade, aninhamento (NODF), centralização e oportunidade de
 seleção sexual (Is). As definições exatas estão na seção das métricas.
 
-Divergência entre curvas de preferência. Construída para a análise do
+**Divergência entre curvas de preferência:** construída para a análise do
 Controle: dentro de uma célula, o quanto as quatro curvas se afastam do centro
 comum delas no espaço das quatro métricas. Vale zero se as quatro produzem a
 mesma topologia. As métricas entram padronizadas, e a padronização é feita uma
@@ -78,13 +78,13 @@ vez só sobre a tabela inteira e não dentro de cada célula. Se fosse por célu
 cada uma seria reescalada pela própria dispersão e deixariam de ser comparáveis
 entre si, que é justamente a pergunta.
 
-Regra de escape. Regra da versão antiga, já removida: a fêmea que não
+**Regra de escape:** regra da versão antiga, já removida: a fêmea que não
 aceitava ninguém acabava acasalando à força com o último avaliado. Como a
 fecundidade é neutra, isso deixava todas com o mesmo sucesso reprodutivo, e sem
 variância de sucesso não há seleção sobre a preferência. Agora quem não aceita
 ninguém fica sem acasalar.
 
-Variância de segregação. Usamos o modelo infinitesimal: o desvio do filhote
+**Variância de segregação:** usamos o modelo infinitesimal: o desvio do filhote
 em relação à média dos pais tem variância proporcional à variância parental, e
 não um ruído de tamanho fixo escolhido por nós. Quero estudar isso melhor.
 
