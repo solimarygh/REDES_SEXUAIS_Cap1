@@ -155,30 +155,92 @@ uma população que se espalha e depois encontra o seu equilíbrio.
 
 ---
 
+## A correção, e o que ela revelou
+
+A saída escolhida foi a primeira das duas: acompanhar a variância génica à
+parte. Ela entrou como um terceiro modo, `segregacao = "genica"`, que virou o
+default da co-evolução, com os outros dois mantidos para comparação.
+
+O que a torna possível é uma propriedade do próprio modelo infinitesimal: a
+seleção **não altera** a variância génica. São infinitos locos de efeito
+infinitesimal, então as frequências alélicas mal se movem e só a deriva e a
+mutação a mudam. Isso dá uma dinâmica simples e defensável:
+
+    var_genica <- var_genica * (1 - 1/(2*Ne)) + mut_sd^2
+
+Assim a variância TOTAL continua livre para inflar sob acasalamento
+assortativo, que é biologia real, mas deixa de realimentar a segregação.
+
+O Ne não é suposto: sai do número de filhos que cada pai de fato deixou, pela
+fórmula do tamanho efetivo por variância no sucesso reprodutivo, combinando os
+dois sexos. Com seleção sexual forte poucos machos podem gerar quase tudo, e
+isso muda a velocidade de erosão por um fator grande.
+
+O diagnóstico rodou de novo com os quatro braços, e o modo génico passou:
+
+| braço | desloc. | subiram | var total | var génica | Ne | cor_zp |
+|---|---|---|---|---|---|---|
+| variância total | 6.22 | 10/10 | 58.6 | — | — | 0.38 |
+| phi longe do zero | 26.91 | 0/10 | 218.4 | — | — | 0.34 |
+| segregação fixa | 0.60 | 5/10 | 0.6 | — | — | 0.83 |
+| **variância génica** | **1.33** | **5/10** | **3.6** | **1.1** | **347** | **0.71** |
+
+Direção aleatória entre réplicas e variância contida, que era o que faltava.
+
+Três coisas que valem para além de "funcionou".
+
+**O desequilíbrio de ligamento virou uma quantidade medível.** No modo génico a
+variância total fica em 3.6 e a génica em 1.1, e a distância entre as duas é o
+desequilíbrio que o acasalamento assortativo gerou. Antes as duas estavam
+fundidas num número só, e era isso que permitia o laço. Agora dá para reportar
+o quanto cada curva de preferência gera de desequilíbrio, que é uma resposta a
+mais e não um problema.
+
+**O acoplamento genuíno estava sendo mascarado, não produzido.** A correlação
+entre traço e preferência é 0.71 com a variância contida contra 0.38 sem, e
+chega a 0.83 no modo de ruído fixo, em que a variância é mínima. Ou seja, o
+sinal fica mais limpo quanto menos ruído de segregação há, e a covariância
+enorme do modo antigo era efeito das variâncias grandes e não de acoplamento
+forte.
+
+**E a dinâmica não morreu junto com o artefato.** O modo génico se desloca mais
+que o de ruído fixo, 1.33 contra 0.60, mas em direção aleatória. Havia o risco
+de a correção matar o fenômeno junto com o problema, e não foi o caso: sobra
+movimento, e agora sem lado preferido.
+
+Um detalhe de leitura: nas linhas dos outros três modos a coluna da variância
+génica mostra o valor inicial e o Ne aparece vazio. Não é erro, é que nesses
+modos a génica nunca é atualizada.
+
+E o Ne deu 347 num censo de 400, bem mais alto do que eu esperava. Faz sentido
+para a gaussiana, em que cada fêmea escolhe machos próximos do seu próprio pico
+e os picos diferem, então a paternidade se reparte. Sob a sigmoide, em que
+todas querem os mesmos machos, é de esperar que despenque. Vale conferir nos
+dados do estudo.
+
+---
+
 ## Onde isto deixa o Estudo 4
 
-O motor está de pé e os testes estruturais passam, mas ele **não pode rodar como
-está**: com as duas características livres, a segregação alimentada pela
-variância total não tem freio, e qualquer resultado sairia contaminado. Uma
-rodada dos 12.960 cenários foi lançada e interrompida por isso.
-
-Duas saídas, e a escolha é uma pergunta para o Miudo:
-
-**Acompanhar a variância génica à parte.** É o que o modelo infinitesimal
-estrito faz. A variância de segregação deixaria de ser recalculada da variância
-total realizada a cada geração e passaria a seguir a sua própria dinâmica, com
-erosão por deriva e entrada por mutação. É a correção certa, e a mais trabalhosa.
-
-**Estimar a génica a partir da total e do assortamento observado.** Sob
-acasalamento assortativo há uma relação clássica entre as duas (Wright 1921;
-Crow e Felsenstein 1968), e nós já gravamos `cov_casais`, que dá a correlação
-entre os pares. Seria uma correção barata usando o que já temos, ao custo de
-depender de um resultado de equilíbrio que a nossa população pode não ter
-alcançado.
+Com a correção da variância génica o motor passou no diagnóstico, e os 12.960
+cenários do desenho da proposta estão rodando.
 
 Os quatro pontos de desenho do Estudo 4 continuam abertos e estão em
-`NOTA_material_removido_2026-08-16.md`. Mas nenhum deles importa antes deste:
-não adianta discutir o gradiente de k num motor que infla a variância sozinho.
+`NOTA_material_removido_2026-08-16.md`. O mais pesado é o gradiente de k: se ele
+sair de Co-evolução, como uma das saídas propunha, o desenho cai para 4.320
+cenários. Vale ter a opinião do Miudo antes da rodada definitiva, mas já não é
+impedimento para esta.
+
+Uma armadilha que valeu a lição: ao relançar com o motor corrigido, o script
+achou o backup da tentativa anterior, feita com a variância total, e começou a
+completá-lo. Teria produzido um conjunto com 6.480 cenários de um motor e 6.480
+do outro. É o mesmo cuidado que já tínhamos tomado ao renomear censoConst para
+bestOfN, e que não tinha sido aplicado aqui. O nome do arquivo agora carrega o
+modo de segregação.
+
+Fica também uma coisa sem explicação, que não bloqueia mas incomoda: no braço
+com phi = 50 as dez réplicas vão todas para baixo, e a variância infla ainda
+mais que no braço original. Não tenho mecanismo para essa direção.
 
 ---
 
