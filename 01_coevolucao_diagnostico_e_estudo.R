@@ -184,8 +184,15 @@ if (motor_ok || forcar) {
   cat(sprintf("\nDesenho '%s': %s cenários de 100 gerações, %d núcleos.\n",
               ESTUDO, format(nrow(cenarios), big.mark = "."), N_CORES))
 
-  arquivo_backup <- file.path(diretorios$dados, sprintf("backup_Coevolucao_%s.rds", ESTUDO))
-  arquivo_final  <- file.path(diretorios$dados, sprintf("resultados_Coevolucao_%s.rds", ESTUDO))
+  # O nome carrega o modo de segregação, e não é detalhe: a primeira tentativa
+  # de rodar o estudo foi feita com a variância total, e ao relançar com a
+  # correção o script achou aquele backup e ia completá-lo, misturando dois
+  # motores no mesmo conjunto. Com o modo no nome isso não pode acontecer.
+  SEG_ESTUDO <- "genica"
+  arquivo_backup <- file.path(diretorios$dados,
+                              sprintf("backup_Coevolucao_%s_%s.rds", SEG_ESTUDO, ESTUDO))
+  arquivo_final  <- file.path(diretorios$dados,
+                              sprintf("resultados_Coevolucao_%s_%s.rds", SEG_ESTUDO, ESTUDO))
 
   lista <- if (file.exists(arquivo_backup)) {
     l <- readRDS(arquivo_backup)
@@ -205,7 +212,8 @@ if (motor_ok || forcar) {
       sigma_z_init    = cenarios$sigma_z_init[i],
       encounters_n    = cenarios$encounters_n[i],
       k_fixo          = cenarios$k_fixo[i],
-      selecao_natural = cenarios$selecao_natural[i]
+      selecao_natural = cenarios$selecao_natural[i],
+      segregacao      = SEG_ESTUDO
     )
     if (is.null(res) || nrow(res) == 0) return(NULL)
     res$replica <- cenarios$replica[i]
