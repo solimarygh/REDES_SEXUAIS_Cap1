@@ -34,8 +34,9 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
                                     female_z_gen, female_p_gen,
                                     N_males_next = 200, N_females_next = 200,
                                     fecundidade_base = 50,
-                                    segregacao = c("infinitesimal", "fixa"),
-                                    eps_sd = 0.2, mut_sd = 0.05) {
+                                    segregacao = c("genica", "infinitesimal", "fixa"),
+                                    eps_sd = 0.2, mut_sd = 0.05,
+                                    var_genica_z = NULL, var_genica_p = NULL) {
   segregacao <- match.arg(segregacao)
   n_femeas <- ncol(M)
 
@@ -60,18 +61,61 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
   midparent_z <- (z_dads + z_moms) / 2
   midparent_p <- (p_dads + p_moms) / 2
 
-  desvio_segregacao <- function(valores_pais) {
+  # Três modos, e a diferença entre eles é de onde sai a variância que governa
+  # a segregação.
+  #
+  #   "genica" — do modelo infinitesimal estrito. A variância de segregação é
+  #     metade da variância GÉNICA, que é uma variável de estado com dinâmica
+  #     própria: no infinitesimal ela não responde à seleção (são infinitos
+  #     locos de efeito infinitesimal, as frequências alélicas mal se movem),
+  #     só à deriva e à mutação. É o modo correto e o default.
+  #
+  #   "infinitesimal" — o modo anterior, que usava a variância TOTAL realizada
+  #     do pool parental. Sob acasalamento assortativo a total fica acima da
+  #     génica, e alimentar a segregação com ela cria um laço: mais variância
+  #     gera mais variância. Foi o que fez a variância ir de 1 para 58 no
+  #     diagnóstico. Fica disponível para comparação.
+  #
+  #   "fixa" — ruído de tamanho fixo, o comportamento histórico. Não tem o
+  #     laço, mas prende a variância num piso arbitrário, 2*eps^2.
+  desvio_segregacao <- function(valores_pais, var_gen) {
     if (segregacao == "fixa") return(rnorm(total_filhotes, 0, eps_sd))
-    var_pais <- var(valores_pais)
-    if (!is.finite(var_pais) || var_pais < 0) var_pais <- 0
-    rnorm(total_filhotes, 0, sqrt(var_pais / 2)) + rnorm(total_filhotes, 0, mut_sd)
+    var_base <- if (segregacao == "genica") var_gen else var(valores_pais)
+    if (!is.finite(var_base) || var_base < 0) var_base <- 0
+    rnorm(total_filhotes, 0, sqrt(var_base / 2)) + rnorm(total_filhotes, 0, mut_sd)
   }
 
   # Os desvios de segregação de z e de p são independentes entre si: a
   # segregação embaralha cada característica separadamente, e é a herança de
   # ponto médio que carrega a associação entre elas.
-  z_filhotes <- pmax(0, midparent_z + desvio_segregacao(c(male_z_surv, female_z_gen)))
-  p_filhotes <- pmax(0, midparent_p + desvio_segregacao(c(male_p_surv, female_p_gen)))
+  z_filhotes <- pmax(0, midparent_z + desvio_segregacao(c(male_z_surv, female_z_gen), var_genica_z))
+  p_filhotes <- pmax(0, midparent_p + desvio_segregacao(c(male_p_surv, female_p_gen), var_genica_p))
+
+  # Atualização da variância génica, quando é ela que governa. No modelo
+  # infinitesimal a seleção não a altera, então só entram a deriva, que a
+  # erode a 1/(2*Ne) por geração, e a mutação, que repõe mut_sd^2.
+  #
+  # O Ne sai do número de filhos que cada pai de fato deixou, e não do censo:
+  # com seleção sexual forte poucos machos geram quase tudo, e o Ne despenca
+  # bem abaixo dos 400 do censo. É a diferença entre erodir devagar e erodir
+  # depressa, então vale medir em vez de supor.
+  if (segregacao == "genica") {
+    ne_por_sexo <- function(pais) {
+      k <- tabulate(pais); k <- k[k > 0]
+      N <- length(k)
+      if (N < 2) return(max(N, 1))
+      kb <- mean(k); vk <- var(k)
+      if (!is.finite(vk) || kb <= 1) return(N)
+      max(1, (N * kb - 1) / (kb - 1 + vk / kb))
+    }
+    Ne_m <- ne_por_sexo(dads); Ne_f <- ne_por_sexo(moms)
+    Ne   <- 4 * Ne_m * Ne_f / (Ne_m + Ne_f)
+    erosao <- 1 - 1 / (2 * Ne)
+    var_genica_z <- var_genica_z * erosao + mut_sd^2
+    var_genica_p <- var_genica_p * erosao + mut_sd^2
+  } else {
+    Ne <- NA_real_
+  }
 
   # Todos os filhotes viram juvenis, com sexo ao acaso 1:1.
   idx  <- sample.int(total_filhotes)
@@ -80,7 +124,8 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
   i_f  <- idx[(meio + 1):(2 * meio)]
 
   list(male_z_juv   = z_filhotes[i_m], male_p_juv   = p_filhotes[i_m],
-       female_z_juv = z_filhotes[i_f], female_p_juv = p_filhotes[i_f])
+       female_z_juv = z_filhotes[i_f], female_p_juv = p_filhotes[i_f],
+       var_genica_z = var_genica_z, var_genica_p = var_genica_p, Ne = Ne)
 }
 
 # ---------------------------------------------------------------------
@@ -92,12 +137,20 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
                                 tipo_selecao = "gaussian", encounters_n = 200,
                                 selecao_natural = TRUE, k_fixo = NULL,
                                 fecundidade_base = 50, eps_sd = 0.2,
-                                segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
+                                segregacao = c("genica", "infinitesimal", "fixa"), mut_sd = 0.05,
                                 regra = c("best_of_n", "sequencial"),
                                 fuga_mult = 3) {
   segregacao <- match.arg(segregacao)
   regra      <- match.arg(regra)
   N_juvenis  <- N_femeas * fecundidade_base %/% 2
+
+  # A variância génica parte da variância imposta na geração 1 e, daí em
+  # diante, segue a sua própria dinâmica: no infinitesimal a seleção não a
+  # toca, só a deriva e a mutação. É o que impede o laço que fazia a variância
+  # explodir quando a segregação era alimentada pela variância total.
+  var_genica_z <- sigma_z_init^2
+  var_genica_p <- sigma_p_init^2
+  Ne_atual     <- NA_real_
 
   # Os DOIS sexos carregam AS DUAS características. Os machos entram como
   # juvenis porque é sobre eles que a viabilidade age.
@@ -167,6 +220,11 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
       zbar_males  = mean(male_z_surv), varz_males  = var(male_z_surv),
       pbar_femeas = mean(female_p),    varp_femeas = var(female_p),
       n_machos_surv = length(male_z_surv),
+      # a variância génica que governou a segregação desta geração, e o Ne que
+      # a erodiu. A distância entre varz_pop e var_genica_z é o desequilíbrio
+      # de ligamento que o acasalamento assortativo criou, e agora dá para
+      # medir em vez de deixar realimentar.
+      var_genica_z = var_genica_z, var_genica_p = var_genica_p, Ne = Ne_atual,
       metrics
     )
 
@@ -176,12 +234,17 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
                                    N_machos, N_femeas,
                                    fecundidade_base = fecundidade_base,
                                    segregacao = segregacao,
-                                   eps_sd = eps_sd, mut_sd = mut_sd)
+                                   eps_sd = eps_sd, mut_sd = mut_sd,
+                                   var_genica_z = var_genica_z,
+                                   var_genica_p = var_genica_p)
     if (is.null(off)) { extincao_gen <- t; break }
     male_z_juv   <- off$male_z_juv
     male_p_juv   <- off$male_p_juv
     female_z_juv <- off$female_z_juv
     female_p_juv <- off$female_p_juv
+    var_genica_z <- off$var_genica_z
+    var_genica_p <- off$var_genica_p
+    Ne_atual     <- off$Ne
   }
 
   df_out <- dplyr::bind_rows(out)

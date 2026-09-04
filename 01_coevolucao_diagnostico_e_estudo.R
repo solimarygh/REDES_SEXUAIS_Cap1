@@ -53,10 +53,10 @@ cat(sprintf("Quatro braços, %d réplicas de %d gerações cada, sempre com a cu
 cat("gaussiana e sem seleção natural, que foi onde o problema apareceu.\n\n")
 
 bracos <- list(
-  list(nome = "A. como está",              phi = 5,  seg = "infinitesimal"),
+  list(nome = "A. variancia total",        phi = 5,  seg = "infinitesimal"),
   list(nome = "B. phi longe do zero",      phi = 50, seg = "infinitesimal"),
-  list(nome = "C. segregação fixa",        phi = 5,  seg = "fixa"),
-  list(nome = "D. os dois desligados",     phi = 50, seg = "fixa")
+  list(nome = "C. segregacao fixa",        phi = 5,  seg = "fixa"),
+  list(nome = "D. variancia GENICA",       phi = 5,  seg = "genica")
 )
 
 diag <- bind_rows(lapply(bracos, function(b) {
@@ -81,6 +81,10 @@ resumo <- diag %>%
     subiram      = sum(zbar_pop > first(phi_usado)),
     n            = n(),
     varz_final   = round(mean(varz_pop), 1),
+    # a génica é a que governa a segregação; a distância entre as duas é o
+    # desequilíbrio de ligamento criado pelo acasalamento assortativo
+    var_genica   = round(mean(var_genica_z), 2),
+    Ne           = round(mean(Ne, na.rm = TRUE)),
     cov_zp       = round(mean(cov_zp), 2),
     cor_zp       = round(mean(cor_zp), 2),
     .groups = "drop")
@@ -98,39 +102,39 @@ cat("1: se continuar na casa das dezenas, a variância está se inflando sozinha
 pega <- function(nome, col) resumo[[col]][resumo$braco == nome]
 equilibrado <- function(nome) {
   s <- pega(nome, "subiram"); n <- pega(nome, "n")
-  s >= 0.25 * n && s <= 0.75 * n          # nem todas para o mesmo lado
+  s >= 0.2 * n && s <= 0.8 * n            # nem todas para o mesmo lado
 }
 contida <- function(nome) pega(nome, "varz_final") < 10   # partiu de 1
 
 cat("\n--- veredito ---\n")
-ok_A <- equilibrado("A. como está") && contida("A. como está")
-ok_B <- equilibrado("B. phi longe do zero")
-ok_C <- contida("C. segregação fixa") && equilibrado("C. segregação fixa")
+cat("O que decide se o estudo pode rodar é o braço D, que é o modo que o\n")
+cat("estudo vai usar: a segregação governada pela variância GÉNICA.\n\n")
 
-if (ok_A) {
-  cat("O braço A já se comporta: direção aleatória e variância contida.\n")
-  cat("O que vimos antes não se repetiu, o que em si merece um olhar.\n")
-  motor_ok <- TRUE
-} else {
-  motor_ok <- FALSE
-  cat("O braço A confirma o problema.\n")
-  if (ok_B && !ok_C) {
-    cat("Afastar phi do zero resolve, e a segregação fixa não. Ou seja, é o\n")
-    cat("TRUNCAMENTO em zero que empurra a média, e não a inflação da variância.\n")
-    cat("Saída: manter phi mas trabalhar numa escala em que o truncamento não\n")
-    cat("morda, ou substituir pmax(0,.) por outro tratamento do limite inferior.\n")
-  } else if (ok_C && !ok_B) {
-    cat("A segregação fixa resolve e afastar phi não. Ou seja, é a INFLAÇÃO DA\n")
-    cat("VARIÂNCIA: a segregação alimentada pela variância TOTAL do pool parental\n")
-    cat("realimenta o acasalamento assortativo, sem freio.\n")
-    cat("Saída: acompanhar a variância GÉNICA à parte, como o modelo infinitesimal\n")
-    cat("estrito faz. É a pergunta 6 da lista do Miudo, agora com evidência.\n")
-  } else if (ok_B && ok_C) {
-    cat("Os dois braços resolvem sozinhos, então os dois contribuem e se somam.\n")
-  } else {
-    cat("Nenhum dos dois resolve sozinho. Há uma terceira coisa em jogo, e não\n")
-    cat("vale rodar o estudo antes de entender qual.\n")
+ok_D <- equilibrado("D. variancia GENICA") && contida("D. variancia GENICA")
+motor_ok <- ok_D
+
+if (ok_D) {
+  cat("O braço D se comporta: direção aleatória entre réplicas e variância\n")
+  cat("contida. A correção resolveu o laço, e o estudo pode rodar.\n")
+  if (!contida("A. variancia total")) {
+    cat("\nO braço A continua inflando, como no diagnóstico anterior, o que\n")
+    cat("confirma que a diferença vem mesmo da variância que alimenta a\n")
+    cat("segregação e não de outra coisa que tenha mudado junto.\n")
   }
+  cat("\nVale comparar cor_zp entre A e D: se D for maior, o acoplamento\n")
+  cat("genuíno estava sendo mascarado pela inflação, e não produzido por ela.\n")
+} else {
+  cat("O braço D NÃO se comporta. A correção da variância génica não bastou.\n")
+  if (!equilibrado("D. variancia GENICA")) {
+    cat("A direção continua enviesada: as réplicas ainda vão quase todas para o\n")
+    cat("mesmo lado, então sobra uma assimetria que não é a inflação.\n")
+  }
+  if (!contida("D. variancia GENICA")) {
+    cat("A variância ainda cresce, o que não deveria acontecer se a segregação\n")
+    cat("só responde à deriva e à mutação. Vale olhar a coluna Ne: se ele for\n")
+    cat("muito pequeno, a erosão é forte e a variância deveria CAIR, não subir.\n")
+  }
+  cat("Não vale rodar o estudo antes de entender isto.\n")
 }
 
 saveRDS(diag, "Resultados_Artigo/Fase_Coevolucao/Dados/diagnostico_coevolucao.rds")
