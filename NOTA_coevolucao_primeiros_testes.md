@@ -335,10 +335,149 @@ A cota deixou de ser um pendente e passou a bloquear um resultado.
 
 ---
 
+## A revisão do motor, com o estudo já rodado
+
+Com os resultados na mão, reli o motor inteiro contra o resto do projeto, à
+procura de coisas que fossem de implementação e não de biologia. Achei uma que
+compromete um número que eu já tinha reportado como resultado, duas
+consequências do buraco do censo que não tínhamos visto, e uma lista de escolhas
+de desenho que são legítimas mas precisam estar declaradas nos Métodos.
+
+### O Ne estava sobrestimado, e justo onde importa
+
+A primeira versão calculava assim:
+
+    k <- tabulate(pais); k <- k[k > 0]
+    N <- length(k)
+
+Duas coisas erradas, e as duas puxando o Ne para cima exatamente nos cenários de
+seleção sexual forte, que são os que queríamos medir.
+
+Os zeros contam. A fórmula de Crow pede N igual ao número de adultos daquele
+sexo, com os que não deixaram filho nenhum incluídos no k. São eles que geram a
+variância que derruba o Ne, e `k[k > 0]` os descartava. Vale reparar que o I_s,
+em `safe_opportunity_sexual_selection`, sempre contou os machos de grau zero:
+era por isso que as duas medidas discordavam na tabela, e a discordância não era
+biológica, era de critério sobre quem conta como adulto.
+
+O k era de zigotos, e não de filhos que chegaram a adultos. Com fecundidade
+plana toda fêmea acasalada deixa exatamente 50, de modo que a variância entre
+fêmeas era zero por construção e Ne_f virava simplesmente o número de fêmeas
+acasaladas. Mas a deriva de verdade neste modelo está no sorteio dos 200 machos
+e das 200 fêmeas entre milhares de juvenis, e esse passo o k de zigotos não
+enxergava.
+
+A correção conta filhos que chegaram a ADULTO, com os zeros. Isso obriga a
+calcular o Ne depois do censo seguinte, então a parentela agora viaja de
+`produce_offspring_coevo` até o próximo censo, e o Ne fecha ali junto com a
+erosão da génica. O consumo de números aleatórios não mudou, então o que muda é
+a coluna Ne e, muito de leve, a trajetória da génica.
+
+Sobre o alcance disto: como a erosão é desprezível em cem gerações (2Ne é da
+ordem de 700), a dinâmica do estudo não muda. O que não se pode reportar são os
+valores de Ne da rodada de setembro. Os 377 da sigmoide e os 178 com seleção
+natural saem daquele cálculo.
+
+### Duas consequências do buraco do censo que não tínhamos visto
+
+A primeira apaga um tratamento. Em `mate_with_survivors`,
+`n_aval <- min(encounters_n, n_m)`. Quando o censo cai para cinco machos, A_max
+passa a ser 5 em todas as células, não importa se o tratamento dizia 200. O
+buraco não mexe só em N: ele desliga o gradiente de A_max onde morde.
+
+A segunda está na própria válvula de segurança. Quando sobrevivem menos de dois
+machos, `selecionar_machos_adultos` devolve `order(V, decreasing = TRUE)[1:2]`,
+ou seja os dois melhores por viabilidade, de forma determinista. É um evento de
+seleção por truncamento escondido dentro de uma salvaguarda.
+
+### O piso em zero
+
+`pmax(0, .)` em z e em p é um limite reflectante. Com phi = 5 e sigma 1 quase não
+morde, mas é a explicação do 54% da curva aleatória subindo em vez de 50%, e
+provavelmente do 62% da u-shaped. Como z e p são valores de característica em
+unidades arbitrárias, deixá-los ir a negativo não tem problema biológico nenhum e
+tiraria esse viés. Se preferirmos manter a não negatividade, o natural é trabalhar
+em escala logarítmica. Desconfio que esteja aqui também o mistério do braço com
+phi = 50, mas não confirmei.
+
+### Uma correção ao que eu tinha dito
+
+Eu tinha afirmado que a preferência não está sob seleção direta. Está. Com a
+gaussiana, `exp(-s(z-p)^2)` com s perto de 2 e sigma_p = 2, uma fêmea de p
+extremo tem probabilidade quase nula de aceitar alguém e fica sem acasalar. Os
+dados mostram: 8.3% de fêmeas sem acasalar na gaussiana contra 0.0% na
+aleatória. Isso é seleção estabilizadora sobre p em direção à média de z, e é o
+mecanismo por trás da diagonal e de `zbar - pbar` dar exatamente zero na
+gaussiana.
+
+### Escolhas de desenho para declarar nos Métodos
+
+Não há custo direto da preferência além do risco de não acasalar, e com
+A_max = 200 esse risco quase desaparece. O modelo fica então no regime da linha
+de equilíbrios de Lande. É uma escolha legítima, mas desde Pomiankowski (1991) o
+esperado é que um custo colapse a linha num ponto, então vale dizer que se optou
+por não pôr.
+
+A exigência `s` é re-sorteada a cada geração para cada fêmea, não é herdável e
+não tem consistência individual. A preferência tem dois componentes e só um
+co-evolui.
+
+A paternidade se reparte uniformemente entre os machos com que a fêmea copulou,
+de modo que o ranking por P_ij, que decide com quem ela acasala, é descartado na
+hora de repartir filhos. Uma alternativa natural seria paternidade proporcional a
+P_ij. Isto é pergunta para o Miudo, não erro.
+
+A fecundidade é plana: acasalada são 50 filhotes, com um macho ou com vinte. Não
+há benefício de poliandria, o que é coerente com o modelo fisheriano puro, mas
+precisa estar dito.
+
+A sigmoide e a u-shaped são funções não limitadas em z. Sem seleção natural o
+modelo não tem equilíbrio, e a fuga só para quando a curva satura. As células de
+sigmoide sem seleção natural não são um cenário biológico, são o modelo saindo
+do seu domínio. Isso não invalida o resultado da erosão da estrutura, ao
+contrário: é exatamente o que aquele resultado diz.
+
+E a esquina A_max = 10 com k = 10 ou k = 20 não tem escolha nenhuma: a fêmea
+avalia dez e pode aceitar dez ou vinte, então o teto nunca aperta. São controles
+involuntários.
+
+### O que revisei e está certo
+
+A covariância sobrevive. O sorteio de vagas é por índice e os dois vetores são
+indexados pelo mesmo `idx`. É o erro silencioso mais perigoso do estudo e não
+está lá.
+
+A dinâmica do desequilíbrio de ligamento é correta. A variância dos filhos é
+var(midparent) mais var_génica/2, e sob acasalamento assortativo a covariância
+entre pai e mãe entra em var(midparent). Ou seja, o desequilíbrio é reconstruído
+a cada geração pelo acasalamento e decai em direção à génica pela segregação, que
+é o que deve acontecer.
+
+A variância génica fica praticamente congelada em cem gerações, então na prática
+o modelo é de V_A constante, o pressuposto padrão de Lande. Defensável, e a
+declarar.
+
+A expressão limitada por sexo está certa: os dois sexos transmitem as duas
+características, cada um expressa uma, e a resposta à seleção fica dividida por
+dois como deve. As condições iniciais sorteiam z e p independentemente, então
+cov(z, p) parte de zero e tudo o que aparece foi o acasalamento que construiu.
+
+E a armadilha do `sample(x, 1)` com x de comprimento 1 está corretamente blindada
+na linha dos `dads`.
+
+---
+
 ## Onde isto deixa o Estudo 4
 
-Com a correção da variância génica o motor passou no diagnóstico, e o estudo
-completo rodou.
+Com a correção da variância génica o motor passou no diagnóstico e o desenho
+completo rodou, 12.960 cenários em 17,5 horas sem uma falha. Com a correção do
+Ne está rodando de novo a metade SEM seleção natural, 6.480 cenários.
+
+A razão de ser só essa metade: todas as células em que o censo adulto encurta são
+de seleção natural ligada, porque com ela desligada o censo é uma amostra
+aleatória de 200 e o buraco nem é tocado. Essa metade é imune à decisão da cota e
+pode ser fechada antes dela, e é onde vivem quase todos os resultados. A outra
+metade se roda uma vez só, depois de decidida a cota, em vez de duas.
 
 Os quatro pontos de desenho do Estudo 4 continuam abertos e estão em
 `NOTA_material_removido_2026-08-16.md`. O mais pesado é o gradiente de k: se ele
@@ -372,3 +511,23 @@ da aleatória, e a diagonal converge dos dois lados. Continua valendo declarar a
 limitação nos Métodos, mas ela não põe os resultados em risco.
 
 Na co-evolução, **é bloqueante**, e passa a ser a primeira coisa a resolver.
+
+E a revisão do motor acrescentou três perguntas novas, todas de desenho e não de
+implementação:
+
+A cota do censo, que já estava na lista, agora vem junto com o piso em zero,
+porque as duas mexem no mesmo bloco de células e faz sentido decidir as duas de
+uma vez. Sobre o piso: z e p são valores de característica em unidades
+arbitrárias, então deixá-los ir a negativo não custa nada e tira um viés
+mensurável. Vale confirmar que ninguém prefere a leitura de "tamanho não pode ser
+negativo".
+
+A paternidade repartida uniformemente entre os machos com que a fêmea copulou,
+contra paternidade proporcional a P_ij. A primeira separa escolha de parceiro de
+sucesso de fertilização, a segunda junta as duas. É uma decisão biológica sobre o
+que o modelo está representando.
+
+O custo da preferência. Sem ele o modelo fica na linha de equilíbrios de Lande
+por construção, e a ausência de fuga na gaussiana é em parte um resultado dessa
+escolha. Se quisermos poder dizer alguma coisa sobre estabilidade, um custo
+pequeno muda a pergunta.
