@@ -169,30 +169,49 @@ if (motor_ok || forcar) {
     n_replicas <- 5L;  amax <- 200;            ks <- 5L
   }
 
+  # Dá para rodar só metade do desenho, e há um motivo para isso. Todas as
+  # células em que o censo adulto encurta são de seleção natural ligada: com
+  # ela desligada, selecionar_machos_adultos devolve uma amostra aleatória de
+  # 200 e o buraco nem é tocado. Ou seja, a metade SEM seleção natural é imune
+  # à decisão da cota e pode ser fechada antes dela.
+  #     COEVO_NS=sem   -> só selecao_natural = FALSE
+  #     COEVO_NS=com   -> só selecao_natural = TRUE
+  #     COEVO_NS=ambos -> o desenho inteiro (default)
+  NS <- Sys.getenv("COEVO_NS", unset = "ambos")
+  ns_valores <- switch(NS,
+                       "sem"   = FALSE,
+                       "com"   = TRUE,
+                       "ambos" = c(TRUE, FALSE),
+                       stop("COEVO_NS deve ser sem, com ou ambos"))
+
   cenarios <- expand.grid(
     tipo_selecao    = c("uniform", "gaussian", "sigmoid", "u-shaped"),
     sigma_p_init    = valores_sigma,
     sigma_z_init    = valores_sigma,
     encounters_n    = amax,
     k_fixo          = ks,
-    selecao_natural = c(TRUE, FALSE),
+    selecao_natural = ns_valores,
     replica         = seq_len(n_replicas),
     stringsAsFactors = FALSE
   )
   cenarios$idx_global <- seq_len(nrow(cenarios))
 
-  cat(sprintf("\nDesenho '%s': %s cenários de 100 gerações, %d núcleos.\n",
-              ESTUDO, format(nrow(cenarios), big.mark = "."), N_CORES))
+  cat(sprintf("\nDesenho '%s', seleção natural '%s': %s cenários de 100 gerações, %d núcleos.\n",
+              ESTUDO, NS, format(nrow(cenarios), big.mark = "."), N_CORES))
 
   # O nome carrega o modo de segregação, e não é detalhe: a primeira tentativa
   # de rodar o estudo foi feita com a variância total, e ao relançar com a
   # correção o script achou aquele backup e ia completá-lo, misturando dois
   # motores no mesmo conjunto. Com o modo no nome isso não pode acontecer.
+  # O mesmo vale para a correção do Ne, que mudou o que a coluna Ne significa:
+  # a rodada de setembro tem Ne de zigotos e sem os zeros, esta tem Ne de
+  # filhos adultos e com eles. Misturar as duas num arquivo só seria pior do
+  # que não ter nenhuma.
   SEG_ESTUDO <- "genica"
-  arquivo_backup <- file.path(diretorios$dados,
-                              sprintf("backup_Coevolucao_%s_%s.rds", SEG_ESTUDO, ESTUDO))
-  arquivo_final  <- file.path(diretorios$dados,
-                              sprintf("resultados_Coevolucao_%s_%s.rds", SEG_ESTUDO, ESTUDO))
+  MOTOR      <- "neAdulto"
+  tag <- sprintf("%s_%s_%s_%s", SEG_ESTUDO, MOTOR, NS, ESTUDO)
+  arquivo_backup <- file.path(diretorios$dados, sprintf("backup_Coevolucao_%s.rds", tag))
+  arquivo_final  <- file.path(diretorios$dados, sprintf("resultados_Coevolucao_%s.rds", tag))
 
   lista <- if (file.exists(arquivo_backup)) {
     l <- readRDS(arquivo_backup)

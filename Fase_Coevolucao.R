@@ -91,41 +91,47 @@ produce_offspring_coevo <- function(M, male_z_surv, male_p_surv,
   z_filhotes <- pmax(0, midparent_z + desvio_segregacao(c(male_z_surv, female_z_gen), var_genica_z))
   p_filhotes <- pmax(0, midparent_p + desvio_segregacao(c(male_p_surv, female_p_gen), var_genica_p))
 
-  # Atualização da variância génica, quando é ela que governa. No modelo
-  # infinitesimal a seleção não a altera, então só entram a deriva, que a
-  # erode a 1/(2*Ne) por geração, e a mutação, que repõe mut_sd^2.
-  #
-  # O Ne sai do número de filhos que cada pai de fato deixou, e não do censo:
-  # com seleção sexual forte poucos machos geram quase tudo, e o Ne despenca
-  # bem abaixo dos 400 do censo. É a diferença entre erodir devagar e erodir
-  # depressa, então vale medir em vez de supor.
-  if (segregacao == "genica") {
-    ne_por_sexo <- function(pais) {
-      k <- tabulate(pais); k <- k[k > 0]
-      N <- length(k)
-      if (N < 2) return(max(N, 1))
-      kb <- mean(k); vk <- var(k)
-      if (!is.finite(vk) || kb <= 1) return(N)
-      max(1, (N * kb - 1) / (kb - 1 + vk / kb))
-    }
-    Ne_m <- ne_por_sexo(dads); Ne_f <- ne_por_sexo(moms)
-    Ne   <- 4 * Ne_m * Ne_f / (Ne_m + Ne_f)
-    erosao <- 1 - 1 / (2 * Ne)
-    var_genica_z <- var_genica_z * erosao + mut_sd^2
-    var_genica_p <- var_genica_p * erosao + mut_sd^2
-  } else {
-    Ne <- NA_real_
-  }
-
   # Todos os filhotes viram juvenis, com sexo ao acaso 1:1.
   idx  <- sample.int(total_filhotes)
   meio <- total_filhotes %/% 2
   i_m  <- idx[seq_len(meio)]
   i_f  <- idx[(meio + 1):(2 * meio)]
 
+  # De quem cada juvenil é filho. O Ne não é calculado aqui: ele depende de
+  # quem chegar a ADULTO na geração seguinte, e isso só se sabe depois do
+  # próximo censo. Ver ne_da_transicao().
   list(male_z_juv   = z_filhotes[i_m], male_p_juv   = p_filhotes[i_m],
        female_z_juv = z_filhotes[i_f], female_p_juv = p_filhotes[i_f],
-       var_genica_z = var_genica_z, var_genica_p = var_genica_p, Ne = Ne)
+       male_dads = dads[i_m], male_moms = moms[i_m],
+       female_dads = dads[i_f], female_moms = moms[i_f],
+       n_pais_m = length(male_z_surv), n_pais_f = length(female_z_gen))
+}
+
+# ---------------------------------------------------------------------
+# Tamanho efetivo por variância no sucesso reprodutivo
+# ---------------------------------------------------------------------
+# Duas coisas aqui que a primeira versão errava, e as duas puxavam o Ne para
+# cima justamente nos cenários de seleção sexual forte.
+#
+#   Os ZEROS contam. A fórmula de Crow pede N igual ao número de adultos
+#     daquele sexo e k com os que não deixaram filho nenhum incluídos. São
+#     eles que geram a variância que faz o Ne cair, e a primeira versão os
+#     descartava com k[k > 0]. Repare que o I_s, em
+#     safe_opportunity_sexual_selection, sempre contou os machos de grau
+#     zero: era por isso que as duas medidas discordavam.
+#
+#   O k é de filhos ADULTOS, não de zigotos. Com fecundidade plana toda fêmea
+#     acasalada deixa exatamente 50 zigotos, de modo que a variância entre
+#     elas seria zero por construção. Mas a deriva de verdade neste modelo
+#     está no sorteio dos 200 machos e das 200 fêmeas entre milhares de
+#     juvenis, e é esse passo que o k de zigotos não enxergava.
+ne_da_transicao <- function(pais_dos_adultos, N_pais) {
+  if (N_pais < 2) return(max(N_pais, 1))
+  k  <- tabulate(pais_dos_adultos, nbins = N_pais)   # com os zeros
+  kb <- mean(k); vk <- var(k)
+  if (!is.finite(vk) || kb <= 0) return(N_pais)
+  if (kb <= 1) return(max(1, N_pais * kb))
+  max(1, (N_pais * kb - 1) / (kb - 1 + vk / kb))
 }
 
 # ---------------------------------------------------------------------
@@ -151,6 +157,7 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
   var_genica_z <- sigma_z_init^2
   var_genica_p <- sigma_p_init^2
   Ne_atual     <- NA_real_
+  pais         <- NULL   # de quem os juvenis desta geração são filhos
 
   # Os DOIS sexos carregam AS DUAS características. Os machos entram como
   # juvenis porque é sobre eles que a viabilidade age.
@@ -176,6 +183,21 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
     idx_f        <- sample.int(length(female_z_juv), N_femeas)
     female_z_gen <- female_z_juv[idx_f]
     female_p_gen <- female_p_juv[idx_f]
+
+    # (1b) Agora que se sabe quem chegou a adulto, dá para fechar o Ne da
+    # transição anterior e erodir a variância génica com ele. No modelo
+    # infinitesimal a seleção não altera a génica: só a deriva, a 1/(2*Ne) por
+    # geração, e a mutação, que repõe mut_sd^2.
+    if (!is.null(pais) && segregacao == "genica") {
+      Ne_m <- ne_da_transicao(c(pais$male_dads[idx_adultos], pais$female_dads[idx_f]),
+                              pais$n_pais_m)
+      Ne_f <- ne_da_transicao(c(pais$male_moms[idx_adultos], pais$female_moms[idx_f]),
+                              pais$n_pais_f)
+      Ne_atual <- 4 * Ne_m * Ne_f / (Ne_m + Ne_f)
+      erosao       <- 1 - 1 / (2 * Ne_atual)
+      var_genica_z <- var_genica_z * erosao + mut_sd^2
+      var_genica_p <- var_genica_p * erosao + mut_sd^2
+    }
 
     # A preferência expressa é a das fêmeas adultas desta geração, então tem
     # de vir DEPOIS do censo. No rascunho esta linha estava antes, e na
@@ -242,9 +264,7 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
     male_p_juv   <- off$male_p_juv
     female_z_juv <- off$female_z_juv
     female_p_juv <- off$female_p_juv
-    var_genica_z <- off$var_genica_z
-    var_genica_p <- off$var_genica_p
-    Ne_atual     <- off$Ne
+    pais         <- off   # a parentela viaja para o próximo censo, onde vira Ne
   }
 
   df_out <- dplyr::bind_rows(out)

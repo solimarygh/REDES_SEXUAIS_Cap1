@@ -25,18 +25,28 @@ suppressPackageStartupMessages({ library(dplyr); library(tidyr) })
 
 pasta <- "Resultados_Artigo/Fase_Coevolucao/Dados"
 
-# O modo de segregação está no nome do arquivo justamente para não misturar o
-# motor antigo com o corrigido. Aqui só leio os do modo génica.
-candidatos <- c(file.path(pasta, "resultados_Coevolucao_genica_completo.rds"),
-                file.path(pasta, "resultados_Coevolucao_genica_piloto.rds"),
-                file.path(pasta, "backup_Coevolucao_genica_completo.rds"),
-                file.path(pasta, "backup_Coevolucao_genica_piloto.rds"))
-achou <- candidatos[file.exists(candidatos)]
-if (!length(achou)) {
-  stop("Não achei nenhum resultado de co-evolução em ", pasta,
-       ".\nRode antes: COEVO_ESTUDO=completo Rscript 01_coevolucao_diagnostico_e_estudo.R")
+# O nome do arquivo carrega o modo de segregação e a versão do motor, para que
+# rodadas de motores diferentes nunca se misturem. Sem argumento, pego o mais
+# recente do modo génica, dando preferência ao resultado final sobre o backup.
+#     Rscript 03_analise_coevolucao.R [caminho do .rds]
+args <- commandArgs(trailingOnly = TRUE)
+if (length(args)) {
+  arquivo <- args[1]
+  if (!file.exists(arquivo)) stop("Não achei o arquivo ", arquivo)
+} else {
+  achou <- c(sort(Sys.glob(file.path(pasta, "resultados_Coevolucao_genica*.rds")), decreasing = TRUE),
+             sort(Sys.glob(file.path(pasta, "backup_Coevolucao_genica*.rds")), decreasing = TRUE))
+  if (!length(achou)) {
+    stop("Não achei nenhum resultado de co-evolução em ", pasta,
+         ".\nRode antes: COEVO_ESTUDO=completo Rscript 01_coevolucao_diagnostico_e_estudo.R")
+  }
+  if (length(achou) > 1) {
+    cat("\nHá mais de um arquivo. Vou ler o primeiro; para escolher outro,\n")
+    cat("passe o caminho como argumento.\n")
+    cat(paste0("  ", basename(achou), collapse = "\n"), "\n")
+  }
+  arquivo <- achou[1]
 }
-arquivo <- achou[1]
 obj <- readRDS(arquivo)
 d <- if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
 
@@ -230,7 +240,7 @@ cat("aceita qualquer macho e deixa de discriminar. A coluna z_menos_p é a\n")
 cat("distância que faz isso acontecer. Se ela cresce enquanto I_s cai, é essa\n")
 cat("a explicação, e não uma perda de variância no traço.\n\n")
 
-for (ns in c(FALSE, TRUE)) {
+for (ns in intersect(c(FALSE, TRUE), unique(d$selecao_natural))) {
   cat(sprintf("  selecao_natural = %s\n\n", ns))
   print(as.data.frame(
     d %>% filter(selecao_natural == ns,
