@@ -68,6 +68,15 @@ n_encerradas <- nrow(distinct(d[!is.na(d$extincao_gen), celula, drop = FALSE]))
 n_fuga       <- nrow(distinct(d[!is.na(d$fuga_gen), celula, drop = FALSE]))
 cat(sprintf("  Réplicas encerradas antes da geração %d: %d\n", G, n_encerradas))
 cat(sprintf("  Réplicas com fuga do traço: %d\n", n_fuga))
+if (n_fuga) {
+  cat("\n  Onde o traço foge, por curva:\n")
+  print(as.data.frame(
+    count(distinct(d[!is.na(d$fuga_gen), celula, drop = FALSE]),
+          tipo_selecao, selecao_natural)
+  ), row.names = FALSE)
+  cat("\n  Fuga concentrada numa curva é a preferência daquela curva, não uma\n")
+  cat("  assimetria do motor. Espalhada por todas seria outra conversa.\n")
+}
 if (nrow(curtas)) {
   cat("\n  Onde o censo encurta, por curva:\n")
   print(as.data.frame(count(curtas, tipo_selecao, selecao_natural)), row.names = FALSE)
@@ -88,7 +97,11 @@ ld <- fim %>%
   summarise(varz_total  = round(mean(varz_pop), 2),
             var_genica  = round(mean(var_genica_z), 2),
             LD          = round(mean(varz_pop - var_genica_z), 2),
-            razao       = round(mean(varz_pop / var_genica_z), 2),
+            # a razão entre as MÉDIAS, coerente com as duas colunas acima. A
+            # média das razões célula a célula não serve: a distribuição é
+            # torta, umas poucas células com génica pequena puxam tudo.
+            razao       = round(mean(varz_pop) / mean(var_genica_z), 2),
+            razao_med   = round(median(varz_pop / var_genica_z), 2),
             .groups = "drop") %>%
   arrange(desc(LD))
 print(as.data.frame(ld), row.names = FALSE)
@@ -207,6 +220,37 @@ print(as.data.frame(ini_fim), row.names = FALSE)
 cat("\nAqui as duas características evoluem, então a rede da geração 100 é\n")
 cat("resultado do que a população virou, e não de um sigma imposto. É a\n")
 cat("diferença entre este estudo e os dois anteriores.\n")
+
+# ---------------------------------------------------------------------
+cat("\n=== 7. A estrutura se apaga? ===\n\n")
+cat("Sob a sigmoide o I_s começa em 7.4 e termina em 0.15, e a centralização\n")
+cat("cai de 0.19 para 0.03. A leitura é que o traço se afasta tanto da\n")
+cat("preferência que a curva satura: com zbar muito acima de pbar, a sigmoide\n")
+cat("aceita qualquer macho e deixa de discriminar. A coluna z_menos_p é a\n")
+cat("distância que faz isso acontecer. Se ela cresce enquanto I_s cai, é essa\n")
+cat("a explicação, e não uma perda de variância no traço.\n\n")
+
+for (ns in c(FALSE, TRUE)) {
+  cat(sprintf("  selecao_natural = %s\n\n", ns))
+  print(as.data.frame(
+    d %>% filter(selecao_natural == ns,
+                 generation %in% c(1L, 5L, 10L, 25L, 50L, 100L)) %>%
+      group_by(tipo_selecao, generation) %>%
+      summarise(z_menos_p = round(mean(zbar_pop - pbar_pop), 1),
+                I_s = round(mean(I_s, na.rm = TRUE), 2),
+                Centr = round(mean(Centralization, na.rm = TRUE), 3),
+                varz = round(mean(varz_pop), 2),
+                .groups = "drop") %>%
+      pivot_wider(names_from = tipo_selecao,
+                  values_from = c(z_menos_p, I_s, Centr, varz))
+  ), row.names = FALSE)
+  cat("\n")
+}
+
+cat("Com seleção natural a viabilidade segura o traço perto de phi, a distância\n")
+cat("não cresce e a preferência continua discriminando. Se for isso que as duas\n")
+cat("tabelas mostram, a seleção natural não apaga a assinatura da seleção\n")
+cat("sexual: é ela que mantém a assinatura de pé.\n")
 
 cat("\n--- o que fica pendente ---\n")
 cat("A cota do censo, que ainda não foi implementada, e a escolha entre\n")
