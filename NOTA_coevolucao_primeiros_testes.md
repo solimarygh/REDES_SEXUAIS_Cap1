@@ -215,15 +215,130 @@ modos a génica nunca é atualizada.
 E o Ne deu 347 num censo de 400, bem mais alto do que eu esperava. Faz sentido
 para a gaussiana, em que cada fêmea escolhe machos próximos do seu próprio pico
 e os picos diferem, então a paternidade se reparte. Sob a sigmoide, em que
-todas querem os mesmos machos, é de esperar que despenque. Vale conferir nos
-dados do estudo.
+todas querem os mesmos machos, é de esperar que despenque. A seção seguinte
+mostra que não despencou, e por quê.
+
+---
+
+## O estudo rodou
+
+Os 12.960 cenários do desenho da proposta rodaram em 17,5 horas, sem uma única
+falha e sem nenhuma réplica encerrada antes da geração 100. São 1.296.000
+linhas em `resultados_Coevolucao_genica_completo.rds`, e a leitura está em
+`03_analise_coevolucao.R`.
+
+A primeira coisa a conferir era se a correção aguentava em escala. Aguentou: na
+gaussiana sem seleção natural, 818 réplicas de 1.620 subiram, 50,5%. O que no
+diagnóstico eram 5 de 10 são agora metade de mil seiscentas. A aleatória dá 54%,
+uma sobra pequena que é o truncamento em zero, com deslocamento de 0.45 em cem
+gerações. E as 1.510 réplicas com fuga do traço estão concentradas em duas
+curvas, 1.260 na sigmoide e 250 na u-shaped, ambas sem seleção natural. Fuga
+concentrada numa preferência é aquela preferência, não uma assimetria do motor.
+
+### O desequilíbrio de ligamento separa dois mecanismos
+
+Na geração 100, sem seleção natural:
+
+| curva | var total | var génica | LD | razão |
+|---|---|---|---|---|
+| gaussiana | 3.29 | 1.71 | 1.58 | 1.92 |
+| u-shaped | 2.20 | 1.74 | 0.45 | 1.26 |
+| sigmoide | 1.64 | 1.66 | -0.02 | 0.99 |
+| aleatória | 1.75 | 1.77 | -0.02 | 0.99 |
+
+A gaussiana é a única que empilha desequilíbrio, e a única com covariância
+genética: `cov_zp` = 2.12 e `cor_zp` = 0.41, contra 0.04 da sigmoide e zero da
+aleatória. `cov_casais` vem sempre à frente de `cov_zp` ao longo das gerações
+(1.5 contra 1.2 na geração 20), que é a ordem que Fisher prevê.
+
+A sigmoide dá exatamente a mesma razão que a aleatória. Isso não é falha de
+nada: sob a sigmoide todas as fêmeas querem o mesmo, independentemente do seu
+próprio p, então o acasalamento é direcional mas não assortativo, e sem
+assortamento não há desequilíbrio. A sigmoide produz fuga do traço sem o
+mecanismo de Fisher, e vê-se na preferência, que fica parada em 5.73 enquanto o
+traço vai a 24.84.
+
+São dois regimes distintos que antes estavam misturados num número só, e é a
+separação entre total e génica que permite enxergá-los.
+
+### As curvas apagam a própria estrutura
+
+Este é o resultado que eu não esperava. Sob a sigmoide, sem seleção natural, ao
+longo das gerações:
+
+| geração | zbar − pbar | I_s | centralização | var do traço |
+|---|---|---|---|---|
+| 1 | 0.0 | 7.41 | 0.185 | 1.74 |
+| 5 | 2.8 | 8.40 | 0.197 | 1.34 |
+| 10 | 5.8 | 7.01 | 0.183 | 1.32 |
+| 25 | 11.8 | 3.54 | 0.112 | 1.49 |
+| 50 | 16.2 | 0.69 | 0.053 | 1.60 |
+| 100 | 19.1 | 0.15 | 0.027 | 1.64 |
+
+A distância entre traço e preferência cresce sem parar, o I_s e a centralização
+desabam atrás dela, e a variância do traço não se mexe. Não é perda de variação:
+é a média do traço saindo do intervalo em que a sigmoide discrimina. Com zbar
+dezenove unidades acima de pbar, a curva vale praticamente 1 para qualquer
+macho, e a rede da geração 100 fica indistinguível da aleatória, com nenhuma
+fêmea sem acasalar e grau médio no teto de k.
+
+Repare na geração 5: o I_s sobe de 7.41 para 8.40 antes de cair. A seleção
+sexual primeiro se intensifica e depois destrói a própria base.
+
+A u-shaped chega ao mesmo fim por outro caminho. A distância entre traço e
+preferência só vai a 3.2, então não é a média que escapa. É a variância, que
+salta de 1.74 para 3.83 em dez gerações. Como a u-shaped aceita machos distantes
+do próprio p, alargar a distribuição faz com que toda fêmea encontre machos
+distantes, e o I_s cai de 3.89 para 0.26 do mesmo jeito.
+
+Duas curvas, dois caminhos, o mesmo destino: uma desloca a média para fora da
+faixa em que a preferência distingue, a outra alarga a distribuição até que todo
+mundo passe. A estrutura de rede que os Estudos 2 e 3 medem com o traço fixo é
+transitória, e quando o traço pode evoluir ela se apaga sozinha. É exatamente o
+que só o Estudo 4 podia mostrar.
+
+### A gaussiana, e o efeito Bulmer
+
+Sob a gaussiana a distância entre zbar e pbar é 0.0 em todas as gerações, com e
+sem seleção natural. Traço e preferência andam amarrados, que é o acoplamento de
+Fisher visto de outro ângulo.
+
+E a variância do traço na geração 100 é 3.29 sem seleção natural contra 1.38 com
+ela. É o efeito Bulmer de manual: o acasalamento assortativo gera desequilíbrio
+positivo, a seleção natural gera negativo, e os dois se cancelam em boa parte.
+Antes de separar total de génica não tínhamos como enxergar isso.
+
+### Por que a previsão do Ne falhou
+
+Eu esperava que o Ne despencasse sob a sigmoide. Na geração 100 ele dá 377 de
+400, igual ao da aleatória. A previsão não errou o mecanismo, errou o momento:
+na geração 100 já não sobrou seleção nenhuma sob a sigmoide, então não há o que
+concentrar a paternidade. Na geração 5, com I_s em 8.40, a história tem de ser
+outra, e a trajetória do Ne agora está na tabela da seção 7 do script.
+
+Com seleção natural, aí sim: o Ne da sigmoide cai para 178, 0.44 do censo, e o
+I_s se mantém em 1.92. A viabilidade segura o traço perto de phi, a preferência
+continua discriminando, e a assinatura da seleção sexual fica de pé. A leitura
+que se insinua é que a seleção natural não apaga a assinatura da seleção sexual:
+é ela que impede o traço de fugir e, com isso, a mantém.
+
+### O que o censo bloqueia
+
+Essa última leitura ainda não pode ser reportada. Sob a sigmoide com seleção
+natural a centralização não cai, sobe, de 0.181 para 0.374. Mas as células de
+sigmoide com seleção natural são exatamente as 670 em que o censo adulto
+encurta, de um total de 776 em todo o estudo (as outras 106 são u-shaped, também
+com seleção natural). Com dois ou cinco machos adultos, uma rede é centralizada
+por construção, e não dá para distinguir o resultado do artefato.
+
+A cota deixou de ser um pendente e passou a bloquear um resultado.
 
 ---
 
 ## Onde isto deixa o Estudo 4
 
-Com a correção da variância génica o motor passou no diagnóstico, e os 12.960
-cenários do desenho da proposta estão rodando.
+Com a correção da variância génica o motor passou no diagnóstico, e o estudo
+completo rodou.
 
 Os quatro pontos de desenho do Estudo 4 continuam abertos e estão em
 `NOTA_material_removido_2026-08-16.md`. O mais pesado é o gradiente de k: se ele

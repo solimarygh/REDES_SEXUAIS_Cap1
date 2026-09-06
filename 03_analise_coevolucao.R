@@ -240,9 +240,13 @@ for (ns in c(FALSE, TRUE)) {
                 I_s = round(mean(I_s, na.rm = TRUE), 2),
                 Centr = round(mean(Centralization, na.rm = TRUE), 3),
                 varz = round(mean(varz_pop), 2),
+                # o Ne da tabela 2 está na geração 100, quando sob a sigmoide
+                # já não sobrou seleção nenhuma. Aqui dá para ver se ele
+                # despenca cedo, enquanto o I_s ainda está alto.
+                Ne = round(mean(Ne, na.rm = TRUE)),
                 .groups = "drop") %>%
       pivot_wider(names_from = tipo_selecao,
-                  values_from = c(z_menos_p, I_s, Centr, varz))
+                  values_from = c(z_menos_p, I_s, Centr, varz, Ne))
   ), row.names = FALSE)
   cat("\n")
 }
