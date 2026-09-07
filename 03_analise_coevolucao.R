@@ -133,9 +133,10 @@ print(as.data.frame(
 
 # ---------------------------------------------------------------------
 cat("\n=== 2. O Ne despenca sob a sigmoide? ===\n\n")
-cat("Censo de 400 adultos. No diagnóstico, sob a gaussiana, o Ne ficou em 347.\n")
-cat("Sob a sigmoide, em que todas as fêmeas querem os mesmos machos, a\n")
-cat("variância no número de filhos deve ser maior e o Ne menor.\n\n")
+cat("Censo de 400 adultos. ATENÇÃO ao ler esta tabela: ela é da geração 100, e\n")
+cat("sob a sigmoide nessa altura já não sobrou seleção nenhuma para concentrar\n")
+cat("a paternidade, então o Ne volta ao do censo. A queda acontece cedo, e está\n")
+cat("na trajetória da seção 7: 189 na geração 5, quando o I_s está no máximo.\n\n")
 
 ne <- fim %>%
   group_by(tipo_selecao, selecao_natural) %>%

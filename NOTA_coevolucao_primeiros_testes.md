@@ -308,19 +308,47 @@ ela. É o efeito Bulmer de manual: o acasalamento assortativo gera desequilíbri
 positivo, a seleção natural gera negativo, e os dois se cancelam em boa parte.
 Antes de separar total de génica não tínhamos como enxergar isso.
 
-### Por que a previsão do Ne falhou
+### O Ne: a previsão estava certa, medida na hora certa
 
-Eu esperava que o Ne despencasse sob a sigmoide. Na geração 100 ele dá 377 de
-400, igual ao da aleatória. A previsão não errou o mecanismo, errou o momento:
-na geração 100 já não sobrou seleção nenhuma sob a sigmoide, então não há o que
-concentrar a paternidade. Na geração 5, com I_s em 8.40, a história tem de ser
-outra, e a trajetória do Ne agora está na tabela da seção 7 do script.
+Eu esperava que o Ne despencasse sob a sigmoide. Na geração 100 ele dá 376 de
+400, igual ao da aleatória, e por um tempo achei que a previsão tinha falhado. O
+que falhou foi o momento de olhar. A trajetória, com o Ne já corrigido:
 
-Com seleção natural, aí sim: o Ne da sigmoide cai para 178, 0.44 do censo, e o
-I_s se mantém em 1.92. A viabilidade segura o traço perto de phi, a preferência
-continua discriminando, e a assinatura da seleção sexual fica de pé. A leitura
-que se insinua é que a seleção natural não apaga a assinatura da seleção sexual:
-é ela que impede o traço de fugir e, com isso, a mantém.
+| geração | Ne sigmoide | I_s sigmoide | Ne gaussiana | Ne aleatória |
+|---|---|---|---|---|
+| 5 | 189 | 8.42 | 312 | 376 |
+| 10 | 193 | 6.99 | 314 | 376 |
+| 25 | 260 | 3.55 | 318 | 376 |
+| 50 | 328 | 0.68 | 323 | 376 |
+| 100 | 376 | 0.15 | 327 | 376 |
+
+O Ne da sigmoide cai a 189, menos da metade do censo, exatamente quando o I_s
+está no máximo, e volta aos 376 à medida que a seleção se dissolve. As duas
+colunas são a imagem espelhada uma da outra. A u-shaped faz o mesmo em menor
+escala, 251 na geração 5 e 360 na 100. A gaussiana fica parada entre 312 e 327,
+com I_s estável, e a aleatória em 376 do começo ao fim.
+
+Ou seja, o apagamento da estrutura tem uma consequência demográfica, e não só de
+rede: enquanto a seleção sexual está viva ela reduz o tamanho efetivo da
+população à metade, e quando o traço escapa da preferência a população volta ao
+seu tamanho efetivo de censo. A seleção sexual, aqui, é uma força demográfica
+transitória.
+
+Vale dizer que este é o resultado que a correção do Ne tornou possível. Com o
+cálculo antigo, que descartava os machos sem filhos, essa queda ficaria muito
+mais rasa justamente nas gerações em que a maioria dos machos não se reproduz.
+
+Com seleção natural a história é outra, e o traço não chega a escapar: o I_s se
+mantém em 1.92 na geração 100 e o Ne fica em 178, 0.44 do censo. A viabilidade
+segura o traço perto de phi, a preferência continua discriminando, e a assinatura
+da seleção sexual fica de pé em vez de se dissolver. A leitura que se insinua é
+que a seleção natural não apaga a assinatura da seleção sexual: é ela que impede
+o traço de fugir e, com isso, a mantém.
+
+Dois avisos sobre esse parágrafo. Os números da metade COM seleção natural são
+ainda da rodada de setembro, com o Ne antigo, porque essa metade espera a decisão
+da cota para ser rodada uma vez só. E é justamente a metade em que o censo
+encurta, o que é o assunto da seção seguinte.
 
 ### O que o censo bloqueia
 
@@ -471,7 +499,15 @@ na linha dos `dads`.
 
 Com a correção da variância génica o motor passou no diagnóstico e o desenho
 completo rodou, 12.960 cenários em 17,5 horas sem uma falha. Com a correção do
-Ne está rodando de novo a metade SEM seleção natural, 6.480 cenários.
+Ne rodou de novo a metade SEM seleção natural, 6.480 cenários em seis horas.
+
+Essa segunda rodada serve também de verificação, e passou. Fora a coluna Ne,
+tudo reproduz a rodada de setembro: o desequilíbrio de ligamento da gaussiana dá
+1.57 contra 1.58, a covariância genética 2.12 nas duas, o zbar da sigmoide 24.87
+contra 24.84, e as réplicas que subiram na gaussiana 812 de 1.620 contra 818. A
+correção do Ne foi cirúrgica, e os resultados de setembro continuam valendo em
+tudo o que não seja o Ne. O censo, nessa metade, ficou em 200 do começo ao fim,
+o que confirma que ela é mesmo imune à decisão da cota.
 
 A razão de ser só essa metade: todas as células em que o censo adulto encurta são
 de seleção natural ligada, porque com ela desligada o censo é uma amostra
