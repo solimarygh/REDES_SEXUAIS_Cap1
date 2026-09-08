@@ -334,9 +334,8 @@ população à metade, e quando o traço escapa da preferência a população vo
 seu tamanho efetivo de censo. A seleção sexual, aqui, é uma força demográfica
 transitória.
 
-Vale dizer que este é o resultado que a correção do Ne tornou possível. Com o
-cálculo antigo, que descartava os machos sem filhos, essa queda ficaria muito
-mais rasa justamente nas gerações em que a maioria dos machos não se reproduz.
+O que faltava para ver isto não era a correção do Ne, era olhar a trajetória em
+vez do valor final. Os dois cálculos dão a mesma curva.
 
 Com seleção natural a história é outra, e o traço não chega a escapar: o I_s se
 mantém em 1.92 na geração 100 e o Ne fica em 178, 0.44 do censo. A viabilidade
@@ -345,10 +344,9 @@ da seleção sexual fica de pé em vez de se dissolver. A leitura que se insinua
 que a seleção natural não apaga a assinatura da seleção sexual: é ela que impede
 o traço de fugir e, com isso, a mantém.
 
-Dois avisos sobre esse parágrafo. Os números da metade COM seleção natural são
-ainda da rodada de setembro, com o Ne antigo, porque essa metade espera a decisão
-da cota para ser rodada uma vez só. E é justamente a metade em que o censo
-encurta, o que é o assunto da seção seguinte.
+Um aviso sobre esse parágrafo: é justamente a metade em que o censo encurta, que
+é o assunto da seção seguinte. Os números vêm da rodada de setembro, com o
+cálculo antigo do Ne, mas isso não é problema, porque os dois cálculos coincidem.
 
 ### O que o censo bloqueia
 
@@ -361,6 +359,43 @@ por construção, e não dá para distinguir o resultado do artefato.
 
 A cota deixou de ser um pendente e passou a bloquear um resultado.
 
+E o desdobramento diz onde exatamente, o que muda a conversa com o Miudo. Por
+intensidade da escolha:
+
+| A_max | k | células curtas | % | censo mínimo |
+|---|---|---|---|---|
+| 10 | 5, 10, 20 | 0 | 0.0 | 200 |
+| 40 | 5 | 144 | 10.0 | 2 |
+| 40 | 10 | 90 | 6.2 | 7 |
+| 40 | 20 | 0 | 0.0 | 200 |
+| 200 | 5 | 200 | 13.9 | 2 |
+| 200 | 10 | 203 | 14.1 | 6 |
+| 200 | 20 | 139 | 9.7 | 22 |
+
+Com A_max = 10 não há uma única célula curta, em nenhum k: avaliando dez machos
+a fêmea não consegue ser seletiva, o traço não se afasta de phi e a viabilidade
+não mata ninguém. A frequência é governada por A_max, e a profundidade por k: com
+k = 5 o censo chega a 2 tanto com A_max 40 quanto com 200, com k = 10 chega a 6
+ou 7, e com k = 20 só desce a 22. Repare que k = 20 com A_max = 40 não produz
+nenhuma célula curta e k = 20 com A_max = 200 produz 139: o que manda é a
+proporção selecionada k/A_max, que é a intensidade de seleção por truncamento.
+
+Ou seja, não é um canto do desenho que se possa descartar. É a região inteira de
+seleção sexual intensa, que é justamente a parte interessante.
+
+E as duas curvas afetadas não são o mesmo problema:
+
+| curva | 2 a 10 | 11 a 50 | 51 a 100 | 101 a 150 | 151 a 199 |
+|---|---|---|---|---|---|
+| sigmoide | 308 | 240 | 112 | 0 | 10 |
+| u-shaped | 0 | 8 | 33 | 38 | 27 |
+
+A sigmoide colapsa: 308 das suas 670 células caem a dez machos ou menos, e 548
+caem a cinquenta ou menos. Não há rede para analisar ali. A u-shaped nunca desce
+de dez e fica quase toda entre 51 e 199, que é uma população reduzida e não um
+colapso. Talvez ela seja reportável com uma nota de rodapé mesmo que a sigmoide
+não seja.
+
 ---
 
 ## A revisão do motor, com o estudo já rodado
@@ -371,40 +406,43 @@ compromete um número que eu já tinha reportado como resultado, duas
 consequências do buraco do censo que não tínhamos visto, e uma lista de escolhas
 de desenho que são legítimas mas precisam estar declaradas nos Métodos.
 
-### O Ne estava sobrestimado, e justo onde importa
+### O Ne: uma correção de definição, que não mudou resultado nenhum
 
 A primeira versão calculava assim:
 
     k <- tabulate(pais); k <- k[k > 0]
     N <- length(k)
 
-Duas coisas erradas, e as duas puxando o Ne para cima exatamente nos cenários de
-seleção sexual forte, que são os que queríamos medir.
-
-Os zeros contam. A fórmula de Crow pede N igual ao número de adultos daquele
-sexo, com os que não deixaram filho nenhum incluídos no k. São eles que geram a
-variância que derruba o Ne, e `k[k > 0]` os descartava. Vale reparar que o I_s,
-em `safe_opportunity_sexual_selection`, sempre contou os machos de grau zero:
-era por isso que as duas medidas discordavam na tabela, e a discordância não era
-biológica, era de critério sobre quem conta como adulto.
-
-O k era de zigotos, e não de filhos que chegaram a adultos. Com fecundidade
-plana toda fêmea acasalada deixa exatamente 50, de modo que a variância entre
-fêmeas era zero por construção e Ne_f virava simplesmente o número de fêmeas
-acasaladas. Mas a deriva de verdade neste modelo está no sorteio dos 200 machos
-e das 200 fêmeas entre milhares de juvenis, e esse passo o k de zigotos não
-enxergava.
+Duas coisas ali fogem da definição de livro. A fórmula de Crow pede N igual ao
+número de adultos daquele sexo, com os que não deixaram filho nenhum incluídos
+no k, e `k[k > 0]` os descartava. E o k era de zigotos, não de filhos que
+chegaram a adultos, de modo que o sorteio dos 200 machos e das 200 fêmeas entre
+milhares de juvenis, que é uma fonte real de deriva, não entrava na conta.
 
 A correção conta filhos que chegaram a ADULTO, com os zeros. Isso obriga a
-calcular o Ne depois do censo seguinte, então a parentela agora viaja de
+calcular o Ne depois do censo seguinte, então a parentela viaja de
 `produce_offspring_coevo` até o próximo censo, e o Ne fecha ali junto com a
-erosão da génica. O consumo de números aleatórios não mudou, então o que muda é
-a coluna Ne e, muito de leve, a trajetória da génica.
+erosão da génica. O consumo de números aleatórios não mudou.
 
-Sobre o alcance disto: como a erosão é desprezível em cem gerações (2Ne é da
-ordem de 700), a dinâmica do estudo não muda. O que não se pode reportar são os
-valores de Ne da rodada de setembro. Os 377 da sigmoide e os 178 com seleção
-natural saem daquele cálculo.
+**E o efeito prático é quase nenhum.** Isto merece ficar registrado porque eu
+tinha previsto o contrário, e com confiança: escrevi que o Ne estava
+sobrestimado e que os valores de setembro não eram reportáveis. Não é verdade. A
+trajetória da sigmoide sem seleção natural dá 189, 193, 261, 328, 377 com o
+cálculo antigo e 189, 193, 260, 328, 376 com o novo. São o mesmo número.
+
+O erro do meu raciocínio foi parar na metade. Descartar os zeros de fato infla o
+k médio, mas o código também tirava aqueles machos do N, e a fórmula de Wright
+com as duas reduções juntas devolve aproximadamente o número de reprodutores
+efetivos, que é o mesmo que a versão com os zeros devolve. As duas convergem.
+
+Fica a versão nova, porque é a definição correta e porque enxerga o sorteio de
+juvenis a adultos. Mas o alcance é de uns poucos por cento, e os valores de Ne
+de setembro, inclusive o 178 da sigmoide com seleção natural, podem ser
+reportados. Essas células continuam bloqueadas, mas pelo censo, não pelo Ne.
+
+Sobra uma diferença de critério que vale mencionar nos Métodos: o I_s, em
+`safe_opportunity_sexual_selection`, sempre contou os machos de grau zero, e o
+Ve antigo não. Agora as duas medidas contam a mesma população.
 
 ### Duas consequências do buraco do censo que não tínhamos visto
 
