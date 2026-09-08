@@ -1,0 +1,537 @@
+---
+title: "Redes sexuais e evolução"
+subtitle: "O que os três estudos mostraram, e a pergunta que ficou"
+author: "Solimary García Hernández"
+date: today
+date-format: "D [de] MMMM [de] YYYY"
+lang: pt
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    embed-resources: true
+    width: 1280
+    height: 760
+    fig-align: center
+    code-fold: false
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r setup}
+knitr::opts_chunk$set(fig.align = "center", fig.width = 10, fig.height = 4.6,
+                      out.width = "100%", fig.retina = 1, dpi = 110)
+suppressPackageStartupMessages({
+  library(dplyr); library(tidyr); library(ggplot2); library(knitr)
+})
+
+cores_4  <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
+labels_4 <- c("uniform"="Aleatória","gaussian"="Gaussiana","sigmoid"="Sigmoide","u-shaped"="Disruptiva")
+
+`%||%` <- function(a, b) if (is.null(a)) b else a
+carregar <- function(paths) {
+  hit <- paths[file.exists(paths)]
+  if (!length(hit)) return(NULL)
+  obj <- readRDS(hit[1])
+  if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
+}
+juntar_pedacos <- function(pasta, padrao) {
+  arqs <- list.files(pasta, pattern = padrao, full.names = TRUE)
+  if (!length(arqs)) return(NULL)
+  distinct(bind_rows(lapply(arqs, carregar)))
+}
+# Mesma regra do documento de resultados: da rodada mais nova para a mais
+# antiga, parando na primeira que existir, e nunca juntando duas.
+RODADAS <- c("bestOfN", "censoConst")
+carregar_rodada <- function(pasta, estudo) {
+  for (r in RODADAS) {
+    df <- juntar_pedacos(pasta, sprintf("^(backup|resultados)_%s_%s.*\\.rds$", estudo, r))
+    if (!is.null(df) && nrow(df) > 0) { attr(df, "rodada") <- r; return(df) }
+  }
+  NULL
+}
+
+ct  <- carregar_rodada("Resultados_Artigo/Fase_Controle/Dados", "Controle")
+d   <- carregar_rodada("Resultados_Artigo/Fase5_MiudoV2/Dados", "Femeas")
+esp <- carregar_rodada("Resultados_Artigo/Fase_Espelho/Dados",  "Espelho")
+
+# Co-evolução: a metade sem seleção natural, que é a que está fechada.
+co <- carregar(c("Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao_genica_neAdulto_sem_completo.rds",
+                 "Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao_genica_completo.rds"))
+co_ns <- carregar("Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao_genica_completo.rds")
+
+ok  <- function(x) !is.null(x) && nrow(x) > 0
+tem <- function(x, col) ok(x) && col %in% names(x)
+
+# A divergência entre curvas, usada em três slides. Uma célula do desenho é uma
+# combinação de sigma_p, sigma_z, A_max, k e regime de seleção natural. Dentro
+# dela cada curva tem a sua média de cada métrica, e a divergência é a distância
+# média das quatro ao centro comum. A padronização é feita UMA vez, sobre o
+# conjunto todo, para que as células continuem comparáveis entre si.
+METRICAS <- c("Modularity", "Nestedness", "Centralization", "I_s")
+divergencia <- function(x, eixos) {
+  if (!ok(x)) return(NULL)
+  z <- x %>% mutate(across(all_of(METRICAS), ~ as.numeric(scale(.x))))
+  chaves <- intersect(c(eixos, "encounters_n", "k_fixo", "selecao_natural"), names(z))
+  z %>%
+    group_by(across(all_of(c(chaves, "tipo_selecao")))) %>%
+    summarise(across(all_of(METRICAS), ~ mean(.x, na.rm = TRUE)), .groups = "drop") %>%
+    group_by(across(all_of(chaves))) %>%
+    summarise(div = {
+      M <- as.matrix(across(all_of(METRICAS)))
+      M <- M[stats::complete.cases(M), , drop = FALSE]
+      if (nrow(M) < 2) NA_real_ else mean(sqrt(rowSums((M - colMeans(M))^2)))
+    }, .groups = "drop") %>%
+    filter(!is.na(div))
+}
+divg <- divergencia(ct, c("sigma_p", "sigma_z"))
+if (!is.null(divg)) divg <- divg %>%
+  mutate(norma = sqrt(sigma_p^2 + sigma_z^2), assimetria = log(sigma_z / sigma_p))
+```
+
+## O que estamos perguntando
+
+A rede de acasalamentos não é só o resultado da escolha de parceiro. Ela é também
+o que estrutura a resposta evolutiva.
+
+Quatro curvas de preferência, quatro topologias de rede, e a pergunta é se a
+topologia prediz para onde a população evolui.
+
+::: {.fragment}
+Três estudos rodados, um quarto em andamento. Vinte réplicas cada, cem gerações.
+:::
+
+---
+
+## As quatro curvas
+
+Cada fêmea tem um pico de preferência `p` e uma exigência `s`. A probabilidade de
+aceitar um macho de traço `z`:
+
+| curva | função | o que significa |
+|---|---|---|
+| aleatória | P = 0.5 | não discrimina, é o controle de deriva |
+| gaussiana | exp(−s(z−p)²) | prefere o parecido com o seu próprio pico |
+| sigmoide | 1/(1+exp(−s(z−p))) | quanto maior o traço, melhor |
+| disruptiva | 1 − exp(−s(z−p)²) | prefere o diferente do seu pico |
+
+A gaussiana gera acasalamento assortativo, a sigmoide gera preferência
+direcional compartilhada, e a disruptiva gera acasalamento dissortativo.
+
+---
+
+## Os quatro estudos
+
+```{r desenho}
+tibble(
+  Estudo = c("1. Controle", "2. Fêmeas variando", "3. Machos variando", "4. Co-evolução"),
+  `O que evolui` = c("nada", "o traço do macho", "a preferência da fêmea", "os dois"),
+  `O que varia` = c("sigma_p e sigma_z impostos",
+                    "sigma_p imposto", "sigma_z imposto", "nada imposto"),
+  Testa = c("H1", "H2a", "H2b", "H4")
+) %>% kable()
+```
+
+O Controle roda uma geração só: mede a topologia sem deixar nada evoluir.
+
+Os estudos 2 e 3 são espelhos um do outro, e servem de replicação interna: se a
+relação for da rede e não da característica, tem de aparecer nos dois lados.
+
+# H1 {background-color="#2C3E50"}
+
+O que determina a estrutura da rede
+
+---
+
+## O nível ecológico domina
+
+```{r h1-niveis}
+if (!is.null(divg)) {
+  base <- lm(div ~ factor(encounters_n) * factor(k_fixo) * selecao_natural, data = divg)
+  r2b <- summary(base)$r.squared
+  parc <- function(termo) {
+    m <- update(base, as.formula(paste(". ~ . +", termo)))
+    (summary(m)$r.squared - r2b) / (1 - r2b)
+  }
+  tibble(
+    Nível = c("Ecologia: A_max, k e seleção natural",
+              "Material: assimetria, log(sigma_z/sigma_p)",
+              "Material: variabilidade total"),
+    `Tipo de R²` = c("total", "parcial, sobre o resíduo", "parcial, sobre o resíduo"),
+    Valor = c(round(r2b, 3), round(parc("assimetria"), 3), round(parc("norma"), 3))
+  ) %>% kable()
+}
+```
+
+O regime de busca explica mais de dois terços de quanto as quatro curvas
+divergem em topologia.
+
+Do que sobra, a assimetria entre os sexos explica cerca de vinte vezes mais que
+a variabilidade total.
+
+::: {.notes}
+A divergência de uma célula é a distância média das quatro curvas ao centro
+comum delas, num espaço de quatro métricas padronizadas. São 882 células.
+:::
+
+---
+
+## O que importa é de que lado está a variação
+
+```{r h1-assimetria, fig.height=4.4}
+if (!is.null(divg)) {
+  perfil <- divg %>% group_by(assimetria) %>%
+    summarise(mediana = median(div), q25 = quantile(div, .25),
+              q75 = quantile(div, .75), .groups = "drop")
+  ggplot(perfil, aes(assimetria, mediana)) +
+    geom_ribbon(aes(ymin = q25, ymax = q75), fill = "#C0392B", alpha = 0.18) +
+    geom_smooth(method = "loess", formula = y ~ x, se = FALSE, span = 1,
+                color = "#C0392B", linewidth = 1.1) +
+    geom_point(color = "#C0392B", size = 2.4) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "gray40") +
+    labs(x = expression(log(sigma[z]/sigma[p])~"    negativo: fêmeas mais variadas    positivo: machos mais variados"),
+         y = "divergência entre curvas") +
+    theme_light(base_size = 14)
+}
+```
+
+A assinatura da curva de preferência é máxima quando as fêmeas são homogêneas e
+os machos variados, e se apaga ao caminhar para o outro lado.
+
+---
+
+## A superfície, métrica por métrica
+
+```{r h1-superficie, fig.height=4.4}
+if (ok(ct)) {
+  sup <- ct %>%
+    filter(encounters_n == 200, selecao_natural == FALSE, k_fixo == 5) %>%
+    group_by(tipo_selecao, sigma_p, sigma_z) %>%
+    summarise(Mod = mean(Modularity, na.rm = TRUE), .groups = "drop")
+  ggplot(sup, aes(factor(sigma_z), factor(sigma_p), fill = Mod)) +
+    geom_tile() +
+    facet_wrap(~tipo_selecao, nrow = 1, labeller = as_labeller(labels_4)) +
+    scale_fill_viridis_c(name = "Modularidade") +
+    labs(x = expression(sigma[z]~"(variação entre machos)"),
+         y = expression(sigma[p]~"(variação entre fêmeas)")) +
+    theme_light(base_size = 13)
+}
+```
+
+Controle, uma geração, A_max = 200, k = 5, sem seleção natural.
+
+A aleatória é plana, como tem de ser. As outras três desenham superfícies
+distintas, e é essa diferença que a divergência resume num número.
+
+# H2 {background-color="#2C3E50"}
+
+A topologia prediz a trajetória evolutiva
+
+---
+
+## H2a. O traço do macho
+
+```{r h2a, fig.height=4.4}
+if (ok(d)) {
+  vz <- d %>%
+    filter(generation == 100, encounters_n == 200, selecao_natural == FALSE) %>%
+    group_by(tipo_selecao, sigma_p) %>%
+    summarise(varz = mean(varz_males, na.rm = TRUE), .groups = "drop")
+  ggplot(vz, aes(sigma_p, varz, color = tipo_selecao)) +
+    geom_hline(yintercept = 1, linetype = "dotted", color = "gray40") +
+    geom_smooth(method = "loess", formula = y ~ x, se = FALSE, span = 1, linewidth = 1.2) +
+    geom_point(size = 2.6) +
+    scale_color_manual(values = cores_4, labels = labels_4, name = NULL) +
+    labs(x = expression(sigma[p]~"(quanto as fêmeas discordam entre si)"),
+         y = "variância genética do traço, Gen 100") +
+    theme_light(base_size = 14) + theme(legend.position = "top")
+}
+```
+
+A heterogeneidade de preferência converte seleção estabilizadora em
+diversificadora: quanto mais as fêmeas discordam, mais variação genética
+sobrevive. A linha pontilhada é o valor inicial.
+
+---
+
+## H2b. A preferência da fêmea
+
+```{r h2b, fig.height=4.4}
+if (ok(esp)) {
+  vp <- esp %>%
+    filter(generation == 100, encounters_n == 200, selecao_natural == FALSE) %>%
+    group_by(tipo_selecao, sigma_z) %>%
+    summarise(varp = mean(varp_femeas, na.rm = TRUE), .groups = "drop")
+  ggplot(vp, aes(sigma_z, varp, color = tipo_selecao)) +
+    geom_hline(yintercept = 1, linetype = "dotted", color = "gray40") +
+    geom_smooth(method = "loess", formula = y ~ x, se = FALSE, span = 1, linewidth = 1.2) +
+    geom_point(size = 2.6) +
+    scale_color_manual(values = cores_4, labels = labels_4, name = NULL) +
+    labs(x = expression(sigma[z]~"(quanta variedade de machos há)"),
+         y = "variância da preferência, Gen 100") +
+    theme_light(base_size = 14) + theme(legend.position = "top")
+}
+```
+
+O espelho, e a resposta à pergunta da Erika. Com poucos machos diferentes a
+variação de preferência é eliminada; com muitos, ela se mantém.
+
+---
+
+## A seleção apaga a própria causa
+
+```{r h2b-dinamica, fig.height=4.2}
+if (ok(esp)) {
+  din <- esp %>%
+    filter(encounters_n == 200, selecao_natural == FALSE, tipo_selecao == "gaussian",
+           sigma_z == 0.2, generation <= 50) %>%
+    group_by(generation) %>%
+    summarise(`variância da preferência` = mean(varp_femeas, na.rm = TRUE),
+              `proporção de fêmeas sem acasalar` = mean(prop_femeas_sem_acasalar, na.rm = TRUE),
+              .groups = "drop") %>%
+    pivot_longer(-generation)
+  ggplot(din, aes(generation, value)) +
+    geom_line(linewidth = 1.1, color = "#C0392B") +
+    facet_wrap(~name, scales = "free_y") +
+    labs(x = "geração", y = NULL) +
+    theme_light(base_size = 14)
+}
+```
+
+As duas caem juntas. Ao eliminar as fêmeas de preferência extrema, a seleção
+remove aquilo sobre o que estava agindo.
+
+Olhando só a geração 100 pareceria que não houve seleção nenhuma.
+
+---
+
+## A assinatura é estrutural, não evolutiva
+
+```{r h2-estrutural}
+if (!is.null(divg) && ok(d)) {
+  div_ct <- divg %>% group_by(encounters_n) %>%
+    summarise(Controle = round(mean(div), 3), .groups = "drop")
+  div_d <- divergencia(d %>% filter(generation == 100), "sigma_p") %>%
+    group_by(encounters_n) %>%
+    summarise(`Fêmeas variando, Gen 100` = round(mean(div), 3), .groups = "drop")
+  left_join(div_ct, div_d, by = "encounters_n") %>%
+    rename(A_max = encounters_n) %>% kable()
+}
+```
+
+Cem gerações de evolução do traço quase não alteram o quanto as quatro curvas
+diferem entre si em topologia.
+
+A assinatura topológica é uma propriedade da regra de escolha, não um resultado
+acumulado da evolução.
+
+# H3 {background-color="#2C3E50"}
+
+A ecologia modula a cadeia
+
+---
+
+## Os dois lados de H3 não vão juntos
+
+```{r h3, fig.height=4.2}
+if (ok(d)) {
+  h3 <- d %>%
+    filter(generation == 100, selecao_natural == FALSE) %>%
+    group_by(tipo_selecao, sigma_p, encounters_n) %>%
+    summarise(zbar = mean(zbar_males, na.rm = TRUE), .groups = "drop") %>%
+    group_by(sigma_p, encounters_n) %>%
+    summarise(divergencia = sd(zbar), .groups = "drop")
+  ggplot(h3, aes(sigma_p, divergencia, color = factor(encounters_n))) +
+    geom_smooth(method = "loess", formula = y ~ x, se = FALSE, span = 1, linewidth = 1.2) +
+    geom_point(size = 2.6) +
+    scale_color_brewer(palette = "Set1", name = "A_max") +
+    labs(x = expression(sigma[p]), y = "divergência evolutiva entre curvas") +
+    theme_light(base_size = 14) + theme(legend.position = "top")
+}
+```
+
+::: {.fragment}
+Na topologia, restringir a busca apaga a assinatura, como previsto. No resultado
+evolutivo, as três linhas de A_max ficam sobrepostas: avaliar 10 machos ou 200
+quase não muda para onde o traço vai parar.
+:::
+
+---
+
+## O achado mais desconcertante da rodada
+
+```{r h3-topo}
+if (!is.null(divg)) {
+  divg %>% group_by(encounters_n) %>%
+    summarise(`divergência na topologia` = round(mean(div), 3), .groups = "drop") %>%
+    arrange(desc(encounters_n)) %>% rename(A_max = encounters_n) %>% kable()
+}
+```
+
+A topologia responde a A_max de forma monotônica. A trajetória evolutiva não.
+
+Se a topologia predissesse a evolução como a hipótese diz, as duas coisas
+teriam de andar juntas. Ainda não temos explicação, e está anotado como tal.
+
+# O Estudo 4 {background-color="#2C3E50"}
+
+Quando as duas características evoluem
+
+---
+
+## Duas maneiras de gerar estrutura
+
+```{r co-ld}
+if (ok(co)) {
+  co %>% filter(generation == max(generation), !selecao_natural) %>%
+    group_by(tipo_selecao) %>%
+    summarise(`var total` = round(mean(varz_pop), 2),
+              `var génica` = round(mean(var_genica_z), 2),
+              `desequilíbrio` = round(mean(varz_pop - var_genica_z), 2),
+              `cor(z,p)` = round(mean(cor_zp), 2),
+              .groups = "drop") %>%
+    arrange(desc(.data[["desequilíbrio"]])) %>%
+    mutate(tipo_selecao = labels_4[tipo_selecao]) %>%
+    rename(curva = tipo_selecao) %>% kable()
+}
+```
+
+A gaussiana acopla traço e preferência: acasalamento assortativo, desequilíbrio
+de ligamento, covariância genética. É Fisher.
+
+A sigmoide dá exatamente o mesmo desequilíbrio que a aleatória, ou seja nenhum.
+Todas as fêmeas querem o mesmo independentemente do seu próprio p, então o
+acasalamento é direcional mas não assortativo. Há fuga do traço sem mecanismo
+de Fisher.
+
+---
+
+## A estrutura se apaga sozinha
+
+```{r co-apaga, fig.height=4.2}
+if (ok(co)) {
+  tr <- co %>% filter(!selecao_natural, tipo_selecao %in% c("sigmoid", "u-shaped")) %>%
+    group_by(tipo_selecao, generation) %>%
+    summarise(`oportunidade de seleção sexual (Is)` = mean(I_s, na.rm = TRUE),
+              `distância entre traço e preferência` = mean(zbar_pop - pbar_pop),
+              .groups = "drop") %>%
+    pivot_longer(-c(tipo_selecao, generation))
+  ggplot(tr, aes(generation, value, color = tipo_selecao)) +
+    geom_line(linewidth = 1.2) +
+    facet_wrap(~name, scales = "free_y") +
+    scale_color_manual(values = cores_4, labels = labels_4, name = NULL) +
+    labs(x = "geração", y = NULL) +
+    theme_light(base_size = 13) + theme(legend.position = "top")
+}
+```
+
+Sob a sigmoide o traço se afasta tanto da preferência que a curva satura e deixa
+de discriminar. A rede da geração 100 é indistinguível da aleatória.
+
+A disruptiva chega ao mesmo fim por outro caminho: alarga a distribuição do
+traço até que toda fêmea encontre machos distantes.
+
+---
+
+## E isso tem consequência demográfica
+
+```{r co-ne}
+if (ok(co)) {
+  co %>% filter(!selecao_natural, generation %in% c(5, 25, 50, 100)) %>%
+    group_by(tipo_selecao, generation) %>%
+    summarise(Ne = round(mean(Ne, na.rm = TRUE)), .groups = "drop") %>%
+    mutate(tipo_selecao = labels_4[tipo_selecao]) %>%
+    pivot_wider(names_from = tipo_selecao, values_from = Ne) %>%
+    rename(`geração` = generation) %>% kable()
+}
+```
+
+Censo de 400 adultos. Enquanto a seleção sexual está viva, ela reduz o tamanho
+efetivo da população quase à metade. Quando o traço escapa da preferência, a
+população volta ao seu tamanho de censo.
+
+A seleção sexual, aqui, é uma força demográfica transitória.
+
+# A pergunta {background-color="#8E44AD"}
+
+---
+
+## O censo de machos
+
+A regra de escolha nova (best-of-n: a fêmea avalia os A_max machos e só depois
+fica com os k melhores) deixou a seleção sexual bem mais forte, que era a
+intenção. Com ela, nas curvas sigmoide e disruptiva com seleção natural ligada,
+o traço se afasta tanto do ótimo ecológico que a viabilidade desaba para todos
+ao mesmo tempo.
+
+```{r censo}
+if (ok(co_ns)) {
+  celula <- c("tipo_selecao", "sigma_p_init", "sigma_z_init",
+              "encounters_n", "k_fixo", "selecao_natural", "replica")
+  co_ns %>%
+    group_by(across(all_of(celula))) %>%
+    summarise(censo_min = min(n_machos_surv), .groups = "drop") %>%
+    group_by(encounters_n, k_fixo) %>%
+    summarise(`células curtas (%)` = round(100 * mean(censo_min < 200), 1),
+              `censo mínimo` = min(censo_min), .groups = "drop") %>%
+    arrange(encounters_n, k_fixo) %>%
+    rename(A_max = encounters_n, k = k_fixo) %>% kable()
+}
+```
+
+Com A_max = 10 não há uma única célula afetada. O problema mora na região de
+seleção sexual intensa, que é justamente a parte interessante do desenho.
+
+---
+
+## Cota ou teto
+
+::: {.columns}
+::: {.column width="50%"}
+**Cota**
+
+Sempre 200 adultos, sorteados com peso proporcional à viabilidade.
+
+200 é capacidade de suporte. A seleção decide *quais* machos, nunca *quantos*.
+:::
+::: {.column width="50%"}
+**Teto**
+
+200 é um máximo e a população pode ser menor.
+
+A viabilidade é mortalidade absoluta, e o tamanho populacional é um resultado
+do modelo.
+:::
+:::
+
+Da resposta dependem as células com seleção natural dos Estudos 2 e 4. Tudo o
+que foi mostrado até aqui vem do regime sem seleção natural, onde o censo é
+sempre 200 por construção.
+
+---
+
+## As outras perguntas em aberto
+
+1. **gamma.** Se ficarmos com o teto, vale afrouxar a viabilidade?
+2. **Modularidade.** Louvain sobre a projeção, ou modularidade bipartida?
+3. **Centralização.** Sobre todos os nós, ou só sobre os machos?
+4. **Paternidade.** Repartida por igual entre os parceiros da fêmea, ou
+   proporcional à probabilidade de aceite?
+5. **Custo da preferência.** Hoje não existe, e por isso o Estudo 4 fica na
+   linha de equilíbrios de Lande por construção.
+6. **Piso em zero.** O traço não pode ser negativo, e isso introduz um viés
+   pequeno mas mensurável na direção da deriva.
+
+---
+
+## Onde estão as coisas
+
+`NOTA_quatro_estudos.md` tem o desenho e as hipóteses.
+
+`Resultados_Preliminares.Rmd` tem estes resultados com o anexo de todas as
+combinações de parâmetros.
+
+`NOTA_coevolucao_primeiros_testes.md` tem o Estudo 4, incluindo o que
+descobrimos sobre o próprio modelo pelo caminho.
