@@ -90,6 +90,41 @@ if (n_fuga) {
 if (nrow(curtas)) {
   cat("\n  Onde o censo encurta, por curva:\n")
   print(as.data.frame(count(curtas, tipo_selecao, selecao_natural)), row.names = FALSE)
+
+  # "Ficou abaixo de 200" e "chegou a 2" são coisas diferentes. O censo mínimo
+  # de cada célula separa uma queda de dez indivíduos de um colapso.
+  por_celula <- d %>%
+    group_by(across(all_of(celula))) %>%
+    summarise(censo_min = min(n_machos_surv), .groups = "drop")
+
+  cat("\n  Quão fundo vai a queda (só as células que encurtaram):\n\n")
+  print(as.data.frame(
+    por_celula %>% filter(censo_min < 200) %>%
+      mutate(faixa = cut(censo_min, breaks = c(0, 10, 50, 100, 150, 199),
+                         labels = c("2 a 10", "11 a 50", "51 a 100",
+                                    "101 a 150", "151 a 199"))) %>%
+      count(tipo_selecao, faixa) %>%
+      tidyr::pivot_wider(names_from = faixa, values_from = n, values_fill = 0L)
+  ), row.names = FALSE)
+
+  cat("\n  E por intensidade da escolha. A_max é quantos machos a fêmea avalia e\n")
+  cat("  k quantos aceita, então A_max grande com k pequeno é a seleção sexual\n")
+  cat("  mais forte, e é onde o traço deve fugir mais longe de phi:\n\n")
+  print(as.data.frame(
+    por_celula %>%
+      group_by(encounters_n, k_fixo) %>%
+      summarise(celulas = n(),
+                curtas  = sum(censo_min < 200),
+                pct     = round(100 * mean(censo_min < 200), 1),
+                censo_min = min(censo_min),
+                .groups = "drop") %>%
+      arrange(encounters_n, k_fixo)
+  ), row.names = FALSE)
+
+  cat("\n  Se as células curtas se concentrarem em A_max = 200 e k = 5, o censo\n")
+  cat("  curto é o preço da seleção sexual intensa e não um problema espalhado\n")
+  cat("  pelo desenho todo. Se estiverem por toda parte, a cota muda mais coisas.\n")
+
   cat("\n  O censo curto é consequência de como selecionar_machos_adultos ficou\n")
   cat("  depois da mudança para best-of-n: entre 2 e 200 sobreviventes ele\n")
   cat("  devolve o que sobreviveu, sem repor. A cota está descrita na\n")
