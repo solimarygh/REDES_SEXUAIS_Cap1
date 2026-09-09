@@ -18,3 +18,18 @@ Rplots.pdf
 
 # Cache das redes das figuras: reconstruivel com 12_Preparar_redes_das_figuras.R
 Resultados_Artigo/Figuras/redes_representativas.rds
+
+# Figuras e tabelas geradas: saem de rodar os scripts, e sao pesadas demais
+# para versionar. O que se publica e o HTML e a sua pasta _files, que ficam
+# fora destas regras de proposito.
+Resultados_Artigo/**/Graficos/
+Resultados_Artigo/Figuras/
+Resultados_Artigo/**/Dados/*.csv
+
+# Cache do knitr
+*_cache/
+*_files/figure-latex/
+
+# Rascunhos
+prueba.png
+teste*.png
