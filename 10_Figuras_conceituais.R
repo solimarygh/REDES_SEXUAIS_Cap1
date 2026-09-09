@@ -41,6 +41,8 @@ source("01_metricas_e_utilitarios.R")
 # ao ser lido.
 ESPELHO_SO_FUNCOES <- TRUE
 source("Fase_Espelho.R")
+# O localizador da réplica representativa dentro dos dados que já rodaram.
+source("11_Rede_Representativa.R")
 suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(ggplot2); library(patchwork)
 })
@@ -344,18 +346,31 @@ desenhar_rede <- function(r, titulo, tamanho = 4) {
 
 figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
                          N = 200, phi = 5, s_media = 2, sigma_s = 0.2,
-                         k = 5L, tipo = "gaussian", seed = 11) {
+                         k = 5L, tipo = "gaussian", seed = 11,
+                         A_max = 200L, selecao_natural = FALSE,
+                         usar_dados = TRUE) {
 
+  # Com usar_dados, a rede desenhada é a de uma réplica que realmente rodou: a
+  # mais próxima da média da célula, recuperada pela semente e conferida contra
+  # a métrica guardada. Se não houver dados, ou se a conferência falhar, cai
+  # para uma população gerada na hora, e o rótulo do painel diz qual é qual.
   um_canto <- function(sz, sp) {
+    if (usar_dados) {
+      r <- rede_representativa("1", sigma_z = sz, sigma_p = sp, tipo_selecao = tipo,
+                               encounters_n = A_max, k_fixo = k,
+                               selecao_natural = selecao_natural, verboso = FALSE)
+      if (!is.null(r))
+        return(c(preparar_rede(r$M), list(met = r$metrics, fonte = r$rotulo)))
+    }
     set.seed(seed + round(100 * sz) + round(10000 * sp))
     male_z   <- pmax(0, rnorm(N, phi, sz))
     female_p <- pmax(0, rnorm(N, phi, sp))
     s_all    <- pmax(0, rnorm(N, s_media, sigma_s))
     M   <- mate_with_survivors(male_z, female_p, s_all, tipo,
-                               encounters_n = N, k_fixo = k)
+                               encounters_n = min(A_max, N), k_fixo = k)
     met <- calc_metrics_from_M(M, k_alvo = k)
 
-    c(preparar_rede(M), list(met = met))
+    c(preparar_rede(M), list(met = met, fonte = "população gerada agora"))
   }
 
   cantos <- list(
@@ -365,14 +380,14 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
     list(sz = sigma_alto,  sp = sigma_alto,  tit = "machos variados, fêmeas discordam")
   )
 
-  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 5.5, 1.5), oma = c(3, 0, 3, 0))
+  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 6.5, 1.5), oma = c(3, 0, 3, 0))
   on.exit(par(op), add = TRUE)
   for (cc in cantos) {
     r <- um_canto(cc$sz, cc$sp)
-    desenhar_rede(r, sprintf("%s  (σz = %.1f, σp = %.1f)\nmodularidade %.2f | aninhamento %.2f | Is %.2f\n%d componentes | %d comunidades | %d fêmeas sem acasalar",
+    desenhar_rede(r, sprintf("%s  (σz = %.1f, σp = %.1f)\nmodularidade %.2f | aninhamento %.2f | Is %.2f\n%d componentes | %d comunidades | %d fêmeas sem acasalar\n%s",
                              cc$tit, cc$sz, cc$sp,
                              r$met$Modularity, r$met$Nestedness, r$met$I_s,
-                             r$n_comp, r$n_com, r$sem))
+                             r$n_comp, r$n_com, r$sem, r$fonte))
   }
   mtext("A mesma regra de escolha, quatro composições da população",
         outer = TRUE, side = 3, line = 0.5, cex = 1.3, font = 2)
@@ -396,11 +411,18 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
 figura_busca <- function(amax = c(10L, 200L), ks = c(5L, 20L),
                          N = 200, phi = 5, sigma_z = 1.0, sigma_p = 1.0,
                          s_media = 2, sigma_s = 0.2, tipo = "gaussian",
-                         seed = 13) {
+                         seed = 13, selecao_natural = FALSE, usar_dados = TRUE) {
 
   celulas <- expand.grid(k = ks, A = amax)
 
   uma <- function(A, k) {
+    if (usar_dados) {
+      r <- rede_representativa("1", sigma_z = sigma_z, sigma_p = sigma_p,
+                               tipo_selecao = tipo, encounters_n = A, k_fixo = k,
+                               selecao_natural = selecao_natural, verboso = FALSE)
+      if (!is.null(r))
+        return(c(preparar_rede(r$M), list(met = r$metrics, fonte = r$rotulo)))
+    }
     set.seed(seed + A * 100 + k)
     male_z   <- pmax(0, rnorm(N, phi, sigma_z))
     female_p <- pmax(0, rnorm(N, phi, sigma_p))
@@ -410,18 +432,19 @@ figura_busca <- function(amax = c(10L, 200L), ks = c(5L, 20L),
     # limitação que o buraco do censo explora nos estudos.
     M   <- mate_with_survivors(male_z, female_p, s_all, tipo,
                                encounters_n = min(A, N), k_fixo = k)
-    c(preparar_rede(M), list(met = calc_metrics_from_M(M, k_alvo = k)))
+    c(preparar_rede(M), list(met = calc_metrics_from_M(M, k_alvo = k),
+                             fonte = "população gerada agora"))
   }
 
-  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 5.5, 1.5), oma = c(3.5, 0, 4, 0))
+  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 6.5, 1.5), oma = c(3.5, 0, 4, 0))
   on.exit(par(op), add = TRUE)
   for (i in seq_len(nrow(celulas))) {
     A <- celulas$A[i]; k <- celulas$k[i]
     r <- uma(A, k)
-    desenhar_rede(r, sprintf("A_max = %d, k = %d  (aceita %.0f%% do que avalia)\nmodularidade %.2f | aninhamento %.2f | Is %.2f\n%d componentes | %d comunidades | %d fêmeas sem acasalar",
+    desenhar_rede(r, sprintf("A_max = %d, k = %d  (aceita %.0f%% do que avalia)\nmodularidade %.2f | aninhamento %.2f | Is %.2f\n%d componentes | %d comunidades | %d fêmeas sem acasalar\n%s",
                              min(A, N), k, 100 * k / min(A, N),
                              r$met$Modularity, r$met$Nestedness, r$met$I_s,
-                             r$n_comp, r$n_com, r$sem))
+                             r$n_comp, r$n_com, r$sem, r$fonte))
   }
   mtext("Estudo 1: o mesmo material, quatro regimes de busca",
         outer = TRUE, side = 3, line = 1.5, cex = 1.3, font = 2)
@@ -456,9 +479,23 @@ figura_rede_evolucao <- function(estudo = c("2", "3"),
   # Sem seleção natural por padrão, e de propósito: é o regime em que o censo é
   # sempre 200 por construção, então as quatro redes têm o mesmo tamanho e a
   # comparação entre elas é sobre a estrutura e não sobre quantos sobraram.
+  #
+  # As duas gerações vêm da MESMA réplica, pedidas de uma vez só. Se fossem duas
+  # chamadas separadas, a representativa da geração 1 e a da 100 poderiam ser
+  # réplicas diferentes, e o antes e depois deixaria de ser da mesma população.
+  eixo_nome <- if (estudo == "2") "sigma_p" else "sigma_z"
   uma <- function(sigma) {
+    args <- list(estudo)
+    args[[eixo_nome]] <- sigma
+    r <- do.call(rede_representativa,
+                 c(args, list(tipo_selecao = tipo, encounters_n = A_max, k_fixo = k,
+                              selecao_natural = selecao_natural,
+                              capturar = c(1L, as.integer(geracoes)), verboso = FALSE)))
+    if (!is.null(r)) return(r)
+
+    # Sem dados, ou conferência falhada: uma réplica nova, e o rótulo avisa.
     set.seed(seed + round(sigma * 1000))
-    if (estudo == "2") {
+    bruto <- if (estudo == "2") {
       simulate_evolution(generations = geracoes, N_machos = N, N_femeas = N,
                          sigma_p = sigma, sigma_z_init = fixo,
                          tipo_selecao = tipo, encounters_n = A_max, k_fixo = k,
@@ -469,6 +506,9 @@ figura_rede_evolucao <- function(estudo = c("2", "3"),
                        tipo_selecao = tipo, encounters_n = A_max, k_fixo = k,
                        selecao_natural = selecao_natural, return_details = TRUE)
     }
+    list(redes = list(gen1 = bruto$rede_gen1,
+                      gen100 = bruto$rede_final),
+         linhas = bruto$dados_tabela, rotulo = "réplica gerada agora")
   }
 
   res <- list(baixo = uma(baixo), alto = uma(alto))
@@ -478,22 +518,22 @@ figura_rede_evolucao <- function(estudo = c("2", "3"),
   coluna  <- if (estudo == "2") "varz_males" else "varp_femeas"
   nome_var <- if (estudo == "2") "var(z)" else "var(p)"
 
-  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 5.5, 1.5), oma = c(3.5, 0, 4, 0))
+  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 6.5, 1.5), oma = c(3.5, 0, 4, 0))
   on.exit(par(op), add = TRUE)
 
   for (nome in c("baixo", "alto")) {
     r <- res[[nome]]
     sigma <- if (nome == "baixo") baixo else alto
-    for (quando in c("rede_gen1", "rede_final")) {
-      d <- r[[quando]]
-      tab <- r$dados_tabela
-      v <- tab[[coluna]][tab$generation == d$geracao]
+    for (g in c(1L, as.integer(geracoes))) {
+      d <- r$redes[[paste0("gen", g)]]
+      if (is.null(d)) next
+      v  <- r$linhas[[coluna]][r$linhas$generation == g]
       rr <- preparar_rede(d$M)
       desenhar_rede(rr,
-                    sprintf("%s = %.1f, geração %d\nmodularidade %.2f | aninhamento %.2f | Is %.2f\n%d componentes | %d comunidades | %s = %.2f",
-                            letra, sigma, d$geracao,
+                    sprintf("%s = %.1f, geração %d\nmodularidade %.2f | aninhamento %.2f | Is %.2f\n%d componentes | %d comunidades | %s = %.2f\n%s",
+                            letra, sigma, g,
                             d$metrics$Modularity, d$metrics$Nestedness, d$metrics$I_s,
-                            rr$n_comp, rr$n_com, nome_var, v))
+                            rr$n_comp, rr$n_com, nome_var, v[1], r$rotulo))
     }
   }
   mtext(sprintf("Estudo %s: o que cem gerações fazem com a rede", estudo),

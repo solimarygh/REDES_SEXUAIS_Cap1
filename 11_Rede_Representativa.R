@@ -138,8 +138,13 @@ dados_do_estudo <- function(estudo) {
 #   estudo 1: sigma_z, sigma_p, encounters_n, k_fixo, selecao_natural, tipo_selecao
 #   estudo 2: sigma_p, ...   estudo 3: sigma_z, ...   estudo 4: sigma_*_init, ...
 # O que não for dado fica no default abaixo.
+# `geracao` é a geração usada para ESCOLHER a réplica (a última, por padrão).
+# `capturar` são as gerações cuja rede se quer de volta, e por padrão é a mesma.
+# Pedir várias de uma vez importa: para o antes e depois, a geração 1 e a 100
+# têm de ser da MESMA réplica, e escolher a representativa em cada geração
+# separadamente daria duas réplicas diferentes.
 rede_representativa <- function(estudo, ..., metrica = "Modularity",
-                                geracao = NULL, verboso = TRUE) {
+                                geracao = NULL, capturar = NULL, verboso = TRUE) {
   estudo <- as.character(estudo)
   e <- ESTUDOS[[estudo]]
   if (is.null(e)) stop("Estudo desconhecido: ", estudo)
@@ -205,14 +210,17 @@ rede_representativa <- function(estudo, ..., metrica = "Modularity",
     return(NULL)
   }
 
+  alvos <- if (is.null(capturar)) gen else sort(unique(c(as.integer(capturar), gen)))
   semente <- e$seed_base + linha$idx_global
   set.seed(semente)
-  res <- e$rodar(linha, gen)
-  rede <- if (!is.null(res$rede)) res$rede else res[[paste0("gen", gen)]]
+  res <- e$rodar(linha, alvos)
+  pegar <- function(g) if (!is.null(res$rede)) res$rede else res[[paste0("gen", g)]]
+  rede  <- pegar(gen)
   if (is.null(rede)) {
     warning("O motor do estudo ", estudo, " não devolveu a rede da geração ", gen, ".")
     return(NULL)
   }
+  redes <- setNames(lapply(alvos, pegar), paste0("gen", alvos))
 
   # O passo que garante que a figura corresponde ao número.
   obtido   <- rede$metrics[[metrica]]
@@ -228,7 +236,19 @@ rede_representativa <- function(estudo, ..., metrica = "Modularity",
     cat(sprintf("  estudo %s, réplica %d, geração %d, semente %d: %s = %.3f (média da célula %.3f)\n",
                 estudo, escolha$replica, gen, semente, metrica, obtido, media))
 
-  list(M = rede$M, metrics = rede$metrics, replica = escolha$replica,
+  # As linhas dos dados daquela réplica, todas as gerações, para quem precisar
+  # de uma coluna que não é métrica de rede (a variância do traço, por exemplo).
+  linhas <- dados
+  for (nm in chaves) {
+    if (!nm %in% names(linhas)) next
+    col <- linhas[[nm]]; if (is.factor(col)) col <- as.character(col)
+    alvo <- escolha[[nm]]; if (is.factor(alvo)) alvo <- as.character(alvo)
+    linhas <- linhas[if (is.numeric(col)) abs(col - alvo) < 1e-8 else col == alvo, , drop = FALSE]
+  }
+  linhas <- linhas[linhas$replica == escolha$replica, , drop = FALSE]
+
+  list(M = rede$M, metrics = rede$metrics, redes = redes, linhas = linhas,
+       replica = escolha$replica,
        geracao = gen, semente = semente, media_celula = media, confere = confere,
        rotulo = sprintf("réplica %d de %d, a mais próxima da média da célula",
                         escolha$replica, nrow(celula)))
