@@ -175,11 +175,29 @@ rede_representativa <- function(estudo, ..., metrica = "Modularity",
   celula <- celula[!is.na(celula[[metrica]]), , drop = FALSE]
   if (!nrow(celula)) return(NULL)
 
+  # Se a chamada não fixou todas as colunas do desenho, a "célula" é na verdade
+  # um conjunto de células, e a média percorre todas elas. Não é erro, mas quem
+  # lê a figura precisa saber.
+  chaves <- setdiff(names(grade), c("replica", "idx_global"))
+  soltas <- setdiff(chaves, names(pedido))
+  if (length(soltas) && verboso)
+    cat(sprintf("  aviso: %s não foi fixado, então a média percorre esses níveis.\n",
+                paste(soltas, collapse = ", ")))
+
   # A réplica representativa: a mais próxima da média da célula.
   media   <- mean(celula[[metrica]])
   escolha <- celula[which.min(abs(celula[[metrica]] - media)), ]
 
-  linha <- filtra(grade)
+  # A linha da grade é procurada com os valores da PRÓPRIA réplica escolhida, e
+  # não com o que a chamada pediu. Assim ela fica sempre completamente
+  # especificada, mesmo que a chamada tenha deixado alguma coluna solta.
+  linha <- grade
+  for (nm in chaves) {
+    if (!nm %in% names(escolha)) next
+    col <- linha[[nm]]; if (is.factor(col)) col <- as.character(col)
+    alvo <- escolha[[nm]]; if (is.factor(alvo)) alvo <- as.character(alvo)
+    linha <- linha[if (is.numeric(col)) abs(col - alvo) < 1e-8 else col == alvo, , drop = FALSE]
+  }
   linha <- linha[linha$replica == escolha$replica, , drop = FALSE]
   if (nrow(linha) != 1) {
     warning("Não consegui localizar a célula na grade do estudo ", estudo,
