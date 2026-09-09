@@ -102,6 +102,14 @@ simulate_epidemia <- function(N_machos = 200, N_femeas = 200,
 
     # (1) A escolha desta ronda, com o sinal corrigido pela infecção.
     # z + h é o que a fêmea avalia; z é o que o macho transmite aos filhos.
+    #
+    # O estado do INÍCIO da ronda fica guardado porque é ele que governa a
+    # escolha desta ronda. Comparar grau com o estado do FIM da temporada não
+    # mede o efeito de h: sob a sigmoide os machos de z alto acasalam com todo
+    # mundo e por isso se infectam primeiro, de modo que "estar infectado"
+    # vira consequência do grau e não causa dele. Medindo o grau ganho NESTA
+    # ronda contra o estado que ele tinha ANTES dela, a ordem causal fica certa.
+    estado_m_ini <- estado_m
     z_efetivo <- male_z + ifelse(estado_m == 1L, h_I, 0)
     M_ronda <- mate_with_survivors(z_efetivo, female_p, female_s, tipo_selecao,
                                    encounters_n = encounters_n, k_fixo = k_fixo,
@@ -171,9 +179,21 @@ simulate_epidemia <- function(N_machos = 200, N_femeas = 200,
       zbar_pares = sel$zbar_pares,
       varz_pop   = var(male_z),
 
-      # --- o efeito direto de h: infectados acasalam mais ou menos? ---
-      grau_infectados   = if (any(estado_m == 1L)) mean(rowSums(M_acum)[estado_m == 1L]) else NA_real_,
-      grau_suscetiveis  = if (any(estado_m == 0L)) mean(rowSums(M_acum)[estado_m == 0L]) else NA_real_
+      # --- o efeito direto de h, medido na ordem causal certa ---
+      # Parceiras ganhas NESTA ronda, separando os machos pelo estado que eles
+      # tinham no INÍCIO dela. Esta é a comparação que isola h.
+      grau_ronda_infectados  = if (any(estado_m_ini == 1L)) mean(rowSums(M_ronda)[estado_m_ini == 1L]) else NA_real_,
+      grau_ronda_suscetiveis = if (any(estado_m_ini == 0L)) mean(rowSums(M_ronda)[estado_m_ini == 0L]) else NA_real_,
+
+      # O confundidor, à vista: se os infectados já tinham z maior, parte da
+      # diferença de grau é do traço e não da doença.
+      z_infectados  = if (any(estado_m_ini == 1L)) mean(male_z[estado_m_ini == 1L]) else NA_real_,
+      z_suscetiveis = if (any(estado_m_ini == 0L)) mean(male_z[estado_m_ini == 0L]) else NA_real_,
+
+      # E o mesmo sobre a rede acumulada, que NÃO isola h e serve para outra
+      # coisa: mostrar que quem mais acasala é quem mais se infecta.
+      grau_acum_infectados  = if (any(estado_m == 1L)) mean(rowSums(M_acum)[estado_m == 1L]) else NA_real_,
+      grau_acum_suscetiveis = if (any(estado_m == 0L)) mean(rowSums(M_acum)[estado_m == 0L]) else NA_real_
     )
   }
 
