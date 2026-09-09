@@ -247,7 +247,7 @@ div.tocify {
 <h3 class="subtitle">Os três estudos rodados, um de cada vez — rodada de
 20 réplicas com o modelo atual</h3>
 <h4 class="author">Solimary García Hernández</h4>
-<h4 class="date">16 de August de 2026</h4>
+<h4 class="date">09 de September de 2026</h4>
 
 </div>
 
@@ -335,17 +335,28 @@ sigmoide chega a passar de 20, o que explica de onde saíram as redes de
 proporcional a V, o que importa passa a ser a viabilidade
 <strong>relativa</strong> entre os juvenis, que continua discriminando
 normalmente mesmo quando o valor absoluto de todos é minúsculo.</p>
-<table style="width:100%;">
+</div>
+<div id="os-quatro-estudos-num-plano-só" class="section level2">
+<h2>Os quatro estudos num plano só</h2>
+<p>O que cada estudo fixa e o que deixa evoluir. Os pontos cinza são as
+condições iniciais do desenho; as setas vermelhas, o que fica livre para
+se mover ao longo das cem gerações. Esta é a única figura do documento
+que é um esquema: todas as outras saem do motor.</p>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fig-desenho-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="situação" class="section level2">
+<h2>Situação</h2>
+<table>
 <caption>O que está neste documento. Cenários inclui as 20
 réplicas.</caption>
 <colgroup>
-<col width="15%" />
+<col width="13%" />
+<col width="17%" />
 <col width="23%" />
-<col width="25%" />
+<col width="6%" />
 <col width="7%" />
-<col width="8%" />
-<col width="8%" />
-<col width="10%" />
+<col width="7%" />
+<col width="23%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -388,12 +399,12 @@ réplicas.</caption>
 </tr>
 <tr class="even">
 <td align="left">Co-evolução</td>
-<td align="left">os dois, só como início</td>
+<td align="left">os dois, herdáveis</td>
 <td align="left">os dois</td>
-<td align="left">-</td>
-<td align="left">-</td>
-<td align="left">-</td>
-<td align="left">não rodado</td>
+<td align="left">bestOfN</td>
+<td align="left">100</td>
+<td align="left">6.480</td>
+<td align="left">metade sem seleção natural</td>
 </tr>
 </tbody>
 </table>
@@ -415,6 +426,30 @@ sexos são igualmente heterogêneos.</p>
 <p>A seleção natural entra como filtro puramente ecológico: muda quais
 machos estão disponíveis, mas não tem consequência evolutiva nenhuma,
 porque não há descendência.</p>
+<div id="o-que-há-dentro-de-uma-célula" class="section level2">
+<h2>1.0 O que há dentro de uma célula</h2>
+<p>Tudo o que vem depois é média de 20 réplicas sobre uma grade. Antes
+disso, vale ver o que uma célula é de verdade: uma população concreta e
+a rede que ela formou.</p>
+<p>As redes desenhadas aqui não são inventadas para a figura: são de
+réplicas que realmente rodaram. Dentro de cada célula o código procura a
+réplica cuja modularidade está mais perto da média da célula, recupera a
+semente com que ela foi gerada e reconstrói a rede, conferindo que a
+métrica reproduzida bate com a guardada. O rodapé de cada painel diz de
+qual réplica se trata.</p>
+<p>Os quatro cantos do plano, desenhados como rede. Quadrados são
+machos, círculos são fêmeas, e as cores saem do
+<code>cluster_louvain</code>, que é o próprio algoritmo da métrica de
+modularidade: os módulos que aparecem no desenho são os que o número da
+faixa 1.1 conta. Cinza claro é quem não acasalou.</p>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/ct-rede-cantos-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>O Controle cruza dois níveis, e o parágrafo acima cobre um só. O
+outro é o regime de busca, que nos resultados é o que mais pesa. Aqui a
+composição da população é a mesma nos quatro painéis, e o que muda é
+quantos machos a fêmea avalia e quantos aceita. A proporção k/A_max é a
+intensidade de seleção por truncamento.</p>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/ct-rede-busca-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
 <div id="superfície-das-métricas-de-rede" class="section level2 tabset">
 <h2 class="tabset">1.1 Superfície das métricas de rede</h2>
 <p>Cada faixa é uma métrica, com escala de cor própria. Dentro da faixa,
@@ -840,6 +875,30 @@ chegou até lá, nos dois extremos do gradiente (σp = 0.2 e σp = 2.0).
 Notem como agora (que a femea escolhe os melhores), como os resultados
 diferem em relação ao graficos que veiamos antes: as metricas evoluem ao
 longo do tempo.</p>
+<div id="o-que-σp-faz-numa-população-concreta" class="section level2">
+<h2>2.0 O que σp faz, numa população concreta</h2>
+<p>O eixo deste estudo é fácil de dizer e difícil de ver. As duas
+colunas abaixo são as duas pontas do gradiente, com os MESMOS machos nas
+duas, de modo que a única coisa que muda é o quanto as fêmeas discordam
+entre si.</p>
+<p>Em cima, a curva de aceite de catorze fêmeas sorteadas, com os machos
+disponíveis marcados no eixo: com σp pequeno as curvas se empilham umas
+sobre as outras, porque todas querem o mesmo macho. No meio, os casais
+que se formaram, com a diagonal marcando onde o macho é igual ao pico da
+fêmea. Embaixo, quantas parceiras cada macho teve, que é sobre quem a
+seleção sexual está agindo neste estudo.</p>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-mecanismo-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<div id="e-o-que-cem-gerações-fazem-com-a-rede" class="section level3">
+<h3>E o que cem gerações fazem com a rede</h3>
+<p>A figura acima é a primeira geração: o mecanismo, antes de qualquer
+resposta evolutiva. Esta mostra a mesma coisa cem gerações depois, com o
+traço do macho já tendo evoluído.</p>
+<p>As duas colunas são a geração 1 e a 100 da MESMA réplica, e não de
+duas réplicas diferentes: é um antes e depois de uma população só. As
+linhas são as duas pontas do gradiente de σp.</p>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-rede-evolucao-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
 <div id="métricas-de-rede" class="section level2 tabset">
 <h2 class="tabset">2.1 Métricas de rede</h2>
 <div id="sem-seleção-natural-3" class="section level3 tabset">
@@ -1161,6 +1220,29 @@ seletiva é a disponibilidade de machos.</p>
 2: σz é imposto a cada geração, igual a σp lá, mas σp aqui é só o ponto
 de partida. Da geração 2 em diante a largura da distribuição de
 preferências é o que a seleção e a deriva fizerem dela.</p>
+<div id="o-que-σz-faz-numa-população-concreta" class="section level2">
+<h2>3.0 O que σz faz, numa população concreta</h2>
+<p>A mesma figura da seção 2.0, com a variação trocada de lado, e vale
+olhar as duas juntas.</p>
+<p>Agora as fêmeas são as MESMAS nas duas colunas, com as mesmas curvas
+de aceite, e o que muda são os machos marcados no eixo de baixo. Ver as
+curvas paradas enquanto o material muda é justamente o que este estudo
+quer dizer.</p>
+<p>A linha de baixo também inverte: mostra quantos parceiros cada fêmea
+teve contra o seu próprio pico. Aqui quem fica de fora é a fêmea que não
+encontra ninguém que sirva, e é essa a seleção que age sobre a
+preferência.</p>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/esp-mecanismo-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<div id="e-o-que-cem-gerações-fazem-com-a-rede-1"
+class="section level3">
+<h3>E o que cem gerações fazem com a rede</h3>
+<p>O espelho da figura equivalente do Estudo 2, e vale comparar as duas.
+Lá o que evolui é o traço do macho e a rede muda porque o material
+mudou; aqui o material é re-sorteado igual em todas as gerações, e a
+rede muda porque as fêmeas passaram a querer outra coisa.</p>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/esp-rede-evolucao-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
 <div id="métricas-de-rede-1" class="section level2 tabset">
 <h2 class="tabset">3.1 Métricas de rede</h2>
 <div id="sem-seleção-natural-6" class="section level3 tabset">
@@ -1912,17 +1994,103 @@ class="section level2 tabset">
 </div>
 </div>
 </div>
-<div id="co-evolução-ainda-não-rodado" class="section level1">
-<h1>5. Co-evolução (ainda não rodado)</h1>
+<div id="co-evolução" class="section level1">
+<h1>5. Co-evolução</h1>
 <p>O quarto estudo, em que traço e preferência são herdáveis ao mesmo
 tempo e a grandeza central passa a ser a covariância genética entre os
-dois.A proposta de desenho está em <code>NOTA_quatro_estudos.md</code>,
-com quatro pontos ainda em aberto para discutir antes de rodar.</p>
-<p>Quando rodar, penso que esta seção ganha os mesmos painéis das
-anteriores mais um com a trajetória de <code>cov_zp</code> ao longo das
-gerações, que é onde o ciclo de Fisher apareceria ou não, o que vcs
-acham?</p>
+dois.</p>
+<p>Rodou. A metade SEM seleção natural está fechada, 6.480 cenários, e é
+a que aparece aqui. A metade com seleção natural espera a decisão sobre
+o censo de machos, que é a mesma pergunta do aviso lá em cima. O relato
+completo, inclusive o que descobrimos sobre o próprio modelo pelo
+caminho, está em <code>NOTA_coevolucao_primeiros_testes.md</code>.</p>
+<p>Aqui a variância do traço se separa em duas: a
+<strong>génica</strong>, que governa a segregação, e a
+<strong>total</strong>, que a população exibe. A distância entre elas é
+o desequilíbrio de ligamento que o acasalamento não aleatório empilhou,
+e é uma quantidade que os três estudos anteriores não têm como
+mostrar.</p>
+<table>
+<caption>Geração 100, sem seleção natural, promediando todos os sigma
+iniciais, A_max e k.</caption>
+<thead>
+<tr class="header">
+<th align="left">curva</th>
+<th align="right">var total</th>
+<th align="right">var génica</th>
+<th align="right">desequilíbrio</th>
+<th align="right">cov(z,p)</th>
+<th align="right">cor(z,p)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Gaussiana</td>
+<td align="right">3.28</td>
+<td align="right">1.71</td>
+<td align="right">1.57</td>
+<td align="right">2.12</td>
+<td align="right">0.41</td>
+</tr>
+<tr class="even">
+<td align="left">Sigmoide</td>
+<td align="right">1.65</td>
+<td align="right">1.66</td>
+<td align="right">-0.01</td>
+<td align="right">0.03</td>
+<td align="right">0.03</td>
+</tr>
+<tr class="odd">
+<td align="left">Disruptiva</td>
+<td align="right">2.24</td>
+<td align="right">1.74</td>
+<td align="right">0.50</td>
+<td align="right">-0.56</td>
+<td align="right">-0.05</td>
+</tr>
+<tr class="even">
+<td align="left">Aleatória</td>
+<td align="right">1.74</td>
+<td align="right">1.77</td>
+<td align="right">-0.02</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+</tr>
+</tbody>
+</table>
+<p>A gaussiana é a única que acopla traço e preferência, que é o
+mecanismo de Fisher. A sigmoide dá exatamente o mesmo desequilíbrio que
+a aleatória, ou seja nenhum: todas as fêmeas querem o mesmo
+independentemente do seu próprio pico, então o acasalamento é
+direcional, mas não assortativo.</p>
+<div id="a-trajetória-e-a-seleção-sexual-apagando-a-si-mesma"
+class="section level2">
+<h2>5.1 A trajetória, e a seleção sexual apagando a si mesma</h2>
+<p>Aqui está o painel de <code>cov_zp</code> ao longo das gerações que
+eu tinha sugerido, junto com três coisas que só apareceram ao rodar.</p>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/co-trajetoria-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>A covariância se acumula na gaussiana e fica negativa na disruptiva,
+que é o esperado do acasalamento assortativo e do dissortativo. Na
+sigmoide ela não sai do zero, apesar de ser a curva em que o traço mais
+se move.</p>
+<p>E há uma coisa que eu não esperava. Sob a sigmoide o traço se afasta
+tanto da preferência que a curva satura e deixa de discriminar: o Is sai
+de 7.4 e termina em 0.15, e a rede da geração 100 fica indistinguível da
+aleatória. A variância do traço não se mexe nesse tempo, então não é
+perda de variação, é a média saindo da faixa em que a preferência
+distingue. A disruptiva chega ao mesmo fim por outro caminho, alargando
+a distribuição até que toda fêmea encontre machos distantes do seu
+pico.</p>
+<p>O painel do Ne mostra que isso não é só uma questão de rede: enquanto
+a seleção sexual está viva ela reduz o tamanho efetivo quase à metade do
+censo, e quando o traço escapa a população volta ao seu tamanho de
+censo. A seleção sexual, neste modelo, é uma força demográfica
+transitória.</p>
+<p>Nas curvas em que a estrutura se apaga, as métricas de rede da
+geração 100 são as de uma rede sem escolha nenhuma. Isso não é um
+problema dos painéis: é o resultado.</p>
 <hr />
+</div>
 </div>
 <div id="section" class="section level1">
 <h1></h1>
