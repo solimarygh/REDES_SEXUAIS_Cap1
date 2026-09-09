@@ -440,6 +440,19 @@ proporcional a V, o que importa passa a ser a viabilidade **relativa**
 entre os juvenis, que continua discriminando normalmente mesmo quando o
 valor absoluto de todos é minúsculo.
 
+## Os quatro estudos num plano só
+
+O que cada estudo fixa e o que deixa evoluir. Os pontos cinza são as condições
+iniciais do desenho; as setas vermelhas, o que fica livre para se mover ao
+longo das cem gerações. Esta é a única figura do documento que é um esquema:
+todas as outras saem do motor.
+
+```{r fig-desenho, fig.width=10, fig.height=8}
+figura_desenho()
+```
+
+## Situação
+
 ```{r status}
 n_cen <- function(x, eixos) {
   if (!ok(x)) return("-")
@@ -452,16 +465,17 @@ n_ger <- function(x) if (!ok(x)) "-" else
 
 tibble(
   Estudo     = c("Controle", "Fêmeas variando", "Machos variando", "Co-evolução"),
-  Eixo       = c("σp × σz (superfície)", "σp", "σz", "os dois, só como início"),
+  Eixo       = c("σp × σz (superfície)", "σp", "σz", "os dois, herdáveis"),
   `O que evolui` = c("nada", "o traço do macho (z)", "a preferência da fêmea (p)", "os dois"),
-  Rodada     = c(rodada_de(ct), rodada_de(d), rodada_de(esp), "-"),
-  Gerações   = c(n_ger(ct), n_ger(d), n_ger(esp), "-"),
+  Rodada     = c(rodada_de(ct), rodada_de(d), rodada_de(esp),
+                 if (ok(co)) "bestOfN" else "-"),
+  Gerações   = c(n_ger(ct), n_ger(d), n_ger(esp), n_ger(co)),
   Cenários   = c(n_cen(ct, c("sigma_p", "sigma_z")), n_cen(d, "sigma_p"),
-                 n_cen(esp, "sigma_z"), "-"),
+                 n_cen(esp, "sigma_z"), n_cen(co, c("sigma_p_init", "sigma_z_init"))),
   Situação   = c(if (ok(ct)) "concluído" else "sem dados",
                  if (ok(d))  "concluído" else "sem dados",
                  if (ok(esp)) "concluído" else "sem dados",
-                 "não rodado")
+                 if (ok(co)) "metade sem seleção natural" else "não rodado")
 ) %>% kable(caption = "O que está neste documento. Cenários inclui as 20 réplicas.")
 ```
 
@@ -487,15 +501,20 @@ porque não há descendência.
 
 Tudo o que vem depois é média de 20 réplicas sobre uma grade. Antes disso,
 vale ver o que uma célula é de verdade: uma população concreta e a rede que
-ela formou. As duas figuras desta subseção são uma realização só, e não uma
-média, e servem para dar sentido ao que os heatmaps resumem.
+ela formou.
+
+As redes desenhadas aqui não são inventadas para a figura: são de réplicas
+que realmente rodaram. Dentro de cada célula o código procura a réplica cuja
+modularidade está mais perto da média da célula, recupera a semente com que
+ela foi gerada e reconstrói a rede, conferindo que a métrica reproduzida bate
+com a guardada. O rodapé de cada painel diz de qual réplica se trata.
 
 Os quatro cantos do plano, desenhados como rede. Quadrados são machos,
 círculos são fêmeas, e as cores saem do `cluster_louvain`, que é o próprio
 algoritmo da métrica de modularidade: os módulos que aparecem no desenho são
 os que o número da faixa 1.1 conta. Cinza claro é quem não acasalou.
 
-```{r ct-rede-cantos, fig.width=9, fig.height=8.5}
+```{r ct-rede-cantos, fig.width=9, fig.height=9, cache=TRUE}
 figura_redes()
 ```
 
@@ -505,7 +524,7 @@ população é a mesma nos quatro painéis, e o que muda é quantos machos a fê
 avalia e quantos aceita. A proporção k/A_max é a intensidade de seleção por
 truncamento.
 
-```{r ct-rede-busca, fig.width=9, fig.height=8.5}
+```{r ct-rede-busca, fig.width=9, fig.height=9, cache=TRUE}
 figura_busca()
 ```
 
@@ -767,6 +786,20 @@ está agindo neste estudo.
 figura_sigma_p()
 ```
 
+### E o que cem gerações fazem com a rede
+
+A figura acima é a primeira geração: o mecanismo, antes de qualquer resposta
+evolutiva. Esta mostra a mesma coisa cem gerações depois, com o traço do macho
+já tendo evoluído.
+
+As duas colunas são a geração 1 e a 100 da MESMA réplica, e não de duas
+réplicas diferentes: é um antes e depois de uma população só. As linhas são as
+duas pontas do gradiente de σp.
+
+```{r fem-rede-evolucao, fig.width=10, fig.height=10, cache=TRUE}
+figura_rede_evolucao("2")
+```
+
 ## 2.1 Métricas de rede {.tabset}
 
 ```{r fem-metricas, results='asis', fig.width=13, fig.height=9}
@@ -837,6 +870,17 @@ ninguém que sirva, e é essa a seleção que age sobre a preferência.
 
 ```{r esp-mecanismo, fig.width=11, fig.height=9}
 figura_sigma_z()
+```
+
+### E o que cem gerações fazem com a rede
+
+O espelho da figura equivalente do Estudo 2, e vale comparar as duas. Lá o que
+evolui é o traço do macho e a rede muda porque o material mudou; aqui o
+material é re-sorteado igual em todas as gerações, e a rede muda porque as
+fêmeas passaram a querer outra coisa.
+
+```{r esp-rede-evolucao, fig.width=10, fig.height=10, cache=TRUE}
+figura_rede_evolucao("3")
 ```
 
 ## 3.1 Métricas de rede {.tabset}
