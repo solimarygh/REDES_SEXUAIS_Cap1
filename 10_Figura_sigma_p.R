@@ -47,7 +47,7 @@ figura_sigma_p <- function(sigma_p_baixo = 0.2, sigma_p_alto = 2.0,
          pares = tibble(p_femea = female_p[pares[, 2]],
                         z_macho = male_z[pares[, 1]],
                         macho   = pares[, 1]),
-         rotulo = sprintf("sigma[p] == %.1f", sigma_p))
+         sigma_p = sigma_p)
   }
 
   baixo <- um_lado(sigma_p_baixo)
@@ -57,8 +57,9 @@ figura_sigma_p <- function(sigma_p_baixo = 0.2, sigma_p_alto = 2.0,
                  length.out = 400)
 
   titulo <- function(lado, texto) {
-    sprintf("%s\nmodularidade %.2f | centralização %.2f | Is %.2f",
-            texto, lado$met$Modularity, lado$met$Centralization, lado$met$I_s)
+    sprintf("%s  (σp = %.1f)\nmodularidade %.2f | centralização %.2f | Is %.2f",
+            texto, lado$sigma_p,
+            lado$met$Modularity, lado$met$Centralization, lado$met$I_s)
   }
 
   # ---- linha 1: cada fêmea é uma curva de aceite -----------------------
@@ -171,14 +172,20 @@ figura_cantos <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
 
   dados <- bind_rows(Map(um_canto, combinacoes$sigma_z, combinacoes$sigma_p))
 
-  rot <- function(v, quem) ifelse(v == sigma_baixo,
-                                  sprintf("%s parecidos entre si", quem),
-                                  sprintf("%s variados", quem))
+  # O rótulo diz o que a condição significa e também o valor que a produziu,
+  # senão quem lê a figura fora do contexto não sabe de que sigma se trata.
+  rot <- function(v, quem, letra) {
+    texto <- if (quem == "machos")
+      ifelse(v == sigma_baixo, "machos parecidos entre si", "machos variados")
+    else
+      ifelse(v == sigma_baixo, "fêmeas concordam", "fêmeas discordam")
+    sprintf("%s  (%s = %.1f)", texto, letra, v)
+  }
   dados <- dados %>%
-    mutate(col = factor(rot(sigma_z, "machos"),
-                        levels = rot(c(sigma_baixo, sigma_alto), "machos")),
-           lin = factor(rot(sigma_p, "fêmeas"),
-                        levels = rot(c(sigma_alto, sigma_baixo), "fêmeas")))
+    mutate(col = factor(rot(sigma_z, "machos", "σz"),
+                        levels = rot(c(sigma_baixo, sigma_alto), "machos", "σz")),
+           lin = factor(rot(sigma_p, "fêmeas", "σp"),
+                        levels = rot(c(sigma_alto, sigma_baixo), "fêmeas", "σp")))
 
   legendas <- dados %>% distinct(col, lin, met_txt)
 
@@ -260,8 +267,8 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
          vertex.shape = r$formas, vertex.size = 7, vertex.label = NA,
          vertex.frame.color = grDevices::rgb(0, 0, 0, 0.25),
          edge.color = grDevices::rgb(0.4, 0.4, 0.4, 0.35), edge.width = 1)
-    title(main = sprintf("%s\nmodularidade %.2f | %d módulos | %d fêmeas sem acasalar",
-                         cc$tit, r$met$Modularity, r$n_com, r$sem),
+    title(main = sprintf("%s  (σz = %.1f, σp = %.1f)\nmodularidade %.2f | %d módulos | %d fêmeas sem acasalar",
+                         cc$tit, cc$sz, cc$sp, r$met$Modularity, r$n_com, r$sem),
           cex.main = 1.05, font.main = 1)
   }
   mtext("A mesma regra de escolha, quatro composições da população",
