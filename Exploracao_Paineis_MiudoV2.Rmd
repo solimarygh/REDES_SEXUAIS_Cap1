@@ -87,6 +87,7 @@ ok  <- function(x) !is.null(x) && nrow(x) > 0
 # grade. Vêm de um script à parte, compartilhado com os outros documentos, para
 # que exista uma versão só de cada uma. Sourcear aqui apenas define as funções.
 source("10_Figuras_conceituais.R")
+CURVAS <- c("uniform", "gaussian", "sigmoid", "u-shaped")
 ```
 
 ```{r funcoes-painel}
@@ -514,8 +515,17 @@ círculos são fêmeas, e as cores saem do `cluster_louvain`, que é o próprio
 algoritmo da métrica de modularidade: os módulos que aparecem no desenho são
 os que o número da faixa 1.1 conta. Cinza claro é quem não acasalou.
 
-```{r ct-rede-cantos, fig.width=9, fig.height=9, cache=TRUE}
-figura_redes()
+### Curva por curva {.tabset}
+
+Comparar as abas entre si isola exatamente a regra de escolha: a composição da
+população é idêntica nas quatro, e o que muda é só a curva de preferência.
+
+```{r ct-rede-cantos, results='asis', fig.width=9, fig.height=9, cache=TRUE}
+for (cv in CURVAS) {
+  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
+  figura_redes(tipo = cv)
+  cat("\n\n")
+}
 ```
 
 O Controle cruza dois níveis, e o parágrafo acima cobre um só. O outro é o
@@ -524,8 +534,14 @@ população é a mesma nos quatro painéis, e o que muda é quantos machos a fê
 avalia e quantos aceita. A proporção k/A_max é a intensidade de seleção por
 truncamento.
 
-```{r ct-rede-busca, fig.width=9, fig.height=9, cache=TRUE}
-figura_busca()
+### O regime de busca, curva por curva {.tabset}
+
+```{r ct-rede-busca, results='asis', fig.width=9, fig.height=9, cache=TRUE}
+for (cv in CURVAS) {
+  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
+  figura_busca(tipo = cv)
+  cat("\n\n")
+}
 ```
 
 ## 1.1 Superfície das métricas de rede {.tabset}
@@ -782,9 +798,18 @@ formaram, com a diagonal marcando onde o macho é igual ao pico da fêmea.
 Embaixo, quantas parceiras cada macho teve, que é sobre quem a seleção sexual
 está agindo neste estudo.
 
-```{r fem-mecanismo, fig.width=11, fig.height=9}
-figura_sigma_p()
+### Curva por curva {.tabset}
+
+```{r fem-mecanismo, results='asis', fig.width=11, fig.height=9, cache=TRUE}
+for (cv in CURVAS) {
+  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
+  print(figura_sigma_p(tipo = cv))
+  cat("\n\n")
+}
 ```
+
+Na aba da aleatória as duas colunas saem iguais, e isso é o controle
+funcionando: com P = 0.5 para todo mundo, σp não tem por onde agir.
 
 ### E o que cem gerações fazem com a rede
 
@@ -868,8 +893,14 @@ A linha de baixo também inverte: mostra quantos parceiros cada fêmea teve
 contra o seu próprio pico. Aqui quem fica de fora é a fêmea que não encontra
 ninguém que sirva, e é essa a seleção que age sobre a preferência.
 
-```{r esp-mecanismo, fig.width=11, fig.height=9}
-figura_sigma_z()
+### Curva por curva {.tabset}
+
+```{r esp-mecanismo, results='asis', fig.width=11, fig.height=9, cache=TRUE}
+for (cv in CURVAS) {
+  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
+  print(figura_sigma_z(tipo = cv))
+  cat("\n\n")
+}
 ```
 
 ### E o que cem gerações fazem com a rede

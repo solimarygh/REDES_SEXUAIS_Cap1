@@ -18,13 +18,13 @@
 # saem do motor de verdade, com mate_with_survivors, calc_metrics_from_M e os
 # próprios loops evolutivos, e as métricas nos rótulos são as calculadas ali.
 #
-# COMO ESTAS REDES SÃO ESCOLHIDAS. Elas não são escolhidas: são geradas na
-# hora, uma realização por painel, com semente fixa para que a figura seja
-# reprodutível. Não são a réplica mediana nem a mais representativa das que
-# rodaram no estudo, e por isso servem para MOSTRAR um mecanismo e nunca para
-# sustentar um número. Quem faz a escolha de uma réplica representativa dentro
-# dos dados que já rodaram é 06_Rede_Representativa_e_3Atos.R, que procura a
-# réplica mais próxima da mediana da célula.
+# COMO ESTAS REDES SÃO ESCOLHIDAS. As figuras de rede desenham uma réplica que
+# REALMENTE rodou: dentro da célula, a mais próxima da média, recuperada pela
+# semente e conferida contra a métrica guardada (ver 11_Rede_Representativa.R).
+# O rodapé de cada painel diz de qual réplica se trata, e se não houver dados,
+# ou se a conferência falhar, o painel cai para uma população gerada na hora e
+# o rodapé avisa. As figuras de mecanismo (figura_eixo) continuam gerando a
+# população na hora, porque o que elas mostram é a regra e não um resultado.
 #
 # Ficam como funções, para poder serem chamadas da apresentação e dos
 # documentos sem duplicar código:
@@ -168,12 +168,10 @@ figura_eixo <- function(eixo = c("sigma_p", "sigma_z"),
     (curvas(lado) + ggtitle(titulo(lado, texto))) / casais(lado) / sucesso(lado)
   }
 
-  rotulos <- if (varia_femeas)
-    c("Fêmeas concordam: todas querem o mesmo",
-      "Fêmeas discordam: cada uma quer uma coisa")
-  else
-    c("Machos parecidos: pouca coisa para escolher",
-      "Machos variados: há de tudo para escolher")
+  # Rótulos curtos de propósito: a frase inteira não cabe na largura do painel e
+  # sai cortada no meio do valor de sigma. A explicação vai na legenda.
+  rotulos <- if (varia_femeas) c("Fêmeas concordam", "Fêmeas discordam")
+             else              c("Machos parecidos", "Machos variados")
 
   (col(lado_baixo, rotulos[1]) | col(lado_alto, rotulos[2])) +
     plot_annotation(
@@ -186,6 +184,10 @@ figura_eixo <- function(eixo = c("sigma_p", "sigma_z"),
         else sprintf("as MESMAS fêmeas, p ~ N(%g, %g)", phi, fixo),
         N, N, A_max, k),
       caption = paste0(
+        if (varia_femeas)
+          "Fêmeas concordam: todas querem o mesmo macho.  Fêmeas discordam: cada uma quer uma coisa.\n"
+        else
+          "Machos parecidos: pouca coisa para escolher.  Machos variados: há de tudo para escolher.\n",
         "O eixo de baixo é o traço do macho nas duas primeiras linhas.\n",
         "Linha 1: a curva de aceite de ", n_curvas, " fêmeas sorteadas, e os machos disponíveis marcados no eixo.\n",
         "Linha 2: cada ponto é um casal, e a diagonal marca onde o macho é igual ao pico da fêmea.\n",
