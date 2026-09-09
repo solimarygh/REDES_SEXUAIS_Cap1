@@ -122,9 +122,16 @@ simulate_epidemia <- function(N_machos = 200, N_femeas = 200,
     estado_m_ini <- estado_m
     z_efetivo <- male_z + ifelse(estado_m == 1L, h_I, 0)
 
-    # A cota que resta a cada fêmea. Quem já gastou o teto não acrescenta mais
-    # ninguém, mas continua copulando com os parceiros que já tem.
-    cota <- pmax(0L, as.integer(k_fixo) - colSums(M_acum))
+    # A cota que resta a cada fêmea, REPARTIDA ao longo da temporada. Se ela
+    # pudesse gastar o teto inteiro na primeira ronda, gastaria, e a doença só
+    # teria influência sobre a escolha uma vez: da ronda 2 em diante a rede
+    # estaria congelada e o resto da temporada seria contágio puro. Repartindo,
+    # cada parceiro novo é escolhido com o h daquele momento, que é onde a
+    # retroalimentação mora. E é o que a biologia diz: ela não acasala com
+    # cinco machos no primeiro dia, vai encontrando ao longo da estação.
+    por_ronda <- max(1L, as.integer(ceiling(as.integer(k_fixo) / rodadas)))
+    resta <- pmax(0L, as.integer(k_fixo) - colSums(M_acum))
+    cota  <- pmin(resta, por_ronda)
     novos <- mate_with_survivors(z_efetivo, female_p, female_s, tipo_selecao,
                                  encounters_n = encounters_n, k_fixo = cota,
                                  regra = regra)
