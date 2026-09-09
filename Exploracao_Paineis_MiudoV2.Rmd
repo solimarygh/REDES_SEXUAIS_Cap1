@@ -75,7 +75,18 @@ ct  <- carregar_rodada("Resultados_Artigo/Fase_Controle/Dados", "Controle")
 d   <- carregar_rodada("Resultados_Artigo/Fase5_MiudoV2/Dados", "Femeas")
 esp <- carregar_rodada("Resultados_Artigo/Fase_Espelho/Dados",  "Espelho")
 
+# Co-evolução: a metade SEM seleção natural, que é a que está fechada. O nome
+# carrega o modo de segregação e a versão do motor, de propósito, para que
+# rodadas de motores diferentes nunca se misturem.
+co <- carregar(c("Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao_genica_neAdulto_sem_completo.rds",
+                 "Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao_genica_completo.rds"))
+
 ok  <- function(x) !is.null(x) && nrow(x) > 0
+
+# As figuras que mostram uma população concreta, em vez de uma média sobre a
+# grade. Vêm de um script à parte, compartilhado com os outros documentos, para
+# que exista uma versão só de cada uma. Sourcear aqui apenas define as funções.
+source("10_Figuras_conceituais.R")
 ```
 
 ```{r funcoes-painel}
@@ -472,6 +483,32 @@ A seleção natural entra como filtro puramente ecológico: muda quais
 machos estão disponíveis, mas não tem consequência evolutiva nenhuma,
 porque não há descendência.
 
+## 1.0 O que há dentro de uma célula
+
+Tudo o que vem depois é média de 20 réplicas sobre uma grade. Antes disso,
+vale ver o que uma célula é de verdade: uma população concreta e a rede que
+ela formou. As duas figuras desta subseção são uma realização só, e não uma
+média, e servem para dar sentido ao que os heatmaps resumem.
+
+Os quatro cantos do plano, desenhados como rede. Quadrados são machos,
+círculos são fêmeas, e as cores saem do `cluster_louvain`, que é o próprio
+algoritmo da métrica de modularidade: os módulos que aparecem no desenho são
+os que o número da faixa 1.1 conta. Cinza claro é quem não acasalou.
+
+```{r ct-rede-cantos, fig.width=9, fig.height=8.5}
+figura_redes()
+```
+
+O Controle cruza dois níveis, e o parágrafo acima cobre um só. O outro é o
+regime de busca, que nos resultados é o que mais pesa. Aqui a composição da
+população é a mesma nos quatro painéis, e o que muda é quantos machos a fêmea
+avalia e quantos aceita. A proporção k/A_max é a intensidade de seleção por
+truncamento.
+
+```{r ct-rede-busca, fig.width=9, fig.height=8.5}
+figura_busca()
+```
+
 ## 1.1 Superfície das métricas de rede {.tabset}
 
 Cada faixa é uma métrica, com escala de cor própria. Dentro da faixa, as
@@ -713,6 +750,23 @@ agora (que a femea escolhe os melhores), como os resultados diferem em
 relação ao graficos que veiamos antes: as metricas evoluem ao longo do
 tempo.
 
+## 2.0 O que σp faz, numa população concreta
+
+O eixo deste estudo é fácil de dizer e difícil de ver. As duas colunas abaixo
+são as duas pontas do gradiente, com os MESMOS machos nas duas, de modo que a
+única coisa que muda é o quanto as fêmeas discordam entre si.
+
+Em cima, a curva de aceite de catorze fêmeas sorteadas, com os machos
+disponíveis marcados no eixo: com σp pequeno as curvas se empilham umas sobre
+as outras, porque todas querem o mesmo macho. No meio, os casais que se
+formaram, com a diagonal marcando onde o macho é igual ao pico da fêmea.
+Embaixo, quantas parceiras cada macho teve, que é sobre quem a seleção sexual
+está agindo neste estudo.
+
+```{r fem-mecanismo, fig.width=11, fig.height=9}
+figura_sigma_p()
+```
+
 ## 2.1 Métricas de rede {.tabset}
 
 ```{r fem-metricas, results='asis', fig.width=13, fig.height=9}
@@ -767,6 +821,23 @@ Um detalhe do desenho que vale ter em mente ao comparar com a seção 2:
 σz é imposto a cada geração, igual a σp lá, mas σp aqui é só o ponto de
 partida. Da geração 2 em diante a largura da distribuição de
 preferências é o que a seleção e a deriva fizerem dela.
+
+## 3.0 O que σz faz, numa população concreta
+
+A mesma figura da seção 2.0, com a variação trocada de lado, e vale olhar as
+duas juntas.
+
+Agora as fêmeas são as MESMAS nas duas colunas, com as mesmas curvas de aceite,
+e o que muda são os machos marcados no eixo de baixo. Ver as curvas paradas
+enquanto o material muda é justamente o que este estudo quer dizer.
+
+A linha de baixo também inverte: mostra quantos parceiros cada fêmea teve
+contra o seu próprio pico. Aqui quem fica de fora é a fêmea que não encontra
+ninguém que sirva, e é essa a seleção que age sobre a preferência.
+
+```{r esp-mecanismo, fig.width=11, fig.height=9}
+figura_sigma_z()
+```
 
 ## 3.1 Métricas de rede {.tabset}
 
@@ -1036,16 +1107,94 @@ render_tabs(function(kk, amax, ns) plot_plano("I_s", kk, amax, ns))
 
 ------------------------------------------------------------------------
 
-# 5. Co-evolução (ainda não rodado)
+# 5. Co-evolução
 
 O quarto estudo, em que traço e preferência são herdáveis ao mesmo tempo
-e a grandeza central passa a ser a covariância genética entre os dois.A
-proposta de desenho está em `NOTA_quatro_estudos.md`, com quatro pontos
-ainda em aberto para discutir antes de rodar.
+e a grandeza central passa a ser a covariância genética entre os dois.
 
-Quando rodar, penso que esta seção ganha os mesmos painéis das
-anteriores mais um com a trajetória de `cov_zp` ao longo das gerações,
-que é onde o ciclo de Fisher apareceria ou não, o que vcs acham?
+Rodou. A metade SEM seleção natural está fechada, 6.480 cenários, e é a
+que aparece aqui. A metade com seleção natural espera a decisão sobre o
+censo de machos, que é a mesma pergunta do aviso lá em cima. O relato
+completo, inclusive o que descobrimos sobre o próprio modelo pelo
+caminho, está em `NOTA_coevolucao_primeiros_testes.md`.
+
+Aqui a variância do traço se separa em duas: a **génica**, que governa a
+segregação, e a **total**, que a população exibe. A distância entre elas
+é o desequilíbrio de ligamento que o acasalamento não aleatório
+empilhou, e é uma quantidade que os três estudos anteriores não têm como
+mostrar.
+
+```{r co-ld}
+if (!ok(co)) cat("\n*Sem dados da co-evolução.*\n") else
+co %>% filter(generation == max(generation), !selecao_natural) %>%
+  group_by(tipo_selecao) %>%
+  summarise(`var total` = round(mean(varz_pop), 2),
+            `var génica` = round(mean(var_genica_z), 2),
+            `desequilíbrio` = round(mean(varz_pop - var_genica_z), 2),
+            `cov(z,p)` = round(mean(cov_zp), 2),
+            `cor(z,p)` = round(mean(cor_zp), 2),
+            .groups = "drop") %>%
+  mutate(tipo_selecao = labels_4[tipo_selecao]) %>%
+  rename(curva = tipo_selecao) %>%
+  kable(caption = "Geração 100, sem seleção natural, promediando todos os sigma iniciais, A_max e k.")
+```
+
+A gaussiana é a única que acopla traço e preferência, que é o mecanismo
+de Fisher. A sigmoide dá exatamente o mesmo desequilíbrio que a
+aleatória, ou seja nenhum: todas as fêmeas querem o mesmo
+independentemente do seu próprio pico, então o acasalamento é
+direcional, mas não assortativo.
+
+## 5.1 A trajetória, e a seleção sexual apagando a si mesma
+
+Aqui está o painel de `cov_zp` ao longo das gerações que eu tinha
+sugerido, junto com três coisas que só apareceram ao rodar.
+
+```{r co-trajetoria, fig.width=12, fig.height=7}
+if (!ok(co)) cat("\n*Sem dados da co-evolução.*\n") else {
+  tr <- co %>% filter(!selecao_natural) %>%
+    group_by(tipo_selecao, generation) %>%
+    summarise(`covariância genética cov(z,p)` = mean(cov_zp, na.rm = TRUE),
+              `oportunidade de seleção sexual (Is)` = mean(I_s, na.rm = TRUE),
+              `distância entre traço e preferência` = mean(zbar_pop - pbar_pop),
+              `tamanho efetivo (Ne)` = mean(Ne, na.rm = TRUE),
+              .groups = "drop") %>%
+    pivot_longer(-c(tipo_selecao, generation))
+  print(
+    ggplot(tr, aes(generation, value, color = tipo_selecao)) +
+      geom_line(linewidth = 1.1) +
+      facet_wrap(~name, scales = "free_y", nrow = 2) +
+      scale_color_manual(values = cores_4, labels = labels_4,
+                         name = "Curva de preferência") +
+      labs(title = "CO-EVOLUÇÃO — as duas características evoluindo juntas",
+           subtitle = "Sem seleção natural | promediando todos os sigma iniciais, A_max e k\nCenso de 400 adultos, então Ne = 400 seria uma população sem desigualdade de sucesso reprodutivo",
+           x = "geração", y = NULL) +
+      theme_light(base_size = 12)
+  )
+}
+```
+
+A covariância se acumula na gaussiana e fica negativa na disruptiva, que
+é o esperado do acasalamento assortativo e do dissortativo. Na sigmoide
+ela não sai do zero, apesar de ser a curva em que o traço mais se move.
+
+E há uma coisa que eu não esperava. Sob a sigmoide o traço se afasta
+tanto da preferência que a curva satura e deixa de discriminar: o Is sai
+de 7.4 e termina em 0.15, e a rede da geração 100 fica indistinguível da
+aleatória. A variância do traço não se mexe nesse tempo, então não é
+perda de variação, é a média saindo da faixa em que a preferência
+distingue. A disruptiva chega ao mesmo fim por outro caminho, alargando
+a distribuição até que toda fêmea encontre machos distantes do seu pico.
+
+O painel do Ne mostra que isso não é só uma questão de rede: enquanto a
+seleção sexual está viva ela reduz o tamanho efetivo quase à metade do
+censo, e quando o traço escapa a população volta ao seu tamanho de
+censo. A seleção sexual, neste modelo, é uma força demográfica
+transitória.
+
+Nas curvas em que a estrutura se apaga, as métricas de rede da geração
+100 são as de uma rede sem escolha nenhuma. Isso não é um problema dos
+painéis: é o resultado.
 
 ------------------------------------------------------------------------
 
