@@ -109,14 +109,16 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
                              fecundidade_base = 50,
                              segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
                              regra = c("best_of_n", "sequencial"),
+                             regime_censo = c("teto", "cota"),
                              # Guarda a rede e as características da primeira e da
                              # última geração, para poder desenhá-las. É só cópia de
                              # objetos que já existem: não consome números
                              # aleatórios e não muda nenhum resultado, e o default
                              # FALSE deixa as rodadas de produção idênticas.
                              return_details = FALSE) {
-  segregacao <- match.arg(segregacao)
-  regra      <- match.arg(regra)
+  segregacao   <- match.arg(segregacao)
+  regra        <- match.arg(regra)
+  regime_censo <- match.arg(regime_censo)
   # O pool de juvenis não é parâmetro livre: é o que a fecundidade produz.
   N_juvenis <- N_femeas * fecundidade_base %/% 2
 
@@ -144,7 +146,8 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
     # N_machos adultos. O índice é o mesmo para z e p, então o p que cada macho
     # carrega acompanha o macho certo. As fêmeas não passam por viabilidade, então
     # o censo delas é um sorteio aleatório entre as juvenis.
-    idx_adultos  <- selecionar_machos_adultos(male_z_juv, N_machos, phi, gamma, selecao_natural)
+    idx_adultos  <- selecionar_machos_adultos(male_z_juv, N_machos, phi, gamma,
+                                              selecao_natural, regime_censo)
     male_z_surv  <- male_z_juv[idx_adultos]
     male_p_surv  <- male_p_juv[idx_adultos]
     female_p_gen <- female_p_juv[sample.int(length(female_p_juv), N_femeas)]
@@ -166,6 +169,7 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
     out[[t]] <- data.frame(
       generation = t, tipo_selecao = tipo_selecao, segregacao = segregacao,
       regra = regra,
+      regime_censo = regime_censo,
       sigma_z = sigma_z, sigma_p_init = sigma_p_init,
       encounters_n = encounters_n,
       k_fixo = ifelse(is.null(k_fixo), NA_integer_, as.integer(k_fixo)),

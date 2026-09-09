@@ -44,13 +44,15 @@ simulate_controle <- function(N_machos = 200, N_femeas = 200,
                               selecao_natural = TRUE, k_fixo = NULL,
                               fecundidade_base = 50,
                               regra = c("best_of_n", "sequencial"),
+                              regime_censo = c("teto", "cota"),
                               # Devolve também a rede e as características, para
                               # poder desenhar a réplica que os dados escolheram.
                               # É só cópia de objetos que já existem, sem chamar
                               # nada que sorteie, então o consumo de números
                               # aleatórios é idêntico com ou sem.
                               return_details = FALSE) {
-  regra <- match.arg(regra)
+  regra        <- match.arg(regra)
+  regime_censo <- match.arg(regime_censo)
 
   # (1) Sorteio da população: nada vem de geração anterior.
   # Os machos são sorteados como JUVENIS, porque é sobre eles que a viabilidade
@@ -65,7 +67,8 @@ simulate_controle <- function(N_machos = 200, N_femeas = 200,
   # Aqui a seleção natural é puramente um filtro ecológico: muda quais machos
   # estão disponíveis, mas não tem consequência evolutiva porque não existe
   # geração seguinte. E, com o censo constante, ela também não muda quantos são.
-  idx_adultos <- selecionar_machos_adultos(male_z_juv, N_machos, phi, gamma, selecao_natural)
+  idx_adultos <- selecionar_machos_adultos(male_z_juv, N_machos, phi, gamma,
+                                           selecao_natural, regime_censo)
   male_z_surv <- male_z_juv[idx_adultos]
 
   # (3) Rede de acasalamentos (mesma função dos outros estudos, sem regra de escape)
@@ -74,7 +77,7 @@ simulate_controle <- function(N_machos = 200, N_femeas = 200,
   metrics <- calc_metrics_from_M(M, k_alvo = k_fixo)
 
   saida <- data.frame(
-    tipo_selecao = tipo_selecao, regra = regra,
+    tipo_selecao = tipo_selecao, regra = regra, regime_censo = regime_censo,
     sigma_p = sigma_p, sigma_z = sigma_z,
     encounters_n = encounters_n,
     k_fixo = ifelse(is.null(k_fixo), NA_integer_, as.integer(k_fixo)),

@@ -145,14 +145,16 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
                                 fecundidade_base = 50, eps_sd = 0.2,
                                 segregacao = c("genica", "infinitesimal", "fixa"), mut_sd = 0.05,
                                 regra = c("best_of_n", "sequencial"),
+                                regime_censo = c("teto", "cota"),
                                 fuga_mult = 3,
                                 # TRUE guarda a primeira e a última geração; um
                                 # vetor guarda as gerações pedidas. Só copia
                                 # objetos que já existem, sem sortear nada.
                                 return_details = FALSE) {
-  segregacao <- match.arg(segregacao)
-  regra      <- match.arg(regra)
-  N_juvenis  <- N_femeas * fecundidade_base %/% 2
+  segregacao   <- match.arg(segregacao)
+  regra        <- match.arg(regra)
+  regime_censo <- match.arg(regime_censo)
+  N_juvenis    <- N_femeas * fecundidade_base %/% 2
 
   # A variância génica parte da variância imposta na geração 1 e, daí em
   # diante, segue a sua própria dinâmica: no infinitesimal a seleção não a
@@ -187,7 +189,8 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
     # par (z, p) do mesmo macho viaja junto. As fêmeas não passam por
     # viabilidade, mas o censo delas também é por índice, senão a covariância
     # dentro de cada fêmea se perderia.
-    idx_adultos  <- selecionar_machos_adultos(male_z_juv, N_machos, phi, gamma, selecao_natural)
+    idx_adultos  <- selecionar_machos_adultos(male_z_juv, N_machos, phi, gamma,
+                                              selecao_natural, regime_censo)
     male_z_surv  <- male_z_juv[idx_adultos]
     male_p_surv  <- male_p_juv[idx_adultos]
 
@@ -234,7 +237,7 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
 
     out[[t]] <- data.frame(
       generation = t, tipo_selecao = tipo_selecao,
-      segregacao = segregacao, regra = regra,
+      segregacao = segregacao, regra = regra, regime_censo = regime_censo,
       sigma_z_init = sigma_z_init, sigma_p_init = sigma_p_init,
       encounters_n = encounters_n,
       k_fixo = ifelse(is.null(k_fixo), NA_integer_, as.integer(k_fixo)),

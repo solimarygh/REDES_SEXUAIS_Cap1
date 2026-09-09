@@ -292,13 +292,41 @@ ensure_min_survivors <- function(survive_vec, viability, min_surv = 2) {
 # Devolve ÍNDICES e não valores, para que características pareadas (o p que o
 # macho carrega no Estudo 3, e o par (z, p) no Estudo 4) acompanhem o mesmo macho.
 # =====================================================================
+# DOIS REGIMES, e a diferença entre eles é biológica e não técnica.
+#
+# "teto" — o comportamento até aqui. Cada juvenil sobrevive com probabilidade V,
+#   de forma independente, e o censo é quem sobrou, até o limite de N_adultos.
+#   200 é um MÁXIMO, e o tamanho da população é um resultado do modelo: a
+#   viabilidade é mortalidade absoluta. O problema aparece quando o traço se
+#   afasta muito de phi: V desaba para todos ao mesmo tempo e o censo cai a
+#   punhados, o que muda N junto com o tratamento.
+#
+# "cota" — sorteia sempre exatamente N_adultos entre os juvenis, com peso
+#   proporcional a V. 200 é a CAPACIDADE DE SUPORTE, e a viabilidade decide
+#   QUAIS machos ocupam as vagas, nunca QUANTAS vagas há. A população fica
+#   regulada por densidade e N deixa de depender do tratamento.
+#
+# O sorteio da cota é feito em escala logarítmica de propósito. Com o traço
+# longe de phi, V = exp(-gamma (z-phi)^2) chega a 1e-300 e vira zero em ponto
+# flutuante, e aí todos os pesos seriam zero e o sorteio degeneraria. O truque
+# de Gumbel (chave = log(peso) + ruído de Gumbel, e ficar com as N maiores) faz
+# amostragem sem reposição com probabilidade proporcional ao peso sem nunca
+# calcular o peso em si.
 selecionar_machos_adultos <- function(z_juv, N_adultos, phi = 5, gamma = 0.2,
-                                      selecao_natural = TRUE) {
+                                      selecao_natural = TRUE,
+                                      regime = c("teto", "cota")) {
+  regime <- match.arg(regime)
   n <- length(z_juv)
 
   if (!selecao_natural) {
     # V_j = 1: nenhuma mortalidade seletiva, o censo é uma amostra aleatória
     return(if (n <= N_adultos) seq_len(n) else sample.int(n, N_adultos))
+  }
+
+  if (regime == "cota") {
+    log_V   <- -gamma * (z_juv - phi)^2
+    chaves  <- log_V - log(-log(runif(n)))
+    return(order(chaves, decreasing = TRUE)[seq_len(min(N_adultos, n))])
   }
 
   V   <- exp(-gamma * (z_juv - phi)^2)
@@ -604,9 +632,13 @@ simulate_evolution <- function(
     segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05, fecundidade_base = 50,
     return_details = FALSE, salvar_redes = FALSE, pasta_redes = NULL, replica_id = 1,
     selecao_natural = TRUE, k_fixo = NULL,
-    regra = c("best_of_n", "sequencial")
+    regra = c("best_of_n", "sequencial"),
+    # "teto" reproduz tudo o que já rodou; "cota" sorteia sempre N_machos com
+    # peso proporcional à viabilidade. Ver selecionar_machos_adultos.
+    regime_censo = c("teto", "cota")
 ) {
   regra <- match.arg(regra)
+  regime_censo <- match.arg(regime_censo)
   segregacao <- match.arg(segregacao)   # sem isto o vetor de 2 elementos duplicaria cada linha do output
 
   # Os dois sexos entram na geração como JUVENIS, em número igual (razão sexual
@@ -654,7 +686,8 @@ simulate_evolution <- function(
     # N_machos adultos, com ou sem seleção natural. Assim a seleção muda a
     # distribuição do traço sem mudar a densidade da rede. As fêmeas não passam
     # por viabilidade, então o censo delas é um sorteio aleatório entre as juvenis.
-    idx_adultos  <- selecionar_machos_adultos(male_z_juv, N_machos, phi, gamma, selecao_natural)
+    idx_adultos  <- selecionar_machos_adultos(male_z_juv, N_machos, phi, gamma,
+                                              selecao_natural, regime_censo)
     male_z_surv  <- male_z_juv[idx_adultos]
     female_z_gen <- female_z_juv[sample.int(length(female_z_juv), N_femeas)]
 
@@ -669,7 +702,7 @@ simulate_evolution <- function(
     # CORREÇÃO: Salvamos a Média e a Variância apenas dos machos que SOBREVIVERAM (male_z_surv)!!!
     out[[t]] <- data.frame(
       generation = t, tipo_selecao = tipo_selecao, segregacao = segregacao,
-      regra = regra,
+      regra = regra, regime_censo = regime_censo,
       sigma_p = sigma_p, sigma_z_init = sigma_z_init, encounters_n = encounters_n,
       k_fixo = ifelse(is.null(k_fixo), NA_integer_, as.integer(k_fixo)),
       selecao_natural = selecao_natural,

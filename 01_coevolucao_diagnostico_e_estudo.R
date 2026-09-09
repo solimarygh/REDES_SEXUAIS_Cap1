@@ -207,8 +207,10 @@ if (motor_ok || forcar) {
   # a rodada de setembro tem Ne de zigotos e sem os zeros, esta tem Ne de
   # filhos adultos e com eles. Misturar as duas num arquivo só seria pior do
   # que não ter nenhuma.
+  CENSO <- Sys.getenv("CENSO", unset = "teto")
+  stopifnot(CENSO %in% c("teto", "cota"))
   SEG_ESTUDO <- "genica"
-  MOTOR      <- "neAdulto"
+  MOTOR      <- if (CENSO == "teto") "neAdulto" else paste0("neAdulto_", CENSO)
   tag <- sprintf("%s_%s_%s_%s", SEG_ESTUDO, MOTOR, NS, ESTUDO)
   arquivo_backup <- file.path(diretorios$dados, sprintf("backup_Coevolucao_%s.rds", tag))
   arquivo_final  <- file.path(diretorios$dados, sprintf("resultados_Coevolucao_%s.rds", tag))
@@ -232,7 +234,8 @@ if (motor_ok || forcar) {
       encounters_n    = cenarios$encounters_n[i],
       k_fixo          = cenarios$k_fixo[i],
       selecao_natural = cenarios$selecao_natural[i],
-      segregacao      = SEG_ESTUDO
+      segregacao      = SEG_ESTUDO,
+      regime_censo    = CENSO
     )
     if (is.null(res) || nrow(res) == 0) return(NULL)
     res$replica <- cenarios$replica[i]

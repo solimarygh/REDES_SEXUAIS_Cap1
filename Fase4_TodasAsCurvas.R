@@ -73,13 +73,20 @@ cenarios_fase4 <- cenarios_fase4[cenarios_fase4$replica >= REP_MIN & cenarios_fa
 sufixo_rep <- if (REP_MIN == 1 && REP_MAX == n_replicas) "" else sprintf("_rep%d-%d", REP_MIN, REP_MAX)
 cat(sprintf("Réplicas: %d a %d  (%d cenários)\n", REP_MIN, REP_MAX, nrow(cenarios_fase4)))
 
-arquivo_backup <- file.path(diretorios$dados, paste0("backup_Femeas_bestOfN", sufixo_rep, ".rds"))   # nome novo a cada mudança de modelo: censo adulto constante + poliandria realizada. Backups antigos NÃO servem.
-arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Femeas_bestOfN", sufixo_rep, ".rds"))
+# O regime do censo entra por variável de ambiente e vai no nome do arquivo,
+# para que a rodada do teto e a da cota nunca se misturem no mesmo conjunto.
+#     CENSO=cota Rscript Fase4_TodasAsCurvas.R
+CENSO <- Sys.getenv("CENSO", unset = "teto")
+stopifnot(CENSO %in% c("teto", "cota"))
+
+sufixo_censo <- if (CENSO == "teto") "" else paste0("_", CENSO)
+arquivo_backup <- file.path(diretorios$dados, paste0("backup_Femeas_bestOfN", sufixo_censo, sufixo_rep, ".rds"))   # nome novo a cada mudança de modelo: censo adulto constante + poliandria realizada. Backups antigos NÃO servem.
+arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Femeas_bestOfN", sufixo_censo, sufixo_rep, ".rds"))
 
 # Se este intervalo ainda não tem backup próprio, aproveita o que já foi calculado
 # numa corrida inteira: o backup completo é indexado pelo índice GLOBAL, então
 # basta extrair as posições deste intervalo. Evita recalcular o que já existe.
-arquivo_backup_full <- file.path(diretorios$dados, "backup_Femeas_bestOfN.rds")
+arquivo_backup_full <- file.path(diretorios$dados, paste0("backup_Femeas_bestOfN", sufixo_censo, ".rds"))
 
 if (file.exists(arquivo_backup)) {
   lista_fase4 <- readRDS(arquivo_backup)
@@ -122,6 +129,7 @@ simular_i <- function(i) {
     encounters_n    = cenarios_fase4$encounters_n[i],
     k_fixo          = cenarios_fase4$k_fixo[i],
     selecao_natural = cenarios_fase4$selecao_natural[i],
+    regime_censo    = CENSO,
     return_details  = FALSE
   )
   res$replica <- cenarios_fase4$replica[i]
