@@ -398,7 +398,12 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
                                 regra = c("best_of_n", "sequencial")) {
   regra <- match.arg(regra)
   n_m <- length(male_z_surv); n_f <- length(female_p)
-  matings_per_female <- if (!is.null(k_fixo)) rep(as.integer(k_fixo), n_f) else sample(min_cop:max_cop, n_f, replace = TRUE)
+  # k_fixo aceita um escalar (todas as fêmeas com o mesmo teto) ou um vetor com
+  # um valor por fêmea. O vetor serve ao Estudo 5, em que o teto é da TEMPORADA
+  # e vai sendo gasto ao longo das rondas, de modo que cada fêmea chega a cada
+  # ronda com uma cota diferente. Com escalar o comportamento é o de sempre, e
+  # o consumo de números aleatórios não muda em nenhum dos dois casos.
+  matings_per_female <- if (!is.null(k_fixo)) rep_len(as.integer(k_fixo), n_f) else sample(min_cop:max_cop, n_f, replace = TRUE)
   M <- matrix(0L, nrow = n_m, ncol = n_f)
 
   prob_aceite <- function(z, p_i, s_i) {

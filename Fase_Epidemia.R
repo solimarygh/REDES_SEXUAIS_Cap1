@@ -21,18 +21,28 @@
 # traços. O diferencial de seleção, esse sim, é sempre calculado sobre o z
 # verdadeiro, porque é ele que se herda.
 #
-# A TEMPORADA, EM RONDAS
-# A temporada é dividida em rondas. Em cada uma, toda fêmea faz uma escolha
-# best-of-n completa entre os machos, com o h daquele momento, e copula com
-# quem escolheu. As arestas se acumulam: a rede da temporada é a união das
-# rondas. Se ela escolher o mesmo macho outra vez, a aresta é a mesma e o que
-# houve foi outra cópula com o mesmo par, que é como o plano descreve.
+# A TEMPORADA, EM RONDAS, E O TETO DE PARCEIROS
+# A temporada é dividida em rondas. O teto k é da TEMPORADA INTEIRA, e não de
+# cada ronda: é o "limite de parceiros por indivíduo" do plano de trabalho. A
+# fêmea chega a cada ronda com a cota que lhe sobrou, e só pode acrescentar
+# parceiros até gastá-la.
 #
-# Daí sai uma coisa que vale reparar: o NÚMERO DE PARCEIROS DISTINTOS deixa de
-# ser o parâmetro k e passa a ser um resultado. Com preferência estável a fêmea
-# volta aos mesmos machos e a rede quase não cresce; quando a infecção muda
-# quem é atraente, ela troca, e a rede cresce. É a retroalimentação ficando
-# visível.
+# Isso importa e não é detalhe. Com k por ronda, cinco rondas com k = 5 dariam
+# até 25 parceiras distintas por fêmea numa temporada, o que não é realista
+# para nada do que estamos modelando, e ainda amarrava o número de rondas ao
+# tamanho da rede: alongar a temporada para ver a epidemia inflava a
+# promiscuidade sem querer.
+#
+# Com o teto na temporada, os dois se separam. As RONDAS passam a ser a
+# frequência de cópula, e o TETO k continua sendo o número de parceiros. Dá
+# para alongar a temporada quanto a epidemia precisar sem tocar na estrutura
+# da rede.
+#
+# Em cada ronda copulam todos os pares que já existem (a mesma aresta ativada
+# de novo, como o plano descreve) mais os que a fêmea acrescentar com a cota
+# que lhe resta. A retroalimentação aparece em QUEM ela acrescenta nas rondas
+# seguintes: se a doença mudou quem é atraente, os parceiros tardios não são
+# os que ela teria escolhido no começo.
 #
 # A transmissão acontece sobre as arestas ATIVADAS na ronda, nos dois sentidos.
 # Depois vem a recuperação: no SIS o infectado volta a suscetível, no SIR passa
@@ -111,12 +121,19 @@ simulate_epidemia <- function(N_machos = 200, N_femeas = 200,
     # ronda contra o estado que ele tinha ANTES dela, a ordem causal fica certa.
     estado_m_ini <- estado_m
     z_efetivo <- male_z + ifelse(estado_m == 1L, h_I, 0)
-    M_ronda <- mate_with_survivors(z_efetivo, female_p, female_s, tipo_selecao,
-                                   encounters_n = encounters_n, k_fixo = k_fixo,
-                                   regra = regra)
 
-    M_acum  <- pmax(M_acum, M_ronda)     # a rede acumula
-    copulas <- copulas + M_ronda         # a aresta pode ser reativada
+    # A cota que resta a cada fêmea. Quem já gastou o teto não acrescenta mais
+    # ninguém, mas continua copulando com os parceiros que já tem.
+    cota <- pmax(0L, as.integer(k_fixo) - colSums(M_acum))
+    novos <- mate_with_survivors(z_efetivo, female_p, female_s, tipo_selecao,
+                                 encounters_n = encounters_n, k_fixo = cota,
+                                 regra = regra)
+
+    # As arestas ativadas nesta ronda: as que já existiam mais as novas. É
+    # sobre elas que a transmissão acontece.
+    M_ronda <- pmax(M_acum, novos)
+    M_acum  <- M_ronda                   # a rede da temporada até aqui
+    copulas <- copulas + M_ronda         # a mesma aresta, ativada de novo
 
     # (2) Transmissão sobre as arestas ativadas nesta ronda, nos dois sentidos.
     # Só o suscetível pode ser infectado; no SIR o recuperado (2) está imune.
@@ -164,10 +181,11 @@ simulate_epidemia <- function(N_machos = 200, N_femeas = 200,
       recuperados   = mean(c(estado_m, estado_f) == 2L),
 
       # --- a rede ---
-      # parceiros distintos por fêmea, que aqui é resposta e não parâmetro:
-      # com preferência estável ela volta aos mesmos machos, e com a infecção
-      # mexendo em quem é atraente, ela troca.
+      # parceiros distintos por fêmea. Tem o teto k, mas nem toda fêmea o
+      # alcança: depende de quantos machos ela aceita, e portanto da curva, de
+      # sigma_p e de h. Por isso continua sendo resposta, e não parâmetro.
       parceiros_distintos = mean(colSums(M_acum)),
+      prop_femeas_no_teto = mean(colSums(M_acum) >= as.integer(k_fixo)),
       copulas_por_femea   = mean(colSums(copulas)),
       n_machos_surv       = n_m,
       metrics,
