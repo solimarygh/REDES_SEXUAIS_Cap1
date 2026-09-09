@@ -626,6 +626,7 @@ simulate_evolution <- function(
   out <- vector("list", generations)
   extincao_gen <- NA_integer_   # geração em que a réplica foi encerrada; NA = chegou ao fim
   M_final <- NULL; male_z_final <- NULL; female_p_final <- NULL
+  detalhes <- list()
 
   for (t in seq_len(generations)) {
 
@@ -676,6 +677,17 @@ simulate_evolution <- function(
       male_z_final <- male_z_surv
       female_p_final <- female_p
     }
+
+    # A rede da PRIMEIRA e da última geração, para poder desenhá-las lado a lado
+    # e ver o que cem gerações fizeram. É só cópia de objetos que já existem:
+    # não consome números aleatórios, então a trajetória é idêntica com ou sem.
+    # Os campos antigos (Gen1, Gen50, Matriz_M_Gen50) continuam como estavam,
+    # porque Histograma_grau_femeas.R depende deles.
+    if (return_details && (t == 1 || t == generations)) {
+      detalhes[[if (t == 1) "rede_gen1" else "rede_final"]] <-
+        list(M = M, male_z = male_z_surv, female_p = female_p,
+             geracao = t, metrics = metrics)
+    }
     
     offspring <- produce_offspring(M, male_z_surv, female_z_gen, N_machos, N_femeas,
                                    fecundidade_base = fecundidade_base, eps_sd = eps_sd,
@@ -693,12 +705,12 @@ simulate_evolution <- function(
   df_out$extincao_gen <- extincao_gen
 
   if (return_details) {
-    return(list(
+    return(c(list(
       dados_tabela = df_out,
       Gen1  = data.frame(Z_Machos = male_z_gen1, P_Femeas = female_p_gen1),
       Gen50 = data.frame(Z_Machos = male_z_final, P_Femeas = female_p_final[1:length(male_z_final)]),
       Matriz_M_Gen50 = M_final
-    ))
+    ), detalhes))
   }
   
   return(df_out)

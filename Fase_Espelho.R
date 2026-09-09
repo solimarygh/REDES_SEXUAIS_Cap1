@@ -108,7 +108,13 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
                              selecao_natural = TRUE, k_fixo = NULL,
                              fecundidade_base = 50,
                              segregacao = c("infinitesimal", "fixa"), mut_sd = 0.05,
-                             regra = c("best_of_n", "sequencial")) {
+                             regra = c("best_of_n", "sequencial"),
+                             # Guarda a rede e as características da primeira e da
+                             # última geração, para poder desenhá-las. É só cópia de
+                             # objetos que já existem: não consome números
+                             # aleatórios e não muda nenhum resultado, e o default
+                             # FALSE deixa as rodadas de produção idênticas.
+                             return_details = FALSE) {
   segregacao <- match.arg(segregacao)
   regra      <- match.arg(regra)
   # O pool de juvenis não é parâmetro livre: é o que a fecundidade produz.
@@ -120,6 +126,7 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
 
   out <- vector("list", generations)
   extincao_gen <- NA_integer_   # geração em que a réplica foi encerrada; NA = chegou ao fim
+  detalhes <- list()
 
   for (t in seq_len(generations)) {
 
@@ -168,6 +175,15 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
       metrics
     )
 
+    # Cópia da rede da primeira e da última geração. Fica DEPOIS do registro e
+    # antes da reprodução, e não chama nada que sorteie, então a sequência de
+    # números aleatórios é a mesma com ou sem isto.
+    if (return_details && (t == 1 || t == generations)) {
+      detalhes[[if (t == 1) "rede_gen1" else "rede_final"]] <-
+        list(M = M, male_z = male_z_surv, female_p = female_p,
+             geracao = t, metrics = metrics)
+    }
+
     # (5) Próxima geração: herda a preferência
     off <- produce_offspring_espelho(M, male_p_surv, female_p_gen,
                                      N_machos, N_femeas,
@@ -183,6 +199,7 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
 
   df_out <- dplyr::bind_rows(out)
   df_out$extincao_gen <- extincao_gen
+  if (return_details) return(c(list(dados_tabela = df_out), detalhes))
   df_out
 }
 

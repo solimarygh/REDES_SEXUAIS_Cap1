@@ -20,6 +20,10 @@
 # =====================================================================
 
 source("01_metricas_e_utilitarios.R")
+# O motor do espelho, só as funções: sem a guarda ele roda o experimento inteiro
+# ao ser lido.
+ESPELHO_SO_FUNCOES <- TRUE
+source("Fase_Espelho.R")
 suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(ggplot2); library(patchwork)
 })
@@ -197,6 +201,40 @@ figura_sigma_z <- function(...) figura_eixo("sigma_z", ...)
 #
 # É base R e não ggplot porque a função de desenho de rede do igraph é a que os
 # outros scripts do projeto já usam.
+# De uma matriz de acasalamentos para uma rede desenhável. As cores saem do
+# cluster_louvain, que é o próprio algoritmo da métrica de modularidade, então
+# os módulos que se veem são os que o número conta, e não uma impressão visual
+# paralela. Quem não acasalou fica cinza: é informação, não sujeira.
+preparar_rede <- function(M, seed_layout = 2026) {
+  n_m <- nrow(M); n_f <- ncol(M)
+  adj <- matrix(0L, n_m + n_f, n_m + n_f)
+  adj[1:n_m, (n_m + 1):(n_m + n_f)] <- M
+  adj[(n_m + 1):(n_m + n_f), 1:n_m] <- t(M)
+  g <- igraph::graph_from_adjacency_matrix(adj, mode = "undirected")
+  igraph::V(g)$type <- c(rep(TRUE, n_m), rep(FALSE, n_f))
+
+  memb  <- igraph::membership(igraph::cluster_louvain(g))
+  n_com <- length(unique(memb))
+  paleta <- grDevices::colorRampPalette(
+    c("#E41A1C","#377EB8","#4DAF4A","#984EA3","#FF7F00","#A65628","#F781BF","#999999"))(n_com)
+  cores <- paleta[memb]
+  cores[igraph::degree(g) == 0] <- "gray85"
+
+  set.seed(seed_layout)
+  list(g = g, cores = cores, layout = igraph::layout_with_fr(g),
+       formas = ifelse(igraph::V(g)$type, "square", "circle"),
+       n_com = n_com,
+       sem = sum(igraph::degree(g)[(n_m + 1):(n_m + n_f)] == 0))
+}
+
+desenhar_rede <- function(r, titulo, tamanho = 7) {
+  plot(r$g, layout = r$layout, vertex.color = r$cores,
+       vertex.shape = r$formas, vertex.size = tamanho, vertex.label = NA,
+       vertex.frame.color = grDevices::rgb(0, 0, 0, 0.25),
+       edge.color = grDevices::rgb(0.4, 0.4, 0.4, 0.35), edge.width = 1)
+  title(main = titulo, cex.main = 1.05, font.main = 1)
+}
+
 figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
                          N = 40, phi = 5, s_media = 2, sigma_s = 0.2,
                          k = 3L, tipo = "gaussian", seed = 11) {
@@ -210,26 +248,7 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
                                encounters_n = N, k_fixo = k)
     met <- calc_metrics_from_M(M, k_alvo = k)
 
-    adj <- matrix(0L, 2 * N, 2 * N)
-    adj[1:N, (N + 1):(2 * N)] <- M
-    adj[(N + 1):(2 * N), 1:N] <- t(M)
-    g <- igraph::graph_from_adjacency_matrix(adj, mode = "undirected")
-    igraph::V(g)$type <- c(rep(TRUE, N), rep(FALSE, N))
-
-    com   <- igraph::cluster_louvain(g)
-    memb  <- igraph::membership(com)
-    n_com <- length(unique(memb))
-    paleta <- grDevices::colorRampPalette(
-      c("#E41A1C","#377EB8","#4DAF4A","#984EA3","#FF7F00","#A65628","#F781BF","#999999"))(n_com)
-    cores <- paleta[memb]
-    # quem não acasalou fica cinza claro: é informação, não sujeira
-    cores[igraph::degree(g) == 0] <- "gray85"
-
-    set.seed(2026)
-    list(g = g, cores = cores, layout = igraph::layout_with_fr(g),
-         formas = ifelse(igraph::V(g)$type, "square", "circle"),
-         met = met, n_com = n_com,
-         sem = sum(igraph::degree(g)[(N + 1):(2 * N)] == 0))
+    c(preparar_rede(M), list(met = met))
   }
 
   cantos <- list(
@@ -243,18 +262,86 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
   on.exit(par(op), add = TRUE)
   for (cc in cantos) {
     r <- um_canto(cc$sz, cc$sp)
-    plot(r$g, layout = r$layout, vertex.color = r$cores,
-         vertex.shape = r$formas, vertex.size = 7, vertex.label = NA,
-         vertex.frame.color = grDevices::rgb(0, 0, 0, 0.25),
-         edge.color = grDevices::rgb(0.4, 0.4, 0.4, 0.35), edge.width = 1)
-    title(main = sprintf("%s  (σz = %.1f, σp = %.1f)\nmodularidade %.2f | %d módulos | %d fêmeas sem acasalar",
-                         cc$tit, cc$sz, cc$sp, r$met$Modularity, r$n_com, r$sem),
-          cex.main = 1.05, font.main = 1)
+    desenhar_rede(r, sprintf("%s  (σz = %.1f, σp = %.1f)\nmodularidade %.2f | %d módulos | %d fêmeas sem acasalar",
+                             cc$tit, cc$sz, cc$sp, r$met$Modularity, r$n_com, r$sem))
   }
   mtext("A mesma regra de escolha, quatro composições da população",
         outer = TRUE, side = 3, line = 0.5, cex = 1.3, font = 2)
   mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain, que é o algoritmo da métrica de modularidade.  Cinza: sem acasalar.",
         outer = TRUE, side = 1, line = 1, cex = 0.8, col = "gray30")
+  invisible(NULL)
+}
+
+# =====================================================================
+# A REDE ANTES E DEPOIS DE CEM GERAÇÕES
+# =====================================================================
+# figura_redes() mostra o Estudo 1, que é uma geração só. Para os Estudos 2 e 3
+# a pergunta é outra: o que a evolução FEZ com a rede. Então são quatro painéis,
+# a dispersão baixa e a alta nas linhas, e a geração 1 contra a 100 nas colunas.
+#
+# Roda o motor de verdade, com N = 200 como nos estudos, e não uma versão
+# encolhida: numa população pequena a deriva domina e a figura mostraria outra
+# coisa. Com 400 nós o desenho fica denso, e por isso os pontos são pequenos,
+# como nas redes representativas do 06_Rede_Representativa_e_3Atos.R.
+#
+# São quatro simulações de cem gerações, uns dois minutos ao todo.
+figura_rede_evolucao <- function(estudo = c("2", "3"),
+                                 baixo = 0.2, alto = 2.0, fixo = 1.0,
+                                 geracoes = 100, N = 200,
+                                 tipo = "gaussian", k = 5L, A_max = 200L,
+                                 selecao_natural = FALSE, seed = 5) {
+  estudo <- match.arg(estudo)
+
+  # Sem seleção natural por padrão, e de propósito: é o regime em que o censo é
+  # sempre 200 por construção, então as quatro redes têm o mesmo tamanho e a
+  # comparação entre elas é sobre a estrutura e não sobre quantos sobraram.
+  uma <- function(sigma) {
+    set.seed(seed + round(sigma * 1000))
+    if (estudo == "2") {
+      simulate_evolution(generations = geracoes, N_machos = N, N_femeas = N,
+                         sigma_p = sigma, sigma_z_init = fixo,
+                         tipo_selecao = tipo, encounters_n = A_max, k_fixo = k,
+                         selecao_natural = selecao_natural, return_details = TRUE)
+    } else {
+      simulate_espelho(generations = geracoes, N_machos = N, N_femeas = N,
+                       sigma_z = sigma, sigma_p_init = fixo,
+                       tipo_selecao = tipo, encounters_n = A_max, k_fixo = k,
+                       selecao_natural = selecao_natural, return_details = TRUE)
+    }
+  }
+
+  res <- list(baixo = uma(baixo), alto = uma(alto))
+  letra   <- if (estudo == "2") "σp" else "σz"
+  o_que   <- if (estudo == "2") "o traço do macho" else "a preferência da fêmea"
+  # a coluna que interessa em cada estudo é a da característica que evolui
+  coluna  <- if (estudo == "2") "varz_males" else "varp_femeas"
+  nome_var <- if (estudo == "2") "var(z)" else "var(p)"
+
+  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 4.5, 1.5), oma = c(3.5, 0, 4, 0))
+  on.exit(par(op), add = TRUE)
+
+  for (nome in c("baixo", "alto")) {
+    r <- res[[nome]]
+    sigma <- if (nome == "baixo") baixo else alto
+    for (quando in c("rede_gen1", "rede_final")) {
+      d <- r[[quando]]
+      tab <- r$dados_tabela
+      v <- tab[[coluna]][tab$generation == d$geracao]
+      desenhar_rede(preparar_rede(d$M),
+                    sprintf("%s = %.1f, geração %d\nmodularidade %.2f | Is %.2f | %s = %.2f",
+                            letra, sigma, d$geracao,
+                            d$metrics$Modularity, d$metrics$I_s, nome_var, v),
+                    tamanho = 4)
+    }
+  }
+  mtext(sprintf("Estudo %s: o que cem gerações fazem com a rede", estudo),
+        outer = TRUE, side = 3, line = 1.5, cex = 1.3, font = 2)
+  mtext(sprintf("%s evolui | preferência %s | %d machos e %d fêmeas | A_max = %d | k = %d | %s",
+                o_que, tipo, N, N, A_max, k,
+                if (selecao_natural) "com seleção natural" else "sem seleção natural"),
+        outer = TRUE, side = 3, line = 0.2, cex = 0.85, col = "gray30")
+  mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.",
+        outer = TRUE, side = 1, line = 1.2, cex = 0.8, col = "gray30")
   invisible(NULL)
 }
 
@@ -317,9 +404,16 @@ if (!interactive() && sys.nframe() == 0) {
   }
   # figura_redes desenha com o igraph, que escreve direto no dispositivo em vez
   # de devolver um objeto, então precisa de png() e dev.off() em volta.
-  destino <- "Resultados_Artigo/Figuras/figura_redes.png"
-  png(destino, width = 10 * 150, height = 9 * 150, res = 150)
-  figura_redes()
-  dev.off()
-  cat("Figura em", destino, "\n")
+  base_r <- list(
+    list(f = function() figura_redes(),                 nome = "figura_redes.png"),
+    list(f = function() figura_rede_evolucao("2"),       nome = "figura_rede_estudo2.png"),
+    list(f = function() figura_rede_evolucao("3"),       nome = "figura_rede_estudo3.png")
+  )
+  for (s in base_r) {
+    destino <- file.path("Resultados_Artigo/Figuras", s$nome)
+    png(destino, width = 10 * 150, height = 9.5 * 150, res = 150)
+    s$f()
+    dev.off()
+    cat("Figura em", destino, "\n")
+  }
 }
