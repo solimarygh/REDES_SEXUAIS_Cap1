@@ -1,6 +1,6 @@
 ---
 title: "Exploração por painéis"
-subtitle: "Os três estudos rodados, um de cada vez — rodada de 20 réplicas com o modelo atual"
+subtitle: "Os quatro estudos, um de cada vez — rodada de 20 réplicas com o modelo atual"
 author: "Solimary García Hernández"
 date: "`r format(Sys.Date(), '%d de %B de %Y')`"
 output:
