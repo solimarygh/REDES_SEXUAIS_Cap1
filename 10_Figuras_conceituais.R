@@ -18,6 +18,14 @@
 # saem do motor de verdade, com mate_with_survivors, calc_metrics_from_M e os
 # próprios loops evolutivos, e as métricas nos rótulos são as calculadas ali.
 #
+# COMO ESTAS REDES SÃO ESCOLHIDAS. Elas não são escolhidas: são geradas na
+# hora, uma realização por painel, com semente fixa para que a figura seja
+# reprodutível. Não são a réplica mediana nem a mais representativa das que
+# rodaram no estudo, e por isso servem para MOSTRAR um mecanismo e nunca para
+# sustentar um número. Quem faz a escolha de uma réplica representativa dentro
+# dos dados que já rodaram é 06_Rede_Representativa_e_3Atos.R, que procura a
+# réplica mais próxima da mediana da célula.
+#
 # Ficam como funções, para poder serem chamadas da apresentação e dos
 # documentos sem duplicar código:
 #
@@ -357,12 +365,13 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
     list(sz = sigma_alto,  sp = sigma_alto,  tit = "machos variados, fêmeas discordam")
   )
 
-  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 4.5, 1.5), oma = c(3, 0, 3, 0))
+  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 5.5, 1.5), oma = c(3, 0, 3, 0))
   on.exit(par(op), add = TRUE)
   for (cc in cantos) {
     r <- um_canto(cc$sz, cc$sp)
-    desenhar_rede(r, sprintf("%s  (σz = %.1f, σp = %.1f)\nmodularidade %.2f | %d componentes | %d comunidades | %d fêmeas sem acasalar",
-                             cc$tit, cc$sz, cc$sp, r$met$Modularity,
+    desenhar_rede(r, sprintf("%s  (σz = %.1f, σp = %.1f)\nmodularidade %.2f | aninhamento %.2f | Is %.2f\n%d componentes | %d comunidades | %d fêmeas sem acasalar",
+                             cc$tit, cc$sz, cc$sp,
+                             r$met$Modularity, r$met$Nestedness, r$met$I_s,
                              r$n_comp, r$n_com, r$sem))
   }
   mtext("A mesma regra de escolha, quatro composições da população",
@@ -404,14 +413,15 @@ figura_busca <- function(amax = c(10L, 200L), ks = c(5L, 20L),
     c(preparar_rede(M), list(met = calc_metrics_from_M(M, k_alvo = k)))
   }
 
-  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 4.5, 1.5), oma = c(3.5, 0, 4, 0))
+  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 5.5, 1.5), oma = c(3.5, 0, 4, 0))
   on.exit(par(op), add = TRUE)
   for (i in seq_len(nrow(celulas))) {
     A <- celulas$A[i]; k <- celulas$k[i]
     r <- uma(A, k)
-    desenhar_rede(r, sprintf("A_max = %d, k = %d  (aceita %.0f%% do que avalia)\nmodularidade %.2f | %d componentes | %d comunidades | Is %.2f",
+    desenhar_rede(r, sprintf("A_max = %d, k = %d  (aceita %.0f%% do que avalia)\nmodularidade %.2f | aninhamento %.2f | Is %.2f\n%d componentes | %d comunidades | %d fêmeas sem acasalar",
                              min(A, N), k, 100 * k / min(A, N),
-                             r$met$Modularity, r$n_comp, r$n_com, r$met$I_s))
+                             r$met$Modularity, r$met$Nestedness, r$met$I_s,
+                             r$n_comp, r$n_com, r$sem))
   }
   mtext("Estudo 1: o mesmo material, quatro regimes de busca",
         outer = TRUE, side = 3, line = 1.5, cex = 1.3, font = 2)
@@ -468,7 +478,7 @@ figura_rede_evolucao <- function(estudo = c("2", "3"),
   coluna  <- if (estudo == "2") "varz_males" else "varp_femeas"
   nome_var <- if (estudo == "2") "var(z)" else "var(p)"
 
-  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 4.5, 1.5), oma = c(3.5, 0, 4, 0))
+  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 5.5, 1.5), oma = c(3.5, 0, 4, 0))
   on.exit(par(op), add = TRUE)
 
   for (nome in c("baixo", "alto")) {
@@ -480,9 +490,10 @@ figura_rede_evolucao <- function(estudo = c("2", "3"),
       v <- tab[[coluna]][tab$generation == d$geracao]
       rr <- preparar_rede(d$M)
       desenhar_rede(rr,
-                    sprintf("%s = %.1f, geração %d\nmodularidade %.2f | %d componentes | %d comunidades | Is %.2f | %s = %.2f",
-                            letra, sigma, d$geracao, d$metrics$Modularity,
-                            rr$n_comp, rr$n_com, d$metrics$I_s, nome_var, v))
+                    sprintf("%s = %.1f, geração %d\nmodularidade %.2f | aninhamento %.2f | Is %.2f\n%d componentes | %d comunidades | %s = %.2f",
+                            letra, sigma, d$geracao,
+                            d$metrics$Modularity, d$metrics$Nestedness, d$metrics$I_s,
+                            rr$n_comp, rr$n_com, nome_var, v))
     }
   }
   mtext(sprintf("Estudo %s: o que cem gerações fazem com a rede", estudo),
