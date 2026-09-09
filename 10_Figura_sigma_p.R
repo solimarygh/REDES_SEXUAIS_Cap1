@@ -81,16 +81,21 @@ figura_sigma_p <- function(sigma_p_baixo = 0.2, sigma_p_alto = 2.0,
   }
 
   # ---- linha 2: quem acasalou com quem ---------------------------------
-  # Cada ponto é um casal. Com sigma_p pequeno tudo se concentra numa faixa
-  # estreita de machos. Com sigma_p grande os pontos seguem a diagonal, que é o
-  # acasalamento assortativo desenhado: cada fêmea com o macho parecido com o
-  # seu próprio pico.
+  # Cada ponto é um casal, com o traço do macho no eixo x e o pico da fêmea no
+  # y. Com sigma_p pequeno tudo se concentra numa faixa estreita. Com sigma_p
+  # grande os pontos seguem a diagonal, que é o acasalamento assortativo
+  # desenhado: cada fêmea com o macho parecido com o seu próprio pico.
+  #
+  # O traço do macho fica no x nas TRÊS linhas de propósito: assim o eixo de
+  # baixo, que o patchwork compartilha entre elas, quer dizer a mesma coisa em
+  # todas. Antes esta linha tinha o pico da fêmea no x e herdava um rótulo que
+  # não era o dela.
   casais <- function(lado) {
-    ggplot(lado$pares, aes(p_femea, z_macho)) +
+    ggplot(lado$pares, aes(z_macho, p_femea)) +
       geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray55") +
       geom_point(alpha = 0.25, size = 1.5, color = "#3BA273") +
       coord_cartesian(xlim = range(grade_z), ylim = range(grade_z)) +
-      labs(x = NULL, y = "traço do macho") +
+      labs(x = NULL, y = "pico da fêmea (p)") +
       theme_light(base_size = 12)
   }
 
@@ -118,7 +123,7 @@ figura_sigma_p <- function(sigma_p_baixo = 0.2, sigma_p_alto = 2.0,
       subtitle = sprintf(
         "Preferência gaussiana | os MESMOS %d machos nas duas colunas, z ~ N(%g, %g) | A_max = %d | k = %d | uma geração",
         N, phi, sigma_z, A_max, k),
-      caption = "Linha 1: a curva de aceite de 14 fêmeas sorteadas, e os machos disponíveis no eixo de baixo.\nLinha 2: os casais que se formaram, com a diagonal de referência.  Linha 3: quantas parceiras cada macho teve.",
+      caption = "O eixo de baixo é o traço do macho nas três linhas.\nLinha 1: a curva de aceite de 14 fêmeas sorteadas, e os machos disponíveis marcados no eixo.\nLinha 2: cada ponto é um casal, e a diagonal marca onde o macho é igual ao pico da fêmea.\nLinha 3: quantas parceiras cada macho teve.",
       theme = theme(plot.title = element_text(face = "bold", size = 15)))
 }
 
