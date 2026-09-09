@@ -65,6 +65,11 @@ co_ns <- carregar("Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao
 ok  <- function(x) !is.null(x) && nrow(x) > 0
 tem <- function(x, col) ok(x) && col %in% names(x)
 
+# As figuras conceituais vêm de um script à parte, para não haver duas versões
+# delas. Sourcear aqui só define as funções: o bloco que salva os arquivos está
+# protegido por sys.nframe() == 0.
+source("10_Figura_sigma_p.R")
+
 # A divergência entre curvas, usada em três slides. Uma célula do desenho é uma
 # combinação de sigma_p, sigma_z, A_max, k e regime de seleção natural. Dentro
 # dela cada curva tem a sua média de cada métrica, e a divergência é a distância
@@ -139,6 +144,14 @@ O Controle roda uma geração só: mede a topologia sem deixar nada evoluir.
 Os estudos 2 e 3 são espelhos um do outro, e servem de replicação interna: se a
 relação for da rede e não da característica, tem de aparecer nos dois lados.
 
+---
+
+## O mesmo desenho, num plano só
+
+```{r desenho-figura, fig.height=6.2}
+figura_desenho()
+```
+
 # H1 {background-color="#2C3E50"}
 
 O que determina a estrutura da rede
@@ -202,32 +215,41 @@ os machos variados, e se apaga ao caminhar para o outro lado.
 
 ---
 
-## A superfície, métrica por métrica
+## A mesma coisa, vista como rede
 
-```{r h1-superficie, fig.height=4.4}
-if (ok(ct)) {
-  sup <- ct %>%
-    filter(encounters_n == 200, selecao_natural == FALSE, k_fixo == 5) %>%
-    group_by(tipo_selecao, sigma_p, sigma_z) %>%
-    summarise(Mod = mean(Modularity, na.rm = TRUE), .groups = "drop")
-  ggplot(sup, aes(factor(sigma_z), factor(sigma_p), fill = Mod)) +
-    geom_tile() +
-    facet_wrap(~tipo_selecao, nrow = 1, labeller = as_labeller(labels_4)) +
-    scale_fill_viridis_c(name = "Modularidade") +
-    labs(x = expression(sigma[z]~"(variação entre machos)"),
-         y = expression(sigma[p]~"(variação entre fêmeas)")) +
-    theme_light(base_size = 13)
-}
+```{r h1-redes, fig.height=6.4}
+figura_redes()
 ```
 
-Controle, uma geração, A_max = 200, k = 5, sem seleção natural.
+---
 
-A aleatória é plana, como tem de ser. As outras três desenham superfícies
-distintas, e é essa diferença que a divergência resume num número.
+## O que os quatro cantos querem dizer
+
+Com **machos parecidos entre si**, não há o que a preferência distinga. Se além
+disso as fêmeas discordam, muitas não encontram ninguém que sirva.
+
+Com **machos variados e fêmeas que concordam**, todas convergem sobre os mesmos
+poucos machos: a rede vira uma estrela e a oportunidade de seleção sexual
+dispara.
+
+Com **machos variados e fêmeas que discordam**, cada uma acasala com quem se
+parece com o seu próprio pico, e a rede se parte em módulos.
+
+::: {.fragment}
+É o mesmo eixo da figura anterior: o que importa é de que lado está a variação.
+:::
 
 # H2 {background-color="#2C3E50"}
 
 A topologia prediz a trajetória evolutiva
+
+---
+
+## Antes de olhar a evolução, o que sigma_p faz
+
+```{r sigma-p, fig.height=6.4}
+figura_sigma_p()
+```
 
 ---
 
