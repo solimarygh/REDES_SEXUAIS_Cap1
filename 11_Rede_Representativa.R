@@ -111,6 +111,45 @@ ESTUDOS <- list(
 )
 
 # ---------------------------------------------------------------------
+# CACHE EM DISCO DAS REDES
+# ---------------------------------------------------------------------
+# Reconstruir uma réplica dos Estudos 2, 3 ou 4 custa cem gerações de
+# simulação. Sem cache, isso acontecia dentro do knit dos documentos, o que é
+# lugar errado: um documento deve ler resultados, não produzi-los. Com o cache
+# a primeira chamada calcula e guarda, e todas as seguintes, inclusive as dos
+# knits, apenas leem.
+#
+# A INVALIDAÇÃO é o ponto delicado: uma rede guardada deixa de valer se um
+# motor mudar. Por isso a chave inclui uma impressão digital dos arquivos dos
+# motores (tamanho e data). Se qualquer um deles for editado, a chave muda, o
+# cache erra de propósito e a rede é recalculada. É melhor recalcular à toa do
+# que desenhar uma rede de um motor que não existe mais.
+ARQUIVO_CACHE_REDES <- "Resultados_Artigo/Figuras/redes_representativas.rds"
+
+.impressao_motores <- local({
+  arqs <- c("01_metricas_e_utilitarios.R", "Fase_Controle.R",
+            "Fase_Espelho.R", "Fase_Coevolucao.R")
+  function() {
+    info <- file.info(arqs[file.exists(arqs)])
+    paste(rownames(info), info$size, format(info$mtime), collapse = "|")
+  }
+})
+
+.ler_cache <- function() {
+  if (!file.exists(ARQUIVO_CACHE_REDES)) return(list())
+  c0 <- tryCatch(readRDS(ARQUIVO_CACHE_REDES), error = function(e) NULL)
+  if (is.null(c0) || !identical(c0$motores, .impressao_motores())) return(list())
+  c0$entradas
+}
+.cache_redes <- .ler_cache()
+
+.gravar_cache <- function() {
+  dir.create(dirname(ARQUIVO_CACHE_REDES), recursive = TRUE, showWarnings = FALSE)
+  saveRDS(list(motores = .impressao_motores(), entradas = .cache_redes),
+          ARQUIVO_CACHE_REDES)
+}
+
+# ---------------------------------------------------------------------
 # Leitura dos dados de um estudo, guardada em cache: quem chama isto numa
 # figura de quatro painéis não precisa reler o .rds quatro vezes.
 # ---------------------------------------------------------------------
@@ -148,6 +187,15 @@ rede_representativa <- function(estudo, ..., metrica = "Modularity",
   estudo <- as.character(estudo)
   e <- ESTUDOS[[estudo]]
   if (is.null(e)) stop("Estudo desconhecido: ", estudo)
+
+  chave <- paste(estudo, metrica,
+                 paste(names(list(...)), unlist(list(...)), sep = "=", collapse = ","),
+                 paste0("gen:", if (is.null(geracao)) "" else geracao),
+                 paste0("cap:", paste(capturar, collapse = "+")), sep = "|")
+  if (!is.null(.cache_redes[[chave]])) {
+    if (verboso) cat("  (do cache) ", chave, "\n", sep = "")
+    return(.cache_redes[[chave]])
+  }
 
   dados <- dados_do_estudo(estudo)
   if (is.null(dados)) return(NULL)   # sem dados, quem chama decide o que fazer
@@ -247,9 +295,12 @@ rede_representativa <- function(estudo, ..., metrica = "Modularity",
   }
   linhas <- linhas[linhas$replica == escolha$replica, , drop = FALSE]
 
-  list(M = rede$M, metrics = rede$metrics, redes = redes, linhas = linhas,
-       replica = escolha$replica,
-       geracao = gen, semente = semente, media_celula = media, confere = confere,
-       rotulo = sprintf("réplica %d de %d, a mais próxima da média da célula",
-                        escolha$replica, nrow(celula)))
+  saida <- list(M = rede$M, metrics = rede$metrics, redes = redes, linhas = linhas,
+                replica = escolha$replica,
+                geracao = gen, semente = semente, media_celula = media, confere = confere,
+                rotulo = sprintf("réplica %d de %d, a mais próxima da média da célula",
+                                 escolha$replica, nrow(celula)))
+  .cache_redes[[chave]] <<- saida
+  .gravar_cache()
+  saida
 }

@@ -441,6 +441,11 @@ proporcional a V, o que importa passa a ser a viabilidade **relativa**
 entre os juvenis, que continua discriminando normalmente mesmo quando o
 valor absoluto de todos é minúsculo.
 
+As figuras de rede deste documento desenham réplicas que realmente rodaram,
+reconstruídas a partir da semente original. Elas são precalculadas por
+`12_Preparar_redes_das_figuras.R` e ficam num cache em disco: se alguma aparecer
+como "população gerada agora", é porque falta rodar aquele script.
+
 ## Os quatro estudos num plano só
 
 O que cada estudo fixa e o que deixa evoluir. Os pontos cinza são as condições
@@ -520,7 +525,7 @@ os que o número da faixa 1.1 conta. Cinza claro é quem não acasalou.
 Comparar as abas entre si isola exatamente a regra de escolha: a composição da
 população é idêntica nas quatro, e o que muda é só a curva de preferência.
 
-```{r ct-rede-cantos, results='asis', fig.width=9, fig.height=9, cache=TRUE}
+```{r ct-rede-cantos, results='asis', fig.width=9, fig.height=9}
 for (cv in CURVAS) {
   cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
   figura_redes(tipo = cv)
@@ -536,7 +541,7 @@ truncamento.
 
 ### O regime de busca, curva por curva {.tabset}
 
-```{r ct-rede-busca, results='asis', fig.width=9, fig.height=9, cache=TRUE}
+```{r ct-rede-busca, results='asis', fig.width=9, fig.height=9}
 for (cv in CURVAS) {
   cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
   figura_busca(tipo = cv)
@@ -800,7 +805,7 @@ está agindo neste estudo.
 
 ### Curva por curva {.tabset}
 
-```{r fem-mecanismo, results='asis', fig.width=11, fig.height=9, cache=TRUE}
+```{r fem-mecanismo, results='asis', fig.width=11, fig.height=9}
 for (cv in CURVAS) {
   cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
   print(figura_sigma_p(tipo = cv))
@@ -811,7 +816,7 @@ for (cv in CURVAS) {
 Na aba da aleatória as duas colunas saem iguais, e isso é o controle
 funcionando: com P = 0.5 para todo mundo, σp não tem por onde agir.
 
-### E o que cem gerações fazem com a rede
+### E o que cem gerações fazem com a rede {.tabset}
 
 A figura acima é a primeira geração: o mecanismo, antes de qualquer resposta
 evolutiva. Esta mostra a mesma coisa cem gerações depois, com o traço do macho
@@ -821,8 +826,12 @@ As duas colunas são a geração 1 e a 100 da MESMA réplica, e não de duas
 réplicas diferentes: é um antes e depois de uma população só. As linhas são as
 duas pontas do gradiente de σp.
 
-```{r fem-rede-evolucao, fig.width=10, fig.height=10, cache=TRUE}
-figura_rede_evolucao("2")
+```{r fem-rede-evolucao, results='asis', fig.width=10, fig.height=10}
+for (cv in CURVAS) {
+  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
+  figura_rede_evolucao("2", tipo = cv)
+  cat("\n\n")
+}
 ```
 
 ## 2.1 Métricas de rede {.tabset}
@@ -895,7 +904,7 @@ ninguém que sirva, e é essa a seleção que age sobre a preferência.
 
 ### Curva por curva {.tabset}
 
-```{r esp-mecanismo, results='asis', fig.width=11, fig.height=9, cache=TRUE}
+```{r esp-mecanismo, results='asis', fig.width=11, fig.height=9}
 for (cv in CURVAS) {
   cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
   print(figura_sigma_z(tipo = cv))
@@ -903,15 +912,19 @@ for (cv in CURVAS) {
 }
 ```
 
-### E o que cem gerações fazem com a rede
+### E o que cem gerações fazem com a rede {.tabset}
 
 O espelho da figura equivalente do Estudo 2, e vale comparar as duas. Lá o que
 evolui é o traço do macho e a rede muda porque o material mudou; aqui o
 material é re-sorteado igual em todas as gerações, e a rede muda porque as
 fêmeas passaram a querer outra coisa.
 
-```{r esp-rede-evolucao, fig.width=10, fig.height=10, cache=TRUE}
-figura_rede_evolucao("3")
+```{r esp-rede-evolucao, results='asis', fig.width=10, fig.height=10}
+for (cv in CURVAS) {
+  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
+  figura_rede_evolucao("3", tipo = cv)
+  cat("\n\n")
+}
 ```
 
 ## 3.1 Métricas de rede {.tabset}
