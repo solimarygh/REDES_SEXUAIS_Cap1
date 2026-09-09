@@ -299,20 +299,34 @@ preparar_rede <- function(M, seed_layout = 2026) {
   igraph::V(g)$type <- c(rep(TRUE, n_m), rep(FALSE, n_f))
 
   memb  <- igraph::membership(igraph::cluster_louvain(g))
-  n_com <- length(unique(memb))
   paleta <- grDevices::colorRampPalette(
-    c("#E41A1C","#377EB8","#4DAF4A","#984EA3","#FF7F00","#A65628","#F781BF","#999999"))(n_com)
+    c("#E41A1C","#377EB8","#4DAF4A","#984EA3","#FF7F00","#A65628","#F781BF","#999999"))(length(unique(memb)))
   cores <- paleta[memb]
-  cores[igraph::degree(g) == 0] <- "gray85"
+  grau  <- igraph::degree(g)
+  cores[grau == 0] <- "gray85"
+
+  # Duas contagens, e a diferença entre elas diz coisas diferentes. COMPONENTE é
+  # um pedaço da rede sem nenhuma ligação com o resto; COMUNIDADE é o que o
+  # Louvain separa, e um componente grande pode conter várias.
+  #
+  # As duas ignoram quem não acasalou. Sem isso, cada indivíduo isolado conta
+  # como um componente e como uma comunidade só dele, e o número explode sem
+  # dizer nada sobre a estrutura: era o que fazia a rede em estrela, com muitos
+  # machos sem parceira, aparecer com trinta e três "módulos".
+  n_com  <- length(unique(memb[grau > 0]))
+  tam    <- igraph::components(g)$csize
+  n_comp <- sum(tam >= 2)
 
   set.seed(seed_layout)
   list(g = g, cores = cores, layout = igraph::layout_with_fr(g),
        formas = ifelse(igraph::V(g)$type, "square", "circle"),
-       n_com = n_com,
-       sem = sum(igraph::degree(g)[(n_m + 1):(n_m + n_f)] == 0))
+       n_com = n_com, n_comp = n_comp,
+       sem = sum(grau[(n_m + 1):(n_m + n_f)] == 0))
 }
 
-desenhar_rede <- function(r, titulo, tamanho = 7) {
+# tamanho 4 é o que deixa 400 nós legíveis, e 400 é o tamanho de todos os
+# estudos, então é o default.
+desenhar_rede <- function(r, titulo, tamanho = 4) {
   plot(r$g, layout = r$layout, vertex.color = r$cores,
        vertex.shape = r$formas, vertex.size = tamanho, vertex.label = NA,
        vertex.frame.color = grDevices::rgb(0, 0, 0, 0.25),
@@ -321,8 +335,8 @@ desenhar_rede <- function(r, titulo, tamanho = 7) {
 }
 
 figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
-                         N = 40, phi = 5, s_media = 2, sigma_s = 0.2,
-                         k = 3L, tipo = "gaussian", seed = 11) {
+                         N = 200, phi = 5, s_media = 2, sigma_s = 0.2,
+                         k = 5L, tipo = "gaussian", seed = 11) {
 
   um_canto <- function(sz, sp) {
     set.seed(seed + round(100 * sz) + round(10000 * sp))
@@ -347,12 +361,13 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
   on.exit(par(op), add = TRUE)
   for (cc in cantos) {
     r <- um_canto(cc$sz, cc$sp)
-    desenhar_rede(r, sprintf("%s  (σz = %.1f, σp = %.1f)\nmodularidade %.2f | %d módulos | %d fêmeas sem acasalar",
-                             cc$tit, cc$sz, cc$sp, r$met$Modularity, r$n_com, r$sem))
+    desenhar_rede(r, sprintf("%s  (σz = %.1f, σp = %.1f)\nmodularidade %.2f | %d componentes | %d comunidades | %d fêmeas sem acasalar",
+                             cc$tit, cc$sz, cc$sp, r$met$Modularity,
+                             r$n_comp, r$n_com, r$sem))
   }
   mtext("A mesma regra de escolha, quatro composições da população",
         outer = TRUE, side = 3, line = 0.5, cex = 1.3, font = 2)
-  mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain, que é o algoritmo da métrica de modularidade.  Cinza: sem acasalar.",
+  mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain, que é o algoritmo da métrica de modularidade.  Cinza: sem acasalar.\nComponente é um pedaço sem ligação com o resto; comunidade é o que o Louvain separa dentro dele. As duas contagens ignoram quem não acasalou.",
         outer = TRUE, side = 1, line = 1, cex = 0.8, col = "gray30")
   invisible(NULL)
 }
@@ -370,7 +385,7 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
 # quantos parceiros ela aceita. A proporção k/A_max é a intensidade de seleção
 # por truncamento, e vem escrita em cada painel.
 figura_busca <- function(amax = c(10L, 200L), ks = c(5L, 20L),
-                         N = 40, phi = 5, sigma_z = 1.0, sigma_p = 1.0,
+                         N = 200, phi = 5, sigma_z = 1.0, sigma_p = 1.0,
                          s_media = 2, sigma_s = 0.2, tipo = "gaussian",
                          seed = 13) {
 
@@ -394,16 +409,16 @@ figura_busca <- function(amax = c(10L, 200L), ks = c(5L, 20L),
   for (i in seq_len(nrow(celulas))) {
     A <- celulas$A[i]; k <- celulas$k[i]
     r <- uma(A, k)
-    desenhar_rede(r, sprintf("A_max = %d, k = %d  (aceita %.0f%% do que avalia)\nmodularidade %.2f | Is %.2f | %d fêmeas sem acasalar",
+    desenhar_rede(r, sprintf("A_max = %d, k = %d  (aceita %.0f%% do que avalia)\nmodularidade %.2f | %d componentes | %d comunidades | Is %.2f",
                              min(A, N), k, 100 * k / min(A, N),
-                             r$met$Modularity, r$met$I_s, r$sem))
+                             r$met$Modularity, r$n_comp, r$n_com, r$met$I_s))
   }
   mtext("Estudo 1: o mesmo material, quatro regimes de busca",
         outer = TRUE, side = 3, line = 1.5, cex = 1.3, font = 2)
   mtext(sprintf("preferência %s | sigma_z = %.1f e sigma_p = %.1f nos quatro painéis | %d machos e %d fêmeas | uma geração",
                 tipo, sigma_z, sigma_p, N, N),
         outer = TRUE, side = 3, line = 0.2, cex = 0.85, col = "gray30")
-  mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.",
+  mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.\nComponente é um pedaço sem ligação com o resto; comunidade é o que o Louvain separa dentro dele. As duas ignoram quem não acasalou.",
         outer = TRUE, side = 1, line = 1.2, cex = 0.8, col = "gray30")
   invisible(NULL)
 }
@@ -463,11 +478,11 @@ figura_rede_evolucao <- function(estudo = c("2", "3"),
       d <- r[[quando]]
       tab <- r$dados_tabela
       v <- tab[[coluna]][tab$generation == d$geracao]
-      desenhar_rede(preparar_rede(d$M),
-                    sprintf("%s = %.1f, geração %d\nmodularidade %.2f | Is %.2f | %s = %.2f",
-                            letra, sigma, d$geracao,
-                            d$metrics$Modularity, d$metrics$I_s, nome_var, v),
-                    tamanho = 4)
+      rr <- preparar_rede(d$M)
+      desenhar_rede(rr,
+                    sprintf("%s = %.1f, geração %d\nmodularidade %.2f | %d componentes | %d comunidades | Is %.2f | %s = %.2f",
+                            letra, sigma, d$geracao, d$metrics$Modularity,
+                            rr$n_comp, rr$n_com, d$metrics$I_s, nome_var, v))
     }
   }
   mtext(sprintf("Estudo %s: o que cem gerações fazem com a rede", estudo),
@@ -476,7 +491,7 @@ figura_rede_evolucao <- function(estudo = c("2", "3"),
                 o_que, tipo, N, N, A_max, k,
                 if (selecao_natural) "com seleção natural" else "sem seleção natural"),
         outer = TRUE, side = 3, line = 0.2, cex = 0.85, col = "gray30")
-  mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.",
+  mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.\nComponente é um pedaço sem ligação com o resto; comunidade é o que o Louvain separa dentro dele. As duas ignoram quem não acasalou.",
         outer = TRUE, side = 1, line = 1.2, cex = 0.8, col = "gray30")
   invisible(NULL)
 }
