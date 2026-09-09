@@ -35,6 +35,23 @@
 # ou os mesmos de antes. Se acasalar de novo com quem já era parceiro, não é um
 # parceiro novo: é outra cópula com o mesmo par.
 #
+# QUANDO A SEMANA PASSA EM BRANCO
+# A escolha tem dois passos, e é o primeiro que permite a semana vazia. Cada
+# macho encontrado passa ou não passa POR SEPARADO, com a sua própria
+# probabilidade P_ij; só depois, entre os que passaram, ela fica com o de maior
+# P. Se nenhum dos encontrados passar, ela não acasala naquela semana.
+#
+# A probabilidade de semana em branco é o produto de (1 - P) sobre os machos
+# encontrados. Com dez machos de P = 0.1 cada, dá 0.9^10, ou seja 35% das
+# semanas em branco. Se todos tivessem P = 0.5, seria 0.5^10, quase nunca.
+#
+# Vale registrar a alternativa que foi considerada e descartada: identificar o
+# melhor dos encontrados e só então decidir sobre ele, com a probabilidade
+# dele. Com os mesmos dez machos de P = 0.1 isso daria 10% de semanas com
+# acasalamento em vez de 65%, uma diferença enorme. Ficamos com a regra de dois
+# passos porque é a dos Estudos 1 a 4, o que mantém a comparabilidade, e porque
+# faz mais sentido que uma fêmea que encontrou dez machos considere mais de um.
+#
 # A DIFERENÇA IMPORTANTE EM RELAÇÃO AOS OUTROS ESTUDOS: número de PARCEIROS e
 # número de CÓPULAS deixam de ser a mesma coisa. Nos Estudos 1 a 4, em que a
 # rede é de uma geração, cada aresta é uma cópula. Aqui a fêmea pode ter poucos
@@ -71,7 +88,9 @@ simulate_epidemia <- function(N_machos = 200, N_femeas = 200,
                               # Costuma não apertar: o número de parceiros sai
                               # dos encontros e da aceitação.
                               k_teto = 10L,
-                              rodadas = 10L,    # semanas da temporada
+                              # 20 semanas: uma temporada reprodutiva de cerca
+                              # de quatro meses, contada em semanas.
+                              rodadas = 20L,
                               # a doença
                               modelo = c("SIS", "SIR"),
                               h_I = 0,          # efeito da infecção no sinal
