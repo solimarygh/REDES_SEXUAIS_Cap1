@@ -1,22 +1,31 @@
 # =====================================================================
-# FIGURA CONCEITUAL: O QUE sigma_p FAZ
+# FIGURAS CONCEITUAIS: EXPLICAR O DESENHO, ESTUDO A ESTUDO
 # =====================================================================
 #     Rscript 10_Figuras_conceituais.R
 #
-# O tratamento central dos Estudos 1 e 2 é sigma_p, a variação entre fêmeas nos
-# picos de preferência. É fácil de dizer e difícil de ver, então esta figura
-# mostra o que ele significa em três níveis, com as duas pontas do gradiente
-# lado a lado.
+# São duas famílias de figura, e nada mais, para que não haja um gráfico novo
+# a aprender em cada seção:
 #
-# Não é um desenho esquemático: as duas colunas saem do motor de verdade, com a
-# MESMA população de machos e o mesmo mate_with_survivors dos estudos. As
-# métricas que aparecem nos subtítulos são as métricas de rede calculadas ali.
+#   O MECANISMO, em três linhas. As curvas de aceite das fêmeas, os casais que
+#     se formaram, e de que lado cai o sucesso reprodutivo. Serve aos Estudos
+#     2 e 3, que são espelhos, com a mesma função e o eixo trocado.
 #
-# Fica como função, para poder ser chamada de dentro da apresentação e dos
+#   A REDE. Para o Estudo 1, os quatro cantos do plano sigma_z x sigma_p, que
+#     é o desenho inteiro dele. Para os Estudos 2 e 3, a rede da geração 1
+#     contra a da geração 100, que é o que a evolução fez com ela.
+#
+# Nenhuma delas é esquemática, com uma exceção anunciada (figura_desenho):
+# saem do motor de verdade, com mate_with_survivors, calc_metrics_from_M e os
+# próprios loops evolutivos, e as métricas nos rótulos são as calculadas ali.
+#
+# Ficam como funções, para poder serem chamadas da apresentação e dos
 # documentos sem duplicar código:
 #
 #     source("10_Figuras_conceituais.R")
-#     figura_sigma_p()
+#     figura_sigma_p();  figura_sigma_z()      # o mecanismo, Estudos 2 e 3
+#     figura_redes();    figura_cantos()       # o Estudo 1, como rede e como matriz
+#     figura_rede_evolucao("2")                # a rede antes e depois
+#     figura_desenho()                         # o esquema dos quatro estudos
 # =====================================================================
 
 source("01_metricas_e_utilitarios.R")
@@ -201,6 +210,82 @@ figura_sigma_z <- function(...) figura_eixo("sigma_z", ...)
 #
 # É base R e não ggplot porque a função de desenho de rede do igraph é a que os
 # outros scripts do projeto já usam.
+
+# =====================================================================
+# OS QUATRO CANTOS DO PLANO sigma_z x sigma_p
+# =====================================================================
+# A figura acima mexe num eixo só. Esta mexe nos dois, e é a que explica de
+# uma vez o resultado de H1: o que importa não é quanta variação existe, é de
+# que LADO ela está.
+#
+# Cada painel é a matriz de acasalamentos, com as fêmeas ordenadas pelo seu
+# pico de preferência e os machos ordenados pelo seu traço. Assim a topologia
+# fica visível sem precisar de índice nenhum: uma faixa na diagonal é
+# modularidade, um canto cheio é aninhamento, uma listra vertical é
+# centralização.
+figura_cantos <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
+                          N = 200, phi = 5, s_media = 2, sigma_s = 0.2,
+                          k = 5L, A_max = 200L, tipo = "gaussian", seed = 7) {
+
+  combinacoes <- expand.grid(sigma_z = c(sigma_baixo, sigma_alto),
+                             sigma_p = c(sigma_baixo, sigma_alto))
+
+  um_canto <- function(sz, sp) {
+    set.seed(seed + round(100 * sz) + round(10000 * sp))
+    male_z   <- pmax(0, rnorm(N, phi, sz))
+    female_p <- pmax(0, rnorm(N, phi, sp))
+    s_all    <- pmax(0, rnorm(N, s_media, sigma_s))
+    M   <- mate_with_survivors(male_z, female_p, s_all, tipo,
+                               encounters_n = A_max, k_fixo = k)
+    met <- calc_metrics_from_M(M, k_alvo = k)
+    # ordenar é o que torna a estrutura legível: sem isso qualquer matriz
+    # parece ruído, por mais estruturada que esteja.
+    om <- order(male_z); of <- order(female_p)
+    ar <- which(M[om, of] == 1L, arr.ind = TRUE)
+    tibble(sigma_z = sz, sigma_p = sp,
+           macho = ar[, 1], femea = ar[, 2],
+           met_txt = sprintf("mod %.2f | centr %.2f | Is %.2f | %.0f%% sem acasalar",
+                             met$Modularity, met$Centralization, met$I_s,
+                             100 * met$prop_femeas_sem_acasalar))
+  }
+
+  dados <- bind_rows(Map(um_canto, combinacoes$sigma_z, combinacoes$sigma_p))
+
+  # O rótulo diz o que a condição significa e também o valor que a produziu,
+  # senão quem lê a figura fora do contexto não sabe de que sigma se trata.
+  rot <- function(v, quem, letra) {
+    texto <- if (quem == "machos")
+      ifelse(v == sigma_baixo, "machos parecidos entre si", "machos variados")
+    else
+      ifelse(v == sigma_baixo, "fêmeas concordam", "fêmeas discordam")
+    sprintf("%s  (%s = %.1f)", texto, letra, v)
+  }
+  dados <- dados %>%
+    mutate(col = factor(rot(sigma_z, "machos", "σz"),
+                        levels = rot(c(sigma_baixo, sigma_alto), "machos", "σz")),
+           lin = factor(rot(sigma_p, "fêmeas", "σp"),
+                        levels = rot(c(sigma_alto, sigma_baixo), "fêmeas", "σp")))
+
+  legendas <- dados %>% distinct(col, lin, met_txt)
+
+  ggplot(dados, aes(femea, macho)) +
+    geom_point(size = 0.35, alpha = 0.6, color = "#2C3E50") +
+    geom_text(data = legendas, aes(x = N / 2, y = -18, label = met_txt),
+              inherit.aes = FALSE, size = 3, color = "gray30") +
+    facet_grid(lin ~ col, switch = "y") +
+    coord_cartesian(ylim = c(-25, N), clip = "off") +
+    labs(title = "O que importa não é quanta variação há, é de que lado ela está",
+         subtitle = sprintf("Preferência gaussiana | %d machos e %d fêmeas | A_max = %d | k = %d | uma geração", N, N, A_max, k),
+         x = "fêmeas, ordenadas pelo seu pico de preferência",
+         y = "machos, ordenados pelo seu traço",
+         caption = "Cada ponto é um acasalamento. Faixa na diagonal: acasalamento assortativo, que gera módulos.\nListra horizontal: poucos machos levam quase tudo. Matriz cheia e sem forma: a preferência não discrimina.") +
+    theme_light(base_size = 12) +
+    theme(plot.title = element_text(face = "bold"),
+          strip.text = element_text(size = 11),
+          panel.grid.minor = element_blank())
+}
+
+
 # De uma matriz de acasalamentos para uma rede desenhável. As cores saem do
 # cluster_louvain, que é o próprio algoritmo da métrica de modularidade, então
 # os módulos que se veem são os que o número conta, e não uma impressão visual
