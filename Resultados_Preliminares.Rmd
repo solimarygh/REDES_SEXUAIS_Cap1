@@ -61,6 +61,12 @@ esp <- carregar_rodada("Resultados_Artigo/Fase_Espelho/Dados",  "Espelho")
 
 ok <- function(x) !is.null(x) && nrow(x) > 0
 tem <- function(x, col) ok(x) && col %in% names(x)
+
+# As figuras que explicam o desenho vivem num script à parte, para que exista
+# uma versão só delas, compartilhada com a apresentação. Sourcear aqui só
+# define as funções: o bloco que salva os arquivos está protegido.
+source("10_Figuras_conceituais.R")
+CURVAS <- c("uniform", "gaussian", "sigmoid", "u-shaped")
 ```
 
 Aqui estão os resultados dos três estudos que já rodaram, com 20 réplicas cada. Organizei por
@@ -148,6 +154,89 @@ checar_um <- function(x, nome) {
 bind_rows(checar_um(ct, "Controle"), checar_um(d, "Fêmeas variando"),
           checar_um(esp, "Machos variando")) %>%
   kable(caption = "O censo deve ser sempre 200 e o número de réplicas encerradas deve ser zero")
+```
+
+---
+
+# O desenho, em figuras
+
+Antes dos resultados, o que cada estudo faz. Todas as figuras desta seção saem
+do motor de verdade, com o mesmo `mate_with_survivors` e o mesmo
+`calc_metrics_from_M` dos estudos, e as métricas nos rótulos são as calculadas
+ali. A única exceção é o esquema logo abaixo, que é um desenho.
+
+```{r fig-desenho, fig.height=7.5}
+figura_desenho()
+```
+
+## O Estudo 1, curva por curva {.tabset}
+
+Os quatro cantos do plano sigma_z x sigma_p, desenhados como rede. Quadrados são
+machos, círculos são fêmeas, e as cores saem do `cluster_louvain`, que é o
+próprio algoritmo da métrica de modularidade: os módulos que se veem são os que
+o número conta. Cinza claro é quem não acasalou.
+
+Vale comparar as abas entre si: é a mesma composição de população em todas, e o
+que muda é só a regra de escolha.
+
+```{r fig-redes-curvas, results='asis', fig.height=8.5, fig.width=9}
+for (cv in CURVAS) {
+  cat("\n\n###", labels_4[[cv]], "\n\n")
+  figura_redes(tipo = cv)
+  cat("\n\n")
+}
+```
+
+## O mesmo, como matriz {.tabset}
+
+A mesma informação com as fêmeas ordenadas pelo seu pico e os machos pelo seu
+traço. Uma faixa na diagonal é acasalamento assortativo, uma listra horizontal é
+que poucos machos levam quase tudo, e uma matriz cheia e sem forma é que a
+preferência não discrimina.
+
+```{r fig-cantos-curvas, results='asis', fig.height=7, fig.width=9}
+for (cv in CURVAS) {
+  cat("\n\n###", labels_4[[cv]], "\n\n")
+  print(figura_cantos(tipo = cv))
+  cat("\n\n")
+}
+```
+
+## O Estudo 2: o que sigma_p faz {.tabset}
+
+O eixo do Estudo 2 é o quanto as fêmeas discordam entre si. Nas duas colunas os
+machos são os MESMOS, então a única coisa que muda é a dispersão das
+preferências.
+
+Em cima, a curva de aceite de catorze fêmeas sorteadas, com os machos
+disponíveis marcados no eixo. No meio, os casais que se formaram, com a diagonal
+marcando onde o macho é igual ao pico da fêmea. Embaixo, quantas parceiras cada
+macho teve, que é sobre quem a seleção sexual está agindo neste estudo.
+
+```{r fig-sigmap-curvas, results='asis', fig.height=9, fig.width=10}
+for (cv in CURVAS) {
+  cat("\n\n###", labels_4[[cv]], "\n\n")
+  print(figura_sigma_p(tipo = cv))
+  cat("\n\n")
+}
+```
+
+## O Estudo 3: o que sigma_z faz {.tabset}
+
+O espelho. Agora as fêmeas são as mesmas nas duas colunas, com as MESMAS curvas
+de aceite, e o que muda é a variedade de machos disponíveis. Ver as curvas
+paradas enquanto o material muda é justamente o que este estudo quer dizer.
+
+A linha de baixo também inverte: mostra quantos parceiros cada fêmea teve contra
+o seu próprio pico, porque aqui quem fica de fora é a fêmea que não encontra
+ninguém, e é essa a seleção que age sobre a preferência.
+
+```{r fig-sigmaz-curvas, results='asis', fig.height=9, fig.width=10}
+for (cv in CURVAS) {
+  cat("\n\n###", labels_4[[cv]], "\n\n")
+  print(figura_sigma_z(tipo = cv))
+  cat("\n\n")
+}
 ```
 
 ---

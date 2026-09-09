@@ -482,10 +482,16 @@ if (!interactive() && sys.nframe() == 0) {
     list(f = figura_sigma_p, nome = "figura_sigma_p.png",       w = 11, h = 8.5),
     list(f = figura_sigma_z, nome = "figura_sigma_z.png",       w = 11, h = 8.5)
   )
+  # Cada figura num tryCatch: se uma falhar, as outras continuam saindo e o erro
+  # aparece na hora, em vez de o script morrer e parecer que nada funcionou.
+  tentar <- function(nome, expr) {
+    tryCatch({ force(expr); cat("Figura em Resultados_Artigo/Figuras/", nome, "\n", sep = "") },
+             error = function(e) cat("FALHOU", nome, ":", conditionMessage(e), "\n"))
+  }
+
   for (s in saidas) {
     destino <- file.path("Resultados_Artigo/Figuras", s$nome)
-    ggsave(destino, s$f(), width = s$w, height = s$h, dpi = 150)
-    cat("Figura em", destino, "\n")
+    tentar(s$nome, ggsave(destino, s$f(), width = s$w, height = s$h, dpi = 150))
   }
   # figura_redes desenha com o igraph, que escreve direto no dispositivo em vez
   # de devolver um objeto, então precisa de png() e dev.off() em volta.
@@ -497,8 +503,8 @@ if (!interactive() && sys.nframe() == 0) {
   for (s in base_r) {
     destino <- file.path("Resultados_Artigo/Figuras", s$nome)
     png(destino, width = 10 * 150, height = 9.5 * 150, res = 150)
-    s$f()
-    dev.off()
-    cat("Figura em", destino, "\n")
+    # o dev.off() vai no on.exit do tryCatch, senão um erro deixa o dispositivo
+    # aberto e a figura seguinte é desenhada por cima desta
+    tentar(s$nome, tryCatch(s$f(), finally = dev.off()))
   }
 }
