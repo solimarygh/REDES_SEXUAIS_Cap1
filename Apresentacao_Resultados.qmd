@@ -68,7 +68,7 @@ tem <- function(x, col) ok(x) && col %in% names(x)
 # As figuras conceituais vêm de um script à parte, para não haver duas versões
 # delas. Sourcear aqui só define as funções: o bloco que salva os arquivos está
 # protegido por sys.nframe() == 0.
-source("10_Figura_sigma_p.R")
+source("10_Figuras_conceituais.R")
 
 # A divergência entre curvas, usada em três slides. Uma célula do desenho é uma
 # combinação de sigma_p, sigma_z, A_max, k e regime de seleção natural. Dentro

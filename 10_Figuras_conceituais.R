@@ -1,7 +1,7 @@
 # =====================================================================
 # FIGURA CONCEITUAL: O QUE sigma_p FAZ
 # =====================================================================
-#     Rscript 10_Figura_sigma_p.R
+#     Rscript 10_Figuras_conceituais.R
 #
 # O tratamento central dos Estudos 1 e 2 é sigma_p, a variação entre fêmeas nos
 # picos de preferência. É fácil de dizer e difícil de ver, então esta figura
@@ -15,7 +15,7 @@
 # Fica como função, para poder ser chamada de dentro da apresentação e dos
 # documentos sem duplicar código:
 #
-#     source("10_Figura_sigma_p.R")
+#     source("10_Figuras_conceituais.R")
 #     figura_sigma_p()
 # =====================================================================
 
@@ -24,73 +24,98 @@ suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(ggplot2); library(patchwork)
 })
 
-figura_sigma_p <- function(sigma_p_baixo = 0.2, sigma_p_alto = 2.0,
-                           N = 200, phi = 5, sigma_z = 1.0,
-                           s_media = 2, sigma_s = 0.2,
-                           k = 5L, A_max = 200L,
-                           n_curvas = 14, seed = 42) {
+# ---------------------------------------------------------------------
+# O MECANISMO, PARA QUALQUER DOS DOIS EIXOS
+# ---------------------------------------------------------------------
+# Uma função só para os Estudos 2 e 3, porque eles são espelhos e a figura
+# também deve ser. O que muda entre os dois:
+#
+#   eixo = "sigma_p" (Estudo 2). Os machos são sempre os mesmos e o que varia
+#     entre as colunas é o quanto as fêmeas discordam entre si. A linha de
+#     baixo mostra o sucesso dos MACHOS, porque é sobre eles que a seleção
+#     sexual está agindo.
+#
+#   eixo = "sigma_z" (Estudo 3). As fêmeas são sempre as mesmas, com as mesmas
+#     curvas de aceite, e o que varia é a variedade de machos disponíveis. A
+#     linha de baixo mostra o sucesso das FÊMEAS, porque agora quem fica de
+#     fora é a fêmea cujo pico não encontra ninguém, e é essa a seleção que
+#     age sobre a preferência.
+#
+# As duas primeiras linhas são idênticas nos dois casos, de propósito: é o
+# mesmo mecanismo visto do mesmo ângulo, com a variação trocada de lado.
+figura_eixo <- function(eixo = c("sigma_p", "sigma_z"),
+                        baixo = 0.2, alto = 2.0, fixo = 1.0,
+                        N = 200, phi = 5, s_media = 2, sigma_s = 0.2,
+                        k = 5L, A_max = 200L, tipo = "gaussian",
+                        n_curvas = 14, seed = 42) {
+
+  eixo <- match.arg(eixo)
+  varia_femeas <- eixo == "sigma_p"
 
   set.seed(seed)
-  # Os MESMOS machos nas duas colunas: assim a única coisa que muda entre elas
-  # é a dispersão das preferências, que é o que a figura quer isolar.
-  male_z <- pmax(0, rnorm(N, phi, sigma_z))
-  s_all  <- pmax(0, rnorm(N, s_media, sigma_s))
+  # O lado que NÃO varia é sorteado uma vez só e reaproveitado nas duas
+  # colunas: assim a única diferença entre elas é o eixo do experimento.
+  s_all <- pmax(0, rnorm(N, s_media, sigma_s))
+  if (varia_femeas) male_z_fixo   <- pmax(0, rnorm(N, phi, fixo))
+  else              female_p_fixo <- pmax(0, rnorm(N, phi, fixo))
 
-  um_lado <- function(sigma_p) {
-    set.seed(seed + round(sigma_p * 100))
-    female_p <- pmax(0, rnorm(N, phi, sigma_p))
-    M <- mate_with_survivors(male_z, female_p, s_all, "gaussian",
-                             encounters_n = A_max, k_fixo = k)
+  um_lado <- function(sigma) {
+    set.seed(seed + round(sigma * 1000))
+    if (varia_femeas) {
+      male_z   <- male_z_fixo
+      female_p <- pmax(0, rnorm(N, phi, sigma))
+    } else {
+      male_z   <- pmax(0, rnorm(N, phi, sigma))
+      female_p <- female_p_fixo
+    }
+    M   <- mate_with_survivors(male_z, female_p, s_all, tipo,
+                               encounters_n = A_max, k_fixo = k)
     met <- calc_metrics_from_M(M, k_alvo = k)
-    pares <- which(M == 1L, arr.ind = TRUE)
-    list(p = female_p, s = s_all, M = M, met = met,
-         pares = tibble(p_femea = female_p[pares[, 2]],
-                        z_macho = male_z[pares[, 1]],
-                        macho   = pares[, 1]),
-         sigma_p = sigma_p)
+    ar  <- which(M == 1L, arr.ind = TRUE)
+    list(z = male_z, p = female_p, s = s_all, M = M, met = met, sigma = sigma,
+         pares = tibble(z_macho = male_z[ar[, 1]], p_femea = female_p[ar[, 2]]))
   }
 
-  baixo <- um_lado(sigma_p_baixo)
-  alto  <- um_lado(sigma_p_alto)
+  lado_baixo <- um_lado(baixo)
+  lado_alto  <- um_lado(alto)
 
-  grade_z <- seq(max(0, phi - 4 * max(sigma_p_alto, 1)), phi + 4 * max(sigma_p_alto, 1),
-                 length.out = 400)
+  amplitude <- max(alto, fixo, 1)
+  grade_z <- seq(max(0, phi - 4 * amplitude), phi + 4 * amplitude, length.out = 400)
 
+  letra <- if (varia_femeas) "σp" else "σz"
   titulo <- function(lado, texto) {
-    sprintf("%s  (σp = %.1f)\nmodularidade %.2f | centralização %.2f | Is %.2f",
-            texto, lado$sigma_p,
+    sprintf("%s  (%s = %.1f)\nmodularidade %.2f | centralização %.2f | Is %.2f",
+            texto, letra, lado$sigma,
             lado$met$Modularity, lado$met$Centralization, lado$met$I_s)
   }
 
   # ---- linha 1: cada fêmea é uma curva de aceite -----------------------
-  # É aqui que a diferença fica óbvia. Com sigma_p pequeno as curvas se empilham
-  # umas sobre as outras: todas as fêmeas querem o mesmo macho. Com sigma_p
-  # grande elas se espalham pelo eixo: cada fêmea quer uma coisa diferente.
+  # No Estudo 2 é aqui que a diferença salta: com sigma_p pequeno as curvas se
+  # empilham umas sobre as outras, e com sigma_p grande se espalham. No Estudo 3
+  # as curvas são as MESMAS nas duas colunas, e o que muda são os machos
+  # marcados no eixo de baixo. Ver as curvas paradas enquanto o material muda é
+  # justamente o que o Estudo 3 quer dizer.
   curvas <- function(lado) {
     idx <- sample(seq_len(N), n_curvas)
-    df <- lapply(idx, function(i) {
-      tibble(femea = i, z = grade_z,
-             P = exp(-lado$s[i] * (grade_z - lado$p[i])^2))
-    }) %>% bind_rows()
+    df <- bind_rows(lapply(idx, function(i) {
+      tibble(femea = i, z = grade_z, P = prob_de_aceite(grade_z, lado$p[i], lado$s[i], tipo))
+    }))
     ggplot(df, aes(z, P, group = femea)) +
       geom_line(color = "#E6B800", alpha = 0.75, linewidth = 0.7) +
-      geom_rug(data = tibble(z = male_z), aes(x = z), inherit.aes = FALSE,
-               sides = "b", alpha = 0.25, length = unit(0.04, "npc")) +
+      geom_rug(data = tibble(z = lado$z), aes(x = z), inherit.aes = FALSE,
+               sides = "b", alpha = 0.25, length = unit(0.05, "npc")) +
       coord_cartesian(xlim = range(grade_z), ylim = c(0, 1)) +
       labs(x = NULL, y = "P(aceitar)") +
       theme_light(base_size = 12)
   }
 
   # ---- linha 2: quem acasalou com quem ---------------------------------
-  # Cada ponto é um casal, com o traço do macho no eixo x e o pico da fêmea no
-  # y. Com sigma_p pequeno tudo se concentra numa faixa estreita. Com sigma_p
-  # grande os pontos seguem a diagonal, que é o acasalamento assortativo
-  # desenhado: cada fêmea com o macho parecido com o seu próprio pico.
+  # Cada ponto é um casal, com o traço do macho no x e o pico da fêmea no y. A
+  # diagonal marca onde os dois coincidem, então pontos ao longo dela são
+  # acasalamento assortativo.
   #
-  # O traço do macho fica no x nas TRÊS linhas de propósito: assim o eixo de
-  # baixo, que o patchwork compartilha entre elas, quer dizer a mesma coisa em
-  # todas. Antes esta linha tinha o pico da fêmea no x e herdava um rótulo que
-  # não era o dela.
+  # O traço do macho fica no x nas TRÊS linhas de propósito, para que o eixo de
+  # baixo, que o patchwork compartilha, queira dizer a mesma coisa em todas.
   casais <- function(lado) {
     ggplot(lado$pares, aes(z_macho, p_femea)) +
       geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray55") +
@@ -100,111 +125,66 @@ figura_sigma_p <- function(sigma_p_baixo = 0.2, sigma_p_alto = 2.0,
       theme_light(base_size = 12)
   }
 
-  # ---- linha 3: como o sucesso se reparte entre os machos --------------
-  # A consequência demográfica: com todas querendo o mesmo, uns poucos machos
-  # levam quase tudo e muitos ficam sem nada.
-  # O eixo do número de parceiras é o MESMO nas duas colunas, senão a coluna em
-  # que poucos machos levam tudo pareceria igual à outra, que é justamente a
-  # diferença que a linha quer mostrar.
-  grau_max <- max(rowSums(baixo$M), rowSums(alto$M))
+  # ---- linha 3: de que lado cai o sucesso ------------------------------
+  # O eixo vertical é o MESMO nas duas colunas, senão a coluna em que poucos
+  # levam tudo pareceria igual à outra, que é justo a diferença a mostrar.
+  grau_de <- function(lado) if (varia_femeas) rowSums(lado$M) else colSums(lado$M)
+  grau_max <- max(grau_de(lado_baixo), grau_de(lado_alto))
   sucesso <- function(lado) {
-    g <- tibble(z = male_z, grau = rowSums(lado$M))
-    ggplot(g, aes(z, grau)) +
+    g <- if (varia_femeas) tibble(x = lado$z, grau = rowSums(lado$M))
+         else              tibble(x = lado$p, grau = colSums(lado$M))
+    ggplot(g, aes(x, grau)) +
       geom_point(alpha = 0.45, size = 1.6, color = "#9932CC") +
       coord_cartesian(xlim = range(grade_z), ylim = c(0, grau_max)) +
-      labs(x = "traço do macho (z)", y = "parceiras") +
+      labs(x = if (varia_femeas) "traço do macho (z)" else "pico da fêmea (p)",
+           y = if (varia_femeas) "parceiras do macho" else "parceiros da fêmea") +
       theme_light(base_size = 12)
   }
 
   col <- function(lado, texto) {
-    (curvas(lado) + ggtitle(titulo(lado, texto))) /
-      casais(lado) / sucesso(lado)
+    (curvas(lado) + ggtitle(titulo(lado, texto))) / casais(lado) / sucesso(lado)
   }
 
-  (col(baixo, "Fêmeas concordam: todas querem o mesmo") |
-      col(alto, "Fêmeas discordam: cada uma quer uma coisa")) +
+  rotulos <- if (varia_femeas)
+    c("Fêmeas concordam: todas querem o mesmo",
+      "Fêmeas discordam: cada uma quer uma coisa")
+  else
+    c("Machos parecidos: pouca coisa para escolher",
+      "Machos variados: há de tudo para escolher")
+
+  (col(lado_baixo, rotulos[1]) | col(lado_alto, rotulos[2])) +
     plot_annotation(
-      title = "O que sigma_p faz",
+      title = if (varia_femeas)
+        "Estudo 2: o que sigma_p faz" else "Estudo 3: o que sigma_z faz",
       subtitle = sprintf(
-        "Preferência gaussiana | os MESMOS %d machos nas duas colunas, z ~ N(%g, %g) | A_max = %d | k = %d | uma geração",
-        N, phi, sigma_z, A_max, k),
-      caption = "O eixo de baixo é o traço do macho nas três linhas.\nLinha 1: a curva de aceite de 14 fêmeas sorteadas, e os machos disponíveis marcados no eixo.\nLinha 2: cada ponto é um casal, e a diagonal marca onde o macho é igual ao pico da fêmea.\nLinha 3: quantas parceiras cada macho teve.",
+        "Preferência %s | %s nas duas colunas | %d machos e %d fêmeas | A_max = %d | k = %d | uma geração",
+        tipo,
+        if (varia_femeas) sprintf("os MESMOS machos, z ~ N(%g, %g)", phi, fixo)
+        else sprintf("as MESMAS fêmeas, p ~ N(%g, %g)", phi, fixo),
+        N, N, A_max, k),
+      caption = paste0(
+        "O eixo de baixo é o traço do macho nas duas primeiras linhas.\n",
+        "Linha 1: a curva de aceite de ", n_curvas, " fêmeas sorteadas, e os machos disponíveis marcados no eixo.\n",
+        "Linha 2: cada ponto é um casal, e a diagonal marca onde o macho é igual ao pico da fêmea.\n",
+        if (varia_femeas) "Linha 3: quantas parceiras cada macho teve."
+        else "Linha 3: quantos parceiros cada fêmea teve, contra o seu próprio pico."),
       theme = theme(plot.title = element_text(face = "bold", size = 15)))
 }
 
-# =====================================================================
-# OS QUATRO CANTOS DO PLANO sigma_z x sigma_p
-# =====================================================================
-# A figura acima mexe num eixo só. Esta mexe nos dois, e é a que explica de
-# uma vez o resultado de H1: o que importa não é quanta variação existe, é de
-# que LADO ela está.
-#
-# Cada painel é a matriz de acasalamentos, com as fêmeas ordenadas pelo seu
-# pico de preferência e os machos ordenados pelo seu traço. Assim a topologia
-# fica visível sem precisar de índice nenhum: uma faixa na diagonal é
-# modularidade, um canto cheio é aninhamento, uma listra vertical é
-# centralização.
-figura_cantos <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
-                          N = 200, phi = 5, s_media = 2, sigma_s = 0.2,
-                          k = 5L, A_max = 200L, tipo = "gaussian", seed = 7) {
-
-  combinacoes <- expand.grid(sigma_z = c(sigma_baixo, sigma_alto),
-                             sigma_p = c(sigma_baixo, sigma_alto))
-
-  um_canto <- function(sz, sp) {
-    set.seed(seed + round(100 * sz) + round(10000 * sp))
-    male_z   <- pmax(0, rnorm(N, phi, sz))
-    female_p <- pmax(0, rnorm(N, phi, sp))
-    s_all    <- pmax(0, rnorm(N, s_media, sigma_s))
-    M   <- mate_with_survivors(male_z, female_p, s_all, tipo,
-                               encounters_n = A_max, k_fixo = k)
-    met <- calc_metrics_from_M(M, k_alvo = k)
-    # ordenar é o que torna a estrutura legível: sem isso qualquer matriz
-    # parece ruído, por mais estruturada que esteja.
-    om <- order(male_z); of <- order(female_p)
-    ar <- which(M[om, of] == 1L, arr.ind = TRUE)
-    tibble(sigma_z = sz, sigma_p = sp,
-           macho = ar[, 1], femea = ar[, 2],
-           met_txt = sprintf("mod %.2f | centr %.2f | Is %.2f | %.0f%% sem acasalar",
-                             met$Modularity, met$Centralization, met$I_s,
-                             100 * met$prop_femeas_sem_acasalar))
-  }
-
-  dados <- bind_rows(Map(um_canto, combinacoes$sigma_z, combinacoes$sigma_p))
-
-  # O rótulo diz o que a condição significa e também o valor que a produziu,
-  # senão quem lê a figura fora do contexto não sabe de que sigma se trata.
-  rot <- function(v, quem, letra) {
-    texto <- if (quem == "machos")
-      ifelse(v == sigma_baixo, "machos parecidos entre si", "machos variados")
-    else
-      ifelse(v == sigma_baixo, "fêmeas concordam", "fêmeas discordam")
-    sprintf("%s  (%s = %.1f)", texto, letra, v)
-  }
-  dados <- dados %>%
-    mutate(col = factor(rot(sigma_z, "machos", "σz"),
-                        levels = rot(c(sigma_baixo, sigma_alto), "machos", "σz")),
-           lin = factor(rot(sigma_p, "fêmeas", "σp"),
-                        levels = rot(c(sigma_alto, sigma_baixo), "fêmeas", "σp")))
-
-  legendas <- dados %>% distinct(col, lin, met_txt)
-
-  ggplot(dados, aes(femea, macho)) +
-    geom_point(size = 0.35, alpha = 0.6, color = "#2C3E50") +
-    geom_text(data = legendas, aes(x = N / 2, y = -18, label = met_txt),
-              inherit.aes = FALSE, size = 3, color = "gray30") +
-    facet_grid(lin ~ col, switch = "y") +
-    coord_cartesian(ylim = c(-25, N), clip = "off") +
-    labs(title = "O que importa não é quanta variação há, é de que lado ela está",
-         subtitle = sprintf("Preferência gaussiana | %d machos e %d fêmeas | A_max = %d | k = %d | uma geração", N, N, A_max, k),
-         x = "fêmeas, ordenadas pelo seu pico de preferência",
-         y = "machos, ordenados pelo seu traço",
-         caption = "Cada ponto é um acasalamento. Faixa na diagonal: acasalamento assortativo, que gera módulos.\nListra horizontal: poucos machos levam quase tudo. Matriz cheia e sem forma: a preferência não discrimina.") +
-    theme_light(base_size = 12) +
-    theme(plot.title = element_text(face = "bold"),
-          strip.text = element_text(size = 11),
-          panel.grid.minor = element_blank())
+# A curva de aceite, na mesma forma que mate_with_survivors usa. Fica aqui
+# porque lá dentro ela é local à função e não dá para chamar de fora.
+prob_de_aceite <- function(z, p, s, tipo) {
+  switch(tipo,
+         "uniform"  = rep(0.5, length(z)),
+         "gaussian" = exp(-s * (z - p)^2),
+         "sigmoid"  = 1 / (1 + exp(-s * (z - p))),
+         "u-shaped" = 1 - exp(-s * (z - p)^2),
+         stop("tipo desconhecido: ", tipo))
 }
+
+# Os dois nomes antigos continuam funcionando, agora como atalhos.
+figura_sigma_p <- function(...) figura_eixo("sigma_p", ...)
+figura_sigma_z <- function(...) figura_eixo("sigma_z", ...)
 
 # =====================================================================
 # AS MESMAS QUATRO SITUAÇÕES, DESENHADAS COMO REDE
@@ -325,9 +305,10 @@ figura_desenho <- function(valores = c(0.2, 0.5, 1.0, 1.5, 2.0)) {
 if (!interactive() && sys.nframe() == 0) {
   dir.create("Resultados_Artigo/Figuras", recursive = TRUE, showWarnings = FALSE)
   saidas <- list(
-    list(f = figura_sigma_p, nome = "figura_sigma_p.png",       w = 11, h = 8.5),
+    list(f = figura_desenho, nome = "figura_desenho.png",       w = 10, h = 8),
     list(f = figura_cantos,  nome = "figura_quatro_cantos.png", w = 10, h = 8),
-    list(f = figura_desenho, nome = "figura_desenho.png",       w = 10, h = 8)
+    list(f = figura_sigma_p, nome = "figura_sigma_p.png",       w = 11, h = 8.5),
+    list(f = figura_sigma_z, nome = "figura_sigma_z.png",       w = 11, h = 8.5)
   )
   for (s in saidas) {
     destino <- file.path("Resultados_Artigo/Figuras", s$nome)
