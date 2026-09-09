@@ -79,7 +79,23 @@ cat(sprintf("Réplicas: %d a %d  (%d cenários)\n", REP_MIN, REP_MAX, nrow(cenar
 CENSO <- Sys.getenv("CENSO", unset = "teto")
 stopifnot(CENSO %in% c("teto", "cota"))
 
+# Dá para rodar só metade do desenho, e o motivo é o mesmo do Estudo 4: a cota
+# só muda alguma coisa onde a seleção natural está ligada. Com ela desligada
+# selecionar_machos_adultos devolve uma amostra aleatória de 200 nos dois
+# regimes, então esses cenários sairiam idênticos aos que já temos.
+#     NS=com  -> só selecao_natural = TRUE       (o que a cota afeta)
+#     NS=sem  -> só selecao_natural = FALSE
+#     NS=ambos -> o desenho inteiro (default)
+NS <- Sys.getenv("NS", unset = "ambos")
+stopifnot(NS %in% c("com", "sem", "ambos"))
+if (NS != "ambos") {
+  cenarios_fase4 <- cenarios_fase4[cenarios_fase4$selecao_natural == (NS == "com"), ]
+  cat(sprintf("Seleção natural '%s': %d cenários.\n", NS, nrow(cenarios_fase4)))
+}
+sufixo_ns <- if (NS == "ambos") "" else paste0("_ns", NS)
+
 sufixo_censo <- if (CENSO == "teto") "" else paste0("_", CENSO)
+sufixo_rep   <- paste0(sufixo_ns, sufixo_rep)
 arquivo_backup <- file.path(diretorios$dados, paste0("backup_Femeas_bestOfN", sufixo_censo, sufixo_rep, ".rds"))   # nome novo a cada mudança de modelo: censo adulto constante + poliandria realizada. Backups antigos NÃO servem.
 arquivo_final  <- file.path(diretorios$dados, paste0("resultados_Femeas_bestOfN", sufixo_censo, sufixo_rep, ".rds"))
 
