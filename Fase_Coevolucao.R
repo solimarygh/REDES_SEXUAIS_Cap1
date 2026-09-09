@@ -145,7 +145,11 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
                                 fecundidade_base = 50, eps_sd = 0.2,
                                 segregacao = c("genica", "infinitesimal", "fixa"), mut_sd = 0.05,
                                 regra = c("best_of_n", "sequencial"),
-                                fuga_mult = 3) {
+                                fuga_mult = 3,
+                                # TRUE guarda a primeira e a última geração; um
+                                # vetor guarda as gerações pedidas. Só copia
+                                # objetos que já existem, sem sortear nada.
+                                return_details = FALSE) {
   segregacao <- match.arg(segregacao)
   regra      <- match.arg(regra)
   N_juvenis  <- N_femeas * fecundidade_base %/% 2
@@ -158,6 +162,13 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
   var_genica_p <- sigma_p_init^2
   Ne_atual     <- NA_real_
   pais         <- NULL   # de quem os juvenis desta geração são filhos
+  detalhes      <- list()
+  quer_detalhes <- isTRUE(return_details) || is.numeric(return_details)
+  alvos_detalhe <- if (is.numeric(return_details)) {
+    as.integer(return_details)
+  } else {
+    c(1L, as.integer(generations))
+  }
 
   # Os DOIS sexos carregam AS DUAS características. Os machos entram como
   # juvenis porque é sobre eles que a viabilidade age.
@@ -250,6 +261,12 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
       metrics
     )
 
+    if (quer_detalhes && t %in% alvos_detalhe) {
+      detalhes[[paste0("gen", t)]] <-
+        list(M = M, male_z = male_z_surv, female_p = female_p,
+             geracao = t, metrics = metrics)
+    }
+
     # (4) Próxima geração: as duas características, pareadas
     off <- produce_offspring_coevo(M, male_z_surv, male_p_surv,
                                    female_z_gen, female_p_gen,
@@ -270,6 +287,12 @@ simulate_coevolucao <- function(generations = 100, N_machos = 200, N_femeas = 20
   df_out <- dplyr::bind_rows(out)
   df_out$extincao_gen <- extincao_gen
   df_out$fuga_gen     <- fuga_gen
+  if (quer_detalhes) {
+    apelidos <- list(rede_gen1  = detalhes[["gen1"]],
+                     rede_final = detalhes[[paste0("gen", generations)]])
+    apelidos <- apelidos[!vapply(apelidos, is.null, logical(1))]
+    return(c(list(dados_tabela = df_out), detalhes, apelidos))
+  }
   df_out
 }
 

@@ -627,6 +627,15 @@ simulate_evolution <- function(
   extincao_gen <- NA_integer_   # geração em que a réplica foi encerrada; NA = chegou ao fim
   M_final <- NULL; male_z_final <- NULL; female_p_final <- NULL
   detalhes <- list()
+  # return_details aceita TRUE (primeira e última geração) ou um vetor de
+  # gerações, para poder capturar a geração exata que a réplica representativa
+  # pede. As duas formas só copiam objetos que já existem.
+  quer_detalhes <- isTRUE(return_details) || is.numeric(return_details)
+  alvos_detalhe <- if (is.numeric(return_details)) {
+    as.integer(return_details)
+  } else {
+    c(1L, as.integer(generations))
+  }
 
   for (t in seq_len(generations)) {
 
@@ -672,7 +681,7 @@ simulate_evolution <- function(
       metrics
     )
     
-    if (t == generations && return_details == TRUE) {
+    if (t == generations && quer_detalhes) {
       M_final <- M
       male_z_final <- male_z_surv
       female_p_final <- female_p
@@ -683,8 +692,8 @@ simulate_evolution <- function(
     # não consome números aleatórios, então a trajetória é idêntica com ou sem.
     # Os campos antigos (Gen1, Gen50, Matriz_M_Gen50) continuam como estavam,
     # porque Histograma_grau_femeas.R depende deles.
-    if (return_details && (t == 1 || t == generations)) {
-      detalhes[[if (t == 1) "rede_gen1" else "rede_final"]] <-
+    if (quer_detalhes && t %in% alvos_detalhe) {
+      detalhes[[paste0("gen", t)]] <-
         list(M = M, male_z = male_z_surv, female_p = female_p,
              geracao = t, metrics = metrics)
     }
@@ -704,13 +713,19 @@ simulate_evolution <- function(
   df_out <- dplyr::bind_rows(out)
   df_out$extincao_gen <- extincao_gen
 
-  if (return_details) {
+  if (quer_detalhes) {
+    # Os apelidos rede_gen1 e rede_final continuam existindo, porque as figuras
+    # os usam; e os campos Gen1/Gen50/Matriz_M_Gen50 ficam como sempre, porque
+    # Histograma_grau_femeas.R depende deles.
+    apelidos <- list(rede_gen1  = detalhes[["gen1"]],
+                     rede_final = detalhes[[paste0("gen", generations)]])
+    apelidos <- apelidos[!vapply(apelidos, is.null, logical(1))]
     return(c(list(
       dados_tabela = df_out,
       Gen1  = data.frame(Z_Machos = male_z_gen1, P_Femeas = female_p_gen1),
       Gen50 = data.frame(Z_Machos = male_z_final, P_Femeas = female_p_final[1:length(male_z_final)]),
       Matriz_M_Gen50 = M_final
-    ), detalhes))
+    ), detalhes, apelidos))
   }
   
   return(df_out)

@@ -127,6 +127,12 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
   out <- vector("list", generations)
   extincao_gen <- NA_integer_   # geração em que a réplica foi encerrada; NA = chegou ao fim
   detalhes <- list()
+  quer_detalhes <- isTRUE(return_details) || is.numeric(return_details)
+  alvos_detalhe <- if (is.numeric(return_details)) {
+    as.integer(return_details)
+  } else {
+    c(1L, as.integer(generations))
+  }
 
   for (t in seq_len(generations)) {
 
@@ -178,8 +184,8 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
     # Cópia da rede da primeira e da última geração. Fica DEPOIS do registro e
     # antes da reprodução, e não chama nada que sorteie, então a sequência de
     # números aleatórios é a mesma com ou sem isto.
-    if (return_details && (t == 1 || t == generations)) {
-      detalhes[[if (t == 1) "rede_gen1" else "rede_final"]] <-
+    if (quer_detalhes && t %in% alvos_detalhe) {
+      detalhes[[paste0("gen", t)]] <-
         list(M = M, male_z = male_z_surv, female_p = female_p,
              geracao = t, metrics = metrics)
     }
@@ -199,7 +205,12 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
 
   df_out <- dplyr::bind_rows(out)
   df_out$extincao_gen <- extincao_gen
-  if (return_details) return(c(list(dados_tabela = df_out), detalhes))
+  if (quer_detalhes) {
+    apelidos <- list(rede_gen1  = detalhes[["gen1"]],
+                     rede_final = detalhes[[paste0("gen", generations)]])
+    apelidos <- apelidos[!vapply(apelidos, is.null, logical(1))]
+    return(c(list(dados_tabela = df_out), detalhes, apelidos))
+  }
   df_out
 }
 

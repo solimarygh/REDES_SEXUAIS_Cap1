@@ -43,7 +43,13 @@ simulate_controle <- function(N_machos = 200, N_femeas = 200,
                               tipo_selecao = "gaussian", encounters_n = 200,
                               selecao_natural = TRUE, k_fixo = NULL,
                               fecundidade_base = 50,
-                              regra = c("best_of_n", "sequencial")) {
+                              regra = c("best_of_n", "sequencial"),
+                              # Devolve também a rede e as características, para
+                              # poder desenhar a réplica que os dados escolheram.
+                              # É só cópia de objetos que já existem, sem chamar
+                              # nada que sorteie, então o consumo de números
+                              # aleatórios é idêntico com ou sem.
+                              return_details = FALSE) {
   regra <- match.arg(regra)
 
   # (1) Sorteio da população: nada vem de geração anterior.
@@ -67,7 +73,7 @@ simulate_controle <- function(N_machos = 200, N_femeas = 200,
                            encounters_n = encounters_n, k_fixo = k_fixo, regra = regra)
   metrics <- calc_metrics_from_M(M, k_alvo = k_fixo)
 
-  data.frame(
+  saida <- data.frame(
     tipo_selecao = tipo_selecao, regra = regra,
     sigma_p = sigma_p, sigma_z = sigma_z,
     encounters_n = encounters_n,
@@ -78,6 +84,12 @@ simulate_controle <- function(N_machos = 200, N_femeas = 200,
     n_machos_surv = length(male_z_surv),
     metrics
   )
+
+  if (return_details)
+    return(list(dados_tabela = saida,
+                rede = list(M = M, male_z = male_z_surv, female_p = female_p,
+                            geracao = 1L, metrics = metrics)))
+  saida
 }
 
 # =====================================================================
