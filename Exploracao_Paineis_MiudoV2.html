@@ -244,8 +244,8 @@ div.tocify {
 
 
 <h1 class="title toc-ignore">Exploração por painéis</h1>
-<h3 class="subtitle">Os três estudos rodados, um de cada vez — rodada de
-20 réplicas com o modelo atual</h3>
+<h3 class="subtitle">Os quatro estudos, um de cada vez — rodada de 20
+réplicas com o modelo atual</h3>
 <h4 class="author">Solimary García Hernández</h4>
 <h4 class="date">09 de September de 2026</h4>
 
@@ -335,6 +335,11 @@ sigmoide chega a passar de 20, o que explica de onde saíram as redes de
 proporcional a V, o que importa passa a ser a viabilidade
 <strong>relativa</strong> entre os juvenis, que continua discriminando
 normalmente mesmo quando o valor absoluto de todos é minúsculo.</p>
+<p>As figuras de rede deste documento desenham réplicas que realmente
+rodaram, reconstruídas a partir da semente original. Elas são
+precalculadas por <code>12_Preparar_redes_das_figuras.R</code> e ficam
+num cache em disco: se alguma aparecer como “população gerada agora”, é
+porque falta rodar aquele script.</p>
 </div>
 <div id="os-quatro-estudos-num-plano-só" class="section level2">
 <h2>Os quatro estudos num plano só</h2>
@@ -442,13 +447,53 @@ machos, círculos são fêmeas, e as cores saem do
 <code>cluster_louvain</code>, que é o próprio algoritmo da métrica de
 modularidade: os módulos que aparecem no desenho são os que o número da
 faixa 1.1 conta. Cinza claro é quem não acasalou.</p>
+<div id="curva-por-curva" class="section level3 tabset">
+<h3 class="tabset">Curva por curva</h3>
+<p>Comparar as abas entre si isola exatamente a regra de escolha: a
+composição da população é idêntica nas quatro, e o que muda é só a curva
+de preferência.</p>
+<div id="aleatória" class="section level4">
+<h4>Aleatória</h4>
 <p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/ct-rede-cantos-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="gaussiana" class="section level4">
+<h4>Gaussiana</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/ct-rede-cantos-2.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="sigmoide" class="section level4">
+<h4>Sigmoide</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/ct-rede-cantos-3.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="disruptiva" class="section level4">
+<h4>Disruptiva</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/ct-rede-cantos-4.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
 <p>O Controle cruza dois níveis, e o parágrafo acima cobre um só. O
 outro é o regime de busca, que nos resultados é o que mais pesa. Aqui a
 composição da população é a mesma nos quatro painéis, e o que muda é
 quantos machos a fêmea avalia e quantos aceita. A proporção k/A_max é a
 intensidade de seleção por truncamento.</p>
+</div>
+</div>
+<div id="o-regime-de-busca-curva-por-curva"
+class="section level3 tabset">
+<h3 class="tabset">O regime de busca, curva por curva</h3>
+<div id="aleatória-1" class="section level4">
+<h4>Aleatória</h4>
 <p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/ct-rede-busca-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="gaussiana-1" class="section level4">
+<h4>Gaussiana</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/ct-rede-busca-2.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="sigmoide-1" class="section level4">
+<h4>Sigmoide</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/ct-rede-busca-3.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="disruptiva-1" class="section level4">
+<h4>Disruptiva</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/ct-rede-busca-4.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
 </div>
 <div id="superfície-das-métricas-de-rede" class="section level2 tabset">
 <h2 class="tabset">1.1 Superfície das métricas de rede</h2>
@@ -887,16 +932,52 @@ sobre as outras, porque todas querem o mesmo macho. No meio, os casais
 que se formaram, com a diagonal marcando onde o macho é igual ao pico da
 fêmea. Embaixo, quantas parceiras cada macho teve, que é sobre quem a
 seleção sexual está agindo neste estudo.</p>
+<div id="curva-por-curva-1" class="section level3 tabset">
+<h3 class="tabset">Curva por curva</h3>
+<div id="aleatória-2" class="section level4">
+<h4>Aleatória</h4>
 <p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-mecanismo-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
-<div id="e-o-que-cem-gerações-fazem-com-a-rede" class="section level3">
-<h3>E o que cem gerações fazem com a rede</h3>
+</div>
+<div id="gaussiana-2" class="section level4">
+<h4>Gaussiana</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-mecanismo-2.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="sigmoide-2" class="section level4">
+<h4>Sigmoide</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-mecanismo-3.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="disruptiva-2" class="section level4">
+<h4>Disruptiva</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-mecanismo-4.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>Na aba da aleatória as duas colunas saem iguais, e isso é o controle
+funcionando: com P = 0.5 para todo mundo, σp não tem por onde agir.</p>
+</div>
+</div>
+<div id="e-o-que-cem-gerações-fazem-com-a-rede"
+class="section level3 tabset">
+<h3 class="tabset">E o que cem gerações fazem com a rede</h3>
 <p>A figura acima é a primeira geração: o mecanismo, antes de qualquer
 resposta evolutiva. Esta mostra a mesma coisa cem gerações depois, com o
 traço do macho já tendo evoluído.</p>
 <p>As duas colunas são a geração 1 e a 100 da MESMA réplica, e não de
 duas réplicas diferentes: é um antes e depois de uma população só. As
 linhas são as duas pontas do gradiente de σp.</p>
+<div id="aleatória-3" class="section level4">
+<h4>Aleatória</h4>
 <p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-rede-evolucao-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="gaussiana-3" class="section level4">
+<h4>Gaussiana</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-rede-evolucao-2.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="sigmoide-3" class="section level4">
+<h4>Sigmoide</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-rede-evolucao-3.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="disruptiva-3" class="section level4">
+<h4>Disruptiva</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/fem-rede-evolucao-4.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
 </div>
 </div>
 <div id="métricas-de-rede" class="section level2 tabset">
@@ -1232,15 +1313,48 @@ quer dizer.</p>
 teve contra o seu próprio pico. Aqui quem fica de fora é a fêmea que não
 encontra ninguém que sirva, e é essa a seleção que age sobre a
 preferência.</p>
+<div id="curva-por-curva-2" class="section level3 tabset">
+<h3 class="tabset">Curva por curva</h3>
+<div id="aleatória-4" class="section level4">
+<h4>Aleatória</h4>
 <p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/esp-mecanismo-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="gaussiana-4" class="section level4">
+<h4>Gaussiana</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/esp-mecanismo-2.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="sigmoide-4" class="section level4">
+<h4>Sigmoide</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/esp-mecanismo-3.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="disruptiva-4" class="section level4">
+<h4>Disruptiva</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/esp-mecanismo-4.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
 <div id="e-o-que-cem-gerações-fazem-com-a-rede-1"
-class="section level3">
-<h3>E o que cem gerações fazem com a rede</h3>
+class="section level3 tabset">
+<h3 class="tabset">E o que cem gerações fazem com a rede</h3>
 <p>O espelho da figura equivalente do Estudo 2, e vale comparar as duas.
 Lá o que evolui é o traço do macho e a rede muda porque o material
 mudou; aqui o material é re-sorteado igual em todas as gerações, e a
 rede muda porque as fêmeas passaram a querer outra coisa.</p>
+<div id="aleatória-5" class="section level4">
+<h4>Aleatória</h4>
 <p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/esp-rede-evolucao-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="gaussiana-5" class="section level4">
+<h4>Gaussiana</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/esp-rede-evolucao-2.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="sigmoide-5" class="section level4">
+<h4>Sigmoide</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/esp-rede-evolucao-3.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="disruptiva-5" class="section level4">
+<h4>Disruptiva</h4>
+<p><img src="Exploracao_Paineis_MiudoV2_files/figure-html/esp-rede-evolucao-4.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+</div>
 </div>
 </div>
 <div id="métricas-de-rede-1" class="section level2 tabset">
