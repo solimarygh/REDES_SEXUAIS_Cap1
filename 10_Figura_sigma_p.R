@@ -102,11 +102,15 @@ figura_sigma_p <- function(sigma_p_baixo = 0.2, sigma_p_alto = 2.0,
   # ---- linha 3: como o sucesso se reparte entre os machos --------------
   # A consequência demográfica: com todas querendo o mesmo, uns poucos machos
   # levam quase tudo e muitos ficam sem nada.
+  # O eixo do número de parceiras é o MESMO nas duas colunas, senão a coluna em
+  # que poucos machos levam tudo pareceria igual à outra, que é justamente a
+  # diferença que a linha quer mostrar.
+  grau_max <- max(rowSums(baixo$M), rowSums(alto$M))
   sucesso <- function(lado) {
     g <- tibble(z = male_z, grau = rowSums(lado$M))
     ggplot(g, aes(z, grau)) +
       geom_point(alpha = 0.45, size = 1.6, color = "#9932CC") +
-      coord_cartesian(xlim = range(grade_z)) +
+      coord_cartesian(xlim = range(grade_z), ylim = c(0, grau_max)) +
       labs(x = "traço do macho (z)", y = "parceiras") +
       theme_light(base_size = 12)
   }
@@ -196,6 +200,78 @@ figura_cantos <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
 }
 
 # =====================================================================
+# AS MESMAS QUATRO SITUAÇÕES, DESENHADAS COMO REDE
+# =====================================================================
+# A matriz ordenada mostra a estrutura, mas quem trabalha com redes lê melhor
+# uma rede. Aqui são os mesmos quatro cantos, pequenos o bastante para que os
+# nós se distingam, com as cores vindo do Louvain, que é exatamente o algoritmo
+# que a métrica de modularidade usa. Assim os módulos que aparecem na figura
+# são os módulos que o número conta, e não uma impressão visual paralela.
+#
+# É base R e não ggplot porque a função de desenho de rede do igraph é a que os
+# outros scripts do projeto já usam.
+figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
+                         N = 40, phi = 5, s_media = 2, sigma_s = 0.2,
+                         k = 3L, tipo = "gaussian", seed = 11) {
+
+  um_canto <- function(sz, sp) {
+    set.seed(seed + round(100 * sz) + round(10000 * sp))
+    male_z   <- pmax(0, rnorm(N, phi, sz))
+    female_p <- pmax(0, rnorm(N, phi, sp))
+    s_all    <- pmax(0, rnorm(N, s_media, sigma_s))
+    M   <- mate_with_survivors(male_z, female_p, s_all, tipo,
+                               encounters_n = N, k_fixo = k)
+    met <- calc_metrics_from_M(M, k_alvo = k)
+
+    adj <- matrix(0L, 2 * N, 2 * N)
+    adj[1:N, (N + 1):(2 * N)] <- M
+    adj[(N + 1):(2 * N), 1:N] <- t(M)
+    g <- igraph::graph_from_adjacency_matrix(adj, mode = "undirected")
+    igraph::V(g)$type <- c(rep(TRUE, N), rep(FALSE, N))
+
+    com   <- igraph::cluster_louvain(g)
+    memb  <- igraph::membership(com)
+    n_com <- length(unique(memb))
+    paleta <- grDevices::colorRampPalette(
+      c("#E41A1C","#377EB8","#4DAF4A","#984EA3","#FF7F00","#A65628","#F781BF","#999999"))(n_com)
+    cores <- paleta[memb]
+    # quem não acasalou fica cinza claro: é informação, não sujeira
+    cores[igraph::degree(g) == 0] <- "gray85"
+
+    set.seed(2026)
+    list(g = g, cores = cores, layout = igraph::layout_with_fr(g),
+         formas = ifelse(igraph::V(g)$type, "square", "circle"),
+         met = met, n_com = n_com,
+         sem = sum(igraph::degree(g)[(N + 1):(2 * N)] == 0))
+  }
+
+  cantos <- list(
+    list(sz = sigma_baixo, sp = sigma_baixo, tit = "machos parecidos, fêmeas concordam"),
+    list(sz = sigma_alto,  sp = sigma_baixo, tit = "machos variados, fêmeas concordam"),
+    list(sz = sigma_baixo, sp = sigma_alto,  tit = "machos parecidos, fêmeas discordam"),
+    list(sz = sigma_alto,  sp = sigma_alto,  tit = "machos variados, fêmeas discordam")
+  )
+
+  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 4.5, 1.5), oma = c(3, 0, 3, 0))
+  on.exit(par(op), add = TRUE)
+  for (cc in cantos) {
+    r <- um_canto(cc$sz, cc$sp)
+    plot(r$g, layout = r$layout, vertex.color = r$cores,
+         vertex.shape = r$formas, vertex.size = 7, vertex.label = NA,
+         vertex.frame.color = grDevices::rgb(0, 0, 0, 0.25),
+         edge.color = grDevices::rgb(0.4, 0.4, 0.4, 0.35), edge.width = 1)
+    title(main = sprintf("%s\nmodularidade %.2f | %d módulos | %d fêmeas sem acasalar",
+                         cc$tit, r$met$Modularity, r$n_com, r$sem),
+          cex.main = 1.05, font.main = 1)
+  }
+  mtext("A mesma regra de escolha, quatro composições da população",
+        outer = TRUE, side = 3, line = 0.5, cex = 1.3, font = 2)
+  mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain, que é o algoritmo da métrica de modularidade.  Cinza: sem acasalar.",
+        outer = TRUE, side = 1, line = 1, cex = 0.8, col = "gray30")
+  invisible(NULL)
+}
+
+# =====================================================================
 # O DESENHO DOS QUATRO ESTUDOS NO MESMO PLANO
 # =====================================================================
 # Um esquema, este sim, e não saída do motor. Serve para dizer numa figura só
@@ -242,13 +318,20 @@ figura_desenho <- function(valores = c(0.2, 0.5, 1.0, 1.5, 2.0)) {
 if (!interactive() && sys.nframe() == 0) {
   dir.create("Resultados_Artigo/Figuras", recursive = TRUE, showWarnings = FALSE)
   saidas <- list(
-    list(f = figura_sigma_p, nome = "figura_sigma_p.png",     w = 11, h = 8.5),
+    list(f = figura_sigma_p, nome = "figura_sigma_p.png",       w = 11, h = 8.5),
     list(f = figura_cantos,  nome = "figura_quatro_cantos.png", w = 10, h = 8),
-    list(f = figura_desenho, nome = "figura_desenho.png",     w = 10, h = 8)
+    list(f = figura_desenho, nome = "figura_desenho.png",       w = 10, h = 8)
   )
   for (s in saidas) {
     destino <- file.path("Resultados_Artigo/Figuras", s$nome)
     ggsave(destino, s$f(), width = s$w, height = s$h, dpi = 150)
     cat("Figura em", destino, "\n")
   }
+  # figura_redes desenha com o igraph, que escreve direto no dispositivo em vez
+  # de devolver um objeto, então precisa de png() e dev.off() em volta.
+  destino <- "Resultados_Artigo/Figuras/figura_redes.png"
+  png(destino, width = 10 * 150, height = 9 * 150, res = 150)
+  figura_redes()
+  dev.off()
+  cat("Figura em", destino, "\n")
 }
