@@ -59,6 +59,12 @@ ct  <- carregar_rodada("Resultados_Artigo/Fase_Controle/Dados", "Controle")
 d   <- carregar_rodada("Resultados_Artigo/Fase5_MiudoV2/Dados", "Femeas")
 esp <- carregar_rodada("Resultados_Artigo/Fase_Espelho/Dados",  "Espelho")
 
+# Co-evolução: a metade SEM seleção natural, que é a que está fechada. O nome do
+# arquivo carrega o modo de segregação e a versão do motor, de propósito, para
+# que rodadas de motores diferentes nunca se misturem.
+co <- carregar(c("Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao_genica_neAdulto_sem_completo.rds",
+                 "Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao_genica_completo.rds"))
+
 ok <- function(x) !is.null(x) && nrow(x) > 0
 tem <- function(x, col) ok(x) && col %in% names(x)
 
@@ -67,10 +73,50 @@ tem <- function(x, col) ok(x) && col %in% names(x)
 # define as funções: o bloco que salva os arquivos está protegido.
 source("10_Figuras_conceituais.R")
 CURVAS <- c("uniform", "gaussian", "sigmoid", "u-shaped")
+
+# A divergência entre curvas é usada em várias seções, então fica calculada
+# aqui, no setup, e não dentro de um bloco. Assim reorganizar o documento não
+# quebra nada por ordem de execução.
+#
+# Uma célula do desenho é uma combinação de sigma_p, sigma_z, A_max, k e regime
+# de seleção natural. Dentro dela as quatro curvas rodaram nas mesmas condições,
+# e cada uma tem a sua média de cada métrica. Padronizamos as quatro métricas
+# UMA vez, sobre o conjunto todo, para que as células continuem comparáveis
+# entre si. Feito isso, cada curva é um ponto num espaço de quatro dimensões, e
+# a divergência da célula é a distância média desses pontos ao centro comum.
+METRICAS <- c("Modularity", "Nestedness", "Centralization", "I_s")
+divergencia <- function(x, eixos) {
+  if (!ok(x)) return(NULL)
+  z <- x %>% mutate(across(all_of(METRICAS), ~ as.numeric(scale(.x))))
+  chaves <- intersect(c(eixos, "encounters_n", "k_fixo", "selecao_natural"), names(z))
+  z %>%
+    group_by(across(all_of(c(chaves, "tipo_selecao")))) %>%
+    summarise(across(all_of(METRICAS), ~ mean(.x, na.rm = TRUE)), .groups = "drop") %>%
+    group_by(across(all_of(chaves))) %>%
+    summarise(div = {
+      M <- as.matrix(across(all_of(METRICAS)))
+      M <- M[stats::complete.cases(M), , drop = FALSE]
+      if (nrow(M) < 2) NA_real_ else mean(sqrt(rowSums((M - colMeans(M))^2)))
+    }, .groups = "drop") %>%
+    filter(!is.na(div))
+}
+divg <- divergencia(ct, c("sigma_p", "sigma_z"))
+if (!is.null(divg)) divg <- divg %>%
+  mutate(norma = sqrt(sigma_p^2 + sigma_z^2), assimetria = log(sigma_z / sigma_p))
 ```
 
-Aqui estão os resultados dos três estudos que já rodaram, com 20 réplicas cada. Organizei por
-hipótese e não por estudo, porque duas delas se testam com mais de um estudo ao mesmo tempo.
+Aqui estão os resultados dos estudos, com 20 réplicas cada. Organizei por estudo, com uma seção
+no fim para as duas coisas que só aparecem ao comparar uns com os outros.
+
+As hipóteses continuam sendo o que se testa, e a correspondência é esta:
+
+| hipótese | onde se testa |
+|---|---|
+| H1. A estrutura da rede é determinada por fatores em três níveis | Estudo 1 |
+| H2a. A topologia prediz a trajetória do traço do macho | Estudo 2 |
+| H2b. A topologia prediz a trajetória da preferência da fêmea | Estudo 3 |
+| H3. Restringir a amostragem erode a assinatura e as suas consequências | Estudos 1 e 2, e a comparação entre eles |
+| H4. A topologia determina se a covariância genética se acumula | Estudo 4 |
 
 O desenho e a formulação das hipóteses estão em `NOTA_quatro_estudos.md`. O que mudou no modelo
 desde a última conversa está em `RESUMO_mudancas_para_Miudo.md`.
@@ -114,12 +160,13 @@ tibble(
   Estudo = c("Controle", "Fêmeas variando", "Machos variando", "Co-evolução"),
   `O que evolui` = c("nada", "o traço do macho", "a preferência da fêmea", "os dois"),
   `Testa` = c("H1", "H2a", "H2b", "H4"),
-  Rodada = c(rodada_de(ct), rodada_de(d), rodada_de(esp), "-"),
-  Cenários = c(n_cen(ct, c("sigma_p", "sigma_z")), n_cen(d, "sigma_p"), n_cen(esp, "sigma_z"), "-"),
+  Rodada = c(rodada_de(ct), rodada_de(d), rodada_de(esp), if (ok(co)) "bestOfN" else "-"),
+  Cenários = c(n_cen(ct, c("sigma_p", "sigma_z")), n_cen(d, "sigma_p"), n_cen(esp, "sigma_z"),
+               n_cen(co, c("sigma_p_init", "sigma_z_init"))),
   Situação = c(if (ok(ct)) "concluído" else "pendente",
                if (ok(d))  "concluído" else "pendente",
                if (ok(esp)) "concluído" else "pendente",
-               "não rodado")
+               if (ok(co)) "metade sem seleção natural" else "não rodado")
 ) %>% kable(caption = "Situação dos estudos nesta rodada. H3 atravessa todos.")
 ```
 
@@ -152,7 +199,7 @@ checar_um <- function(x, nome) {
   )
 }
 bind_rows(checar_um(ct, "Controle"), checar_um(d, "Fêmeas variando"),
-          checar_um(esp, "Machos variando")) %>%
+          checar_um(esp, "Machos variando"), checar_um(co, "Co-evolução")) %>%
   kable(caption = "O censo deve ser sempre 200 e o número de réplicas encerradas deve ser zero")
 ```
 
@@ -185,6 +232,19 @@ for (cv in CURVAS) {
   figura_redes(tipo = cv)
   cat("\n\n")
 }
+```
+
+## O outro eixo do Estudo 1: o regime de busca
+
+Os quatro cantos mostram o material. Falta o outro nível que o Controle cruza, e que nos resultados
+é o que mais pesa: quantos machos a fêmea consegue avaliar (A_max) e quantos ela aceita (k).
+
+Aqui a composição da população é a mesma nos quatro painéis. O que muda é só o quanto ela consegue
+amostrar antes de decidir. A proporção k/A_max é a intensidade de seleção por truncamento, e está
+escrita em cada painel.
+
+```{r fig-busca, fig.height=8.5, fig.width=9}
+figura_busca()
 ```
 
 ## O mesmo, como matriz {.tabset}
@@ -241,8 +301,15 @@ for (cv in CURVAS) {
 
 ---
 
-# H1. Os determinantes da estrutura da rede
+---
 
+# Estudo 1. Controle
+
+> Nada evolui. Uma geração só, com sigma_p e sigma_z impostos, para medir a topologia que cada
+> regra de escolha produz sobre cada composição de população.
+
+É o único desenho que cruza os três níveis por inteiro: a regra de escolha, a variação disponível
+e a restrição ecológica. Por isso é aqui que se pergunta qual deles manda.
 > A estrutura da rede é determinada por fatores em três níveis (a regra de escolha, a variação
 > disponível, a restrição ecológica), e a questão é qual domina e como interagem.
 
@@ -279,23 +346,7 @@ Fomos por aí porque o regime de busca domina tanto que, num R² comum, todo o r
 colado no zero e a comparação entre os termos não diria nada.
 
 ```{r h1-niveis}
-if (ok(ct)) {
-  METRICAS <- c("Modularity", "Nestedness", "Centralization", "I_s")
-  ctz <- ct %>% mutate(across(all_of(METRICAS), ~ as.numeric(scale(.x))))
-  por_curva <- ctz %>%
-    group_by(sigma_p, sigma_z, encounters_n, k_fixo, selecao_natural, tipo_selecao) %>%
-    summarise(across(all_of(METRICAS), ~ mean(.x, na.rm = TRUE)), .groups = "drop")
-  divg <- por_curva %>%
-    group_by(sigma_p, sigma_z, encounters_n, k_fixo, selecao_natural) %>%
-    summarise(div = {
-      M <- as.matrix(across(all_of(METRICAS)))
-      M <- M[stats::complete.cases(M), , drop = FALSE]
-      if (nrow(M) < 2) NA_real_ else mean(sqrt(rowSums((M - colMeans(M))^2)))
-    }, .groups = "drop") %>%
-    filter(!is.na(div)) %>%
-    mutate(norma = sqrt(sigma_p^2 + sigma_z^2),
-           assimetria = log(sigma_z / sigma_p))
-
+if (!is.null(divg)) {
   base <- lm(div ~ factor(encounters_n) * factor(k_fixo) * selecao_natural, data = divg)
   r2b <- summary(base)$r.squared
   parc <- function(termo) {
@@ -387,15 +438,34 @@ análise usa a poliandria realizada e não o k nominal.
 
 ---
 
-# H2. A topologia prediz a trajetória evolutiva
+## O regime de busca, medido
 
-> A topologia da rede prediz a trajetória evolutiva da característica que estiver livre para
-> evoluir. **H2a** para o traço do macho, **H2b** para a preferência da fêmea.
+A figura dos quatro regimes de busca, lá em cima, mostra o efeito. Aqui está o número: quanto as
+quatro curvas divergem entre si em topologia, conforme se restringe o quanto a fêmea consegue
+amostrar.
+```{r h3-topo}
+if (ok(ct)) {
+  divg %>% group_by(encounters_n) %>%
+    summarise(`divergência média` = round(mean(div), 3),
+              `mediana` = round(median(div), 3), .groups = "drop") %>%
+    arrange(desc(encounters_n)) %>%
+    rename(A_max = encounters_n) %>%
+    kable(caption = "H3 na topologia (Controle), promediando todos os sigma_p, sigma_z, k e os dois regimes de seleção natural")
+}
+```
 
-O espelho funciona como replicação interna: se a relação for da rede e não da característica em
-particular, tem que aparecer nos dois lados.
+Na topologia, sim. A divergência cai de forma monotônica ao restringir a busca e é máxima em
+A_max = 200, que é exatamente o que a predição original diz.
 
-## H2a. O traço do macho (Fêmeas variando)
+---
+
+# Estudo 2. Fêmeas variando
+
+> O traço do macho evolui. sigma_p é imposto, e a pergunta é se a topologia que ele produz prediz
+> para onde o traço vai.
+
+Este estudo e o seguinte são espelhos, e servem de replicação interna: se a relação for da rede e
+não da característica em particular, tem de aparecer nos dois lados.
 
 > **Esta é a seção que o problema do censo mais atinge**, e por isso vale repetir o aviso aqui.
 > As curvas sigmoide e disruptiva, com seleção natural ligada, são justamente onde o traço se
@@ -460,7 +530,37 @@ A primeira se inverte. O aninhamento aparece associado a médias de traço menor
 sinal é firme estatisticamente, mas não temos explicação para ele, e prefiro deixá-lo anotado como
 coisa a entender antes de escrever qualquer coisa a respeito.
 
-## H2b. A preferência da fêmea (Machos variando)
+## Restringir a busca muda a trajetória?
+
+A mesma pergunta que a seção do regime de busca fez sobre a topologia, agora sobre o resultado
+evolutivo.
+```{r h3, fig.height=4.2}
+if (ok(d)) {
+  h3 <- d %>%
+    filter(generation == 100, selecao_natural == FALSE) %>%
+    group_by(tipo_selecao, sigma_p, encounters_n) %>%
+    summarise(zbar = mean(zbar_males, na.rm = TRUE), .groups = "drop") %>%
+    group_by(sigma_p, encounters_n) %>%
+    summarise(divergencia = sd(zbar), .groups = "drop")
+  ggplot(h3, aes(sigma_p, divergencia, color = factor(encounters_n))) +
+    geom_smooth(method = "loess", formula = y ~ x, se = FALSE, span = 1, linewidth = 1.1) + geom_point(size = 2.4) +
+    scale_color_brewer(palette = "Set1", name = "A_max") +
+    labs(title = "Divergência evolutiva entre curvas de preferência",
+         subtitle = "Gen 100 | sem seleção natural | todos os k juntos\nDesvio-padrão da média do traço entre as quatro curvas",
+         x = expression(sigma[p]), y = "divergência entre curvas (Gen 100)") +
+    theme_light(base_size = 12)
+}
+```
+
+No resultado evolutivo, as três linhas de A_max ficam praticamente sobrepostas: restringir a fêmea
+a avaliar 10 machos em vez de 200 quase não muda para onde o traço vai parar.
+
+---
+
+# Estudo 3. Machos variando
+
+> A preferência da fêmea evolui. sigma_z é imposto, e é a disponibilidade de machos variados que
+> gera a seleção sobre a preferência.
 
 ```{r h2b-varp, fig.height=4.2}
 if (ok(esp)) {
@@ -511,6 +611,83 @@ somem com ela.
 Vale registrar pelo efeito prático: olhando só a geração 100, parece não ter havido seleção
 nenhuma. Ela só aparece na dinâmica inicial.
 
+---
+
+# Estudo 4. Co-evolução
+
+> As duas características são herdáveis, e a topologia determina se a covariância genética entre
+> elas chega a se acumular.
+
+Rodou. A metade SEM seleção natural está fechada, 6.480 cenários, e é a que aparece aqui. A metade
+com seleção natural espera a decisão sobre o censo de machos, que é o assunto do aviso lá em cima,
+e por isso ainda não entra. O relato completo, incluindo o que descobrimos sobre o próprio modelo
+pelo caminho, está em `NOTA_coevolucao_primeiros_testes.md`.
+
+Aqui a variância do traço se separa em duas: a **génica**, que governa a segregação, e a **total**,
+que a população exibe. A distância entre elas é o desequilíbrio de ligamento que o acasalamento
+não aleatório empilhou, e é uma quantidade que os outros três estudos não têm como mostrar.
+
+```{r co-ld}
+if (ok(co)) {
+  co %>% filter(generation == max(generation), !selecao_natural) %>%
+    group_by(tipo_selecao) %>%
+    summarise(`var total` = round(mean(varz_pop), 2),
+              `var génica` = round(mean(var_genica_z), 2),
+              `desequilíbrio` = round(mean(varz_pop - var_genica_z), 2),
+              `cov(z,p)` = round(mean(cov_zp), 2),
+              `cor(z,p)` = round(mean(cor_zp), 2),
+              .groups = "drop") %>%
+    mutate(tipo_selecao = labels_4[tipo_selecao]) %>%
+    rename(curva = tipo_selecao) %>%
+    kable(caption = "Geração 100, sem seleção natural, promediando todos os sigma iniciais, A_max e k.")
+}
+```
+
+A gaussiana é a única que acopla traço e preferência: acasalamento assortativo, desequilíbrio de
+ligamento e covariância genética, que é o mecanismo de Fisher. A sigmoide dá exatamente o mesmo
+desequilíbrio que a aleatória, ou seja nenhum, porque todas as fêmeas querem o mesmo
+independentemente do seu próprio pico: o acasalamento é direcional mas não assortativo.
+
+## A seleção sexual apaga a si mesma
+
+```{r co-apaga, fig.height=4.4}
+if (ok(co)) {
+  tr <- co %>% filter(!selecao_natural) %>%
+    group_by(tipo_selecao, generation) %>%
+    summarise(`oportunidade de seleção sexual (Is)` = mean(I_s, na.rm = TRUE),
+              `distância entre traço e preferência` = mean(zbar_pop - pbar_pop),
+              `tamanho efetivo (Ne)` = mean(Ne, na.rm = TRUE),
+              .groups = "drop") %>%
+    pivot_longer(-c(tipo_selecao, generation))
+  ggplot(tr, aes(generation, value, color = tipo_selecao)) +
+    geom_line(linewidth = 1.1) +
+    facet_wrap(~name, scales = "free_y") +
+    scale_color_manual(values = cores_4, labels = labels_4, name = "Curva de preferência") +
+    labs(title = "Co-evolução: o que acontece ao longo das cem gerações",
+         subtitle = "Sem seleção natural | promediando todos os sigma iniciais, A_max e k\nCenso de 400 adultos, então Ne = 400 seria uma população sem desigualdade de sucesso",
+         x = "geração", y = NULL) +
+    theme_light(base_size = 12)
+}
+```
+
+Sob a sigmoide o traço se afasta tanto da preferência que a curva satura e deixa de discriminar: o
+Is sai de 7.4 e termina em 0.15, e a rede da geração 100 fica indistinguível da aleatória, sem
+nenhuma fêmea sem acasalar. A variância do traço não se mexe nesse tempo, então não é perda de
+variação, é a média saindo da faixa em que a preferência distingue.
+
+A disruptiva chega ao mesmo fim por outro caminho: alarga a distribuição do traço até que toda
+fêmea encontre machos distantes do seu pico.
+
+E o painel do Ne mostra que isso não é só uma questão de rede. Enquanto a seleção sexual está viva
+ela reduz o tamanho efetivo quase à metade do censo; quando o traço escapa, a população volta ao
+seu tamanho de censo. A seleção sexual, neste modelo, é uma força demográfica transitória.
+
+---
+
+# Juntando os quatro estudos
+
+Duas coisas que só aparecem ao comparar os estudos entre si, e que nenhum deles diria sozinho.
+
 ## A assinatura é estrutural, não evolutiva
 
 ```{r h2-estrutural}
@@ -541,62 +718,10 @@ if (ok(ct) && ok(d)) {
 Os dois valores são praticamente iguais nos três níveis de A_max. Cem gerações de evolução do
 traço quase não alteram o quanto as curvas diferem entre si em topologia.
 
----
-
-# H3. A ecologia modula a cadeia
-
-> Restringir a capacidade de amostragem (A_max) erode a assinatura topológica e, com ela, as suas
-> consequências evolutivas.
-
-```{r h3, fig.height=4.2}
-if (ok(d)) {
-  h3 <- d %>%
-    filter(generation == 100, selecao_natural == FALSE) %>%
-    group_by(tipo_selecao, sigma_p, encounters_n) %>%
-    summarise(zbar = mean(zbar_males, na.rm = TRUE), .groups = "drop") %>%
-    group_by(sigma_p, encounters_n) %>%
-    summarise(divergencia = sd(zbar), .groups = "drop")
-  ggplot(h3, aes(sigma_p, divergencia, color = factor(encounters_n))) +
-    geom_smooth(method = "loess", formula = y ~ x, se = FALSE, span = 1, linewidth = 1.1) + geom_point(size = 2.4) +
-    scale_color_brewer(palette = "Set1", name = "A_max") +
-    labs(title = "Divergência evolutiva entre curvas de preferência",
-         subtitle = "Gen 100 | sem seleção natural | todos os k juntos\nDesvio-padrão da média do traço entre as quatro curvas",
-         x = expression(sigma[p]), y = "divergência entre curvas (Gen 100)") +
-    theme_light(base_size = 12)
-}
-```
-
-No resultado evolutivo, as três linhas de A_max ficam praticamente sobrepostas: restringir a fêmea
-a avaliar 10 machos em vez de 200 quase não muda para onde o traço vai parar.
-
-```{r h3-topo}
-if (ok(ct)) {
-  divg %>% group_by(encounters_n) %>%
-    summarise(`divergência média` = round(mean(div), 3),
-              `mediana` = round(median(div), 3), .groups = "drop") %>%
-    arrange(desc(encounters_n)) %>%
-    rename(A_max = encounters_n) %>%
-    kable(caption = "H3 na topologia (Controle), promediando todos os sigma_p, sigma_z, k e os dois regimes de seleção natural")
-}
-```
-
-Na topologia, sim. A divergência cai de forma monotônica ao restringir a busca e é máxima em
-A_max = 200, que é exatamente o que a predição original diz.
-
+## Restringir a busca: os dois lados não vão juntos
 Então os dois lados de H3 não vão juntos: restringir a busca muda a topologia, mas não muda para
 onde o traço vai parar. É o achado mais desconcertante desta rodada, e por enquanto está só
 anotado.
-
----
-
-# H4. Co-evolução
-
-> Quando o traço e a preferência são ambos herdáveis, a topologia determina se a covariância
-> genética entre eles chega a se acumular.
-
-Ainda não rodou. O desenho está em `NOTA_quatro_estudos.md`: três níveis de variância inicial
-cruzados entre os sexos, 12.960 cenários. A previsão que escrevemos é de limiar e não de dose, ou
-seja, que exista uma variância de partida abaixo da qual o ciclo não se acende.
 
 ---
 

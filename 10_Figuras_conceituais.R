@@ -358,6 +358,57 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
 }
 
 # =====================================================================
+# O OUTRO EIXO DO ESTUDO 1: O REGIME DE BUSCA
+# =====================================================================
+# O Controle cruza dois níveis, e as figuras acima só mostram um deles. O outro
+# é o regime de busca: A_max, quantos machos a fêmea avalia, e k, quantos ela
+# aceita. Nos resultados é o nível que mais pesa, mais de dois terços da
+# divergência entre curvas, e mesmo assim é o que não tinha figura nenhuma.
+#
+# A composição da população é a mesma nos quatro painéis, com sigma_z e sigma_p
+# fixos. O que muda é só quanto a fêmea consegue amostrar antes de decidir e
+# quantos parceiros ela aceita. A proporção k/A_max é a intensidade de seleção
+# por truncamento, e vem escrita em cada painel.
+figura_busca <- function(amax = c(10L, 200L), ks = c(5L, 20L),
+                         N = 40, phi = 5, sigma_z = 1.0, sigma_p = 1.0,
+                         s_media = 2, sigma_s = 0.2, tipo = "gaussian",
+                         seed = 13) {
+
+  celulas <- expand.grid(k = ks, A = amax)
+
+  uma <- function(A, k) {
+    set.seed(seed + A * 100 + k)
+    male_z   <- pmax(0, rnorm(N, phi, sigma_z))
+    female_p <- pmax(0, rnorm(N, phi, sigma_p))
+    s_all    <- pmax(0, rnorm(N, s_media, sigma_s))
+    # A_max nunca passa do número de machos que existem: se o tratamento pedir
+    # 200 e a população tiver 40, ela avalia 40. Vale registrar porque é a mesma
+    # limitação que o buraco do censo explora nos estudos.
+    M   <- mate_with_survivors(male_z, female_p, s_all, tipo,
+                               encounters_n = min(A, N), k_fixo = k)
+    c(preparar_rede(M), list(met = calc_metrics_from_M(M, k_alvo = k)))
+  }
+
+  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 4.5, 1.5), oma = c(3.5, 0, 4, 0))
+  on.exit(par(op), add = TRUE)
+  for (i in seq_len(nrow(celulas))) {
+    A <- celulas$A[i]; k <- celulas$k[i]
+    r <- uma(A, k)
+    desenhar_rede(r, sprintf("A_max = %d, k = %d  (aceita %.0f%% do que avalia)\nmodularidade %.2f | Is %.2f | %d fêmeas sem acasalar",
+                             min(A, N), k, 100 * k / min(A, N),
+                             r$met$Modularity, r$met$I_s, r$sem))
+  }
+  mtext("Estudo 1: o mesmo material, quatro regimes de busca",
+        outer = TRUE, side = 3, line = 1.5, cex = 1.3, font = 2)
+  mtext(sprintf("preferência %s | sigma_z = %.1f e sigma_p = %.1f nos quatro painéis | %d machos e %d fêmeas | uma geração",
+                tipo, sigma_z, sigma_p, N, N),
+        outer = TRUE, side = 3, line = 0.2, cex = 0.85, col = "gray30")
+  mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.",
+        outer = TRUE, side = 1, line = 1.2, cex = 0.8, col = "gray30")
+  invisible(NULL)
+}
+
+# =====================================================================
 # A REDE ANTES E DEPOIS DE CEM GERAÇÕES
 # =====================================================================
 # figura_redes() mostra o Estudo 1, que é uma geração só. Para os Estudos 2 e 3
@@ -496,7 +547,8 @@ if (!interactive() && sys.nframe() == 0) {
   # figura_redes desenha com o igraph, que escreve direto no dispositivo em vez
   # de devolver um objeto, então precisa de png() e dev.off() em volta.
   base_r <- list(
-    list(f = function() figura_redes(),                 nome = "figura_redes.png"),
+    list(f = function() figura_redes(),                  nome = "figura_redes.png"),
+    list(f = function() figura_busca(),                  nome = "figura_busca.png"),
     list(f = function() figura_rede_evolucao("2"),       nome = "figura_rede_estudo2.png"),
     list(f = function() figura_rede_evolucao("3"),       nome = "figura_rede_estudo3.png")
   )
