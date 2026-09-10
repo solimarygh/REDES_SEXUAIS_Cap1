@@ -108,9 +108,23 @@ vezes, com sementes diferentes, e essas 20 corridas são as réplicas.
 réplicas daquela célula, a que tem a modularidade mais perto da média das 20,
 reconstruída a partir da semente original.
 
-*zbar* e *pbar*: a média do traço e a média do pico de preferência na população
-inteira, machos e fêmeas juntos, porque os dois sexos carregam as duas
-características e só expressam uma delas.
+*zbar* e *pbar*: as duas médias da população, a do traço e a do pico de
+preferência.
+
+Vale parar um segundo aqui, porque na co-evolução cada indivíduo carrega os
+dois genes mas só usa um. O macho exibe o seu `z` e nunca usa o `p` que
+carrega; a fêmea escolhe com o seu `p` e nunca exibe o `z` que carrega. Na hora
+de gerar filhotes, os dois transmitem as duas coisas.
+
+Por isso `zbar` soma machos e fêmeas para calcular a média do traço, e `pbar`
+faz o mesmo para a preferência: são médias do que a população *carrega*, e não
+do que ela mostra. Contar só os machos para `z` e só as fêmeas para `p` daria
+praticamente o mesmo, porque as duas características passam pelas duas
+linhagens sem viés de sexo.
+
+E `zbar - pbar`, que aparece impresso nas figuras, é a distância entre as duas:
+o quanto o macho médio está longe do que a fêmea média procura. Zero quer dizer
+que os machos são, em média, exatamente o que elas preferem.
 
 *Is*, oportunidade de seleção sexual: a variância no número de parceiras entre
 os machos, dividida pela média ao quadrado. Zero quer dizer que todos acasalam
@@ -239,8 +253,9 @@ figura_mecanismo_coevolucao("u-shaped")
 ## O traço e a preferência ao longo das gerações
 
 As figuras anteriores são duas fotos, a geração 1 e a 100. Esta é o filme
-inteiro, e mostra as duas médias em separado: onde está o traço dos machos e
-onde está o pico de preferência das fêmeas, geração a geração.
+inteiro, e mostra `zbar` e `pbar` em separado, geração a geração: por onde anda
+o traço e por onde anda a preferência. Nas figuras anteriores estava só a
+diferença entre os dois; aqui dá para ver qual dos dois se mexeu.
 
 É a mesma célula das figuras anteriores, e cada linha é a média das 20
 réplicas, com a sombra de um desvio. A linha pontilhada marca 5, que é onde as
