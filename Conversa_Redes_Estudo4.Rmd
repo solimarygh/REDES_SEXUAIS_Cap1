@@ -1,0 +1,187 @@
+---
+title: "A seleção sexual apaga a própria estrutura"
+subtitle: "Estudo 4, para a conversa com o pessoal de redes"
+author: "Solimary García Hernández"
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.align = "center", fig.retina = 1, dpi = 100)
+suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(ggplot2); library(knitr) })
+source("10_Figuras_conceituais.R")
+
+cores_4  <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
+labels_4 <- c("uniform"="Aleatória","gaussian"="Gaussiana","sigmoid"="Sigmoide","u-shaped"="Disruptiva")
+
+carregar <- function(paths) {
+  hit <- paths[file.exists(paths)]
+  if (!length(hit)) return(NULL)
+  o <- readRDS(hit[1])
+  if (is.data.frame(o)) o else bind_rows(o[!vapply(o, is.null, logical(1))])
+}
+co <- carregar(c("Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao_genica_neAdulto_sem_completo.rds",
+                 "Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao_genica_completo.rds"))
+ok <- function(x) !is.null(x) && nrow(x) > 0
+```
+
+## O sistema, em três frases
+
+Uma população de 200 machos e 200 fêmeas, gerações discretas. Cada macho tem um
+traço `z`; cada fêmea tem um pico de preferência `p` e uma exigência `s`, e
+aceita um macho com probabilidade que depende de quão bem `z` casa com `p`.
+
+Testamos quatro regras de emparejamento: **aleatória** (aceita metade dos
+machos, sem discriminar), **gaussiana** (prefere quem se parece com o seu
+pico), **sigmoide** (quanto maior `z`, melhor) e **disruptiva** (prefere quem
+difere do seu pico).
+
+Neste estudo as duas características são herdáveis e evoluem juntas ao longo de
+100 gerações. Cada geração produz uma rede bipartida de acasalamentos, e é ela
+que medimos.
+
+---
+
+## O resultado, em uma figura {.tabset}
+
+Cada aba compara uma regra com a **aleatória**, que é o controle sem escolha.
+Em cada linha, a rede da **geração 1** contra a da **geração 100**, da mesma
+réplica.
+
+A geração 1 é a rede antes de qualquer resposta evolutiva, então o estudo traz
+o seu próprio controle: não é preciso acreditar em nenhum experimento que não
+esteja aqui.
+
+### Sigmoide
+
+```{r fig-sigmoid, fig.width=11, fig.height=10}
+figura_estrutura_se_apaga(curvas = c("sigmoid", "uniform"))
+```
+
+Na geração 1, uns poucos machos levam quase todas as fêmeas e mais de cem ficam
+sem acasalar (os cinzas). Na geração 100 a rede tem **os mesmos números que o
+controle aleatório**: modularidade 0.44 contra 0.44, centralização 0.013 contra
+0.015.
+
+E a variância do traço quase não se mexeu. Não é perda de variação: é a média
+do traço saindo da faixa em que a preferência distingue. A distância entre
+`zbar` e `pbar` passa de 0 para mais de 20, e a sigmoide satura.
+
+### Gaussiana
+
+```{r fig-gaussian, fig.width=11, fig.height=10}
+figura_estrutura_se_apaga(curvas = c("gaussian", "uniform"))
+```
+
+### Disruptiva
+
+```{r fig-ushaped, fig.width=11, fig.height=10}
+figura_estrutura_se_apaga(curvas = c("u-shaped", "uniform"))
+```
+
+---
+
+## A mesma coisa, ao longo das gerações
+
+```{r trajetoria, fig.width=11, fig.height=5}
+if (ok(co)) {
+  tr <- co %>% filter(!selecao_natural) %>%
+    group_by(tipo_selecao, generation) %>%
+    summarise(`oportunidade de seleção sexual (Is)` = mean(I_s, na.rm = TRUE),
+              `distância entre traço e preferência` = mean(zbar_pop - pbar_pop),
+              `tamanho efetivo (Ne)` = mean(Ne, na.rm = TRUE),
+              .groups = "drop") %>%
+    pivot_longer(-c(tipo_selecao, generation))
+  ggplot(tr, aes(generation, value, color = tipo_selecao)) +
+    geom_line(linewidth = 1.1) +
+    facet_wrap(~name, scales = "free_y") +
+    scale_color_manual(values = cores_4, labels = labels_4, name = NULL) +
+    labs(subtitle = "Média sobre todas as células sem seleção natural. Censo de 400 adultos.",
+         x = "geração", y = NULL) +
+    theme_light(base_size = 12) + theme(legend.position = "top")
+}
+```
+
+O `Is` cai enquanto a distância entre traço e preferência cresce: são a mesma
+coisa vista de dois ângulos.
+
+E o painel do `Ne` mostra que isso não é só topologia. Enquanto a seleção
+sexual está viva, ela reduz o tamanho efetivo da população quase à metade do
+censo; quando o traço escapa, a população volta ao seu tamanho de censo. A
+seleção sexual, aqui, é uma força demográfica transitória.
+
+---
+
+## Duas maneiras diferentes de gerar estrutura
+
+```{r ld}
+if (ok(co)) {
+  co %>% filter(generation == max(generation), !selecao_natural) %>%
+    group_by(tipo_selecao) %>%
+    summarise(`var total` = round(mean(varz_pop), 2),
+              `var génica` = round(mean(var_genica_z), 2),
+              `desequilíbrio` = round(mean(varz_pop - var_genica_z), 2),
+              `cor(z,p)` = round(mean(cor_zp), 2), .groups = "drop") %>%
+    mutate(tipo_selecao = labels_4[tipo_selecao]) %>%
+    rename(regra = tipo_selecao) %>%
+    kable(caption = "Geração 100, média sobre todas as células sem seleção natural.")
+}
+```
+
+A **gaussiana** é a única que acopla as duas características: emparejamento
+assortativo, desequilíbrio de ligamento, correlação entre traço e preferência.
+
+A **sigmoide** dá exatamente o mesmo desequilíbrio que a aleatória, ou seja
+nenhum. Todas as fêmeas querem a mesma coisa independentemente do seu próprio
+pico, então o emparejamento é direcional mas não assortativo. Ela produz fuga
+do traço sem acoplamento.
+
+E a **disruptiva** chega ao mesmo apagamento que a sigmoide por outro caminho:
+não desloca a média, alarga a distribuição do traço até que toda fêmea encontre
+machos distantes do seu pico.
+
+---
+
+## O que eu queria perguntar a vocês
+
+**1. Métricas entre redes de tamanhos e densidades diferentes.** No nosso
+desenho a densidade varia por um fator de doze (de 0.008 a 0.1), porque o
+número de parceiros por fêmea vai de 5 a 20. Medimos quanto disso contamina
+cada métrica, controlando por tamanho e densidade:
+
+```{r r2}
+tibble(
+  `métrica` = c("modularidade", "centralização", "Is", "aninhamento (NODF)"),
+  `R² só da regra de escolha` = c(0.443, 0.247, 0.177, 0.019),
+  `R² parcial, controlando tamanho e densidade` = c(0.464, 0.259, 0.181, 0.039)
+) %>% kable(caption = "Estudo 1 (uma geração, sem evolução), 70.560 redes.")
+```
+
+Três aguentam. O **aninhamento não**: a regra de escolha explica 2% da sua
+variação e a densidade explica 45%. Como vocês lidam com isso? Vale a pena
+reportar a métrica relativa a um modelo nulo que preserve a sequência de graus,
+em vez do valor cru?
+
+**2. Duas métricas de concentração que se contradizem.** Numa mesma rede, ao
+mudar o censo de machos de 38 para 200, a centralização cai de 0.59 para 0.19 e
+o `Is` sobe de 0.50 para 6.95. Achamos que é a normalização pelo tamanho da
+rede. Qual das duas vocês reportariam?
+
+**3. Modularidade bipartida.** Usamos Louvain sobre a projeção unimodal porque
+`computeModules` bipartido leva segundos por rede e temos dezenas de milhares.
+É defensável? Há algo intermediário?
+
+---
+
+## Onde estão as coisas
+
+O motor é `Fase_Coevolucao.R`; a leitura dos resultados,
+`03_analise_coevolucao.R`; e as figuras, `10_Figuras_conceituais.R`. O relato de
+como o modelo foi construído, incluindo os erros que consertamos pelo caminho,
+está em `NOTA_coevolucao_primeiros_testes.md`.
