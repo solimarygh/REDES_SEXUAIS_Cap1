@@ -65,22 +65,42 @@ RODADAS <- c("bestOfN", "censoConst")
 # O regime do censo também entra no nome do arquivo, e desde a rodada de
 # setembro há os dois: sem sufixo é o TETO (200 como máximo, cada juvenil
 # sobrevive ou não de forma independente) e "_cota" é a COTA (200 como
-# capacidade de suporte, sorteados com peso proporcional à viabilidade). São
-# seleção dura e seleção branda, ou seja dois modelos biológicos distintos, e
-# juntá-los num conjunto só não significaria nada. Onde a cota existir é ela
-# que aparece, e a tabela de situação diz qual regime cada estudo está usando.
-CENSOS <- c("cota", "teto")
+# capacidade de suporte, sorteados com peso proporcional à viabilidade).
+#
+# A cota só foi rodada onde a decisão mudava alguma coisa, que é a metade COM
+# seleção natural: sem ela os dois regimes percorrem o mesmo caminho de código
+# e dão resultados idênticos. Então a regra não pode ser "se houver cota, use
+# só a cota", senão a metade sem seleção natural desaparece do documento.
+# É por regime de seleção natural: onde a cota cobre, manda a cota; o resto vem
+# do teto. Assim nenhum cenário aparece duas vezes e nenhum some.
 padrao_censo <- function(estudo, r, censo) {
   if (censo == "cota") sprintf("^(backup|resultados)_%s_%s.*cota.*\\.rds$", estudo, r)
   else                 sprintf("^(backup|resultados)_%s_%s(?!.*cota).*\\.rds$", estudo, r)
 }
 
+combinar_censo <- function(teto, cota) {
+  if (is.null(cota) || !nrow(cota)) return(teto)
+  if (is.null(teto) || !nrow(teto)) return(cota)
+  ns_cota <- unique(cota$selecao_natural)
+  bind_rows(cota, filter(teto, !(selecao_natural %in% ns_cota)))
+}
+
+descrever_censo <- function(teto, cota) {
+  tem <- function(x) !is.null(x) && nrow(x) > 0
+  if (!tem(cota)) return("teto")
+  if (!tem(teto)) return("cota")
+  if (all(unique(teto$selecao_natural) %in% unique(cota$selecao_natural))) "cota"
+  else "cota onde existe, teto no resto"
+}
+
 carregar_rodada <- function(pasta, estudo) {
-  for (r in RODADAS) for (cs in CENSOS) {
-    df <- juntar_pedacos(pasta, padrao_censo(estudo, r, cs))
+  for (r in RODADAS) {
+    teto <- juntar_pedacos(pasta, padrao_censo(estudo, r, "teto"))
+    cota <- juntar_pedacos(pasta, padrao_censo(estudo, r, "cota"))
+    df   <- combinar_censo(teto, cota)
     if (!is.null(df) && nrow(df) > 0) {
       attr(df, "rodada") <- r
-      attr(df, "censo")  <- cs
+      attr(df, "censo")  <- descrever_censo(teto, cota)
       return(df)
     }
   }

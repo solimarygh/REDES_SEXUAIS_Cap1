@@ -48,20 +48,40 @@ RODADAS <- c("bestOfN", "censoConst")
 
 # O regime do censo também entra no nome do arquivo: sem sufixo é o TETO (200
 # como máximo) e "_cota" é a COTA (200 como capacidade de suporte). São seleção
-# dura e seleção branda, dois modelos biológicos distintos, e juntá-los daria
-# duas linhas por réplica. Onde a cota existir é ela que aparece.
-CENSOS <- c("cota", "teto")
+# dura e seleção branda, dois modelos biológicos distintos.
+#
+# A cota só foi rodada na metade COM seleção natural, que é a única em que a
+# decisão muda alguma coisa. Por isso a escolha é por regime de seleção
+# natural, e não por arquivo: onde a cota cobre, manda a cota; o resto vem do
+# teto. Escolher só um dos dois arquivos apagaria metade do desenho.
 padrao_censo <- function(estudo, r, censo) {
   if (censo == "cota") sprintf("^(backup|resultados)_%s_%s.*cota.*\\.rds$", estudo, r)
   else                 sprintf("^(backup|resultados)_%s_%s(?!.*cota).*\\.rds$", estudo, r)
 }
 
+combinar_censo <- function(teto, cota) {
+  if (is.null(cota) || !nrow(cota)) return(teto)
+  if (is.null(teto) || !nrow(teto)) return(cota)
+  ns_cota <- unique(cota$selecao_natural)
+  bind_rows(cota, filter(teto, !(selecao_natural %in% ns_cota)))
+}
+
+descrever_censo <- function(teto, cota) {
+  tem <- function(x) !is.null(x) && nrow(x) > 0
+  if (!tem(cota)) return("teto")
+  if (!tem(teto)) return("cota")
+  if (all(unique(teto$selecao_natural) %in% unique(cota$selecao_natural))) "cota"
+  else "cota onde existe, teto no resto"
+}
+
 carregar_rodada <- function(pasta, estudo) {
-  for (r in RODADAS) for (cs in CENSOS) {
-    df <- juntar_pedacos(pasta, padrao_censo(estudo, r, cs))
+  for (r in RODADAS) {
+    teto <- juntar_pedacos(pasta, padrao_censo(estudo, r, "teto"))
+    cota <- juntar_pedacos(pasta, padrao_censo(estudo, r, "cota"))
+    df   <- combinar_censo(teto, cota)
     if (!is.null(df) && nrow(df) > 0) {
       attr(df, "rodada") <- r
-      attr(df, "censo")  <- cs
+      attr(df, "censo")  <- descrever_censo(teto, cota)
       return(df)
     }
   }

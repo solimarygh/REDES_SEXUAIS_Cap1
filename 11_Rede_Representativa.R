@@ -166,20 +166,32 @@ dados_do_estudo <- function(estudo) {
                        basename(todos))]
   if (!length(todos)) return(NULL)
 
-  # O regime do censo está no nome do arquivo, e desde a rodada de setembro há
-  # os dois: sem sufixo é o teto, "_cota" é a cota. São dois modelos
-  # biológicos, seleção dura e seleção branda, e lê-los juntos daria uma
-  # "célula" com duas linhas por réplica e uma média sobre as duas rodadas.
-  # Onde a cota existir é ela que vale; onde não, o teto.
-  eh_cota <- grepl("cota", basename(todos))
-  arqs    <- if (any(eh_cota)) todos[eh_cota] else todos
-
   ler <- function(a) {
     o <- readRDS(a)
     if (is.data.frame(o)) o else bind_rows(o[!vapply(o, is.null, logical(1))])
   }
-  df <- distinct(bind_rows(lapply(arqs, ler)))
-  attr(df, "censo") <- if (any(eh_cota)) "cota" else "teto"
+  juntar <- function(arqs) {
+    if (!length(arqs)) return(NULL)
+    distinct(bind_rows(lapply(arqs, ler)))
+  }
+
+  # O regime do censo está no nome do arquivo: sem sufixo é o teto, "_cota" é a
+  # cota. São dois modelos biológicos, seleção dura e seleção branda, e lê-los
+  # juntos daria uma "célula" com duas linhas por réplica.
+  #
+  # Mas a cota só foi rodada onde a decisão mudava alguma coisa, que é a metade
+  # COM seleção natural. Então a escolha é por regime de seleção natural, e não
+  # por arquivo: onde a cota cobre, manda a cota; o resto vem do teto. Ficar só
+  # com os arquivos da cota apagaria a metade sem seleção natural, que é
+  # justamente a que as figuras usam.
+  eh_cota <- grepl("cota", basename(todos))
+  cota <- juntar(todos[eh_cota])
+  teto <- juntar(todos[!eh_cota])
+
+  df <- if (is.null(cota)) teto else if (is.null(teto)) cota else {
+    bind_rows(cota, teto[!(teto$selecao_natural %in% unique(cota$selecao_natural)), , drop = FALSE])
+  }
+  if (is.null(df) || !nrow(df)) return(NULL)
   .cache_dados[[estudo]] <- df
   df
 }
