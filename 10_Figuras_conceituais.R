@@ -795,6 +795,15 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
   nome_estudo <- switch(estudo, "2" = "Estudo 2 (Fêmeas variando)",
                         "3" = "Estudo 3 (Machos variando)", "4" = "Estudo 4 (Co-evolução)")
 
+  # A célula tem de aparecer inteira no subtítulo. Sem o sigma, quem lê a figura
+  # não sabe em que ponto do gradiente está, e o gradiente é o eixo do estudo.
+  bonito <- c(sigma_p = "σp", sigma_z = "σz",
+              sigma_p_init = "σp inicial", sigma_z_init = "σz inicial")
+  quais      <- intersect(names(celula), names(bonito))
+  sigmas_txt <- paste(sprintf("%s = %s", bonito[quais],
+                              format(unlist(celula[quais]), trim = TRUE)),
+                      collapse = " | ")
+
   montagem <- if (deitada) bloco(lados[[1]]) / bloco(lados[[2]])
               else         bloco(lados[[1]]) | bloco(lados[[2]])
 
@@ -802,9 +811,10 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
     plot_annotation(
       title = sprintf("%s, preferência %s: a mesma população, cem gerações depois",
                       nome_estudo, labels_curva(tipo)),
-      subtitle = sprintf("%s\n%s | A_max = %d | k = %d | %s",
-                         o_que_anda, r$rotulo, A_max, k,
-                         if (selecao_natural) "com seleção natural" else "sem seleção natural"),
+      subtitle = sprintf("%s\n%s | A_max = %d | k = %d | %s\n%s",
+                         o_que_anda, sigmas_txt, A_max, k,
+                         if (selecao_natural) "com seleção natural" else "sem seleção natural",
+                         r$rotulo),
       caption = paste0(
         "Linha 1: a rede de acasalamentos. Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.\n",
         "Nas outras três, o eixo de baixo é o traço do macho, e é O MESMO nas duas colunas: sem isso a fuga do traço não se veria.\n",

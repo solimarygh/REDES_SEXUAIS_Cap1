@@ -127,8 +127,11 @@ ESTUDOS <- list(
 ARQUIVO_CACHE_REDES <- "Resultados_Artigo/Figuras/redes_representativas.rds"
 
 .impressao_motores <- local({
+  # Este script entra na impressão junto com os motores: se a regra de escolha
+  # da réplica mudar, o cache tem de ser refeito, senão as figuras continuam
+  # sendo as antigas sem que nada avise.
   arqs <- c("01_metricas_e_utilitarios.R", "Fase_Controle.R",
-            "Fase_Espelho.R", "Fase_Coevolucao.R")
+            "Fase_Espelho.R", "Fase_Coevolucao.R", "11_Rede_Representativa.R")
   function() {
     info <- file.info(arqs[file.exists(arqs)])
     paste(rownames(info), info$size, format(info$mtime), collapse = "|")
@@ -158,14 +161,25 @@ ARQUIVO_CACHE_REDES <- "Resultados_Artigo/Figuras/redes_representativas.rds"
 dados_do_estudo <- function(estudo) {
   if (!is.null(.cache_dados[[estudo]])) return(.cache_dados[[estudo]])
   e <- ESTUDOS[[estudo]]
-  arqs <- list.files(e$pasta, full.names = TRUE,
-                     pattern = sprintf("^(backup|resultados)_.*%s.*\\.rds$", e$padrao))
-  if (!length(arqs)) return(NULL)
+  todos <- list.files(e$pasta, full.names = TRUE)
+  todos <- todos[grepl(sprintf("^(backup|resultados)_.*%s.*\\.rds$", e$padrao),
+                       basename(todos))]
+  if (!length(todos)) return(NULL)
+
+  # O regime do censo está no nome do arquivo, e desde a rodada de setembro há
+  # os dois: sem sufixo é o teto, "_cota" é a cota. São dois modelos
+  # biológicos, seleção dura e seleção branda, e lê-los juntos daria uma
+  # "célula" com duas linhas por réplica e uma média sobre as duas rodadas.
+  # Onde a cota existir é ela que vale; onde não, o teto.
+  eh_cota <- grepl("cota", basename(todos))
+  arqs    <- if (any(eh_cota)) todos[eh_cota] else todos
+
   ler <- function(a) {
     o <- readRDS(a)
     if (is.data.frame(o)) o else bind_rows(o[!vapply(o, is.null, logical(1))])
   }
   df <- distinct(bind_rows(lapply(arqs, ler)))
+  attr(df, "censo") <- if (any(eh_cota)) "cota" else "teto"
   .cache_dados[[estudo]] <- df
   df
 }
@@ -237,6 +251,16 @@ rede_representativa <- function(estudo, ..., metrica = "Modularity",
     cat(sprintf("  aviso: %s não foi fixado, então a média percorre esses níveis.\n",
                 paste(soltas, collapse = ", ")))
 
+  # Uma célula tem uma linha por réplica. Se tiver mais, é porque os dados
+  # lidos juntaram duas rodadas do mesmo cenário (o backup com o resultado
+  # final, ou o teto com a cota), e a média está sendo tirada sobre um conjunto
+  # que não é o que o rótulo diz. Aviso em vez de deixar passar em silêncio.
+  n_rep <- length(unique(celula$replica))
+  if (nrow(celula) != n_rep)
+    warning(sprintf(
+      "Estudo %s: a célula tem %d linhas para %d réplicas. Os dados lidos estão juntando mais de uma rodada do mesmo cenário.",
+      estudo, nrow(celula), n_rep))
+
   # A réplica representativa: a mais próxima da média da célula.
   media   <- mean(celula[[metrica]])
   escolha <- celula[which.min(abs(celula[[metrica]] - media)), ]
@@ -298,8 +322,8 @@ rede_representativa <- function(estudo, ..., metrica = "Modularity",
   saida <- list(M = rede$M, metrics = rede$metrics, redes = redes, linhas = linhas,
                 replica = escolha$replica,
                 geracao = gen, semente = semente, media_celula = media, confere = confere,
-                rotulo = sprintf("réplica %d de %d, a mais próxima da média",
-                                 escolha$replica, nrow(celula)))
+                rotulo = sprintf("réplica %d de %d, a mais próxima da média da célula",
+                                 escolha$replica, n_rep))
   .cache_redes[[chave]] <<- saida
   .gravar_cache()
   saida

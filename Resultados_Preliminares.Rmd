@@ -34,7 +34,8 @@ carregar <- function(paths) {
   if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
 }
 juntar_pedacos <- function(pasta, padrao) {
-  arqs <- list.files(pasta, pattern = padrao, full.names = TRUE)
+  arqs <- list.files(pasta, full.names = TRUE)
+  arqs <- arqs[grepl(padrao, basename(arqs), perl = TRUE)]
   if (!length(arqs)) return(NULL)
   distinct(bind_rows(lapply(arqs, carregar)))
 }
@@ -45,25 +46,53 @@ juntar_pedacos <- function(pasta, padrao) {
 # sentido nenhum. A rodada efetivamente lida aparece na tabela de situação.
 RODADAS <- c("bestOfN", "censoConst")
 
+# O regime do censo também entra no nome do arquivo: sem sufixo é o TETO (200
+# como máximo) e "_cota" é a COTA (200 como capacidade de suporte). São seleção
+# dura e seleção branda, dois modelos biológicos distintos, e juntá-los daria
+# duas linhas por réplica. Onde a cota existir é ela que aparece.
+CENSOS <- c("cota", "teto")
+padrao_censo <- function(estudo, r, censo) {
+  if (censo == "cota") sprintf("^(backup|resultados)_%s_%s.*cota.*\\.rds$", estudo, r)
+  else                 sprintf("^(backup|resultados)_%s_%s(?!.*cota).*\\.rds$", estudo, r)
+}
+
 carregar_rodada <- function(pasta, estudo) {
-  for (r in RODADAS) {
-    df <- juntar_pedacos(pasta, sprintf("^(backup|resultados)_%s_%s.*\\.rds$", estudo, r))
-    if (!is.null(df) && nrow(df) > 0) { attr(df, "rodada") <- r; return(df) }
+  for (r in RODADAS) for (cs in CENSOS) {
+    df <- juntar_pedacos(pasta, padrao_censo(estudo, r, cs))
+    if (!is.null(df) && nrow(df) > 0) {
+      attr(df, "rodada") <- r
+      attr(df, "censo")  <- cs
+      return(df)
+    }
   }
   NULL
 }
 rodada_de <- function(x) if (is.null(x)) "-" else attr(x, "rodada") %||% "?"
+censo_de  <- function(x) if (is.null(x)) "-" else attr(x, "censo")  %||% "?"
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
 ct  <- carregar_rodada("Resultados_Artigo/Fase_Controle/Dados", "Controle")
 d   <- carregar_rodada("Resultados_Artigo/Fase5_MiudoV2/Dados", "Femeas")
 esp <- carregar_rodada("Resultados_Artigo/Fase_Espelho/Dados",  "Espelho")
 
-# Co-evolução: a metade SEM seleção natural, que é a que está fechada. O nome do
-# arquivo carrega o modo de segregação e a versão do motor, de propósito, para
-# que rodadas de motores diferentes nunca se misturem.
-co <- carregar(c("Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao_genica_neAdulto_sem_completo.rds",
-                 "Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao_genica_completo.rds"))
+# Co-evolução. As duas metades vêm em arquivos separados e as duas entram: a
+# metade SEM seleção natural (idêntica nos dois regimes de censo, porque ali o
+# código nem chega à parte da cota) e a metade COM, que rodou sob a cota. O nome
+# do arquivo carrega o modo de segregação e a versão do motor, de propósito,
+# para que rodadas de motores diferentes nunca se misturem.
+co <- local({
+  pasta <- "Resultados_Artigo/Fase_Coevolucao/Dados"
+  sem <- carregar(file.path(pasta,
+    c("resultados_Coevolucao_genica_neAdulto_sem_completo.rds",
+      "resultados_Coevolucao_genica_completo.rds")))
+  com <- carregar(file.path(pasta,
+    c("resultados_Coevolucao_genica_neAdulto_cota_com_completo.rds",
+      "resultados_Coevolucao_genica_neAdulto_cota_ambos_completo.rds")))
+  if (!is.null(com)) com <- filter(com, selecao_natural)
+  partes <- list(sem, com)
+  partes <- partes[!vapply(partes, is.null, logical(1))]
+  if (!length(partes)) NULL else distinct(bind_rows(partes))
+})
 
 ok <- function(x) !is.null(x) && nrow(x) > 0
 tem <- function(x, col) ok(x) && col %in% names(x)
@@ -133,21 +162,23 @@ juntos, e como k pesa bastante, vale conferir no anexo se o padrão se mantém e
 > os A_max machos, todos, e só depois fica com os k melhores entre os que aceitou. O desenho
 > está em `NOTA_quatro_estudos.md`.
 >
-> A regra deixou a seleção sexual bem mais forte, que era a intenção, e isso teve uma
-> consequência que ainda não está resolvida. Em Fêmeas variando, nas curvas *sigmoide* e
-> *disruptiva* com seleção natural ligada, o traço se afasta tanto do ótimo ecológico que a
-> viabilidade `V = exp(-gamma (z - phi)^2)` desaba para todos ao mesmo tempo, e sobram
-> pouquíssimos machos adultos. Nessas células a rede saiu de 200 fêmeas por dois ou três
-> machos, e modularidade, aninhamento e centralização não são comparáveis com as das outras. A
-> tabela de invariantes logo abaixo diz quanto do conjunto está nessa situação.
+> A regra deixou a seleção sexual bem mais forte, que era a intenção, e isso abriu o problema
+> do censo. Em Fêmeas variando, nas curvas *sigmoide* e *disruptiva* com seleção natural
+> ligada, o traço se afasta tanto do ótimo ecológico que a viabilidade
+> `V = exp(-gamma (z - phi)^2)` desaba para todos ao mesmo tempo, e sobram pouquíssimos machos
+> adultos. Nessas células a rede saiu de 200 fêmeas por dois ou três machos, e modularidade,
+> aninhamento e centralização não são comparáveis com as das outras. A tabela de invariantes
+> logo abaixo diz quanto do conjunto está nessa situação.
 >
 > O Controle e Machos variando não têm esse problema: neles o traço é sorteado de novo a cada
 > geração, sempre centrado em phi, então o censo fica nos 200 em todos os cenários.
 >
-> A próxima rodada vai tratar os 200 como cota, sorteando sempre 200 juvenis com peso
-> proporcional à viabilidade, de modo que a seleção decida quais machos e nunca quantos. A
-> seção "O censo de machos sob a regra nova" da nota explica a decisão e o que fica em aberto,
-> inclusive se gamma precisa mudar junto.
+> As metades afetadas dos Estudos 2 e 4 já rodaram de novo tratando os 200 como cota, ou seja
+> sorteando sempre 200 juvenis com peso proporcional à viabilidade, de modo que a seleção
+> decida quais machos e nunca quantos. É essa rodada que aparece aqui, e a comparação pareada
+> entre os dois regimes está em `NOTA_teto_contra_cota.md`. O que ficou em aberto é a escolha
+> entre seleção branda (cota) e seleção dura (teto), que são dois modelos biológicos
+> diferentes, e não a pergunta técnica de como manter o censo em 200.
 
 ```{r status}
 n_cen <- function(x, eixos) {
@@ -161,13 +192,15 @@ tibble(
   `O que evolui` = c("nada", "o traço do macho", "a preferência da fêmea", "os dois"),
   `Testa` = c("H1", "H2a", "H2b", "H4"),
   Rodada = c(rodada_de(ct), rodada_de(d), rodada_de(esp), if (ok(co)) "bestOfN" else "-"),
+  Censo = c(censo_de(ct), censo_de(d), censo_de(esp),
+            if (ok(co)) "sem NS: igual nos dois; com NS: cota" else "-"),
   Cenários = c(n_cen(ct, c("sigma_p", "sigma_z")), n_cen(d, "sigma_p"), n_cen(esp, "sigma_z"),
                n_cen(co, c("sigma_p_init", "sigma_z_init"))),
   Situação = c(if (ok(ct)) "concluído" else "pendente",
                if (ok(d))  "concluído" else "pendente",
                if (ok(esp)) "concluído" else "pendente",
-               if (ok(co)) "metade sem seleção natural" else "não rodado")
-) %>% kable(caption = "Situação dos estudos nesta rodada. H3 atravessa todos.")
+               if (ok(co)) "concluído" else "não rodado")
+) %>% kable(caption = "Situação dos estudos nesta rodada. H3 atravessa todos. No Controle e em Machos variando o traço é re-sorteado a cada geração e o censo nunca encurta, então os dois regimes dão o mesmo.")
 ```
 
 ### Conferência das invariantes
@@ -177,7 +210,9 @@ em todos os cenários, nenhuma réplica pode ter sido encerrada antes das 100 ge
 proporção de fêmeas sem acasalar precisa estar longe dos 92% que disparariam o caso degenerado.
 
 A coluna do censo é a que denuncia o problema descrito acima. Onde a proporção abaixo de 200 for
-maior que zero, aquele estudo tem células cuja topologia não é comparável com o resto.
+maior que zero, aquele estudo tem células cuja topologia não é comparável com o resto. Sob a
+cota ela dá zero por construção, porque as 200 vagas se preenchem sempre, então aqui a coluna
+serve para confirmar que a rodada lida é mesmo a nova.
 
 ```{r invariantes}
 checar_um <- function(x, nome) {
@@ -463,15 +498,16 @@ A_max = 200, que é exatamente o que a predição original diz.
 Este estudo e o seguinte são espelhos, e servem de replicação interna: se a relação for da rede e
 não da característica em particular, tem de aparecer nos dois lados.
 
-> Esta é a seção que o problema do censo mais atinge, e por isso vale repetir o aviso aqui.
+> Esta é a seção que o problema do censo mais atingia, e por isso vale repetir o aviso aqui.
 > As curvas sigmoide e disruptiva, com seleção natural ligada, são justamente onde o traço se
-> afasta do ótimo e o censo de machos desanda. Ou seja, o problema mora exatamente no canto do
-> desenho em que a resposta evolutiva é mais forte, que é o canto que esta hipótese quer olhar.
+> afasta do ótimo e o censo de machos desandava. Ou seja, o problema morava exatamente no canto
+> do desenho em que a resposta evolutiva é mais forte, que é o canto que esta hipótese quer
+> olhar.
 >
-> A figura logo abaixo é uma exceção e pode ser lida sem ressalva, porque mostra o regime *sem
-> seleção natural*, em que o censo é sempre 200 por construção. As tabelas e figuras desta
-> seção que juntam os dois regimes carregam a ressalva, e as conclusões que dependerem das duas
-> curvas com seleção natural precisam esperar a rodada com a cota.
+> Com a cota o censo é sempre 200 e essas células voltaram a ser comparáveis. O que mudou de
+> verdade foi a leitura: a subida da centralização que víamos ali era o censo curto, e o
+> resultado que fica no lugar dela é o Is, que aguenta a mudança de tamanho da rede. Está em
+> `NOTA_teto_contra_cota.md`.
 
 ```{r h2a-varz, fig.height=4.2}
 if (ok(d)) {
@@ -615,10 +651,11 @@ nenhuma. Ela só aparece na dinâmica inicial.
 > As duas características são herdáveis, e a topologia determina se a covariância genética entre
 > elas chega a se acumular.
 
-Rodou. A metade SEM seleção natural está fechada, 6.480 cenários, e é a que aparece aqui. A metade
-com seleção natural espera a decisão sobre o censo de machos, que é o assunto do aviso lá em cima,
-e por isso ainda não entra. O relato completo, incluindo o que descobrimos sobre o próprio modelo
-pelo caminho, está em `NOTA_coevolucao_primeiros_testes.md`.
+Rodou inteiro. A metade sem seleção natural são 6.480 cenários e a metade com seleção natural
+rodou depois, sob a cota. As tabelas e a figura desta seção mostram a metade sem seleção natural,
+que é onde o mecanismo de Fisher aparece sem a viabilidade competindo com ele. O relato completo,
+incluindo o que descobrimos sobre o próprio modelo pelo caminho, está em
+`NOTA_coevolucao_primeiros_testes.md`.
 
 Aqui a variância do traço se separa em duas: a *génica*, que governa a segregação, e a *total*,
 que a população exibe. A distância entre elas é o desequilíbrio de ligamento que o acasalamento

@@ -207,14 +207,17 @@ ela muda quais machos estão disponíveis, que é o efeito que nos
 interessa, e não quantos, que seria um confundimento de densidade. Na
 versão anterior a viabilidade agia depois do censo, o pool caía de 198
 para 124 ao longo do gradiente de sigma_z, e isso sozinho mexia em Is,
-centralização e aninhamento. A seção sobre o tamanho do pool de machos
-conta essa história por inteiro.
+centralização e aninhamento. A seção "O tamanho do pool de machos não é
+constante", em `NOTA_material_removido_2026-08-16.md`, conta essa
+história por inteiro.
 
 Com a regra de escolha nova a garantia deixou de valer nos cenários em
 que o traço foge do ótimo: a viabilidade absoluta desaba para todos os
-juvenis ao mesmo tempo e o censo não chega aos 200. O documento de
-Exploração por painéis mostra onde isso acontece e o que estamos
-pensando fazer.
+juvenis ao mesmo tempo e o censo não chega aos 200. Foi por isso que as
+metades afetadas dos Estudos 2 e 4 rodaram de novo tratando os 200 como
+cota, ou seja sorteando sempre 200 juvenis com peso proporcional à
+viabilidade. A comparação entre os dois regimes está em
+`NOTA_teto_contra_cota.md`.
 
 Quatro observações:
 
