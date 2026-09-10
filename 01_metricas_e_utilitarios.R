@@ -731,9 +731,12 @@ simulate_evolution <- function(
     # Os campos antigos (Gen1, Gen50, Matriz_M_Gen50) continuam como estavam,
     # porque Histograma_grau_femeas.R depende deles.
     if (quer_detalhes && t %in% alvos_detalhe) {
+      # female_s entra aqui porque sem ela não dá para redesenhar as curvas de
+      # aceite daquela geração: a curva de cada fêmea depende do seu pico E da
+      # sua exigência.
       detalhes[[paste0("gen", t)]] <-
         list(M = M, male_z = male_z_surv, female_p = female_p,
-             geracao = t, metrics = metrics)
+             female_s = female_s, geracao = t, metrics = metrics)
     }
     
     offspring <- produce_offspring(M, male_z_surv, female_z_gen, N_machos, N_femeas,

@@ -614,18 +614,29 @@ figura_estrutura_se_apaga <- function(curvas = c("sigmoid", "uniform"),
   invisible(NULL)
 }
 
+# O nome antigo continua funcionando.
+figura_mecanismo_coevolucao <- function(...) figura_mecanismo_geracoes("4", ...)
+
 labels_curva <- function(cv) c(uniform = "Aleatória", gaussian = "Gaussiana",
                                sigmoid = "Sigmoide", `u-shaped` = "Disruptiva")[[cv]]
 
 # =====================================================================
-# O MECANISMO DA CO-EVOLUÇÃO: A GERAÇÃO 1 CONTRA A 100
+# O MECANISMO AO LONGO DO TEMPO: A GERAÇÃO 1 CONTRA A 100
 # =====================================================================
 # O equivalente de figura_eixo() para o Estudo 4, com uma diferença de fundo.
 #
-# Nos Estudos 2 e 3 há um eixo IMPOSTO, e a figura contrasta sigma baixo contra
-# sigma alto: duas populações diferentes, montadas de propósito. No Estudo 4 não
-# há nada imposto, as duas características evoluem, então o contraste que faz
-# sentido é OUTRO: a mesma população na geração 1 e na geração 100.
+# figura_eixo() contrasta sigma baixo contra sigma alto: duas populações
+# diferentes, montadas de propósito. Esta contrasta OUTRA coisa: a mesma
+# população na geração 1 e na geração 100.
+#
+# E o que muda entre os três estudos é QUAL LADO SE MOVE, que é o contraste mais
+# bonito do conjunto:
+#
+#   Estudo 2 — a preferência é re-sorteada a cada geração, então as curvas de
+#     aceite ficam paradas e são os machos que correm por baixo delas.
+#   Estudo 3 — o espelho: o traço é re-sorteado, os machos ficam no lugar, e são
+#     as curvas que se deslocam.
+#   Estudo 4 — nada é imposto, e os dois se movem.
 #
 # As três linhas são as mesmas de sempre, e é aí que está a graça:
 #
@@ -639,18 +650,29 @@ labels_curva <- function(cv) c(uniform = "Aleatória", gaussian = "Gaussiana",
 #
 #   linha 3 — quantas parceiras cada macho teve. Na geração 1 uns poucos levam
 #     tudo; na geração 100, sob a sigmoide, todos levam quase o mesmo.
-figura_mecanismo_coevolucao <- function(tipo = "sigmoid", geracoes = 100L,
-                                        sigma_p_init = 1.0, sigma_z_init = 1.0,
-                                        A_max = 200L, k = 5L,
-                                        selecao_natural = FALSE, n_curvas = 14) {
+figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
+                                      tipo = "sigmoid", geracoes = 100L,
+                                      A_max = 200L, k = 5L,
+                                      selecao_natural = FALSE, n_curvas = 14,
+                                      ...) {
+  estudo <- match.arg(estudo)
 
-  r <- rede_representativa("4", sigma_p_init = sigma_p_init,
-                           sigma_z_init = sigma_z_init, tipo_selecao = tipo,
-                           encounters_n = A_max, k_fixo = k,
-                           selecao_natural = selecao_natural,
-                           capturar = c(1L, as.integer(geracoes)), verboso = FALSE)
+  # A célula, com o default de cada estudo se nada for pedido. Cada um chama os
+  # seus eixos de um jeito, e é essa a única coisa que muda entre eles aqui.
+  celula <- list(...)
+  padrao <- switch(estudo,
+                   "2" = list(sigma_p = 1.0),
+                   "3" = list(sigma_z = 1.0),
+                   "4" = list(sigma_p_init = 1.0, sigma_z_init = 1.0))
+  for (nm in names(padrao)) if (is.null(celula[[nm]])) celula[[nm]] <- padrao[[nm]]
+
+  r <- do.call(rede_representativa,
+               c(list(estudo), celula,
+                 list(tipo_selecao = tipo, encounters_n = A_max, k_fixo = k,
+                      selecao_natural = selecao_natural,
+                      capturar = c(1L, as.integer(geracoes)), verboso = FALSE)))
   if (is.null(r)) {
-    warning("Sem dados para esta célula do Estudo 4.")
+    warning("Sem dados para esta célula do estudo ", estudo, ".")
     return(invisible(NULL))
   }
 
@@ -713,12 +735,20 @@ figura_mecanismo_coevolucao <- function(tipo = "sigmoid", geracoes = 100L,
     (curvas(d) + ggtitle(titulo)) / casais(d) / sucesso(d)
   }
 
+  # O que se move é diferente em cada estudo, e é isso que a figura mostra.
+  o_que_anda <- switch(estudo,
+    "2" = "a preferência é re-sorteada a cada geração, então as curvas ficam paradas e são os MACHOS que correm",
+    "3" = "o traço é re-sorteado a cada geração, então os machos ficam no lugar e são as CURVAS que se deslocam",
+    "4" = "nada é imposto: as curvas e os machos se movem os dois")
+  nome_estudo <- switch(estudo, "2" = "Estudo 2 (Fêmeas variando)",
+                        "3" = "Estudo 3 (Machos variando)", "4" = "Estudo 4 (Co-evolução)")
+
   (col(lados[[1]]) | col(lados[[2]])) +
     plot_annotation(
-      title = sprintf("Estudo 4, preferência %s: a mesma população, cem gerações depois",
-                      labels_curva(tipo)),
-      subtitle = sprintf("as duas características evoluem | %s | A_max = %d | k = %d | %s",
-                         r$rotulo, A_max, k,
+      title = sprintf("%s, preferência %s: a mesma população, cem gerações depois",
+                      nome_estudo, labels_curva(tipo)),
+      subtitle = sprintf("%s\n%s | A_max = %d | k = %d | %s",
+                         o_que_anda, r$rotulo, A_max, k,
                          if (selecao_natural) "com seleção natural" else "sem seleção natural"),
       caption = paste0(
         "O eixo de baixo é o traço do macho nas três linhas, e é O MESMO nas duas colunas: sem isso a fuga do traço não se veria.\n",

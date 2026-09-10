@@ -189,9 +189,12 @@ simulate_espelho <- function(generations = 100, N_machos = 200, N_femeas = 200,
     # antes da reprodução, e não chama nada que sorteie, então a sequência de
     # números aleatórios é a mesma com ou sem isto.
     if (quer_detalhes && t %in% alvos_detalhe) {
+      # female_s entra aqui porque sem ela não dá para redesenhar as curvas de
+      # aceite daquela geração: a curva de cada fêmea depende do seu pico E da
+      # sua exigência.
       detalhes[[paste0("gen", t)]] <-
         list(M = M, male_z = male_z_surv, female_p = female_p,
-             geracao = t, metrics = metrics)
+             female_s = female_s, geracao = t, metrics = metrics)
     }
 
     # (5) Próxima geração: herda a preferência
