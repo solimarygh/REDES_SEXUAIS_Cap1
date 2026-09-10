@@ -613,6 +613,117 @@ labels_curva <- function(cv) c(uniform = "Aleatória", gaussian = "Gaussiana",
                                sigmoid = "Sigmoide", `u-shaped` = "Disruptiva")[[cv]]
 
 # =====================================================================
+# O MECANISMO DA CO-EVOLUÇÃO: A GERAÇÃO 1 CONTRA A 100
+# =====================================================================
+# O equivalente de figura_eixo() para o Estudo 4, com uma diferença de fundo.
+#
+# Nos Estudos 2 e 3 há um eixo IMPOSTO, e a figura contrasta sigma baixo contra
+# sigma alto: duas populações diferentes, montadas de propósito. No Estudo 4 não
+# há nada imposto, as duas características evoluem, então o contraste que faz
+# sentido é OUTRO: a mesma população na geração 1 e na geração 100.
+#
+# As três linhas são as mesmas de sempre, e é aí que está a graça:
+#
+#   linha 1 — as curvas de aceite de catorze fêmeas, com os machos disponíveis
+#     marcados no eixo. Na geração 1 as curvas estão em cima dos machos. Na
+#     geração 100, sob a sigmoide, os machos correram para a direita e as curvas
+#     ficaram para trás: dá para VER a preferência deixando de discriminar.
+#
+#   linha 2 — os casais, com a diagonal. Mostra se o acasalamento é assortativo
+#     e como isso muda ao longo das cem gerações.
+#
+#   linha 3 — quantas parceiras cada macho teve. Na geração 1 uns poucos levam
+#     tudo; na geração 100, sob a sigmoide, todos levam quase o mesmo.
+figura_mecanismo_coevolucao <- function(tipo = "sigmoid", geracoes = 100L,
+                                        sigma_p_init = 1.0, sigma_z_init = 1.0,
+                                        A_max = 200L, k = 5L,
+                                        selecao_natural = FALSE, n_curvas = 14) {
+
+  r <- rede_representativa("4", sigma_p_init = sigma_p_init,
+                           sigma_z_init = sigma_z_init, tipo_selecao = tipo,
+                           encounters_n = A_max, k_fixo = k,
+                           selecao_natural = selecao_natural,
+                           capturar = c(1L, as.integer(geracoes)), verboso = FALSE)
+  if (is.null(r)) {
+    warning("Sem dados para esta célula do Estudo 4.")
+    return(invisible(NULL))
+  }
+
+  ger <- c(1L, as.integer(geracoes))
+  lados <- lapply(ger, function(g) r$redes[[paste0("gen", g)]])
+  names(lados) <- paste0("gen", ger)
+  if (any(vapply(lados, is.null, logical(1)))) {
+    warning("Falta uma das gerações.")
+    return(invisible(NULL))
+  }
+  if (is.null(lados[[1]]$female_s)) {
+    warning("Esta rede foi guardada antes de female_s entrar na captura. ",
+            "Apague o cache (", ARQUIVO_CACHE_REDES, ") e rode de novo.")
+    return(invisible(NULL))
+  }
+
+  # O eixo é o MESMO nas duas colunas, senão a fuga do traço não se vê: com
+  # eixos livres, uma população em z = 5 e outra em z = 25 sairiam idênticas.
+  todos_z <- unlist(lapply(lados, function(d) d$male_z))
+  todos_p <- unlist(lapply(lados, function(d) d$female_p))
+  faixa   <- range(c(todos_z, todos_p))
+  grade_z <- seq(faixa[1], faixa[2], length.out = 400)
+  grau_max <- max(unlist(lapply(lados, function(d) rowSums(d$M))))
+
+  curvas <- function(d) {
+    idx <- sample(seq_along(d$female_p), min(n_curvas, length(d$female_p)))
+    df <- bind_rows(lapply(idx, function(i) {
+      tibble(femea = i, z = grade_z,
+             P = prob_de_aceite(grade_z, d$female_p[i], d$female_s[i], tipo))
+    }))
+    ggplot(df, aes(z, P, group = femea)) +
+      geom_line(color = "#E6B800", alpha = 0.75, linewidth = 0.7) +
+      geom_rug(data = tibble(z = d$male_z), aes(x = z), inherit.aes = FALSE,
+               sides = "b", alpha = 0.25, length = unit(0.05, "npc")) +
+      coord_cartesian(xlim = faixa, ylim = c(0, 1)) +
+      labs(x = NULL, y = "P(aceitar)") + theme_light(base_size = 12)
+  }
+
+  casais <- function(d) {
+    ar <- which(d$M == 1L, arr.ind = TRUE)
+    ggplot(tibble(z = d$male_z[ar[, 1]], p = d$female_p[ar[, 2]]), aes(z, p)) +
+      geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray55") +
+      geom_point(alpha = 0.25, size = 1.5, color = "#3BA273") +
+      coord_cartesian(xlim = faixa, ylim = faixa) +
+      labs(x = NULL, y = "pico da fêmea (p)") + theme_light(base_size = 12)
+  }
+
+  sucesso <- function(d) {
+    ggplot(tibble(z = d$male_z, grau = rowSums(d$M)), aes(z, grau)) +
+      geom_point(alpha = 0.45, size = 1.6, color = "#9932CC") +
+      coord_cartesian(xlim = faixa, ylim = c(0, grau_max)) +
+      labs(x = "traço do macho (z)", y = "parceiras do macho") +
+      theme_light(base_size = 12)
+  }
+
+  col <- function(d) {
+    titulo <- sprintf("Geração %d\nIs %.2f | modularidade %.2f\nzbar - pbar %.1f",
+                      d$geracao, d$metrics$I_s, d$metrics$Modularity,
+                      mean(d$male_z) - mean(d$female_p))
+    (curvas(d) + ggtitle(titulo)) / casais(d) / sucesso(d)
+  }
+
+  (col(lados[[1]]) | col(lados[[2]])) +
+    plot_annotation(
+      title = sprintf("Estudo 4, preferência %s: a mesma população, cem gerações depois",
+                      labels_curva(tipo)),
+      subtitle = sprintf("as duas características evoluem | %s | A_max = %d | k = %d | %s",
+                         r$rotulo, A_max, k,
+                         if (selecao_natural) "com seleção natural" else "sem seleção natural"),
+      caption = paste0(
+        "O eixo de baixo é o traço do macho nas três linhas, e é O MESMO nas duas colunas: sem isso a fuga do traço não se veria.\n",
+        "Linha 1: a curva de aceite de ", n_curvas, " fêmeas sorteadas, e os machos disponíveis marcados no eixo.\n",
+        "Linha 2: cada ponto é um casal, e a diagonal marca onde o macho é igual ao pico da fêmea.\n",
+        "Linha 3: quantas parceiras cada macho teve."),
+      theme = theme(plot.title = element_text(face = "bold", size = 15)))
+}
+
+# =====================================================================
 # O DESENHO DOS QUATRO ESTUDOS NO MESMO PLANO
 # =====================================================================
 # Um esquema, este sim, e não saída do motor. Serve para dizer numa figura só
