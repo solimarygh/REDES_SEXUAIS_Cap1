@@ -36,7 +36,12 @@
 
 suppressPackageStartupMessages({ library(dplyr); library(tidyr) })
 
-pasta <- "Resultados_Artigo/Fase5_MiudoV2/Dados"
+# Qual estudo:  Rscript 05_teto_contra_cota.R 2   (ou 4)
+ESTUDO <- {
+  a <- commandArgs(trailingOnly = TRUE)
+  if (length(a)) a[1] else "2"
+}
+stopifnot(ESTUDO %in% c("2", "4"))
 
 ler <- function(caminho) {
   if (!file.exists(caminho)) return(NULL)
@@ -44,27 +49,53 @@ ler <- function(caminho) {
   if (is.data.frame(o)) o else bind_rows(o[!vapply(o, is.null, logical(1))])
 }
 
-# O teto é a rodada de setembro, o desenho inteiro. Excluo explicitamente os
-# arquivos da cota para não misturar os dois regimes num só conjunto.
-arqs_teto <- setdiff(
-  list.files(pasta, pattern = "^resultados_Femeas_bestOfN.*\\.rds$", full.names = TRUE),
-  list.files(pasta, pattern = "cota",                                full.names = TRUE))
-teto <- bind_rows(lapply(arqs_teto, ler))
-cota <- ler(file.path(pasta, "resultados_Femeas_bestOfN_cota_nscom.rds"))
+# Onde estão as duas rodadas de cada estudo, e o que define uma célula.
+# O teto é a rodada anterior à decisão; a cota, a nova. Em ambos os casos
+# excluo explicitamente os arquivos do outro regime, para que os dois nunca se
+# misturem num conjunto só.
+CFG <- list(
+  "2" = list(
+    nome   = "Fêmeas variando",
+    pasta  = "Resultados_Artigo/Fase5_MiudoV2/Dados",
+    teto   = "^resultados_Femeas_bestOfN(?!.*cota).*\\.rds$",
+    cota   = "^resultados_Femeas_bestOfN_cota.*\\.rds$",
+    celula = c("tipo_selecao", "sigma_p", "encounters_n", "k_fixo", "replica")),
+  "4" = list(
+    nome   = "Co-evolução",
+    pasta  = "Resultados_Artigo/Fase_Coevolucao/Dados",
+    teto   = "^resultados_Coevolucao_genica(?!.*cota).*\\.rds$",
+    cota   = "^resultados_Coevolucao_genica.*cota.*\\.rds$",
+    celula = c("tipo_selecao", "sigma_p_init", "sigma_z_init",
+               "encounters_n", "k_fixo", "replica"))
+)[[ESTUDO]]
+
+junta <- function(padrao) {
+  arqs <- list.files(CFG$pasta, pattern = padrao, full.names = TRUE, perl = TRUE)
+  if (!length(arqs)) return(NULL)
+  cat("  lendo:", paste(basename(arqs), collapse = ", "), "\n")
+  distinct(bind_rows(lapply(arqs, ler)))
+}
+
+cat(sprintf("\nEstudo %s (%s)\n", ESTUDO, CFG$nome))
+teto <- junta(CFG$teto)
+cota <- junta(CFG$cota)
 
 if (is.null(teto) || is.null(cota))
-  stop("Faltam dados. Preciso da rodada de setembro (teto) e de ",
-       "resultados_Femeas_bestOfN_cota_nscom.rds.")
+  stop("Faltam dados para o estudo ", ESTUDO, ". Preciso das duas rodadas, ",
+       "a do teto e a da cota, na pasta ", CFG$pasta)
 
-# Só a metade que a decisão afeta.
+# Só a metade que a decisão afeta: com a seleção natural desligada os dois
+# regimes percorrem o mesmo caminho de código e dão resultados idênticos.
 teto <- teto %>% filter(selecao_natural) %>% mutate(regime = "teto")
 cota <- cota %>% filter(selecao_natural) %>% mutate(regime = "cota")
+if (!nrow(teto) || !nrow(cota))
+  stop("Uma das rodadas não tem células com seleção natural ligada.")
 G <- max(c(teto$generation, cota$generation), na.rm = TRUE)
 
 cat(sprintf("\nTeto: %s linhas. Cota: %s linhas. %d gerações.\n",
-            format(nrow(teto), big.mark = "."), format(nrow(cota), big.mark = "."), G))
+            format(nrow(teto), big.mark = " "), format(nrow(cota), big.mark = " "), G))
 
-CELULA   <- c("tipo_selecao", "sigma_p", "encounters_n", "k_fixo", "replica")
+CELULA   <- CFG$celula
 METRICAS <- c("Modularity", "Nestedness", "Centralization", "I_s")
 
 # ---------------------------------------------------------------------
@@ -115,7 +146,7 @@ pareado <- inner_join(
                                               zbar_males, varz_males, n_machos_surv),
   by = CELULA, suffix = c("_teto", "_cota"))
 
-cat(sprintf("  %s células emparelhadas.\n\n", format(nrow(pareado), big.mark = ".")))
+cat(sprintf("  %s células emparelhadas.\n\n", format(nrow(pareado), big.mark = " ")))
 
 diferenca_pareada <- function(col) {
   d <- pareado[[paste0(col, "_cota")]] - pareado[[paste0(col, "_teto")]]
@@ -135,7 +166,7 @@ cat("  decisão de fato muda:\n\n")
 curtas <- pareado %>% filter(n_machos_surv_teto < 200)
 if (nrow(curtas)) {
   cat(sprintf("  %s células (%.1f%% do total).\n\n",
-              format(nrow(curtas), big.mark = "."), 100 * nrow(curtas) / nrow(pareado)))
+              format(nrow(curtas), big.mark = " "), 100 * nrow(curtas) / nrow(pareado)))
   print(as.data.frame(
     curtas %>%
       summarise(across(ends_with(c("_teto", "_cota")), ~ round(mean(.x, na.rm = TRUE), 3))) %>%
