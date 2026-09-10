@@ -816,20 +816,21 @@ for (cv in CURVAS) {
 Na aba da aleatória as duas colunas saem iguais, e isso é o controle
 funcionando: com P = 0.5 para todo mundo, σp não tem por onde agir.
 
-### E o que cem gerações fazem com a rede {.tabset}
+### E o que cem gerações fazem {.tabset}
 
-A figura acima é a primeira geração: o mecanismo, antes de qualquer resposta
-evolutiva. Esta mostra a mesma coisa cem gerações depois, com o traço do macho
-já tendo evoluído.
+A figura acima contrasta σp baixo contra σp alto, duas populações diferentes.
+Esta contrasta outra coisa: **a mesma população na geração 1 e na geração 100**,
+com o traço do macho já tendo evoluído.
 
-As duas colunas são a geração 1 e a 100 da MESMA réplica, e não de duas
-réplicas diferentes: é um antes e depois de uma população só. As linhas são as
-duas pontas do gradiente de σp.
+Em cima a rede, e embaixo os três painéis do mecanismo que a produziu, todos da
+mesma réplica. Neste estudo a preferência é re-sorteada a cada geração, então as
+curvas de aceite ficam no mesmo lugar nas duas colunas e o que se desloca são os
+machos: dá para ver o traço correndo por baixo de curvas que não se mexem.
 
-```{r fem-rede-evolucao, results='asis', fig.width=10, fig.height=10}
+```{r fem-rede-evolucao, results='asis', fig.width=10, fig.height=12}
 for (cv in CURVAS) {
   cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
-  figura_rede_evolucao("2", tipo = cv)
+  print(figura_mecanismo_geracoes("2", tipo = cv))
   cat("\n\n")
 }
 ```
@@ -912,17 +913,20 @@ for (cv in CURVAS) {
 }
 ```
 
-### E o que cem gerações fazem com a rede {.tabset}
+### E o que cem gerações fazem {.tabset}
 
-O espelho da figura equivalente do Estudo 2, e vale comparar as duas. Lá o que
-evolui é o traço do macho e a rede muda porque o material mudou; aqui o
-material é re-sorteado igual em todas as gerações, e a rede muda porque as
-fêmeas passaram a querer outra coisa.
+O espelho exato da figura equivalente do Estudo 2, e vale abrir as duas lado a
+lado.
 
-```{r esp-rede-evolucao, results='asis', fig.width=10, fig.height=10}
+Lá as curvas de aceite ficavam paradas e os machos corriam. **Aqui é o
+contrário:** o traço é re-sorteado a cada geração, então os machos marcados no
+eixo de baixo estão no mesmo lugar nas duas colunas, e o que se desloca são as
+curvas. As fêmeas passaram a querer outra coisa.
+
+```{r esp-rede-evolucao, results='asis', fig.width=10, fig.height=12}
 for (cv in CURVAS) {
   cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
-  figura_rede_evolucao("3", tipo = cv)
+  print(figura_mecanismo_geracoes("3", tipo = cv))
   cat("\n\n")
 }
 ```
@@ -1270,6 +1274,23 @@ de Fisher. A sigmoide dá exatamente o mesmo desequilíbrio que a
 aleatória, ou seja nenhum: todas as fêmeas querem o mesmo
 independentemente do seu próprio pico, então o acasalamento é
 direcional, mas não assortativo.
+
+## 5.0 O que cem gerações fazem, curva por curva {.tabset}
+
+A mesma figura dos Estudos 2 e 3, e o contraste entre as três é o ponto:
+**aqui os dois lados se movem**. As curvas de aceite se deslocam E os machos
+correm, porque nada é imposto e as duas características evoluem.
+
+Sob a sigmoide, os machos correm mais depressa do que as curvas os seguem, e é
+por isso que a preferência acaba deixando de discriminar.
+
+```{r co-mecanismo, results='asis', fig.width=10, fig.height=12}
+for (cv in CURVAS) {
+  cat("\n\n### ", labels_4[[cv]], "\n\n", sep = "")
+  print(figura_mecanismo_geracoes("4", tipo = cv))
+  cat("\n\n")
+}
+```
 
 ## 5.1 A trajetória, e a seleção sexual apagando a si mesma
 
