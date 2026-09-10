@@ -243,18 +243,64 @@ para os dois lados.
 
 ---
 
+## A estrutura da rede ao longo das gerações
+
+As abas acima são duas fotos da rede, a geração 1 e a 100, e não dizem o que
+acontece no meio. Esta figura preenche isso: as quatro métricas de topologia
+geração a geração, uma linha por regra de escolha.
+
+Mesma célula das abas, e cada linha é a média das 20 réplicas com a sombra de
+um desvio. Cada painel tem a sua escala, porque as quatro métricas vêm em
+unidades diferentes.
+
+```{r estrutura, fig.width=12, fig.height=4}
+if (ok(co)) {
+  METS <- c(Modularity = "modularidade", Centralization = "centralização",
+            Nestedness = "aninhamento (NODF)", I_s = "oportunidade (Is)")
+  est <- co %>%
+    filter(!selecao_natural,
+           sigma_p_init == 1.0, sigma_z_init == 1.0,
+           encounters_n == 200, k_fixo == 5) %>%
+    dplyr::select(tipo_selecao, generation, all_of(names(METS))) %>%
+    pivot_longer(all_of(names(METS)), names_to = "met", values_to = "v") %>%
+    group_by(tipo_selecao, generation, met) %>%
+    summarise(m = mean(v, na.rm = TRUE), s = sd(v, na.rm = TRUE), .groups = "drop") %>%
+    mutate(met = factor(METS[met], levels = unname(METS)))
+  ggplot(est, aes(generation, m, color = tipo_selecao, fill = tipo_selecao)) +
+    geom_ribbon(aes(ymin = m - s, ymax = m + s), alpha = 0.13, color = NA) +
+    geom_line(linewidth = 1.1) +
+    facet_wrap(~met, scales = "free_y", nrow = 1) +
+    scale_color_manual(values = cores_4, labels = labels_4, name = NULL) +
+    scale_fill_manual(values = cores_4, guide = "none") +
+    labs(subtitle = "σp inicial = 1.0 | σz inicial = 1.0 | A_max = 200 | k = 5 | sem seleção natural\nMédia das 20 réplicas, sombra de ±1 desvio. Cada painel com a sua escala.",
+         x = "geração", y = NULL) +
+    theme_light(base_size = 12) + theme(legend.position = "top")
+}
+```
+
+A linha cinza da aleatória é a referência em todos os painéis: é a estrutura
+que uma rede sem escolha nenhuma produz, com este número de indivíduos e esta
+densidade. Onde uma regra encosta nela, a topologia dela deixou de se
+distinguir de acasalamento ao acaso.
+
+Vale reparar em quando isso acontece, e não só em se acontece. A conversa que
+eu queria ter é sobre esse ponto: uma rede que caminha para o valor da
+aleatória ao longo das gerações é um resultado sobre a seleção sexual, ou é o
+modelo saindo da faixa em que as curvas de preferência são definidas?
+
+---
+
 ## O traço e a preferência ao longo das gerações
 
-As figuras anteriores são duas fotos, a geração 1 e a 100. Esta é o filme
-inteiro, e mostra `zbar` e `pbar` em separado, geração a geração: por onde anda
-o traço e por onde anda a preferência. Nas figuras anteriores estava só a
-diferença entre os dois; aqui dá para ver qual dos dois se mexeu.
+A figura acima mostra a rede mudando. Esta mostra a população que a produz, com
+`zbar` e `pbar` em separado: por onde anda o traço dos machos e por onde anda a
+preferência das fêmeas. Nas redes só aparecia a diferença entre os dois; aqui
+dá para ver qual dos dois se mexeu.
 
-É a mesma célula das figuras anteriores, e cada linha é a média das 20
-réplicas, com a sombra de um desvio. A linha pontilhada marca 5, que é onde as
-duas características começam e onde estaria o ótimo se a seleção natural
-estivesse ligada. O eixo vertical é o mesmo nos quatro painéis, senão a fuga do
-traço sob a sigmoide não se veria.
+Mesma célula e mesma construção, média das 20 réplicas com a sombra de um
+desvio. A linha pontilhada marca 5, que é onde as duas características começam
+e onde estaria o ótimo se a seleção natural estivesse ligada. O eixo vertical é
+o mesmo nos quatro painéis, senão a fuga do traço sob a sigmoide não se veria.
 
 ```{r zp-trajetoria, fig.width=11, fig.height=4}
 if (ok(co)) {
@@ -296,10 +342,11 @@ resume num número só.
 
 ## As trajetórias
 
-A figura de cima é uma célula. Esta é o contrário: cada linha é a média das 81
-células daquela regra e das 20 réplicas de cada uma, geração a geração. Serve
-para ver a forma da trajetória, não o valor exato, e as células individuais
-variam bastante em torno dela.
+Tudo até aqui é uma célula do desenho. Esta figura é o contrário: cada linha é
+a média das 81 células daquela regra e das 20 réplicas de cada uma, geração a
+geração. Serve para ver se a forma das trajetórias se sustenta fora daquele
+canto, e não para ler valores exatos, porque as células individuais variam
+bastante em torno da média.
 
 ```{r trajetoria, fig.width=11, fig.height=5}
 if (ok(co)) {
