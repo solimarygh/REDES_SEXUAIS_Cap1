@@ -37,10 +37,13 @@ Uma população de 200 machos e 200 fêmeas, gerações discretas. Cada macho te
 traço `z`; cada fêmea tem um pico de preferência `p` e uma exigência `s`, e
 aceita um macho com probabilidade que depende de quão bem `z` casa com `p`.
 
-Testamos quatro regras de emparejamento: **aleatória** (aceita metade dos
-machos, sem discriminar), **gaussiana** (prefere quem se parece com o seu
-pico), **sigmoide** (quanto maior `z`, melhor) e **disruptiva** (prefere quem
-difere do seu pico).
+Testamos quatro regras de emparejamento, e cada uma leva daqui em diante a
+mesma cor que tem nas figuras:
+
+- <span style="color:#8a8a8a;font-weight:bold">aleatória</span> — aceita metade dos machos, sem discriminar
+- <span style="color:#E6B800;font-weight:bold">gaussiana</span> — prefere quem se parece com o seu próprio pico
+- <span style="color:#3BA273;font-weight:bold">sigmoide</span> — quanto maior `z`, melhor
+- <span style="color:#9932CC;font-weight:bold">disruptiva</span> — prefere quem difere do seu pico
 
 Neste estudo as duas características são herdáveis e evoluem juntas ao longo de
 100 gerações. Cada geração produz uma rede bipartida de acasalamentos, e é ela
@@ -103,15 +106,6 @@ figura_estrutura_se_apaga(curvas = c("gaussian", "uniform"))
 
 ```{r fig-ushaped, fig.width=11, fig.height=10}
 figura_estrutura_se_apaga(curvas = c("u-shaped", "uniform"))
-```
-
-### Aleatória sozinha
-
-O controle, visto de perto. Nada se move entre a geração 1 e a 100: é a régua
-contra a qual as outras três se leem.
-
-```{r fig-uniform, fig.width=11, fig.height=5.5}
-figura_estrutura_se_apaga(curvas = "uniform")
 ```
 
 ---
