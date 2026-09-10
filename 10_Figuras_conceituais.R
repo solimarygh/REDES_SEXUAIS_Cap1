@@ -630,8 +630,10 @@ figura_estrutura_se_apaga <- function(curvas = c("sigmoid", "uniform"),
   # aconteceu é o texto de cada uma.
   mtext("Estudo 4: a rede na geração 1 e na geração 100",
         outer = TRUE, side = 3, line = 1.5, cex = 1.3, font = 2)
-  mtext(sprintf("as duas características evoluem | %d machos e %d fêmeas | A_max = %d | k = %d | sem seleção natural",
-                200L, 200L, A_max, k),
+  mtext(sprintf("as duas características evoluem | %d machos e %d fêmeas | σp inicial = %s | σz inicial = %s | A_max = %d | k = %d | %s",
+                200L, 200L, format(sigma_p_init, trim = TRUE),
+                format(sigma_z_init, trim = TRUE), A_max, k,
+                if (selecao_natural) "com seleção natural" else "sem seleção natural"),
         outer = TRUE, side = 3, line = 0.2, cex = 0.85, col = "gray30")
   mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.",
         outer = TRUE, side = 1, line = 1.2, cex = 0.8, col = "gray30")

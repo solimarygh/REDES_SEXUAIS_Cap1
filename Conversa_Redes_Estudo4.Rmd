@@ -40,21 +40,54 @@ aceita um macho com probabilidade que depende de quão bem `z` casa com `p`.
 São quatro regras de acasalamento, e cada uma leva daqui em diante a cor que
 tem nas figuras:
 
-- <span style="color:#8a8a8a;font-weight:bold">aleatória</span> — aceita metade dos machos, sem discriminar
-- <span style="color:#E6B800;font-weight:bold">gaussiana</span> — prefere quem se parece com o seu próprio pico
-- <span style="color:#3BA273;font-weight:bold">sigmoide</span> — quanto maior `z`, melhor
-- <span style="color:#9932CC;font-weight:bold">disruptiva</span> — prefere quem difere do seu pico
+- <span style="color:#8a8a8a;font-weight:bold">aleatória</span>: aceita metade dos machos, sem discriminar
+- <span style="color:#E6B800;font-weight:bold">gaussiana</span>: prefere quem se parece com o seu próprio pico
+- <span style="color:#3BA273;font-weight:bold">sigmoide</span>: quanto maior `z`, melhor
+- <span style="color:#9932CC;font-weight:bold">disruptiva</span>: prefere quem difere do seu pico
 
 As duas características são herdáveis e evoluem juntas ao longo de 100
 gerações. Cada geração produz uma rede bipartida de acasalamentos, e é ela que
-medimos.
+medimos. A exigência `s` é sorteada de novo a cada geração e nunca é herdada,
+então ela não evolui em nenhum cenário.
+
+### O desenho, e o que este documento mostra
+
+O Estudo 4 cruza cinco fatores. Todo número deste documento vem de algum ponto
+desta grade, e vale ter a grade à vista para saber de qual:
+
+| fator | níveis |
+|---|---|
+| regra de escolha | aleatória, gaussiana, sigmoide, disruptiva |
+| σp inicial, dispersão da preferência na geração 1 | 0.5, 1.0, 2.0 |
+| σz inicial, dispersão do traço na geração 1 | 0.5, 1.0, 2.0 |
+| A_max, quantos machos cada fêmea avalia | 200, 40, 10 |
+| k, com quantos ela pode acasalar | 5, 10, 20 |
+| seleção natural sobre o traço | ligada, desligada |
+
+Fixada a regra de escolha e o regime de seleção natural, sobram 3 x 3 x 3 x 3 =
+81 combinações, cada uma rodada 20 vezes. Com as quatro regras, são 6.480
+corridas de 100 gerações em cada metade do desenho.
+
+Duas restrições valem para o documento inteiro. Primeira, tudo aqui é a metade
+**sem seleção natural**, que é onde o mecanismo de Fisher aparece sem a
+viabilidade competindo com ele. Segunda, as figuras mostram sempre a mesma
+célula, σp inicial = 1.0, σz inicial = 1.0, A_max = 200 e k = 5, que é a mais
+permissiva do desenho: a fêmea vê todos os machos e fica com os 5 melhores. As
+tabelas dizem no rodapé se são dessa célula ou de todas.
 
 ### Vocabulário
 
-*Célula*: uma combinação de parâmetros do desenho, ou seja regra de escolha,
-dispersão inicial do traço, dispersão inicial da preferência, quantos machos a
-fêmea avalia e quantos aceita. Cada uma rodou 20 vezes, e essas 20 são as
-réplicas. "A réplica mais próxima da média" é a média dessas 20.
+*Célula*: uma combinação concreta dos fatores acima. Cada célula rodou 20
+vezes, com sementes diferentes, e essas 20 corridas são as réplicas.
+
+*Réplica mais próxima da média*: quando uma figura desenha uma rede, ela não
+desenha uma rede inventada nem uma média de redes, que não existiria. Desenha
+uma das 20 réplicas daquela célula, a que tem a modularidade mais perto da
+média das 20, reconstruída a partir da semente original.
+
+*zbar* e *pbar*: a média do traço e a média do pico de preferência na população
+inteira, machos e fêmeas juntos, porque os dois sexos carregam as duas
+características e só expressam uma delas.
 
 *Is*, oportunidade de seleção sexual: a variância no número de parceiras entre
 os machos, dividida pela média ao quadrado. Zero quer dizer que todos acasalam
@@ -62,19 +95,24 @@ igual; quanto maior, mais desigual é o sucesso.
 
 *Ne*, tamanho efetivo da população: o tamanho que uma população ideal
 precisaria ter para derivar tanto quanto esta. Se uns poucos machos deixam
-quase todos os filhos, o Ne fica bem abaixo do número de indivíduos.
+quase todos os filhos, o Ne fica bem abaixo do número de indivíduos. Aqui o
+censo são os 400 adultos, 200 de cada sexo, então Ne = 400 seria uma população
+sem nenhuma desigualdade de sucesso reprodutivo.
 
 ---
 
 ## A rede na geração 1 e na geração 100 {.tabset}
 
-Cada aba compara uma regra com a aleatória, que é o controle sem escolha. Em
-cada linha, a mesma réplica na geração 1 e na 100.
+Cada aba compara uma regra com a aleatória, que é o controle sem escolha. São
+quatro redes: em cima a regra que dá nome à aba, embaixo a aleatória, e as duas
+colunas são a geração 1 à esquerda e a geração 100 à direita. Cada linha
+acompanha uma réplica só, a mesma nas duas gerações.
 
 A geração 1 é a rede antes de qualquer resposta evolutiva, então o controle
-está dentro do próprio estudo.
+está dentro do próprio estudo, e não numa rodada à parte.
 
-Nos rótulos, *modularidade* é o quanto a rede se divide em grupos que acasalam
+Os números impressos em cada rede são os daquela réplica, e não médias.
+*Modularidade* é o quanto a rede se divide em grupos que acasalam
 preferencialmente entre si, e *centralização* é o quanto os acasalamentos se
 concentram em poucos indivíduos.
 
@@ -85,14 +123,16 @@ figura_estrutura_se_apaga(curvas = c("sigmoid", "uniform"))
 ```
 
 Na geração 1 uns poucos machos levam quase todas as fêmeas, e mais de cem ficam
-sem acasalar (os cinzas). Na geração 100 a rede tem *os mesmos números que o
-controle aleatório*: modularidade 0.44 contra 0.44, centralização 0.013 contra
-0.015.
+sem acasalar (os cinzas). Na geração 100 a rede desta réplica tem os mesmos
+números que a réplica da aleatória embaixo: modularidade 0.44 contra 0.44,
+centralização 0.013 contra 0.015.
 
-A variância do traço quase não se mexeu nesse tempo, e a distância entre `zbar`
-e `pbar` passa de zero para mais de vinte. Ou seja, não é perda de variação, é
-deslocamento da média. Se isso basta para explicar o apagamento, ou se falta
-alguma coisa, é uma das perguntas que trago.
+Os outros dois números impressos, `var(z)` e `zbar - pbar`, são desta mesma
+réplica: a variância do traço quase não se mexe entre as duas gerações,
+enquanto a distância entre traço e preferência passa de zero para mais de
+vinte. Ou seja, não é perda de variação, é deslocamento da média. Se isso basta
+para explicar o apagamento, ou se falta alguma coisa, é uma das perguntas que
+trago.
 
 ### Gaussiana
 
@@ -101,8 +141,8 @@ figura_estrutura_se_apaga(curvas = c("gaussian", "uniform"))
 ```
 
 Aqui não se apaga nada, e é o contraste com a aba anterior. A modularidade se
-mantém alta e a rede da geração 100 continua bem diferente do controle. A
-distância entre `zbar` e `pbar` fica em zero o tempo todo.
+mantém alta e a rede da geração 100 continua bem diferente da aleatória
+embaixo. A distância entre traço e preferência fica em zero nas duas gerações.
 
 Sob a gaussiana cada fêmea quer um macho parecido com o seu *próprio* pico, e
 os picos diferem entre elas, o que amarraria traço e preferência e não deixaria
@@ -115,27 +155,37 @@ veem outra.
 figura_estrutura_se_apaga(curvas = c("u-shaped", "uniform"))
 ```
 
+A disruptiva chega perto da aleatória na geração 100, como a sigmoide, mas o
+número que se move é outro. Aqui `zbar - pbar` fica pequeno e quem cresce é o
+`var(z)`: a distribuição do traço se alarga em vez de a média se deslocar.
+
 ---
 
 ## Os indivíduos por trás da rede {.tabset}
 
-A figura anterior mostra a rede; esta mostra quem a formou, na mesma réplica e
-nas mesmas duas gerações.
+A figura anterior mostra a rede; esta mostra quem a formou. É a mesma célula, a
+mesma réplica e as mesmas duas gerações, agora com os indivíduos à vista. Duas
+colunas, geração 1 à esquerda e geração 100 à direita, e quatro linhas em cada
+uma:
 
-Em cima, a curva de aceite de catorze fêmeas sorteadas, com os machos
-disponíveis marcados no eixo. Na geração 1 as curvas estão em cima dos machos.
-Na 100, sob a sigmoide, os machos correram para a direita e as curvas ficaram
-para trás. A preferência não mudou de forma; o material saiu do alcance dela.
-
-No meio, os casais, com a diagonal marcando onde o macho é igual ao pico da
-fêmea. Embaixo, quantas parceiras teve cada macho.
+1. A rede, a mesma da figura anterior, para servir de referência.
+2. A curva de aceite de catorze fêmeas sorteadas dessa réplica. O eixo de baixo
+   é o traço do macho, e os tracinhos nele são os machos que existiam naquela
+   geração.
+3. Um ponto por casal: o traço do macho contra o pico da fêmea. A diagonal
+   marca onde os dois são iguais, então pontos sobre a diagonal são
+   acasalamento assortativo.
+4. Quantas parceiras teve cada macho, contra o traço dele.
 
 O eixo horizontal é o mesmo nas duas colunas de propósito. Com eixos livres,
 uma população em z = 5 e outra em z = 25 sairiam idênticas e a fuga do traço
 desapareceria da figura.
 
-A aba que abre é a aleatória, para servir de linha de base: com P = 0.5 para
-todo mundo, a geração 100 sai praticamente igual à geração 1.
+O que muda entre as abas é só a regra de escolha. A aba que abre é a aleatória,
+para servir de linha de base: com P = 0.5 para todo mundo, a geração 100 sai
+praticamente igual à geração 1. Na sigmoide, a comparação para fazer é entre os
+tracinhos e as curvas na geração 100: os machos correram para a direita e as
+curvas ficaram para trás, sem mudar de forma.
 
 ### Aleatória
 
@@ -165,6 +215,11 @@ figura_mecanismo_coevolucao("u-shaped")
 
 ## As trajetórias
 
+As figuras acima são uma réplica de uma célula. Esta é o contrário: cada linha
+é a média das 81 células daquela regra e das 20 réplicas de cada uma, geração a
+geração. Serve para ver a forma da trajetória, não o valor exato, e as células
+individuais variam bastante em torno dela.
+
 ```{r trajetoria, fig.width=11, fig.height=5}
 if (ok(co)) {
   tr <- co %>% filter(!selecao_natural) %>%
@@ -178,7 +233,7 @@ if (ok(co)) {
     geom_line(linewidth = 1.1) +
     facet_wrap(~name, scales = "free_y") +
     scale_color_manual(values = cores_4, labels = labels_4, name = NULL) +
-    labs(subtitle = "Média sobre todas as células sem seleção natural. Censo de 400 adultos.",
+    labs(subtitle = "Média das 81 células de cada regra (todos os sigma iniciais, A_max e k) e das 20 réplicas de cada uma. Sem seleção natural.\nCenso de 400 adultos, então Ne = 400 seria uma população sem desigualdade de sucesso reprodutivo.",
          x = "geração", y = NULL) +
     theme_light(base_size = 12) + theme(legend.position = "top")
 }
@@ -198,21 +253,55 @@ média sobre células?
 
 ## Desequilíbrio de ligamento
 
-É a diferença entre a variância total do traço na população e a variância
-génica, que é a que a segregação transmite. Mede o excesso de variância que o
-acasalamento não aleatório empilha, e some quando o acasalamento é aleatório.
+O motor guarda duas variâncias do traço. A *total* é a que a população exibe, e
+é a que se mediria olhando os indivíduos. A *génica* é a que a segregação
+transmite aos filhotes. A diferença entre as duas é o desequilíbrio de
+ligamento: o excesso de variância que o acasalamento não aleatório empilha sem
+que exista genótipo novo por trás. Vale zero quando o acasalamento é aleatório.
 
-```{r ld}
+A tabela abaixo é da mesma célula das figuras, na geração 100, e cada valor é a
+média das 20 réplicas com o desvio entre elas.
+
+```{r ld-celula}
 if (ok(co)) {
-  co %>% filter(generation == max(generation), !selecao_natural) %>%
+  G <- max(co$generation, na.rm = TRUE)
+  ld <- co %>%
+    filter(generation == G, !selecao_natural) %>%
+    mutate(desequilibrio = varz_pop - var_genica_z)
+
+  mm <- function(x) sprintf("%.2f ± %.2f", mean(x, na.rm = TRUE), sd(x, na.rm = TRUE))
+  ld %>%
+    filter(sigma_p_init == 1.0, sigma_z_init == 1.0,
+           encounters_n == 200, k_fixo == 5) %>%
     group_by(tipo_selecao) %>%
-    summarise(`var total` = round(mean(varz_pop), 2),
-              `var génica` = round(mean(var_genica_z), 2),
-              `desequilíbrio` = round(mean(varz_pop - var_genica_z), 2),
-              `cor(z,p)` = round(mean(cor_zp), 2), .groups = "drop") %>%
+    summarise(`réplicas` = n(),
+              `var total` = mm(varz_pop),
+              `var génica` = mm(var_genica_z),
+              `desequilíbrio` = mm(desequilibrio),
+              `cor(z,p)` = mm(cor_zp), .groups = "drop") %>%
     mutate(tipo_selecao = labels_4[tipo_selecao]) %>%
     rename(regra = tipo_selecao) %>%
-    kable(caption = "Geração 100, média sobre todas as células sem seleção natural.")
+    kable(caption = "Uma célula só: σp inicial = 1.0, σz inicial = 1.0, A_max = 200, k = 5, sem seleção natural, geração 100. Média ± desvio entre as réplicas.")
+}
+```
+
+E esta diz se aquela célula é representativa. Cada uma das 81 células de uma
+regra tem a sua média de desequilíbrio; o que está aqui é a mediana e os
+extremos dessas 81:
+
+```{r ld-todas}
+if (ok(co)) {
+  ld %>%
+    group_by(tipo_selecao, sigma_p_init, sigma_z_init, encounters_n, k_fixo) %>%
+    summarise(d = mean(desequilibrio, na.rm = TRUE), .groups = "drop") %>%
+    group_by(tipo_selecao) %>%
+    summarise(`células` = n(),
+              `mediana` = round(median(d), 2),
+              `mínimo` = round(min(d), 2),
+              `máximo` = round(max(d), 2), .groups = "drop") %>%
+    mutate(tipo_selecao = labels_4[tipo_selecao]) %>%
+    rename(regra = tipo_selecao) %>%
+    kable(caption = "Desequilíbrio de ligamento na geração 100, célula por célula, sem seleção natural. Uma célula é uma combinação de σp inicial, σz inicial, A_max e k, e a sua média é sobre as 20 réplicas.")
 }
 ```
 
@@ -233,11 +322,17 @@ vocês.
 
 ## Perguntas
 
+As três perguntas usam números de fora do Estudo 4, e digo de onde vem cada
+um. São problemas de método que atravessam os quatro estudos, e é sobre eles
+que vocês sabem mais do que eu.
+
 ### Métricas entre redes de tamanhos e densidades diferentes
 
-No nosso desenho a densidade varia por um fator de doze, de 0.008 a 0.1, porque
-o número de parceiros por fêmea vai de 5 a 20. Medimos quanto disso contamina
-cada métrica, controlando por tamanho e densidade:
+Estes números são do Estudo 1, o controle sem evolução, que cruza a grade
+inteira numa geração só e por isso dá a melhor amostra de redes. A densidade
+varia por um fator de doze, de 0.008 a 0.1, porque o número de parceiros por
+fêmea vai de 5 a 20. Medimos quanto disso contamina cada métrica, controlando
+por tamanho e densidade:
 
 ```{r r2}
 tibble(
@@ -254,7 +349,10 @@ valor cru?
 
 ### Duas métricas de concentração que se contradizem
 
-Numa mesma rede, ao mudar o censo de machos de 38 para 200, a centralização cai
+Este vem do Estudo 2, das células com seleção natural em que o traço fugiu
+tanto do ótimo que quase nenhum macho sobrevivia. Rodamos as mesmas células
+duas vezes, com a mesma semente, mudando só como o censo de 200 é imposto, e o
+censo de machos passou de 38 para 200. Nas mesmas células a centralização cai
 de 0.59 para 0.19 e o Is sobe de 0.50 para 6.95. Suspeito que seja a
 normalização pelo tamanho da rede. Qual das duas vocês reportariam?
 
@@ -268,7 +366,14 @@ intermediário?
 
 ## Arquivos
 
-O motor é `Fase_Coevolucao.R`, a leitura dos resultados é
-`03_analise_coevolucao.R` e as figuras saem de `10_Figuras_conceituais.R`. Como
-o modelo foi construído, incluindo os erros que consertamos pelo caminho, está
-em `NOTA_coevolucao_primeiros_testes.md`.
+O motor do Estudo 4 é `Fase_Coevolucao.R` e a leitura dos resultados é
+`03_analise_coevolucao.R`. As figuras saem de `10_Figuras_conceituais.R`, e as
+redes que elas desenham são recuperadas por `11_Rede_Representativa.R`, que
+reconstrói a réplica a partir da semente original e confere que a métrica
+reproduzida bate com a guardada.
+
+O desenho dos quatro estudos está em `NOTA_quatro_estudos.md`. Como este modelo
+foi construído, incluindo os erros que consertamos pelo caminho, está em
+`NOTA_coevolucao_primeiros_testes.md`. A comparação dos dois regimes de censo,
+de onde saem os números da segunda pergunta, está em
+`NOTA_teto_contra_cota.md`.
