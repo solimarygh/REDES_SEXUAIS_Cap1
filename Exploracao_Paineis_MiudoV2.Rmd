@@ -968,7 +968,7 @@ render_tabs(function(kk, amax, ns)
 
 ------------------------------------------------------------------------
 
-# 4. Os três estudos no mesmo plano modo heatmap ;)
+# 4. Os quatro estudos no mesmo plano modo heatmap ;)
 
 A ideia desta seção legal é do Miudo, e serve para responder a pergunta
 que as seções anteriores não conseguem fazer: o que o Controle diz sobre
@@ -982,6 +982,14 @@ posição vertical não se mexe; já σz é livre, e a geração 100 pode estar
 num σz bem diferente do 1.0 de onde partiu. Em Machos variando é o
 espelho: σz fica onde foi posto e σp é que anda.
 
+A Co-evolução é o caso extremo: ali **nada é imposto**, as duas
+dispersões são medidas e as duas andam. Por isso a célula não fica presa
+a uma coluna nem a uma linha, e pode aparecer em qualquer ponto do
+plano. É o único estudo em que isso acontece, e ver onde as células vão
+parar é a resposta visual a uma pergunta que os painéis anteriores não
+fazem: quando ninguém segura nenhum dos dois eixos, para onde a
+população caminha?
+
 Então aqui cada estudo aparece duas vezes, na geração 1 e na geração
 100, sobre a mesma grade 7×7 do Controle e com a mesma escala de cor em
 todas as linhas da figura. É essa escala compartilhada que faz a
@@ -993,7 +1001,12 @@ Controle não previa.
 Só uma parte da grade fica pintada, e isso é o desenho e não falta de
 dado. Na geração 1 de Fêmeas variando só existe a coluna σz = 1.0,
 porque é ali que todos os cenários começam; na de Machos variando, só a
-linha σp = 1.0.
+linha σp = 1.0. Na Co-evolução a geração 1 cai nos três valores de
+partida do desenho (0.5, 1.0 e 2.0) nos dois eixos, e da geração 100 sai
+onde sair.
+
+Das linhas da Co-evolução só entra a metade SEM seleção natural, que é a
+que está fechada e a que não depende da decisão sobre o censo.
 
 **Avisos:**
 
@@ -1091,12 +1104,37 @@ plano <- local({
       dplyr::select(-generation, -sig_p_medido)
   }
 
+  # Co-evolução: NADA é imposto, as duas dispersões são medidas e as duas andam.
+  # Por isso a célula não fica presa a uma coluna nem a uma linha: ela pode
+  # aparecer em qualquer ponto do plano, e é o único estudo em que isso acontece.
+  # Só entra a metade SEM seleção natural, que é a que está fechada e a que não
+  # depende da decisão do censo.
+  if (ok(co)) {
+    g <- max(co$generation, na.rm = TRUE)
+    partes$co <- co %>%
+      filter(generation %in% c(1L, g), !selecao_natural) %>%
+      group_by(across(all_of(CHAVE)), generation) %>%
+      summarise(sig_z_medido = mean(sqrt(varz_pop), na.rm = TRUE),
+                sig_p_medido = mean(sqrt(varp_pop), na.rm = TRUE),
+                across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
+                desvio_media = mean(abs(zbar_pop - 5), na.rm = TRUE),
+                censo_curto = mean(n_machos_surv < 200, na.rm = TRUE),
+                .groups = "drop") %>%
+      mutate(sig_z  = encaixar(sig_z_medido),
+             sig_p  = encaixar(sig_p_medido),
+             fora   = sig_z_medido > max(NIVEIS_SIGMA) | sig_p_medido > max(NIVEIS_SIGMA),
+             painel = sprintf("Co-evolução · geração %d", generation)) %>%
+      dplyr::select(-generation, -sig_z_medido, -sig_p_medido)
+  }
+
   if (!length(partes)) NULL else {
     ordem <- c("Controle (superfície completa)",
                "Fêmeas variando · geração 1", sprintf("Fêmeas variando · geração %d",
                  if (ok(d)) max(d$generation, na.rm = TRUE) else 100),
                "Machos variando · geração 1", sprintf("Machos variando · geração %d",
-                 if (ok(esp)) max(esp$generation, na.rm = TRUE) else 100))
+                 if (ok(esp)) max(esp$generation, na.rm = TRUE) else 100),
+               "Co-evolução · geração 1", sprintf("Co-evolução · geração %d",
+                 if (ok(co)) max(co$generation, na.rm = TRUE) else 100))
     bind_rows(partes) %>% mutate(painel = factor(painel, levels = unique(ordem)))
   }
 })
