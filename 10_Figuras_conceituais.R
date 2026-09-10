@@ -550,6 +550,69 @@ figura_rede_evolucao <- function(estudo = c("2", "3"),
 }
 
 # =====================================================================
+# O ESTUDO 4 EM UMA FIGURA: A ESTRUTURA SE APAGA
+# =====================================================================
+# Esta é a figura da conversa com o pessoal de redes, e conta o resultado
+# inteiro sozinha.
+#
+# Cada linha é uma curva de preferência; as colunas são a geração 1 e a 100 da
+# MESMA réplica. Sob a sigmoide, a rede da geração 1 é uma estrela, com poucos
+# machos levando quase todas as fêmeas, e a da geração 100 é indistinguível de
+# uma rede aleatória. A variância do traço, que vai no rótulo, é praticamente a
+# mesma nas duas: não é perda de variação, é a média do traço saindo da faixa
+# em que a preferência distingue.
+#
+# O Estudo 4 traz o seu próprio controle e o seu próprio nulo, e por isso esta
+# figura não precisa emprestar nada do Estudo 1. A GERAÇÃO 1 é a rede antes de
+# qualquer resposta evolutiva, e a CURVA ALEATÓRIA é o nulo, na mesma
+# simulação e com os mesmos parâmetros. Dizer "aqui, na geração 1, as curvas já
+# dão topologias diferentes; olhem a geração 100" é mais limpo do que pedir ao
+# público que acredite num experimento que não está vendo.
+figura_estrutura_se_apaga <- function(curvas = c("sigmoid", "uniform"),
+                                      geracoes = 100L,
+                                      sigma_p_init = 1.0, sigma_z_init = 1.0,
+                                      A_max = 200L, k = 5L,
+                                      selecao_natural = FALSE) {
+
+  op <- par(mfrow = c(length(curvas), 2), mar = c(1.5, 1.5, 6, 1.5),
+            oma = c(3.5, 0, 4, 0))
+  on.exit(par(op), add = TRUE)
+
+  for (cv in curvas) {
+    r <- rede_representativa("4", sigma_p_init = sigma_p_init,
+                             sigma_z_init = sigma_z_init, tipo_selecao = cv,
+                             encounters_n = A_max, k_fixo = k,
+                             selecao_natural = selecao_natural,
+                             capturar = c(1L, as.integer(geracoes)), verboso = FALSE)
+    for (g in c(1L, as.integer(geracoes))) {
+      if (is.null(r) || is.null(r$redes[[paste0("gen", g)]])) {
+        plot.new(); title(main = sprintf("%s, geração %d\n(sem dados)",
+                                         labels_curva(cv), g), font.main = 1)
+        next
+      }
+      d  <- r$redes[[paste0("gen", g)]]
+      li <- r$linhas[r$linhas$generation == g, ]
+      rr <- preparar_rede(d$M)
+      desenhar_rede(rr, sprintf(
+        "%s, geração %d\nIs %.2f | modularidade %.2f | centralização %.3f\nvar(z) %.2f | zbar - pbar %.1f\n%s",
+        labels_curva(cv), g, d$metrics$I_s, d$metrics$Modularity, d$metrics$Centralization,
+        li$varz_pop[1], li$zbar_pop[1] - li$pbar_pop[1], r$rotulo))
+    }
+  }
+  mtext("Estudo 4: a seleção sexual apaga a própria estrutura",
+        outer = TRUE, side = 3, line = 1.5, cex = 1.3, font = 2)
+  mtext(sprintf("as duas características evoluem | %d machos e %d fêmeas | A_max = %d | k = %d | sem seleção natural",
+                200L, 200L, A_max, k),
+        outer = TRUE, side = 3, line = 0.2, cex = 0.85, col = "gray30")
+  mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.",
+        outer = TRUE, side = 1, line = 1.2, cex = 0.8, col = "gray30")
+  invisible(NULL)
+}
+
+labels_curva <- function(cv) c(uniform = "Aleatória", gaussian = "Gaussiana",
+                               sigmoid = "Sigmoide", `u-shaped` = "Disruptiva")[[cv]]
+
+# =====================================================================
 # O DESENHO DOS QUATRO ESTUDOS NO MESMO PLANO
 # =====================================================================
 # Um esquema, este sim, e não saída do motor. Serve para dizer numa figura só
@@ -618,7 +681,8 @@ if (!interactive() && sys.nframe() == 0) {
     list(f = function() figura_redes(),                  nome = "figura_redes.png"),
     list(f = function() figura_busca(),                  nome = "figura_busca.png"),
     list(f = function() figura_rede_evolucao("2"),       nome = "figura_rede_estudo2.png"),
-    list(f = function() figura_rede_evolucao("3"),       nome = "figura_rede_estudo3.png")
+    list(f = function() figura_rede_evolucao("3"),       nome = "figura_rede_estudo3.png"),
+    list(f = function() figura_estrutura_se_apaga(),     nome = "figura_estrutura_se_apaga.png")
   )
   for (s in base_r) {
     destino <- file.path("Resultados_Artigo/Figuras", s$nome)
