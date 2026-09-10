@@ -1,6 +1,6 @@
 ---
-title: "A seleção sexual apaga a própria estrutura"
-subtitle: "Estudo 4, para a conversa com o pessoal de redes"
+title: "Co-evolução de traço e preferência"
+subtitle: "Estudo 4, notas para a conversa no laboratório"
 author: "Solimary García Hernández"
 date: "`r format(Sys.Date(), '%d de %B de %Y')`"
 output:
@@ -31,55 +31,52 @@ co <- carregar(c("Resultados_Artigo/Fase_Coevolucao/Dados/resultados_Coevolucao_
 ok <- function(x) !is.null(x) && nrow(x) > 0
 ```
 
-## O sistema, em três frases
+## O modelo
 
 Uma população de 200 machos e 200 fêmeas, gerações discretas. Cada macho tem um
 traço `z`; cada fêmea tem um pico de preferência `p` e uma exigência `s`, e
 aceita um macho com probabilidade que depende de quão bem `z` casa com `p`.
 
-Testamos quatro regras de emparejamento, e cada uma leva daqui em diante a
-mesma cor que tem nas figuras:
+São quatro regras de acasalamento, e cada uma leva daqui em diante a cor que
+tem nas figuras:
 
 - <span style="color:#8a8a8a;font-weight:bold">aleatória</span> — aceita metade dos machos, sem discriminar
 - <span style="color:#E6B800;font-weight:bold">gaussiana</span> — prefere quem se parece com o seu próprio pico
 - <span style="color:#3BA273;font-weight:bold">sigmoide</span> — quanto maior `z`, melhor
 - <span style="color:#9932CC;font-weight:bold">disruptiva</span> — prefere quem difere do seu pico
 
-Neste estudo as duas características são herdáveis e evoluem juntas ao longo de
-100 gerações. Cada geração produz uma rede bipartida de acasalamentos, e é ela
-que medimos.
+As duas características são herdáveis e evoluem juntas ao longo de 100
+gerações. Cada geração produz uma rede bipartida de acasalamentos, e é ela que
+medimos.
 
-### Três palavras que vão aparecer
+### Vocabulário
 
-**Célula:** uma combinação de parâmetros do desenho (regra de escolha, dispersão
-inicial do traço, dispersão inicial da preferência, quantos machos a fêmea
-avalia, quantos aceita). Cada célula rodou 20 vezes, e essas 20 são as
-*réplicas*. Quando digo "a réplica mais próxima da média", é a média daquelas
-20.
+*Célula*: uma combinação de parâmetros do desenho, ou seja regra de escolha,
+dispersão inicial do traço, dispersão inicial da preferência, quantos machos a
+fêmea avalia e quantos aceita. Cada uma rodou 20 vezes, e essas 20 são as
+réplicas. "A réplica mais próxima da média" é a média dessas 20.
 
-**Is (oportunidade de seleção sexual):** a variância no número de parceiras
-entre os machos, dividida pela média ao quadrado. Zero quer dizer que todos
-acasalam igual; quanto maior, mais desigual é o sucesso.
+*Is*, oportunidade de seleção sexual: a variância no número de parceiras entre
+os machos, dividida pela média ao quadrado. Zero quer dizer que todos acasalam
+igual; quanto maior, mais desigual é o sucesso.
 
-**Ne (tamanho efetivo da população):** o tamanho que uma população ideal
+*Ne*, tamanho efetivo da população: o tamanho que uma população ideal
 precisaria ter para derivar tanto quanto esta. Se uns poucos machos deixam
-quase todos os filhos, o Ne fica muito abaixo do número de indivíduos.
+quase todos os filhos, o Ne fica bem abaixo do número de indivíduos.
 
 ---
 
-## O resultado, em uma figura {.tabset}
+## A rede na geração 1 e na geração 100 {.tabset}
 
-Cada aba compara uma regra com a **aleatória**, que é o controle sem escolha.
-Em cada linha, a rede da **geração 1** contra a da **geração 100**, da mesma
-réplica.
+Cada aba compara uma regra com a aleatória, que é o controle sem escolha. Em
+cada linha, a mesma réplica na geração 1 e na 100.
 
-A geração 1 é a rede antes de qualquer resposta evolutiva, então o estudo traz
-o seu próprio controle: não é preciso acreditar em nenhum experimento que não
-esteja aqui.
+A geração 1 é a rede antes de qualquer resposta evolutiva, então o controle
+está dentro do próprio estudo.
 
-Nos rótulos, **modularidade** é o quanto a rede se divide em grupos que
-acasalam preferencialmente entre si, e **centralização** é o quanto os
-acasalamentos se concentram em poucos indivíduos.
+Nos rótulos, *modularidade* é o quanto a rede se divide em grupos que acasalam
+preferencialmente entre si, e *centralização* é o quanto os acasalamentos se
+concentram em poucos indivíduos.
 
 ### Sigmoide
 
@@ -87,14 +84,14 @@ acasalamentos se concentram em poucos indivíduos.
 figura_estrutura_se_apaga(curvas = c("sigmoid", "uniform"))
 ```
 
-Na geração 1, uns poucos machos levam quase todas as fêmeas e mais de cem ficam
-sem acasalar (os cinzas). Na geração 100 a rede tem **os mesmos números que o
-controle aleatório**: modularidade 0.44 contra 0.44, centralização 0.013 contra
+Na geração 1 uns poucos machos levam quase todas as fêmeas, e mais de cem ficam
+sem acasalar (os cinzas). Na geração 100 a rede tem *os mesmos números que o
+controle aleatório*: modularidade 0.44 contra 0.44, centralização 0.013 contra
 0.015.
 
-E a variância do traço quase não se mexeu. Não é perda de variação: é a média
-do traço saindo da faixa em que a preferência distingue. A distância entre
-`zbar` e `pbar` passa de 0 para mais de 20, e a sigmoide satura.
+A variância do traço quase não se mexeu, então não é perda de variação. É a
+média do traço saindo da faixa em que a preferência distingue: a distância
+entre `zbar` e `pbar` passa de zero para mais de vinte, e a sigmoide satura.
 
 ### Gaussiana
 
@@ -102,12 +99,12 @@ do traço saindo da faixa em que a preferência distingue. A distância entre
 figura_estrutura_se_apaga(curvas = c("gaussian", "uniform"))
 ```
 
-**Aqui não se apaga nada**, e é o contraste que dá sentido ao resto. A
+Aqui não se apaga nada, e esse é o contraste que dá sentido ao resto. A
 modularidade se mantém alta e a rede da geração 100 continua bem diferente do
-controle aleatório. A razão é que sob a gaussiana cada fêmea quer um macho
-parecido com o SEU próprio pico, e os picos diferem entre elas: o traço e a
-preferência andam amarrados, e a distância entre `zbar` e `pbar` fica em zero
-o tempo todo. Não há para onde fugir.
+controle. Sob a gaussiana cada fêmea quer um macho parecido com o seu *próprio*
+pico, e os picos diferem entre elas, então traço e preferência andam amarrados:
+a distância entre `zbar` e `pbar` fica em zero o tempo todo. Não há para onde
+fugir.
 
 ### Disruptiva
 
@@ -117,21 +114,20 @@ figura_estrutura_se_apaga(curvas = c("u-shaped", "uniform"))
 
 ---
 
-## O que acontece numa população concreta {.tabset}
+## Os indivíduos por trás da rede {.tabset}
 
-A figura acima mostra a rede. Esta mostra os indivíduos que a formam, na mesma
-réplica e nas mesmas duas gerações.
+A figura anterior mostra a rede; esta mostra quem a formou, na mesma réplica e
+nas mesmas duas gerações.
 
 Em cima, a curva de aceite de catorze fêmeas sorteadas, com os machos
-disponíveis marcados no eixo de baixo. **É aqui que o mecanismo fica visível:**
-na geração 1 as curvas estão em cima dos machos, e na geração 100, sob a
-sigmoide, os machos correram para a direita e as curvas ficaram para trás. A
-preferência não mudou de forma; o material é que saiu do alcance dela.
+disponíveis marcados no eixo. Na geração 1 as curvas estão em cima dos machos.
+Na 100, sob a sigmoide, os machos correram para a direita e as curvas ficaram
+para trás. A preferência não mudou de forma; o material saiu do alcance dela.
 
-No meio, os casais que se formaram, com a diagonal marcando onde o macho é
-igual ao pico da fêmea. Embaixo, quantas parceiras teve cada macho.
+No meio, os casais, com a diagonal marcando onde o macho é igual ao pico da
+fêmea. Embaixo, quantas parceiras teve cada macho.
 
-O eixo horizontal é o mesmo nas duas colunas de propósito: com eixos livres,
+O eixo horizontal é o mesmo nas duas colunas de propósito. Com eixos livres,
 uma população em z = 5 e outra em z = 25 sairiam idênticas e a fuga do traço
 desapareceria da figura.
 
@@ -161,7 +157,7 @@ figura_mecanismo_coevolucao("uniform")
 
 ---
 
-## A mesma coisa, ao longo das gerações
+## As trajetórias
 
 ```{r trajetoria, fig.width=11, fig.height=5}
 if (ok(co)) {
@@ -182,24 +178,22 @@ if (ok(co)) {
 }
 ```
 
-O `Is` cai enquanto a distância entre traço e preferência cresce: são a mesma
-coisa vista de dois ângulos. Quando a média do traço se afasta demais do pico
-médio de preferência, a regra de escolha satura e deixa de distinguir uns
-machos dos outros.
+O Is cai enquanto a distância entre traço e preferência cresce, e são a mesma
+coisa vista de dois ângulos: quando a média do traço se afasta demais do pico
+médio, a regra de escolha satura e deixa de distinguir uns machos dos outros.
 
-E o painel do `Ne` mostra que isso não é só topologia. Enquanto a seleção
-sexual está viva, ela reduz o tamanho efetivo da população quase à metade do
-censo; quando o traço escapa, a população volta ao seu tamanho de censo. A
-seleção sexual, aqui, é uma força demográfica transitória.
+O painel do Ne mostra que isso não é só topologia. Enquanto a seleção sexual
+está viva, ela reduz o tamanho efetivo da população quase à metade do censo;
+quando o traço escapa, a população volta ao tamanho de censo. A seleção sexual,
+aqui, é uma força demográfica *transitória*.
 
 ---
 
-## Duas maneiras diferentes de gerar estrutura
+## Desequilíbrio de ligamento
 
-O **desequilíbrio de ligamento** é a diferença entre a variância total do traço
-na população e a variância *génica*, que é a que a segregação transmite. É o
-excesso de variância que o emparejamento não aleatório empilha, e some quando o
-emparejamento é aleatório.
+É a diferença entre a variância total do traço na população e a variância
+génica, que é a que a segregação transmite. Mede o excesso de variância que o
+acasalamento não aleatório empilha, e some quando o acasalamento é aleatório.
 
 ```{r ld}
 if (ok(co)) {
@@ -215,25 +209,26 @@ if (ok(co)) {
 }
 ```
 
-A **gaussiana** é a única que acopla as duas características: emparejamento
+A gaussiana é a única que acopla as duas características: acasalamento
 assortativo, desequilíbrio de ligamento, correlação entre traço e preferência.
 
-A **sigmoide** dá exatamente o mesmo desequilíbrio que a aleatória, ou seja
-nenhum. Todas as fêmeas querem a mesma coisa independentemente do seu próprio
-pico, então o emparejamento é direcional mas não assortativo. Ela produz fuga
-do traço sem acoplamento.
+A sigmoide dá o mesmo desequilíbrio que a aleatória, ou seja nenhum. Todas as
+fêmeas querem a mesma coisa independentemente do seu próprio pico, então o
+acasalamento é direcional mas não assortativo, e há fuga do traço *sem*
+acoplamento.
 
-E a **disruptiva** chega ao mesmo apagamento que a sigmoide por outro caminho:
-não desloca a média, alarga a distribuição do traço até que toda fêmea encontre
+A disruptiva chega ao mesmo apagamento que a sigmoide por outro caminho: não
+desloca a média, alarga a distribuição do traço até que toda fêmea encontre
 machos distantes do seu pico.
 
 ---
 
-## O que eu queria perguntar a vocês
+## Perguntas
 
-**1. Métricas entre redes de tamanhos e densidades diferentes.** No nosso
-desenho a densidade varia por um fator de doze (de 0.008 a 0.1), porque o
-número de parceiros por fêmea vai de 5 a 20. Medimos quanto disso contamina
+### Métricas entre redes de tamanhos e densidades diferentes
+
+No nosso desenho a densidade varia por um fator de doze, de 0.008 a 0.1, porque
+o número de parceiros por fêmea vai de 5 a 20. Medimos quanto disso contamina
 cada métrica, controlando por tamanho e densidade:
 
 ```{r r2}
@@ -244,25 +239,28 @@ tibble(
 ) %>% kable(caption = "Estudo 1 (uma geração, sem evolução), 70.560 redes.")
 ```
 
-Três aguentam. O **aninhamento não**: a regra de escolha explica 2% da sua
-variação e a densidade explica 45%. Como vocês lidam com isso? Vale a pena
-reportar a métrica relativa a um modelo nulo que preserve a sequência de graus,
-em vez do valor cru?
+Três aguentam; o aninhamento não. A regra de escolha explica 2% da variação
+dele e a densidade explica 45%. Como vocês lidam com isso? Vale reportar a
+métrica relativa a um modelo nulo que preserve a sequência de graus, em vez do
+valor cru?
 
-**2. Duas métricas de concentração que se contradizem.** Numa mesma rede, ao
-mudar o censo de machos de 38 para 200, a centralização cai de 0.59 para 0.19 e
-o `Is` sobe de 0.50 para 6.95. Achamos que é a normalização pelo tamanho da
-rede. Qual das duas vocês reportariam?
+### Duas métricas de concentração que se contradizem
 
-**3. Modularidade bipartida.** Usamos Louvain sobre a projeção unimodal porque
-`computeModules` bipartido leva segundos por rede e temos dezenas de milhares.
-É defensável? Há algo intermediário?
+Numa mesma rede, ao mudar o censo de machos de 38 para 200, a centralização cai
+de 0.59 para 0.19 e o Is sobe de 0.50 para 6.95. Suspeito que seja a
+normalização pelo tamanho da rede. Qual das duas vocês reportariam?
+
+### Modularidade bipartida
+
+Usamos Louvain sobre a projeção unimodal porque `computeModules` bipartido leva
+segundos por rede e temos dezenas de milhares. É defensável? Há algo
+intermediário?
 
 ---
 
-## Onde estão as coisas
+## Arquivos
 
-O motor é `Fase_Coevolucao.R`; a leitura dos resultados,
-`03_analise_coevolucao.R`; e as figuras, `10_Figuras_conceituais.R`. O relato de
-como o modelo foi construído, incluindo os erros que consertamos pelo caminho,
-está em `NOTA_coevolucao_primeiros_testes.md`.
+O motor é `Fase_Coevolucao.R`, a leitura dos resultados é
+`03_analise_coevolucao.R` e as figuras saem de `10_Figuras_conceituais.R`. Como
+o modelo foi construído, incluindo os erros que consertamos pelo caminho, está
+em `NOTA_coevolucao_primeiros_testes.md`.
