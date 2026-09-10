@@ -677,8 +677,16 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
                                       tipo = "sigmoid", geracoes = 100L,
                                       A_max = 200L, k = 5L,
                                       selecao_natural = FALSE, n_curvas = 14,
+                                      # "vertical": as gerações são colunas e os
+                                      # quatro painéis são linhas, que é formato
+                                      # de página. "horizontal": o contrário, e
+                                      # cabe num slide.
+                                      orientacao = c("vertical", "horizontal"),
                                       ...) {
-  estudo <- match.arg(estudo)
+  estudo     <- match.arg(estudo)
+  orientacao <- match.arg(orientacao)
+  deitada    <- orientacao == "horizontal"
+
 
   # A célula, com o default de cada estudo se nada for pedido. Cada um chama os
   # seus eixos de um jeito, e é essa a única coisa que muda entre eles aqui.
@@ -731,7 +739,8 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
       geom_rug(data = tibble(z = d$male_z), aes(x = z), inherit.aes = FALSE,
                sides = "b", alpha = 0.25, length = unit(0.05, "npc")) +
       coord_cartesian(xlim = faixa, ylim = c(0, 1)) +
-      labs(x = NULL, y = "P(aceitar)") + theme_light(base_size = 12)
+      labs(x = if (deitada) "traço do macho (z)" else NULL, y = "P(aceitar)") +
+      theme_light(base_size = 12)
   }
 
   casais <- function(d) {
@@ -740,7 +749,8 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
       geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray55") +
       geom_point(alpha = 0.25, size = 1.5, color = "#3BA273") +
       coord_cartesian(xlim = faixa, ylim = faixa) +
-      labs(x = NULL, y = "pico da fêmea (p)") + theme_light(base_size = 12)
+      labs(x = if (deitada) "traço do macho (z)" else NULL, y = "pico da fêmea (p)") +
+      theme_light(base_size = 12)
   }
 
   sucesso <- function(d) {
@@ -754,12 +764,16 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
   # A rede entra como primeira linha: é a MESMA população das outras três, então
   # vale a pena ver a rede e o mecanismo que a produziu na mesma figura, em vez
   # de em duas separadas.
-  col <- function(d) {
+  bloco <- function(d) {
     titulo <- sprintf("Geração %d\nIs %.2f | modularidade %.2f | zbar - pbar %.1f",
                       d$geracao, d$metrics$I_s, d$metrics$Modularity,
                       mean(d$male_z) - mean(d$female_p))
-    rede_ggplot(preparar_rede(d$M), titulo) / curvas(d) / casais(d) / sucesso(d) +
-      plot_layout(heights = c(1.4, 1, 1, 1))
+    rede <- rede_ggplot(preparar_rede(d$M), titulo)
+    if (deitada) {
+      rede | curvas(d) | casais(d) | sucesso(d)
+    } else {
+      rede / curvas(d) / casais(d) / sucesso(d) + plot_layout(heights = c(1.4, 1, 1, 1))
+    }
   }
 
   # O que se move é diferente em cada estudo, e é isso que a figura mostra.
@@ -770,7 +784,10 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
   nome_estudo <- switch(estudo, "2" = "Estudo 2 (Fêmeas variando)",
                         "3" = "Estudo 3 (Machos variando)", "4" = "Estudo 4 (Co-evolução)")
 
-  (col(lados[[1]]) | col(lados[[2]])) +
+  montagem <- if (deitada) bloco(lados[[1]]) / bloco(lados[[2]])
+              else         bloco(lados[[1]]) | bloco(lados[[2]])
+
+  montagem +
     plot_annotation(
       title = sprintf("%s, preferência %s: a mesma população, cem gerações depois",
                       nome_estudo, labels_curva(tipo)),
