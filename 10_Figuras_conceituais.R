@@ -338,6 +338,29 @@ preparar_rede <- function(M, seed_layout = 2026) {
 
 # tamanho 4 é o que deixa 400 nós legíveis, e 400 é o tamanho de todos os
 # estudos, então é o default.
+# A mesma rede de desenhar_rede(), mas como objeto ggplot, para poder entrar
+# num patchwork ao lado dos outros painéis. O igraph desenha em base R, e base R
+# e grid não se misturam na mesma figura; aqui as coordenadas do layout viram
+# pontos e as arestas viram segmentos, e o resultado é o mesmo desenho.
+rede_ggplot <- function(r, titulo = NULL) {
+  pos <- as.data.frame(r$layout)
+  names(pos) <- c("x", "y")
+  el <- igraph::as_edgelist(r$g, names = FALSE)
+  seg <- data.frame(x = pos$x[el[, 1]], y = pos$y[el[, 1]],
+                    xend = pos$x[el[, 2]], yend = pos$y[el[, 2]])
+  pos$cor   <- r$cores
+  pos$forma <- ifelse(igraph::V(r$g)$type, 22, 21)   # quadrado, círculo
+  ggplot() +
+    geom_segment(data = seg, aes(x, y, xend = xend, yend = yend),
+                 color = "gray75", linewidth = 0.15, alpha = 0.6) +
+    geom_point(data = pos, aes(x, y, fill = cor, shape = forma),
+               size = 1.3, color = "gray30", stroke = 0.1) +
+    scale_fill_identity() + scale_shape_identity() +
+    coord_equal() + labs(title = titulo) +
+    theme_void(base_size = 12) +
+    theme(plot.title = element_text(size = 11, hjust = 0.5))
+}
+
 desenhar_rede <- function(r, titulo, tamanho = 4) {
   plot(r$g, layout = r$layout, vertex.color = r$cores,
        vertex.shape = r$formas, vertex.size = tamanho, vertex.label = NA,
@@ -728,11 +751,15 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
       theme_light(base_size = 12)
   }
 
+  # A rede entra como primeira linha: é a MESMA população das outras três, então
+  # vale a pena ver a rede e o mecanismo que a produziu na mesma figura, em vez
+  # de em duas separadas.
   col <- function(d) {
-    titulo <- sprintf("Geração %d\nIs %.2f | modularidade %.2f\nzbar - pbar %.1f",
+    titulo <- sprintf("Geração %d\nIs %.2f | modularidade %.2f | zbar - pbar %.1f",
                       d$geracao, d$metrics$I_s, d$metrics$Modularity,
                       mean(d$male_z) - mean(d$female_p))
-    (curvas(d) + ggtitle(titulo)) / casais(d) / sucesso(d)
+    rede_ggplot(preparar_rede(d$M), titulo) / curvas(d) / casais(d) / sucesso(d) +
+      plot_layout(heights = c(1.4, 1, 1, 1))
   }
 
   # O que se move é diferente em cada estudo, e é isso que a figura mostra.
@@ -751,10 +778,11 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
                          o_que_anda, r$rotulo, A_max, k,
                          if (selecao_natural) "com seleção natural" else "sem seleção natural"),
       caption = paste0(
-        "O eixo de baixo é o traço do macho nas três linhas, e é O MESMO nas duas colunas: sem isso a fuga do traço não se veria.\n",
-        "Linha 1: a curva de aceite de ", n_curvas, " fêmeas sorteadas, e os machos disponíveis marcados no eixo.\n",
-        "Linha 2: cada ponto é um casal, e a diagonal marca onde o macho é igual ao pico da fêmea.\n",
-        "Linha 3: quantas parceiras cada macho teve."),
+        "Linha 1: a rede de acasalamentos. Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.\n",
+        "Nas outras três, o eixo de baixo é o traço do macho, e é O MESMO nas duas colunas: sem isso a fuga do traço não se veria.\n",
+        "Linha 2: a curva de aceite de ", n_curvas, " fêmeas sorteadas, e os machos disponíveis marcados no eixo.\n",
+        "Linha 3: cada ponto é um casal, e a diagonal marca onde o macho é igual ao pico da fêmea.\n",
+        "Linha 4: quantas parceiras cada macho teve."),
       theme = theme(plot.title = element_text(face = "bold", size = 15)))
 }
 
