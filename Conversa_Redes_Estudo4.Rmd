@@ -241,11 +241,18 @@ veem outra.
 figura_mecanismo_coevolucao("u-shaped")
 ```
 
-A disruptiva chega perto da aleatória na geração 100, como a sigmoide, mas o
-número que se move é outro. Aqui a distância entre machos e fêmeas fica pequena
-e quem cresce é o `var(z)`: a distribuição do traço se alarga em vez de a média
-se deslocar. No painel dos casais isso aparece como pontos fugindo da diagonal
-para os dois lados.
+A disruptiva também se aproxima da aleatória na geração 100, como a sigmoide,
+mas o número que mais se move é outro. A distância entre machos e fêmeas cresce
+bem menos do que sob a sigmoide, e quem dispara é o `var(z)`: a distribuição do
+traço se alarga. No painel dos casais isso aparece como pontos fugindo da
+diagonal para os dois lados.
+
+Uma ressalva, e é o que menos entendo do conjunto. Esta é uma réplica, e as 20
+réplicas desta célula vão parar em lugares bem diferentes umas das outras,
+muito mais do que nas outras três curvas. A figura das médias mais adiante
+mostra isso como uma sombra enorme. Então esta aba ilustra o mecanismo, mas não
+representa bem a célula, e é uma das coisas que ainda quero olhar réplica a
+réplica.
 
 ---
 
@@ -310,9 +317,16 @@ características começam e onde estaria o ótimo se a seleção natural estives
 ligada. O eixo vertical é o mesmo nos quatro painéis, senão a fuga do traço sob
 a sigmoide não se veria.
 
-O traço vai em linha cheia e a preferência em tracejado, porque nas curvas em
-que as duas andam juntas elas ficam exatamente uma sobre a outra. Onde se vê
-vermelho picotado sobre azul contínuo, é que as duas estão no mesmo lugar.
+Um aviso sobre a cor, porque aqui ela muda de significado. Em todas as outras
+figuras a cor é a regra de escolha, com o cinza, o amarelo, o verde e o roxo da
+lista lá de cima. Nesta não: a regra de escolha é o painel, e a cor distingue
+as duas características, o traço do macho da preferência da fêmea. Por isso as
+duas também vão com traço diferente, o traço em linha cheia e a preferência em
+tracejado, que é o que se lê primeiro.
+
+Isso importa porque nas curvas em que as duas andam juntas elas ficam
+exatamente uma sobre a outra. Onde se vê o tracejado por cima da linha cheia, é
+que as duas estão no mesmo lugar.
 
 ```{r zp-trajetoria, fig.width=11, fig.height=4}
 if (ok(co)) {
@@ -352,10 +366,21 @@ if (ok(co)) {
 }
 ```
 
-Sob a gaussiana as duas linhas andam coladas: a preferência acompanha o traço,
-e é isso que a correlação da última tabela mede. Sob a sigmoide o traço sobe e a
-preferência fica para trás, e é a distância entre as duas que a figura seguinte
-resume num número só.
+Sob a aleatória e sob a gaussiana nenhuma das duas médias sai de 5. Vale
+insistir nisso porque é fácil ler errado: que as duas linhas andem coladas aqui
+não é o acoplamento entre traço e preferência, é só que nenhum dos dois se
+moveu. O acoplamento da gaussiana não está nesta figura, está na correlação
+entre indivíduos que a tabela do desequilíbrio mede.
+
+Sob a sigmoide o traço sobe até cerca de 30 e a preferência fica onde estava. É
+a distância entre as duas linhas, e é ela que a figura das trajetórias resume
+num número só.
+
+Sob a disruptiva o traço também sobe, mas menos, e a sombra fica enorme. As
+réplicas vão parar em lugares muito diferentes umas das outras, então a média
+entre elas não descreve bem nenhuma. Como o traço é truncado em zero, ele só
+tem para onde fugir de um lado, e desconfio que seja isso o que assimetriza o
+resultado. É uma das coisas que ainda quero olhar réplica a réplica.
 
 ---
 
