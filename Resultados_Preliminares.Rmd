@@ -1,6 +1,6 @@
 ---
 title: "Resultados preliminares"
-subtitle: "Rodada de exploração com 20 réplicas, organizada pelas quatro hipóteses — para discussão com Erika e Paulo"
+subtitle: "Rodada de 20 réplicas, organizada pelas quatro hipóteses, para discussão com Erika e Paulo"
 author: "Solimary García Hernández"
 date: "`r format(Sys.Date(), '%d de %B de %Y')`"
 output:
@@ -128,18 +128,18 @@ Um aviso de leitura. Cada figura e cada tabela diz no subtítulo ou na legenda q
 parâmetros está mostrando. Onde estiver escrito "todos os k", os três valores estão promediados
 juntos, e como k pesa bastante, vale conferir no anexo se o padrão se mantém em cada um deles.
 
-> **E um aviso mais sério, que vale para o documento inteiro.** Esta rodada usa a versão mais
-> recente do modelo, com a regra de escolha que apelidamos de **best-of-n**: a fêmea avalia os
-> A_max machos, todos, e só depois fica com os k melhores entre os que aceitou. O desenho está
-> em `NOTA_quatro_estudos.md`.
+> Um segundo aviso, este mais sério e válido para o documento inteiro. Esta rodada usa a versão
+> mais recente do modelo, com a regra de escolha que apelidamos de *best-of-n*: a fêmea avalia
+> os A_max machos, todos, e só depois fica com os k melhores entre os que aceitou. O desenho
+> está em `NOTA_quatro_estudos.md`.
 >
 > A regra deixou a seleção sexual bem mais forte, que era a intenção, e isso teve uma
-> consequência que ainda não está resolvida. Em **Fêmeas variando**, nas curvas **sigmoide** e
-> **disruptiva com seleção natural ligada**, o traço se afasta tanto do ótimo ecológico que a
+> consequência que ainda não está resolvida. Em Fêmeas variando, nas curvas *sigmoide* e
+> *disruptiva* com seleção natural ligada, o traço se afasta tanto do ótimo ecológico que a
 > viabilidade `V = exp(-gamma (z - phi)^2)` desaba para todos ao mesmo tempo, e sobram
 > pouquíssimos machos adultos. Nessas células a rede saiu de 200 fêmeas por dois ou três
 > machos, e modularidade, aninhamento e centralização não são comparáveis com as das outras. A
-> tabela de invariantes logo abaixo diz exatamente quanto do conjunto está nessa situação.
+> tabela de invariantes logo abaixo diz quanto do conjunto está nessa situação.
 >
 > O Controle e Machos variando não têm esse problema: neles o traço é sorteado de novo a cada
 > geração, sempre centrado em phi, então o censo fica nos 200 em todos os cenários.
@@ -234,7 +234,7 @@ for (cv in CURVAS) {
 }
 ```
 
-## O outro eixo do Estudo 1: o regime de busca
+## O regime de busca
 
 Os quatro cantos mostram o material. Falta o outro nível que o Controle cruza, e que nos resultados
 é o que mais pesa: quantos machos a fêmea consegue avaliar (A_max) e quantos ela aceita (k).
@@ -265,7 +265,7 @@ for (cv in CURVAS) {
 ## O Estudo 2: o que sigma_p faz {.tabset}
 
 O eixo do Estudo 2 é o quanto as fêmeas discordam entre si. Nas duas colunas os
-machos são os MESMOS, então a única coisa que muda é a dispersão das
+machos são os *mesmos*, então a única coisa que muda é a dispersão das
 preferências.
 
 Em cima, a curva de aceite de catorze fêmeas sorteadas, com os machos
@@ -283,7 +283,7 @@ for (cv in CURVAS) {
 
 ## O Estudo 3: o que sigma_z faz {.tabset}
 
-O espelho. Agora as fêmeas são as mesmas nas duas colunas, com as MESMAS curvas
+O espelho. Agora as fêmeas são as mesmas nas duas colunas, com as *mesmas* curvas
 de aceite, e o que muda é a variedade de machos disponíveis. Ver as curvas
 paradas enquanto o material muda é justamente o que este estudo quer dizer.
 
@@ -301,28 +301,23 @@ for (cv in CURVAS) {
 
 ---
 
----
-
 # Estudo 1. Controle
 
 > Nada evolui. Uma geração só, com sigma_p e sigma_z impostos, para medir a topologia que cada
 > regra de escolha produz sobre cada composição de população.
 
 É o único desenho que cruza os três níveis por inteiro: a regra de escolha, a variação disponível
-e a restrição ecológica. Por isso é aqui que se pergunta qual deles manda.
-> A estrutura da rede é determinada por fatores em três níveis (a regra de escolha, a variação
-> disponível, a restrição ecológica), e a questão é qual domina e como interagem.
+e a restrição ecológica. Por isso é aqui que se pergunta qual deles domina e como interagem, que
+é o conteúdo de H1.
 
-Quem testa é o Controle, o único desenho que cruza os três níveis por inteiro.
-
-As quatro métricas de topologia que aparecem daqui em diante: **modularidade** é o quanto a rede se
-divide em grupos que acasalam preferencialmente entre si; **aninhamento** (NODF) é o quanto os
+As quatro métricas de topologia que aparecem daqui em diante: *modularidade* é o quanto a rede se
+divide em grupos que acasalam preferencialmente entre si; *aninhamento* (NODF) é o quanto os
 parceiros dos machos menos procurados são um subconjunto dos parceiros dos mais procurados, ou
-seja, o quanto existe hierarquia; **centralização** é o quanto os acasalamentos se concentram em
-poucos indivíduos; e **Is** é a desigualdade no número de parceiras entre os machos, que é a
+seja, o quanto existe hierarquia; *centralização* é o quanto os acasalamentos se concentram em
+poucos indivíduos; e *Is* é a desigualdade no número de parceiras entre os machos, que é a
 oportunidade de seleção sexual.
 
-## O nível ecológico domina
+## Qual dos três níveis manda
 
 Antes da tabela, o que é a divergência entre curvas, porque é uma medida que construímos e não um
 índice de prateleira.
@@ -367,7 +362,7 @@ if (!is.null(divg)) {
 O regime de busca explica mais de dois terços da divergência. Dentro do que sobra, a assimetria
 entre os sexos explica cerca de vinte vezes mais que a variabilidade total.
 
-## Dentro do material, o que importa é de que lado está a variação
+## A assimetria entre os sexos
 
 ```{r h1-superficie, fig.height=4.6}
 if (ok(ct)) {
@@ -443,6 +438,7 @@ análise usa a poliandria realizada e não o k nominal.
 A figura dos quatro regimes de busca, lá em cima, mostra o efeito. Aqui está o número: quanto as
 quatro curvas divergem entre si em topologia, conforme se restringe o quanto a fêmea consegue
 amostrar.
+
 ```{r h3-topo}
 if (ok(ct)) {
   divg %>% group_by(encounters_n) %>%
@@ -467,13 +463,13 @@ A_max = 200, que é exatamente o que a predição original diz.
 Este estudo e o seguinte são espelhos, e servem de replicação interna: se a relação for da rede e
 não da característica em particular, tem de aparecer nos dois lados.
 
-> **Esta é a seção que o problema do censo mais atinge**, e por isso vale repetir o aviso aqui.
+> Esta é a seção que o problema do censo mais atinge, e por isso vale repetir o aviso aqui.
 > As curvas sigmoide e disruptiva, com seleção natural ligada, são justamente onde o traço se
 > afasta do ótimo e o censo de machos desanda. Ou seja, o problema mora exatamente no canto do
 > desenho em que a resposta evolutiva é mais forte, que é o canto que esta hipótese quer olhar.
 >
-> A figura logo abaixo é uma exceção e pode ser lida sem ressalva, porque mostra o regime **sem
-> seleção natural**, em que o censo é sempre 200 por construção. As tabelas e figuras desta
+> A figura logo abaixo é uma exceção e pode ser lida sem ressalva, porque mostra o regime *sem
+> seleção natural*, em que o censo é sempre 200 por construção. As tabelas e figuras desta
 > seção que juntam os dois regimes carregam a ressalva, e as conclusões que dependerem das duas
 > curvas com seleção natural precisam esperar a rodada com a cota.
 
@@ -502,7 +498,7 @@ As duas predições que o paper faz sobre o traço do macho vão em sentidos opo
 
 Cada linha da tabela é um modelo linear ajustado sobre todas as réplicas na geração 100, com a
 curva de preferência, sigma_p e A_max como covariáveis. O coeficiente mostrado é o da métrica de
-rede, ou seja, o efeito dela **dentro** de cada combinação das covariáveis. O sinal é o que
+rede, ou seja, o efeito dela *dentro* de cada combinação das covariáveis. O sinal é o que
 importa: a predição do paper é que os dois sejam positivos.
 
 ```{r h2a-regressao}
@@ -534,6 +530,7 @@ coisa a entender antes de escrever qualquer coisa a respeito.
 
 A mesma pergunta que a seção do regime de busca fez sobre a topologia, agora sobre o resultado
 evolutivo.
+
 ```{r h3, fig.height=4.2}
 if (ok(d)) {
   h3 <- d %>%
@@ -583,7 +580,7 @@ O espelho do anterior, e a resposta direta à pergunta que a Erika formulou. Qua
 variedade de machos, a variação de preferência acaba eliminada; quando há muita, ela se mantém
 perto do valor neutro.
 
-### A seleção apaga a própria causa
+### A dinâmica das primeiras gerações
 
 ```{r h2b-dinamica, fig.height=4}
 if (ok(esp)) {
@@ -623,7 +620,7 @@ com seleção natural espera a decisão sobre o censo de machos, que é o assunt
 e por isso ainda não entra. O relato completo, incluindo o que descobrimos sobre o próprio modelo
 pelo caminho, está em `NOTA_coevolucao_primeiros_testes.md`.
 
-Aqui a variância do traço se separa em duas: a **génica**, que governa a segregação, e a **total**,
+Aqui a variância do traço se separa em duas: a *génica*, que governa a segregação, e a *total*,
 que a população exibe. A distância entre elas é o desequilíbrio de ligamento que o acasalamento
 não aleatório empilhou, e é uma quantidade que os outros três estudos não têm como mostrar.
 
@@ -648,7 +645,7 @@ ligamento e covariância genética, que é o mecanismo de Fisher. A sigmoide dá
 desequilíbrio que a aleatória, ou seja nenhum, porque todas as fêmeas querem o mesmo
 independentemente do seu próprio pico: o acasalamento é direcional mas não assortativo.
 
-## A seleção sexual apaga a si mesma
+## As trajetórias ao longo das cem gerações
 
 ```{r co-apaga, fig.height=4.4}
 if (ok(co)) {
@@ -688,7 +685,7 @@ seu tamanho de censo. A seleção sexual, neste modelo, é uma força demográfi
 
 Duas coisas que só aparecem ao comparar os estudos entre si, e que nenhum deles diria sozinho.
 
-## A assinatura é estrutural, não evolutiva
+## O Controle contra a geração 100
 
 ```{r h2-estrutural}
 if (ok(ct) && ok(d)) {
@@ -718,10 +715,10 @@ if (ok(ct) && ok(d)) {
 Os dois valores são praticamente iguais nos três níveis de A_max. Cem gerações de evolução do
 traço quase não alteram o quanto as curvas diferem entre si em topologia.
 
-## Restringir a busca: os dois lados não vão juntos
-Então os dois lados de H3 não vão juntos: restringir a busca muda a topologia, mas não muda para
-onde o traço vai parar. É o achado mais desconcertante desta rodada, e por enquanto está só
-anotado.
+## Os dois lados de H3
+
+Restringir a busca muda a topologia, mas não muda para onde o traço vai parar. É o achado mais
+desconcertante desta rodada, e por enquanto está só anotado.
 
 ---
 
@@ -794,7 +791,7 @@ coisa. É a primeira das perguntas para o Miudo.
 # Anexo. Todas as combinações de parâmetros
 
 As figuras acima mostram o cenário limpo (A_max = 200, sem seleção natural) para deixar o
-argumento claro. Aqui estão os mesmos resultados em **todas** as combinações de seleção natural,
+argumento claro. Aqui estão os mesmos resultados em *todas* as combinações de seleção natural,
 A_max e k, para conferir se os padrões se sustentam. Use as abas.
 
 ```{r anexo-setup}

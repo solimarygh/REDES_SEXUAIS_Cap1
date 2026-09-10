@@ -1,6 +1,6 @@
 ---
 title: "Exploração por painéis"
-subtitle: "Os quatro estudos, um de cada vez — rodada de 20 réplicas com o modelo atual"
+subtitle: "Os quatro estudos, um de cada vez, na rodada de 20 réplicas com o modelo atual"
 author: "Solimary García Hernández"
 date: "`r format(Sys.Date(), '%d de %B de %Y')`"
 output:
@@ -303,11 +303,11 @@ cada vez, e o desenho está descrito em `NOTA_quatro_estudos.md`.
 
 A barra lateral tem uma entrada por estudo, e dentro de cada uma as
 variáveis resposta que faz sentido olhar naquele estudo. Já a navegação
-por dentro de cada painel é por abas, sempre na mesma ordem: **seleção
-natural** (sem, com), depois **A_max** (200, 40, 10), depois **k** (5,
-10, 20). São as 18 combinações do desenho ecológico, e a aba que abre
-por default é a mais permissiva de todas, sem seleção natural e com
-A_max = 200.
+por dentro de cada painel é por abas, sempre na mesma ordem: *seleção
+natural* (sem, com), depois *A_max* (200, 40, 10), depois *k* (5, 10,
+20). São as 18 combinações do desenho ecológico, e a aba que abre por
+default é a mais permissiva de todas, sem seleção natural e com A_max =
+200.
 
 As quatro curvas de preferência aparecem sempre nas mesmas cores:
 [**aleatória**]{style="color:gray55"},
@@ -315,21 +315,21 @@ As quatro curvas de preferência aparecem sempre nas mesmas cores:
 [**sigmoide**]{style="color:#3BA273"} e
 [**disruptiva**]{style="color:#9932CC"}.
 
-Lembrando as métricas que estamos medindo: **modularidade** é o quanto a
+Lembrando as métricas que estamos medindo: *modularidade* é o quanto a
 rede se divide em grupos que acasalam preferencialmente entre si;
-**aninhamento** (NODF) é o quanto os parceiros dos machos menos
-procurados são um subconjunto dos parceiros dos mais procurados;
-**centralização** é o quanto os acasalamentos se concentram em poucos
-indivíduos; e **Is** é a desigualdade no número de parceiras entre os
-machos. A **poliandria realizada** é o grau médio das fêmeas que
-acasalaram, ou seja, quantos parceiros elas de fato conseguiram, que não
-é o mesmo que o k que buscavam.
+*aninhamento* (NODF) é o quanto os parceiros dos machos menos procurados
+são um subconjunto dos parceiros dos mais procurados; *centralização* é
+o quanto os acasalamentos se concentram em poucos indivíduos; e *Is* é a
+desigualdade no número de parceiras entre os machos. A *poliandria
+realizada* é o grau médio das fêmeas que acasalaram, ou seja, quantos
+parceiros elas de fato conseguiram, que não é o mesmo que o k que
+buscavam.
 
-> **NOvidade:** Esta rodada usa a versão mais recente do modelo depois
-> da minha última conversa com Miudo, agora inclui a regra de escolha
-> que apelidamos de **best-of-n**: a fêmea avalia os A_max machos,
-> todos, e só depois fica com os k melhores entre os que aceitou. O
-> desenho está em `NOTA_quatro_estudos.md`.
+> Esta rodada usa a versão mais recente do modelo, a que saiu da minha
+> última conversa com o Miudo, e inclui a regra de escolha que
+> apelidamos de *best-of-n*: a fêmea avalia os A_max machos, todos, e só
+> depois fica com os k melhores entre os que aceitou. O desenho está em
+> `NOTA_quatro_estudos.md`.
 >
 > A regra deixou a seleção sexual bem mais forte, que era a intenção, e
 > isso teve uma consequência que ainda não está resolvida. Em Fêmeas
@@ -345,16 +345,16 @@ acasalaram, ou seja, quantos parceiros elas de fato conseguiram, que não
 > sorteado de novo a cada geração, sempre centrado em phi, então o censo
 > fica nos 200 em todos os cenários.
 >
-> Estou pensando rodadar novamente mas tratando os 200 como cota,
-> sorteando sempre 200 juvenis com peso proporcional à viabilidade. A
-> seção "O censo de machos sob a regra nova" explica melhor esse ponto e
-> as dúvidas que me surgiram.
+> Estou pensando em rodar de novo tratando os 200 como cota, sorteando
+> sempre 200 juvenis com peso proporcional à viabilidade. A seção "O
+> censo de machos sob a regra nova" explica melhor esse ponto e as
+> dúvidas que me surgiram.
 
-### Um parêntese
+### A conta por trás do censo
 
-Fiz esta figura para tentar entender melhor o que pode estar acontecendo
-com o censo. Ela não usa dado nenhum, é só a conta do modelo, mas me
-ajudou a enxergar, então deixo aqui.
+Fiz esta figura para entender melhor o que pode estar acontecendo com o
+censo. Ela não usa dado nenhum, é só a conta do modelo, mas me ajudou a
+enxergar, então deixo aqui.
 
 Cada macho juvenil sobrevive com probabilidade
 
@@ -437,7 +437,7 @@ sigmoide chega a passar de 20, o que explica de onde saíram as redes de
 200 fêmeas por 2 machos.
 
 E deixa claro também por que a cota resolve: sorteando 200 com peso
-proporcional a V, o que importa passa a ser a viabilidade **relativa**
+proporcional a V, o que importa passa a ser a viabilidade *relativa*
 entre os juvenis, que continua discriminando normalmente mesmo quando o
 valor absoluto de todos é minúsculo.
 
@@ -487,7 +487,7 @@ tibble(
 
 ------------------------------------------------------------------------
 
-# 1. Controle — σp × σz, uma geração
+# 1. Controle: a superfície σp × σz, uma geração
 
 > Nada é herdado. Os traços são sorteados, a rede se forma, as métricas
 > são medidas, e acabou. É o único estudo que cruza os dois eixos de
@@ -749,19 +749,20 @@ render_tabs(function(kk, amax, ns)
 
 ## 1.4 Poliandria realizada e fêmeas sem acasalar {.tabset}
 
-Erika, esta foi uma modificação recente também. Antes, descrevíamos k
-como "com quantos machos cada fêmea acasala", com os níveis 5, 10 e 20.
-A fêmea acasala com
-`min(k, machos que ela aceitou entre os A_max avaliados)`. Ela para
-quando atinge k OU quando esgota os machos que conseguiu avaliar, o que
-vier primeiro. Como a amostragem é sem reposição, ela nunca acasala com
-mais machos do que avaliou. Então, com A_max = 10 e k = 20, as femeas
-nunca podem chegar nesses 20. E talvez nem a 10, pois as femeas não
-acasalam com os dez que avaliaram, e sim com os que aceitou entre esses
-dez. AGORA: k é um teto e não uma cota, então quantos parceiros a fêmea
-de fato consegue depende da curva de preferência e de A_max. E estamos
-anotando o número de machos com os que as femeas estão se acasalando.
-Aqui dá para ver o panomarama completo.
+Erika, esta foi outra modificação recente. Antes descrevíamos k como
+"com quantos machos cada fêmea acasala", nos níveis 5, 10 e 20. Na
+verdade ela acasala com
+`min(k, machos que ela aceitou entre os A_max avaliados)`: para quando
+atinge k ou quando esgota os machos que conseguiu avaliar, o que vier
+primeiro. Como a amostragem é sem reposição, nunca acasala com mais
+machos do que avaliou.
+
+Com A_max = 10 e k = 20, portanto, as fêmeas nunca chegam aos 20. E
+talvez nem a 10, porque não acasalam com os dez que avaliaram, e sim com
+os que aceitaram entre esses dez. Ou seja, k é um teto e não uma cota, e
+quantos parceiros a fêmea de fato consegue depende da curva de
+preferência e de A_max. Passamos a anotar esse número, e aqui dá para
+ver o panorama completo.
 
 ```{r ct-poliandria, results='asis', fig.width=12, fig.height=13}
 if (!ok(ct)) cat("\n*Sem dados do Controle.*\n") else
@@ -785,15 +786,14 @@ seletiva sobre o traço masculino.
 
 Em todos os painéis desta seção, a coluna 1 mostra o gradiente ao longo
 de σp na geração 100, e as colunas 2 e 3 mostram como cada coisa chegou
-até lá, nos dois extremos do gradiente (σp = 0.2 e σp = 2.0). Notem como
-agora (que a femea escolhe os melhores), como os resultados diferem em
-relação ao graficos que veiamos antes: as metricas evoluem ao longo do
-tempo.
+até lá, nos dois extremos do gradiente (σp = 0.2 e σp = 2.0). Reparem no
+quanto os resultados mudaram em relação aos gráficos anteriores, agora
+que a fêmea escolhe os melhores: as métricas evoluem ao longo do tempo.
 
 ## 2.0 O que σp faz, numa população concreta
 
 O eixo deste estudo é fácil de dizer e difícil de ver. As duas colunas abaixo
-são as duas pontas do gradiente, com os MESMOS machos nas duas, de modo que a
+são as duas pontas do gradiente, com os *mesmos* machos nas duas, de modo que a
 única coisa que muda é o quanto as fêmeas discordam entre si.
 
 Em cima, a curva de aceite de catorze fêmeas sorteadas, com os machos
@@ -819,7 +819,7 @@ funcionando: com P = 0.5 para todo mundo, σp não tem por onde agir.
 ### E o que cem gerações fazem {.tabset}
 
 A figura acima contrasta σp baixo contra σp alto, duas populações diferentes.
-Esta contrasta outra coisa: **a mesma população na geração 1 e na geração 100**,
+Esta contrasta outra coisa: *a mesma população na geração 1 e na geração 100*,
 com o traço do macho já tendo evoluído.
 
 Em cima a rede, e embaixo os três painéis do mecanismo que a produziu, todos da
@@ -846,11 +846,11 @@ render_tabs(function(kk, amax, ns)
 
 ## 2.2 O traço do macho (z) {.tabset}
 
-z é variável evolutiva deste estudo. Notem como agora, sem SelNat o
-tamanho do trait sobre além do ótimo (era 5). Também, agora, com a
-segregação infinitesimal (quero estudar mais disso) a variância deixou
-de ficar no piso de 0.08, então cada cenário chega a um equilíbrio
-próprio.
+z é a variável evolutiva deste estudo. Reparem que sem seleção natural o
+traço sobe bem além do ótimo, que era 5. E que com a segregação
+infinitesimal, que é a outra coisa que quero estudar melhor, a variância
+deixou de ficar presa no piso de 0.08: cada cenário chega ao seu próprio
+equilíbrio.
 
 ```{r fem-traco, results='asis', fig.width=13, fig.height=5.5}
 if (!ok(d)) cat("\n*Sem dados.*\n") else
@@ -881,9 +881,9 @@ render_tabs(function(kk, amax, ns)
 > preferência da fêmea passa a ser herdável e bi-parental. σp fica em
 > 1.0, mas só como condição inicial.
 
-Aqui o papel da escolha da fêmea se inverte: ela deixa de ser a causa da
-seleção e passa a ser o alvo dela. Aqui podemos pensar que a força
-seletiva é a disponibilidade de machos.
+O papel da escolha da fêmea se inverte: ela deixa de ser a causa da
+seleção e passa a ser o alvo dela, e a força seletiva passa a ser a
+disponibilidade de machos.
 
 Um detalhe do desenho que vale ter em mente ao comparar com a seção 2:
 σz é imposto a cada geração, igual a σp lá, mas σp aqui é só o ponto de
@@ -895,7 +895,7 @@ preferências é o que a seleção e a deriva fizerem dela.
 A mesma figura da seção 2.0, com a variação trocada de lado, e vale olhar as
 duas juntas.
 
-Agora as fêmeas são as MESMAS nas duas colunas, com as mesmas curvas de aceite,
+Agora as fêmeas são as *mesmas* nas duas colunas, com as mesmas curvas de aceite,
 e o que muda são os machos marcados no eixo de baixo. Ver as curvas paradas
 enquanto o material muda é justamente o que este estudo quer dizer.
 
@@ -918,8 +918,8 @@ for (cv in CURVAS) {
 O espelho exato da figura equivalente do Estudo 2, e vale abrir as duas lado a
 lado.
 
-Lá as curvas de aceite ficavam paradas e os machos corriam. **Aqui é o
-contrário:** o traço é re-sorteado a cada geração, então os machos marcados no
+Lá as curvas de aceite ficavam paradas e os machos corriam. Aqui é o
+*contrário*: o traço é re-sorteado a cada geração, então os machos marcados no
 eixo de baixo estão no mesmo lugar nas duas colunas, e o que se desloca são as
 curvas. As fêmeas passaram a querer outra coisa.
 
@@ -972,12 +972,12 @@ render_tabs(function(kk, amax, ns)
 
 ------------------------------------------------------------------------
 
-# 4. Os quatro estudos no mesmo plano modo heatmap ;)
+# 4. Os quatro estudos no mesmo plano
 
-A ideia desta seção legal é do Miudo, e serve para responder a pergunta
+A ideia desta seção é do Miudo, e serve para responder a uma pergunta
 que as seções anteriores não conseguem fazer: o que o Controle diz sobre
-onde os estudos evolutivos acabam parando? 0rigininalmente pensamos
-fazer para Modularidade, mas fiz para todas as métricas
+onde os estudos evolutivos acabam parando? Originalmente pensamos em
+fazê-la para a modularidade, mas acabei fazendo para as quatro métricas.
 
 O Controle varre o plano (σp, σz) inteiro, e os dois estudos evolutivos
 percorrem cada um uma linha dele. Mas essa linha não fica parada. Em
@@ -986,7 +986,7 @@ posição vertical não se mexe; já σz é livre, e a geração 100 pode estar
 num σz bem diferente do 1.0 de onde partiu. Em Machos variando é o
 espelho: σz fica onde foi posto e σp é que anda.
 
-A Co-evolução é o caso extremo: ali **nada é imposto**, as duas
+A Co-evolução é o caso extremo: ali *nada* é imposto, as duas
 dispersões são medidas e as duas andam. Por isso a célula não fica presa
 a uma coluna nem a uma linha, e pode aparecer em qualquer ponto do
 plano. É o único estudo em que isso acontece, e ver onde as células vão
@@ -1012,30 +1012,30 @@ onde sair.
 Das linhas da Co-evolução só entra a metade SEM seleção natural, que é a
 que está fechada e a que não depende da decisão sobre o censo.
 
-**Avisos:**
+Três ressalvas antes de olhar os painéis:
 
--Este plano é uma projeção, e falta nele uma dimensão. No Controle o
-traço e a preferência estão sempre centrados em 5. Já na geração 100 de
-Fêmeas variando a média do traço pode ter se deslocado bastante,
-enquanto as preferências continuam sendo re-sorteadas em torno de 5.
-Duas situações com o mesmo (σp, σz) mas com médias diferentes não são a
-mesma situação, e o desencontro entre os sexos não aparece em lugar
-nenhum destes eixos. Por isso a legenda de cada figura diz o quanto a
-média se afastou: onde esse número é pequeno a comparação é direta, e
-onde é grande ela é apenas indicativa.
+-   Este plano é uma projeção, e falta nele uma dimensão. No Controle o
+    traço e a preferência estão sempre centrados em 5. Já na geração 100
+    de Fêmeas variando a média do traço pode ter se deslocado bastante,
+    enquanto as preferências continuam sendo re-sorteadas em torno de 5.
+    Duas situações com o mesmo (σp, σz) mas com médias diferentes não
+    são a mesma situação, e o desencontro entre os sexos não aparece em
+    lugar nenhum destes eixos. Por isso a legenda de cada figura diz o
+    quanto a média se afastou: onde esse número é pequeno a comparação é
+    direta, e onde é grande ela é apenas indicativa.
 
--A posição das células evolutivas é a dispersão MEDIDA (a raiz da
-variância gravada), enquanto a grade do Controle é a dispersão IMPOSTA.
-Os dois coincidem quando a seleção natural está desligada, mas com ela
-ligada a viabilidade estreita a distribuição dos machos, e a medida fica
-abaixo da imposta. Essa é mais uma razão para comparar as abas "com" e
-"sem" seleção natural entre si.
+-   A posição das células evolutivas é a dispersão *medida* (a raiz da
+    variância gravada), enquanto a grade do Controle é a dispersão
+    *imposta*. As duas coincidem quando a seleção natural está
+    desligada, mas com ela ligada a viabilidade estreita a distribuição
+    dos machos e a medida fica abaixo da imposta. É mais uma razão para
+    comparar as abas "com" e "sem" seleção natural entre si.
 
--a dispersão medida é contínua, e para caber na grade ela é arredondada
-para o nível mais próximo dos sete do desenho. Valores acima de 2.0
-encostam todos no 2.0, e a legenda avisa quantos casos ficaram fora da
-grade. Quando esse número for alto, é sinal de que a grade do Controle
-deveria ser estendida na rodada final.
+-   A dispersão medida é contínua, e para caber na grade é arredondada
+    para o nível mais próximo dos sete do desenho. Valores acima de 2.0
+    encostam todos no 2.0, e a legenda avisa quantos casos ficaram fora
+    da grade. Quando esse número for alto, é sinal de que a grade do
+    Controle deveria ser estendida na rodada final.
 
 ```{r plano-dados}
 METS_PLANO <- c(Modularity = "Modularidade", Nestedness = "Aninhamento (NODF)",
@@ -1248,8 +1248,8 @@ censo de machos, que é a mesma pergunta do aviso lá em cima. O relato
 completo, inclusive o que descobrimos sobre o próprio modelo pelo
 caminho, está em `NOTA_coevolucao_primeiros_testes.md`.
 
-Aqui a variância do traço se separa em duas: a **génica**, que governa a
-segregação, e a **total**, que a população exibe. A distância entre elas
+Aqui a variância do traço se separa em duas: a *génica*, que governa a
+segregação, e a *total*, que a população exibe. A distância entre elas
 é o desequilíbrio de ligamento que o acasalamento não aleatório
 empilhou, e é uma quantidade que os três estudos anteriores não têm como
 mostrar.
@@ -1278,7 +1278,7 @@ direcional, mas não assortativo.
 ## 5.0 O que cem gerações fazem, curva por curva {.tabset}
 
 A mesma figura dos Estudos 2 e 3, e o contraste entre as três é o ponto:
-**aqui os dois lados se movem**. As curvas de aceite se deslocam E os machos
+*aqui os dois lados se movem*. As curvas de aceite se deslocam e os machos
 correm, porque nada é imposto e as duas características evoluem.
 
 Sob a sigmoide, os machos correm mais depressa do que as curvas os seguem, e é
@@ -1292,7 +1292,7 @@ for (cv in CURVAS) {
 }
 ```
 
-## 5.1 A trajetória, e a seleção sexual apagando a si mesma
+## 5.1 As trajetórias ao longo das cem gerações
 
 Aqui está o painel de `cov_zp` ao longo das gerações que eu tinha
 sugerido, junto com três coisas que só apareceram ao rodar.
@@ -1345,9 +1345,9 @@ painéis: é o resultado.
 
 ------------------------------------------------------------------------
 
-# 
+# Onde estão os dados
 
-Nota para eu nao esquecer: Os dados vêm de `Resultados_Artigo/`, lidos
+Nota para eu não esquecer. Os dados vêm de `Resultados_Artigo/`, lidos
 com a mesma função do `Resultados_Preliminares.Rmd`. Se uma combinação
 aparecer como *sem dados*, é porque aquele pedaço ainda não foi baixado
 ou juntado; `99_juntar_resultados.R` faz a junção dos arquivos
