@@ -342,7 +342,7 @@ preparar_rede <- function(M, seed_layout = 2026) {
 # num patchwork ao lado dos outros painéis. O igraph desenha em base R, e base R
 # e grid não se misturam na mesma figura; aqui as coordenadas do layout viram
 # pontos e as arestas viram segmentos, e o resultado é o mesmo desenho.
-rede_ggplot <- function(r, titulo = NULL) {
+rede_ggplot <- function(r, titulo = NULL, subtitulo = NULL) {
   pos <- as.data.frame(r$layout)
   names(pos) <- c("x", "y")
   el <- igraph::as_edgelist(r$g, names = FALSE)
@@ -356,9 +356,10 @@ rede_ggplot <- function(r, titulo = NULL) {
     geom_point(data = pos, aes(x, y, fill = cor, shape = forma),
                size = 1.3, color = "gray30", stroke = 0.1) +
     scale_fill_identity() + scale_shape_identity() +
-    coord_equal() + labs(title = titulo) +
+    coord_equal() + labs(title = titulo, subtitle = subtitulo) +
     theme_void(base_size = 12) +
-    theme(plot.title = element_text(size = 11, hjust = 0.5))
+    theme(plot.title = element_text(size = 15, face = "bold", hjust = 0),
+          plot.subtitle = element_text(size = 10, color = "gray30", hjust = 0))
 }
 
 desenhar_rede <- function(r, titulo, tamanho = 4) {
@@ -765,14 +766,24 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
   # vale a pena ver a rede e o mecanismo que a produziu na mesma figura, em vez
   # de em duas separadas.
   bloco <- function(d) {
-    titulo <- sprintf("Geração %d\nIs %.2f | modularidade %.2f | zbar - pbar %.1f",
-                      d$geracao, d$metrics$I_s, d$metrics$Modularity,
-                      mean(d$male_z) - mean(d$female_p))
-    rede <- rede_ggplot(preparar_rede(d$M), titulo)
+    # A geração vira título grande e as métricas vão para o subtítulo. Antes era
+    # tudo um título só, que na horizontal ficava mais largo que o painel da rede
+    # e saía cortado pela esquerda.
+    rede <- rede_ggplot(
+      preparar_rede(d$M),
+      titulo    = sprintf("Geração %d", d$geracao),
+      subtitulo = sprintf("Is %.2f | modularidade %.2f | zbar - pbar %.1f",
+                          d$metrics$I_s, d$metrics$Modularity,
+                          mean(d$male_z) - mean(d$female_p)))
     if (deitada) {
-      rede | curvas(d) | casais(d) | sucesso(d)
+      # a rede leva quase o dobro da largura dos outros painéis: é o desenho que
+      # precisa de espaço, os outros três são dispersões e se leem apertados.
+      # Os parênteses não são estilo: em R o `|` liga mais frouxo que o `+`,
+      # então sem eles o plot_layout() se aplicaria só ao último painel.
+      (rede | curvas(d) | casais(d) | sucesso(d)) +
+        plot_layout(widths = c(1.8, 1, 1, 1))
     } else {
-      rede / curvas(d) / casais(d) / sucesso(d) + plot_layout(heights = c(1.4, 1, 1, 1))
+      rede / curvas(d) / casais(d) / sucesso(d) + plot_layout(heights = c(1.8, 1, 1, 1))
     }
   }
 
