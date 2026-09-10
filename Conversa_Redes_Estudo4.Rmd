@@ -102,6 +102,13 @@ do traço saindo da faixa em que a preferência distingue. A distância entre
 figura_estrutura_se_apaga(curvas = c("gaussian", "uniform"))
 ```
 
+**Aqui não se apaga nada**, e é o contraste que dá sentido ao resto. A
+modularidade se mantém alta e a rede da geração 100 continua bem diferente do
+controle aleatório. A razão é que sob a gaussiana cada fêmea quer um macho
+parecido com o SEU próprio pico, e os picos diferem entre elas: o traço e a
+preferência andam amarrados, e a distância entre `zbar` e `pbar` fica em zero
+o tempo todo. Não há para onde fugir.
+
 ### Disruptiva
 
 ```{r fig-ushaped, fig.width=11, fig.height=10}

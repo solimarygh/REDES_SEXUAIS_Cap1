@@ -599,7 +599,12 @@ figura_estrutura_se_apaga <- function(curvas = c("sigmoid", "uniform"),
         li$varz_pop[1], li$zbar_pop[1] - li$pbar_pop[1], r$rotulo))
     }
   }
-  mtext("Estudo 4: a seleção sexual apaga a própria estrutura",
+  # O título é DESCRITIVO de propósito. Já foi "a seleção sexual apaga a própria
+  # estrutura", que é verdade sob a sigmoide e sob a disruptiva mas FALSO sob a
+  # gaussiana, onde a modularidade se mantém e o acoplamento persiste. Um título
+  # que afirma o resultado não pode encabeçar as quatro abas; quem diz o que
+  # aconteceu é o texto de cada uma.
+  mtext("Estudo 4: a rede na geração 1 e na geração 100",
         outer = TRUE, side = 3, line = 1.5, cex = 1.3, font = 2)
   mtext(sprintf("as duas características evoluem | %d machos e %d fêmeas | A_max = %d | k = %d | sem seleção natural",
                 200L, 200L, A_max, k),
