@@ -1,13 +1,20 @@
 ---
+title: "Os quatro estudos complementares"
+subtitle: "O que cada estudo faz, e o desenho por trás deles"
+author: "Solimary García Hernández"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    self_contained: true
 editor_options: 
   markdown: 
     wrap: 72
 ---
 
-# Os quatro estudos complementares
-
 Olá Erika e Paulo. O que está aqui é o que cada estudo faz, e não os
-resultados, que vão no documento de Exploracao de Paneis que mandarei
+resultados, que vão no documento de Exploração por painéis que mandarei
 junto.
 
 ------------------------------------------------------------------------
