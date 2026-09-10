@@ -771,12 +771,20 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
     # A geração vira título grande e as métricas vão para o subtítulo. Antes era
     # tudo um título só, que na horizontal ficava mais largo que o painel da rede
     # e saía cortado pela esquerda.
+    # Os cinco números da rede. Antes eram três, e os dois que faltavam
+    # (centralização e a variância do traço) eram justamente os que separam
+    # "a média se deslocou" de "a distribuição se alargou".
+    # A distância é medida entre os adultos daquela geração, ou seja o traço
+    # que os machos exibem contra o pico que as fêmeas usam, que é o que os
+    # painéis de baixo desenham.
     rede <- rede_ggplot(
       preparar_rede(d$M),
       titulo    = sprintf("Geração %d", d$geracao),
-      subtitulo = sprintf("Is %.2f | modularidade %.2f | zbar - pbar %.1f",
+      subtitulo = sprintf("Is %.2f | modularidade %.2f | centralização %.3f\nmachos − fêmeas %.1f | var(z) dos machos %.2f",
                           d$metrics$I_s, d$metrics$Modularity,
-                          mean(d$male_z) - mean(d$female_p)))
+                          d$metrics$Centralization,
+                          mean(d$male_z) - mean(d$female_p),
+                          var(d$male_z)))
     if (deitada) {
       # a rede leva quase o dobro da largura dos outros painéis: é o desenho que
       # precisa de espaço, os outros três são dispersões e se leem apertados.

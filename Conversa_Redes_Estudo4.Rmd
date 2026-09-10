@@ -122,9 +122,11 @@ do que ela mostra. Contar só os machos para `z` e só as fêmeas para `p` daria
 praticamente o mesmo, porque as duas características passam pelas duas
 linhagens sem viés de sexo.
 
-E `zbar - pbar`, que aparece impresso nas figuras, é a distância entre as duas:
-o quanto o macho médio está longe do que a fêmea média procura. Zero quer dizer
-que os machos são, em média, exatamente o que elas preferem.
+A distância entre as duas, `zbar - pbar`, é o quanto o macho médio está longe
+do que a fêmea média procura. Zero quer dizer que os machos são, em média,
+exatamente o que elas preferem. Nas redes ela aparece rotulada como
+*machos − fêmeas*, medida sobre os adultos daquela geração, e é praticamente o
+mesmo número.
 
 *Is*, oportunidade de seleção sexual: a variância no número de parceiras entre
 os machos, dividida pela média ao quadrado. Zero quer dizer que todos acasalam
@@ -138,48 +140,89 @@ sem nenhuma desigualdade de sucesso reprodutivo.
 
 ---
 
-## A rede na geração 1 e na geração 100 {.tabset}
+## O que muda entre a geração 1 e a 100 {.tabset}
 
-Cada aba compara uma regra com a aleatória, que é o controle sem escolha. São
-quatro redes: em cima a regra que dá nome à aba, embaixo a aleatória, e as duas
-colunas são a geração 1 à esquerda e a geração 100 à direita. Cada linha
-acompanha uma réplica só, a mesma nas duas gerações.
+Uma aba por regra de escolha, e dentro de cada uma a mesma réplica duas vezes:
+geração 1 à esquerda, geração 100 à direita. A geração 1 é a rede antes de
+qualquer resposta evolutiva, então o controle está dentro da própria figura.
 
-A geração 1 é a rede antes de qualquer resposta evolutiva, então o controle
-está dentro do próprio estudo, e não numa rodada à parte.
+Antes das abas, o que é a rede. Cada geração produz um grafo bipartido: os
+quadrados são os machos, os círculos são as fêmeas, e há uma aresta entre dois
+deles se acasalaram. Bipartido quer dizer que macho nunca se liga a macho nem
+fêmea a fêmea, e a matriz é binária, então um mesmo casal nunca conta duas
+vezes. Em cinza claro ficam os que não acasalaram, e sob seleção sexual forte
+eles são muitos.
 
-Os números impressos em cada rede são os daquela réplica, e não médias.
-*Modularidade* é o quanto a rede se divide em grupos que acasalam
-preferencialmente entre si, e *centralização* é o quanto os acasalamentos se
-concentram em poucos indivíduos.
+Dessa rede saem os números impressos em cada painel, todos daquela réplica e
+não médias:
+
+- *Modularidade*: o quanto a rede se parte em grupos que acasalam
+  preferencialmente entre si. As cores dos pontos são as comunidades que o
+  algoritmo de Louvain encontrou, ou seja o desenho mostra os módulos que o
+  número conta.
+- *Centralização*: o quanto os acasalamentos se concentram em poucos
+  indivíduos. Uma estrela, com um macho ligado a todas, seria o máximo.
+- *Is*: a desigualdade de sucesso entre os machos, definida acima.
+- *machos − fêmeas*: a distância entre a média do traço dos machos adultos e a
+  média do pico das fêmeas adultas daquela geração.
+- *var(z)*: o quanto o traço varia entre os machos daquela geração.
+
+Abaixo da rede vêm três painéis com os indivíduos que a formaram:
+
+1. A curva de aceite de catorze fêmeas sorteadas dessa réplica. O eixo de baixo
+   é o traço do macho, e os tracinhos nele são os machos que existiam naquela
+   geração. Ver as curvas e os tracinhos juntos diz se as fêmeas ainda têm
+   material dentro da faixa em que discriminam.
+2. Um ponto por casal: o traço do macho contra o pico da fêmea. A diagonal
+   marca onde os dois são iguais, então pontos sobre a diagonal são
+   acasalamento assortativo.
+3. Quantas parceiras teve cada macho, contra o traço dele. É a matéria-prima do
+   Is.
+
+O eixo horizontal é o mesmo nas duas colunas de propósito. Com eixos livres,
+uma população em z = 5 e outra em z = 25 sairiam idênticas e a fuga do traço
+desapareceria da figura.
+
+### Aleatória
+
+```{r mec-uniform, fig.width=11, fig.height=9}
+figura_mecanismo_coevolucao("uniform")
+```
+
+Esta aba é a linha de base, e vale abrir primeiro. Com `P = 0.5` para todo
+mundo, a fêmea aceita qualquer macho, então não há seleção sexual nenhuma: a
+geração 100 sai praticamente igual à geração 1, e o que separa as duas é
+deriva. Os números daqui são a referência contra a qual ler as outras três
+abas.
 
 ### Sigmoide
 
-```{r fig-sigmoid, fig.width=11, fig.height=10}
-figura_estrutura_se_apaga(curvas = c("sigmoid", "uniform"))
+```{r mec-sigmoid, fig.width=11, fig.height=9}
+figura_mecanismo_coevolucao("sigmoid")
 ```
 
-Na geração 1 uns poucos machos levam quase todas as fêmeas, e mais de cem ficam
-sem acasalar (os cinzas). Na geração 100 a rede desta réplica tem os mesmos
-números que a réplica da aleatória embaixo: modularidade 0.44 contra 0.44,
-centralização 0.013 contra 0.015.
+Na geração 1 uns poucos machos levam quase todas as fêmeas e mais de cem ficam
+sem acasalar, os cinzas. Na geração 100 a rede tem os mesmos números da aba
+aleatória: modularidade 0.44 contra 0.44, centralização 0.013 contra 0.015.
 
-Os outros dois números impressos, `var(z)` e `zbar - pbar`, são desta mesma
-réplica: a variância do traço quase não se mexe entre as duas gerações,
-enquanto a distância entre traço e preferência passa de zero para mais de
-vinte. Ou seja, não é perda de variação, é deslocamento da média. Se isso basta
-para explicar o apagamento, ou se falta alguma coisa, é uma das perguntas que
-trago.
+O painel das curvas mostra por onde isso passou. Os machos correram para a
+direita e as curvas de aceite ficaram para trás, sem mudar de forma. E os dois
+últimos números dizem qual das duas coisas se moveu: o `var(z)` quase não se
+mexe entre as duas gerações, enquanto a distância entre machos e fêmeas passa
+de perto de zero para dezenas. Ou seja, não é perda de variação, é deslocamento
+da média. Se isso basta para explicar o apagamento, ou se falta alguma coisa, é
+uma das perguntas que trago.
 
 ### Gaussiana
 
-```{r fig-gaussian, fig.width=11, fig.height=10}
-figura_estrutura_se_apaga(curvas = c("gaussian", "uniform"))
+```{r mec-gaussian, fig.width=11, fig.height=9}
+figura_mecanismo_coevolucao("gaussian")
 ```
 
 Aqui não se apaga nada, e é o contraste com a aba anterior. A modularidade se
-mantém alta e a rede da geração 100 continua bem diferente da aleatória
-embaixo. A distância entre traço e preferência fica em zero nas duas gerações.
+mantém alta, a rede da geração 100 continua bem diferente da aleatória, e a
+distância entre machos e fêmeas fica perto de zero nas duas gerações. No painel
+das curvas, os tracinhos continuam por baixo das curvas na geração 100.
 
 Sob a gaussiana cada fêmea quer um macho parecido com o seu *próprio* pico, e
 os picos diferem entre elas, o que amarraria traço e preferência e não deixaria
@@ -188,65 +231,15 @@ veem outra.
 
 ### Disruptiva
 
-```{r fig-ushaped, fig.width=11, fig.height=10}
-figura_estrutura_se_apaga(curvas = c("u-shaped", "uniform"))
-```
-
-A disruptiva chega perto da aleatória na geração 100, como a sigmoide, mas o
-número que se move é outro. Aqui `zbar - pbar` fica pequeno e quem cresce é o
-`var(z)`: a distribuição do traço se alarga em vez de a média se deslocar.
-
----
-
-## Os indivíduos por trás da rede {.tabset}
-
-A figura anterior mostra a rede; esta mostra quem a formou. É a mesma célula, a
-mesma réplica e as mesmas duas gerações, agora com os indivíduos à vista. Duas
-colunas, geração 1 à esquerda e geração 100 à direita, e quatro linhas em cada
-uma:
-
-1. A rede, a mesma da figura anterior, para servir de referência.
-2. A curva de aceite de catorze fêmeas sorteadas dessa réplica. O eixo de baixo
-   é o traço do macho, e os tracinhos nele são os machos que existiam naquela
-   geração.
-3. Um ponto por casal: o traço do macho contra o pico da fêmea. A diagonal
-   marca onde os dois são iguais, então pontos sobre a diagonal são
-   acasalamento assortativo.
-4. Quantas parceiras teve cada macho, contra o traço dele.
-
-O eixo horizontal é o mesmo nas duas colunas de propósito. Com eixos livres,
-uma população em z = 5 e outra em z = 25 sairiam idênticas e a fuga do traço
-desapareceria da figura.
-
-O que muda entre as abas é só a regra de escolha. A aba que abre é a aleatória,
-para servir de linha de base: com P = 0.5 para todo mundo, a geração 100 sai
-praticamente igual à geração 1. Na sigmoide, a comparação para fazer é entre os
-tracinhos e as curvas na geração 100: os machos correram para a direita e as
-curvas ficaram para trás, sem mudar de forma.
-
-### Aleatória
-
-```{r mec-uniform, fig.width=11, fig.height=9}
-figura_mecanismo_coevolucao("uniform")
-```
-
-### Sigmoide
-
-```{r mec-sigmoid, fig.width=11, fig.height=9}
-figura_mecanismo_coevolucao("sigmoid")
-```
-
-### Gaussiana
-
-```{r mec-gaussian, fig.width=11, fig.height=9}
-figura_mecanismo_coevolucao("gaussian")
-```
-
-### Disruptiva
-
 ```{r mec-ushaped, fig.width=11, fig.height=9}
 figura_mecanismo_coevolucao("u-shaped")
 ```
+
+A disruptiva chega perto da aleatória na geração 100, como a sigmoide, mas o
+número que se move é outro. Aqui a distância entre machos e fêmeas fica pequena
+e quem cresce é o `var(z)`: a distribuição do traço se alarga em vez de a média
+se deslocar. No painel dos casais isso aparece como pontos fugindo da diagonal
+para os dois lados.
 
 ---
 
