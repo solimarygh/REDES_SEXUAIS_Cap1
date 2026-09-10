@@ -20,6 +20,12 @@ source("10_Figuras_conceituais.R")
 cores_4  <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
 labels_4 <- c("uniform"="Aleatória","gaussian"="Gaussiana","sigmoid"="Sigmoide","u-shaped"="Disruptiva")
 
+# tipo_selecao vem como texto, e sem isto o ggplot e o kable ordenam em
+# alfabético: gaussian, sigmoid, u-shaped, uniform. A aleatória é o controle e
+# tem de vir primeiro, na mesma ordem das abas e da lista lá de cima.
+ORDEM_CURVAS  <- names(labels_4)
+ordenar_curva <- function(x) factor(as.character(x), levels = ORDEM_CURVAS)
+
 carregar <- function(paths) {
   hit <- paths[file.exists(paths)]
   if (!length(hit)) return(NULL)
@@ -265,7 +271,8 @@ if (ok(co)) {
     pivot_longer(all_of(names(METS)), names_to = "met", values_to = "v") %>%
     group_by(tipo_selecao, generation, met) %>%
     summarise(m = mean(v, na.rm = TRUE), s = sd(v, na.rm = TRUE), .groups = "drop") %>%
-    mutate(met = factor(METS[met], levels = unname(METS)))
+    mutate(tipo_selecao = ordenar_curva(tipo_selecao),
+           met = factor(METS[met], levels = unname(METS)))
   ggplot(est, aes(generation, m, color = tipo_selecao, fill = tipo_selecao)) +
     geom_ribbon(aes(ymin = m - s, ymax = m + s), alpha = 0.13, color = NA) +
     geom_line(linewidth = 1.1) +
@@ -298,9 +305,14 @@ preferência das fêmeas. Nas redes só aparecia a diferença entre os dois; aqu
 dá para ver qual dos dois se mexeu.
 
 Mesma célula e mesma construção, média das 20 réplicas com a sombra de um
-desvio. A linha pontilhada marca 5, que é onde as duas características começam
-e onde estaria o ótimo se a seleção natural estivesse ligada. O eixo vertical é
-o mesmo nos quatro painéis, senão a fuga do traço sob a sigmoide não se veria.
+desvio. A linha pontilhada horizontal marca 5, que é onde as duas
+características começam e onde estaria o ótimo se a seleção natural estivesse
+ligada. O eixo vertical é o mesmo nos quatro painéis, senão a fuga do traço sob
+a sigmoide não se veria.
+
+O traço vai em linha cheia e a preferência em tracejado, porque nas curvas em
+que as duas andam juntas elas ficam exatamente uma sobre a outra. Onde se vê
+vermelho picotado sobre azul contínuo, é que as duas estão no mesmo lugar.
 
 ```{r zp-trajetoria, fig.width=11, fig.height=4}
 if (ok(co)) {
@@ -314,18 +326,25 @@ if (ok(co)) {
               .groups = "drop") %>%
     pivot_longer(-c(tipo_selecao, generation),
                  names_to = c("qual", ".value"), names_sep = "_") %>%
-    mutate(qual = factor(c(z = "traço do macho (z)",
+    mutate(tipo_selecao = ordenar_curva(tipo_selecao),
+           qual = factor(c(z = "traço do macho (z)",
                            p = "preferência da fêmea (p)")[qual],
                          levels = c("traço do macho (z)",
                                     "preferência da fêmea (p)")))
   cores_zp <- c("traço do macho (z)" = "#2C3E50",
                 "preferência da fêmea (p)" = "#C0392B")
+  # Sob a gaussiana e sob a aleatória as duas linhas ficam exatamente uma em
+  # cima da outra, e uma delas some. Com a preferência tracejada, a
+  # sobreposição se vê: sai vermelho picotado sobre azul contínuo.
   ggplot(zp, aes(generation, m, color = qual, fill = qual)) +
     geom_hline(yintercept = 5, linetype = "dotted", color = "gray45") +
     geom_ribbon(aes(ymin = m - s, ymax = m + s), alpha = 0.16, color = NA) +
-    geom_line(linewidth = 1.1) +
+    geom_line(aes(linetype = qual), linewidth = 1.1) +
     facet_wrap(~tipo_selecao, nrow = 1, labeller = as_labeller(labels_4)) +
     scale_color_manual(values = cores_zp, name = NULL) +
+    scale_linetype_manual(values = c("traço do macho (z)" = "solid",
+                                     "preferência da fêmea (p)" = "22"),
+                          name = NULL) +
     scale_fill_manual(values = cores_zp, guide = "none") +
     labs(subtitle = "σp inicial = 1.0 | σz inicial = 1.0 | A_max = 200 | k = 5 | sem seleção natural\nMédia das 20 réplicas, sombra de ±1 desvio. Pontilhado: o 5 de onde as duas partem.",
          x = "geração", y = NULL) +
@@ -356,7 +375,8 @@ if (ok(co)) {
               `distância entre traço e preferência` = mean(zbar_pop - pbar_pop),
               `tamanho efetivo (Ne)` = mean(Ne, na.rm = TRUE),
               .groups = "drop") %>%
-    pivot_longer(-c(tipo_selecao, generation))
+    pivot_longer(-c(tipo_selecao, generation)) %>%
+    mutate(tipo_selecao = ordenar_curva(tipo_selecao))
   ggplot(tr, aes(generation, value, color = tipo_selecao)) +
     geom_line(linewidth = 1.1) +
     facet_wrap(~name, scales = "free_y") +
@@ -407,6 +427,7 @@ if (ok(co)) {
               `var génica` = mm(var_genica_z),
               `desequilíbrio` = mm(desequilibrio),
               `cor(z,p)` = mm(cor_zp), .groups = "drop") %>%
+    arrange(ordenar_curva(tipo_selecao)) %>%
     mutate(tipo_selecao = labels_4[tipo_selecao]) %>%
     rename(regra = tipo_selecao) %>%
     kable(caption = "Uma célula só: σp inicial = 1.0, σz inicial = 1.0, A_max = 200, k = 5, sem seleção natural, geração 100. Média ± desvio entre as réplicas.")
@@ -427,6 +448,7 @@ if (ok(co)) {
               `mediana` = round(median(d), 2),
               `mínimo` = round(min(d), 2),
               `máximo` = round(max(d), 2), .groups = "drop") %>%
+    arrange(ordenar_curva(tipo_selecao)) %>%
     mutate(tipo_selecao = labels_4[tipo_selecao]) %>%
     rename(regra = tipo_selecao) %>%
     kable(caption = "Desequilíbrio de ligamento na geração 100, célula por célula, sem seleção natural. Uma célula é uma combinação de σp inicial, σz inicial, A_max e k, e a sua média é sobre as 20 réplicas.")
