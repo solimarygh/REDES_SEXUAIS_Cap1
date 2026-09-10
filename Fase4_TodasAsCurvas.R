@@ -174,6 +174,19 @@ if (!requireNamespace("ggplot2", quietly = TRUE) ||
   cat("Os dados da simulação já estão salvos em", arquivo_final, "\n")
   quit(save = "no", status = 0)
 }
+
+# E o mesmo vale para uma rodada PARCIAL. Toda a análise daqui para baixo
+# filtra selecao_natural == FALSE, e numa rodada com NS=com esse filtro devolve
+# zero linhas: lm() morre com "contrasts can be applied only to factors with 2
+# or more levels", que foi exatamente o que aconteceu na primeira rodada da
+# cota. Não é erro da simulação, que já terminou e já salvou; é a análise
+# pedindo um desenho que aquela rodada não tem.
+if (NS != "ambos") {
+  cat(sprintf("Rodada parcial (NS=%s): a análise post-hoc precisa do desenho inteiro.\n", NS))
+  cat("Os dados da simulação já estão salvos em", arquivo_final, "\n")
+  cat("A análise se faz depois, reunindo as metades.\n")
+  quit(save = "no", status = 0)
+}
 library(ggplot2)
 library(segmented)
 
