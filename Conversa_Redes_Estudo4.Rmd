@@ -89,9 +89,10 @@ sem acasalar (os cinzas). Na geração 100 a rede tem *os mesmos números que o
 controle aleatório*: modularidade 0.44 contra 0.44, centralização 0.013 contra
 0.015.
 
-A variância do traço quase não se mexeu, então não é perda de variação. É a
-média do traço saindo da faixa em que a preferência distingue: a distância
-entre `zbar` e `pbar` passa de zero para mais de vinte, e a sigmoide satura.
+A variância do traço quase não se mexeu nesse tempo, e a distância entre `zbar`
+e `pbar` passa de zero para mais de vinte. Ou seja, não é perda de variação, é
+deslocamento da média. Se isso basta para explicar o apagamento, ou se falta
+alguma coisa, é uma das perguntas que trago.
 
 ### Gaussiana
 
@@ -99,12 +100,14 @@ entre `zbar` e `pbar` passa de zero para mais de vinte, e a sigmoide satura.
 figura_estrutura_se_apaga(curvas = c("gaussian", "uniform"))
 ```
 
-Aqui não se apaga nada, e esse é o contraste que dá sentido ao resto. A
-modularidade se mantém alta e a rede da geração 100 continua bem diferente do
-controle. Sob a gaussiana cada fêmea quer um macho parecido com o seu *próprio*
-pico, e os picos diferem entre elas, então traço e preferência andam amarrados:
-a distância entre `zbar` e `pbar` fica em zero o tempo todo. Não há para onde
-fugir.
+Aqui não se apaga nada, e é o contraste com a aba anterior. A modularidade se
+mantém alta e a rede da geração 100 continua bem diferente do controle. A
+distância entre `zbar` e `pbar` fica em zero o tempo todo.
+
+Sob a gaussiana cada fêmea quer um macho parecido com o seu *próprio* pico, e
+os picos diferem entre elas, o que amarraria traço e preferência e não deixaria
+para onde fugir. É a explicação que me parece natural, e queria ouvir se vocês
+veem outra.
 
 ### Disruptiva
 
@@ -181,14 +184,15 @@ if (ok(co)) {
 }
 ```
 
-O Is cai enquanto a distância entre traço e preferência cresce, e são a mesma
-coisa vista de dois ângulos: quando a média do traço se afasta demais do pico
-médio, a regra de escolha satura e deixa de distinguir uns machos dos outros.
+O Is cai enquanto a distância entre traço e preferência cresce, e as duas
+curvas se espelham. A leitura que eu daria é que a regra de escolha satura
+quando a média do traço sai da faixa em que ela distingue, mas é leitura minha:
+vocês leriam assim?
 
-O painel do Ne mostra que isso não é só topologia. Enquanto a seleção sexual
-está viva, ela reduz o tamanho efetivo da população quase à metade do censo;
-quando o traço escapa, a população volta ao tamanho de censo. A seleção sexual,
-aqui, é uma força demográfica *transitória*.
+O Ne acompanha o Is. Enquanto o Is está alto o tamanho efetivo fica perto da
+metade do censo, e quando o traço escapa ele volta ao valor de censo. Faz
+sentido chamar isso de força demográfica transitória, ou é ler demais numa
+média sobre células?
 
 ---
 
@@ -212,17 +216,18 @@ if (ok(co)) {
 }
 ```
 
-A gaussiana é a única que acopla as duas características: acasalamento
-assortativo, desequilíbrio de ligamento, correlação entre traço e preferência.
+A gaussiana é a única com desequilíbrio e correlação entre traço e preferência.
+A sigmoide dá o mesmo desequilíbrio que a aleatória, ou seja nenhum, apesar de
+ser a curva em que o traço mais se move.
 
-A sigmoide dá o mesmo desequilíbrio que a aleatória, ou seja nenhum. Todas as
-fêmeas querem a mesma coisa independentemente do seu próprio pico, então o
-acasalamento é direcional mas não assortativo, e há fuga do traço *sem*
-acoplamento.
+Sob a sigmoide todas as fêmeas querem a mesma coisa independentemente do seu
+próprio pico, então o acasalamento seria direcional mas não assortativo, e
+haveria fuga do traço *sem* acoplamento. A disruptiva chegaria ao mesmo
+apagamento por outro caminho, alargando a distribuição do traço em vez de
+deslocar a média.
 
-A disruptiva chega ao mesmo apagamento que a sigmoide por outro caminho: não
-desloca a média, alarga a distribuição do traço até que toda fêmea encontre
-machos distantes do seu pico.
+São as duas leituras que eu tenho, e é sobre elas que queria a opinião de
+vocês.
 
 ---
 
