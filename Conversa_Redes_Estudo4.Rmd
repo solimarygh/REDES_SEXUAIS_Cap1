@@ -116,6 +116,50 @@ figura_estrutura_se_apaga(curvas = "uniform")
 
 ---
 
+## O que acontece numa população concreta {.tabset}
+
+A figura acima mostra a rede. Esta mostra os indivíduos que a formam, na mesma
+réplica e nas mesmas duas gerações.
+
+Em cima, a curva de aceite de catorze fêmeas sorteadas, com os machos
+disponíveis marcados no eixo de baixo. **É aqui que o mecanismo fica visível:**
+na geração 1 as curvas estão em cima dos machos, e na geração 100, sob a
+sigmoide, os machos correram para a direita e as curvas ficaram para trás. A
+preferência não mudou de forma; o material é que saiu do alcance dela.
+
+No meio, os casais que se formaram, com a diagonal marcando onde o macho é
+igual ao pico da fêmea. Embaixo, quantas parceiras teve cada macho.
+
+O eixo horizontal é o mesmo nas duas colunas de propósito: com eixos livres,
+uma população em z = 5 e outra em z = 25 sairiam idênticas e a fuga do traço
+desapareceria da figura.
+
+### Sigmoide
+
+```{r mec-sigmoid, fig.width=11, fig.height=9}
+figura_mecanismo_coevolucao("sigmoid")
+```
+
+### Gaussiana
+
+```{r mec-gaussian, fig.width=11, fig.height=9}
+figura_mecanismo_coevolucao("gaussian")
+```
+
+### Disruptiva
+
+```{r mec-ushaped, fig.width=11, fig.height=9}
+figura_mecanismo_coevolucao("u-shaped")
+```
+
+### Aleatória
+
+```{r mec-uniform, fig.width=11, fig.height=9}
+figura_mecanismo_coevolucao("uniform")
+```
+
+---
+
 ## A mesma coisa, ao longo das gerações
 
 ```{r trajetoria, fig.width=11, fig.height=5}
