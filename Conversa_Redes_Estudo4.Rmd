@@ -131,6 +131,15 @@ O eixo horizontal é o mesmo nas duas colunas de propósito. Com eixos livres,
 uma população em z = 5 e outra em z = 25 sairiam idênticas e a fuga do traço
 desapareceria da figura.
 
+A aba que abre é a aleatória, para servir de linha de base: com P = 0.5 para
+todo mundo, a geração 100 sai praticamente igual à geração 1.
+
+### Aleatória
+
+```{r mec-uniform, fig.width=11, fig.height=9}
+figura_mecanismo_coevolucao("uniform")
+```
+
 ### Sigmoide
 
 ```{r mec-sigmoid, fig.width=11, fig.height=9}
@@ -147,12 +156,6 @@ figura_mecanismo_coevolucao("gaussian")
 
 ```{r mec-ushaped, fig.width=11, fig.height=9}
 figura_mecanismo_coevolucao("u-shaped")
-```
-
-### Aleatória
-
-```{r mec-uniform, fig.width=11, fig.height=9}
-figura_mecanismo_coevolucao("uniform")
 ```
 
 ---
