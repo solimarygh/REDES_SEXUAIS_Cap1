@@ -37,13 +37,23 @@ Uma população de 200 machos e 200 fêmeas, gerações discretas. Cada macho te
 traço `z`; cada fêmea tem um pico de preferência `p` e uma exigência `s`, e
 aceita um macho com probabilidade que depende de quão bem `z` casa com `p`.
 
-São quatro regras de acasalamento, e cada uma leva daqui em diante a cor que
-tem nas figuras:
+São quatro regras de acasalamento. `P` é a probabilidade de a fêmea aceitar o
+macho, e as quatro partem do mesmo pico médio, de modo que o que difere entre
+elas é a geometria da regra e não as fêmeas quererem coisas diferentes em
+média. Cada uma leva daqui em diante a cor que tem nas figuras:
 
-- <span style="color:#8a8a8a;font-weight:bold">aleatória</span>: aceita metade dos machos, sem discriminar
-- <span style="color:#E6B800;font-weight:bold">gaussiana</span>: prefere quem se parece com o seu próprio pico
-- <span style="color:#3BA273;font-weight:bold">sigmoide</span>: quanto maior `z`, melhor
-- <span style="color:#9932CC;font-weight:bold">disruptiva</span>: prefere quem difere do seu pico
+- <span style="color:#8a8a8a;font-weight:bold">aleatória</span> (nula): `P = 0.5`, constante. Aceita qualquer macho com a
+  mesma probabilidade, então aqui não existe seleção sexual e qualquer mudança
+  no traço é deriva. É o controle.
+- <span style="color:#E6B800;font-weight:bold">gaussiana</span> (estabilizadora): `P = exp(-s (z - p)^2)`. Aceita machos
+  cujo traço está perto do seu pico, e rejeita tanto os muito maiores quanto os
+  muito menores.
+- <span style="color:#3BA273;font-weight:bold">sigmoide</span> (direcional): `P = 1 / (1 + exp(-s (z - p)))`. Aceita
+  machos cujo traço supera o seu pico, e quanto mais o supera, mais provável é
+  o aceite.
+- <span style="color:#9932CC;font-weight:bold">disruptiva</span> (u-shaped): `P = 1 - exp(-s (z - p)^2)`. Evita machos
+  parecidos com o seu pico e aceita os que estão distantes dele, para mais ou
+  para menos.
 
 As duas características são herdáveis e evoluem juntas ao longo de 100
 gerações. Cada geração produz uma rede bipartida de acasalamentos, e é ela que
@@ -52,7 +62,7 @@ então ela não evolui em nenhum cenário.
 
 ### O desenho, e o que este documento mostra
 
-O Estudo 4 cruza cinco fatores. Todo número deste documento vem de algum ponto
+O Estudo 4 cruza seis fatores. Todo número deste documento vem de algum ponto
 desta grade, e vale ter a grade à vista para saber de qual:
 
 | fator | níveis |
@@ -64,16 +74,37 @@ desta grade, e vale ter a grade à vista para saber de qual:
 | k, com quantos ela pode acasalar | 5, 10, 20 |
 | seleção natural sobre o traço | ligada, desligada |
 
+Os três últimos são os fatores ecológicos, e são os mesmos nos quatro estudos:
+
+- *A_max*: quantos machos distintos cada fêmea consegue avaliar antes de
+  decidir. É o custo ecológico de procurar parceiro. O nível 200 é a condição
+  de saturação, ou seja "sem restrição de busca", e não um terceiro ponto
+  equidistante do gradiente.
+- *k*: com quantos parceiros ela pode acasalar. É um teto e não uma cota. Pela
+  regra atual, best-of-n, a fêmea avalia os A_max machos, todos, e só então
+  fica com os k melhores entre os que aceitou, então quantos parceiros
+  realmente consegue depende também da taxa de aceite da curva.
+- *Seleção natural*: viabilidade sobre o traço do macho,
+  `V = exp(-gamma (z - phi)^2)` com `gamma = 0.2` e `phi = 5`, ligada ou
+  desligada. Penaliza os machos cujo traço se afasta do ótimo ecológico `phi`,
+  que é o mesmo valor 5 em que as duas características começam. Age só sobre os
+  machos e só sobre o traço, nunca sobre a preferência.
+
 Fixada a regra de escolha e o regime de seleção natural, sobram 3 x 3 x 3 x 3 =
 81 combinações, cada uma rodada 20 vezes. Com as quatro regras, são 6.480
 corridas de 100 gerações em cada metade do desenho.
 
-Duas restrições valem para o documento inteiro. Primeira, tudo aqui é a metade
-**sem seleção natural**, que é onde o mecanismo de Fisher aparece sem a
-viabilidade competindo com ele. Segunda, as figuras mostram sempre a mesma
-célula, σp inicial = 1.0, σz inicial = 1.0, A_max = 200 e k = 5, que é a mais
-permissiva do desenho: a fêmea vê todos os machos e fica com os 5 melhores. As
-tabelas dizem no rodapé se são dessa célula ou de todas.
+Deste espaço todo, aqui eu olho um canto só: *A_max = 200, k = 5, σp inicial =
+1.0, σz inicial = 1.0 e sem seleção natural*. É a condição mais permissiva do
+desenho, a fêmea vê todos os machos e fica com os 5 melhores, e é onde a
+seleção sexual age com menos coisa competindo com ela. Todas as figuras são
+dessa célula, e as tabelas dizem no rodapé se são dela ou de todas as 81.
+
+A metade com seleção natural também rodou, e não está aqui só para manter a
+conversa em uma coisa de cada vez: ali a viabilidade e a escolha das fêmeas
+agem sobre o mesmo traço ao mesmo tempo, e separar o que é de qual seria uma
+discussão por si só. Ela está nos painéis de `Exploracao_Paineis_MiudoV2.Rmd`,
+que têm abas para comparar as duas metades.
 
 ### Vocabulário
 
