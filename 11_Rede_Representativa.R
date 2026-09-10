@@ -298,7 +298,7 @@ rede_representativa <- function(estudo, ..., metrica = "Modularity",
   saida <- list(M = rede$M, metrics = rede$metrics, redes = redes, linhas = linhas,
                 replica = escolha$replica,
                 geracao = gen, semente = semente, media_celula = media, confere = confere,
-                rotulo = sprintf("réplica %d de %d, a mais próxima da média da célula",
+                rotulo = sprintf("réplica %d de %d, a mais próxima da média",
                                  escolha$replica, nrow(celula)))
   .cache_redes[[chave]] <<- saida
   .gravar_cache()
