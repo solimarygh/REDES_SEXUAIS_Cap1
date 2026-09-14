@@ -1,0 +1,1695 @@
+---
+title: "Material suplementar"
+subtitle: "Estrutura de redes de acasalamento sob escolha de parceiro: os quatro experimentos de simulação"
+author: "Solimary García Hernández"
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    self_contained: false
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{css, echo=FALSE}
+.main-container { max-width: 96% !important; width: 96% !important;
+                  margin-left: auto; margin-right: auto; }
+.tocify { max-height: 90% !important; }
+```
+
+```{r setup, include=FALSE}
+# fig.retina = 1: por padrão o rmarkdown gera as figuras no DOBRO da
+# resolução, para telas retina, e o arquivo fica quatro vezes maior sem que a
+# figura pareça melhor num monitor comum. Com tantos painéis isso é a diferença
+# entre a pasta de figuras pesar 79 MB ou uns 20 MB, o que importa muito na hora
+# de publicar o documento.
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.align = "center", out.width = "100%",
+                      fig.retina = 1, dpi = 96)
+suppressPackageStartupMessages({
+  library(dplyr); library(tidyr); library(ggplot2); library(patchwork); library(knitr)
+})
+
+cores_4  <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
+labels_4 <- c("uniform"="Aleatória","gaussian"="Gaussiana","sigmoid"="Sigmoide","u-shaped"="Disruptiva")
+```
+
+```{r dados}
+# Mesma leitura do Resultados_Preliminares.Rmd, para os dois documentos nunca
+# discordarem sobre o que estão mostrando.
+carregar <- function(paths) {
+  hit <- paths[file.exists(paths)]
+  if (!length(hit)) return(NULL)
+  obj <- readRDS(hit[1])
+  if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
+}
+juntar_pedacos <- function(pasta, padrao) {
+  arqs <- list.files(pasta, full.names = TRUE)
+  arqs <- arqs[grepl(padrao, basename(arqs), perl = TRUE)]
+  if (!length(arqs)) return(NULL)
+  distinct(bind_rows(lapply(arqs, carregar)))
+}
+
+# Cada mudança de modelo grava com um sufixo próprio, e a leitura tenta da
+# rodada mais nova para a mais antiga, parando na primeira que existir. Nunca
+# junta duas: são modelos diferentes, e misturá-las daria um conjunto sem
+# sentido nenhum. A rodada efetivamente lida aparece na tabela de situação.
+RODADAS <- c("bestOfN", "censoConst")
+
+# O regime do censo também entra no nome do arquivo, e desde a rodada de
+# setembro há os dois: sem sufixo é o TETO (200 como máximo, cada juvenil
+# sobrevive ou não de forma independente) e "_cota" é a COTA (200 como
+# capacidade de suporte, sorteados com peso proporcional à viabilidade).
+#
+# A cota só foi rodada onde a decisão mudava alguma coisa, que é a metade COM
+# seleção natural: sem ela os dois regimes percorrem o mesmo caminho de código
+# e dão resultados idênticos. Então a regra não pode ser "se houver cota, use
+# só a cota", senão a metade sem seleção natural desaparece do documento.
+# É por regime de seleção natural: onde a cota cobre, manda a cota; o resto vem
+# do teto. Assim nenhum cenário aparece duas vezes e nenhum some.
+padrao_censo <- function(estudo, r, censo) {
+  if (censo == "cota") sprintf("^(backup|resultados)_%s_%s.*cota.*\\.rds$", estudo, r)
+  else                 sprintf("^(backup|resultados)_%s_%s(?!.*cota).*\\.rds$", estudo, r)
+}
+
+combinar_censo <- function(teto, cota) {
+  if (is.null(cota) || !nrow(cota)) return(teto)
+  if (is.null(teto) || !nrow(teto)) return(cota)
+  ns_cota <- unique(cota$selecao_natural)
+  bind_rows(cota, filter(teto, !(selecao_natural %in% ns_cota)))
+}
+
+descrever_censo <- function(teto, cota) {
+  tem <- function(x) !is.null(x) && nrow(x) > 0
+  if (!tem(cota)) return("teto")
+  if (!tem(teto)) return("cota")
+  if (all(unique(teto$selecao_natural) %in% unique(cota$selecao_natural))) "cota"
+  else "cota onde existe, teto no resto"
+}
+
+carregar_rodada <- function(pasta, estudo) {
+  for (r in RODADAS) {
+    teto <- juntar_pedacos(pasta, padrao_censo(estudo, r, "teto"))
+    cota <- juntar_pedacos(pasta, padrao_censo(estudo, r, "cota"))
+    df   <- combinar_censo(teto, cota)
+    if (!is.null(df) && nrow(df) > 0) {
+      attr(df, "rodada") <- r
+      attr(df, "censo")  <- descrever_censo(teto, cota)
+      return(df)
+    }
+  }
+  NULL
+}
+rodada_de <- function(x) if (is.null(x)) "-" else attr(x, "rodada") %||% "?"
+censo_de  <- function(x) if (is.null(x)) "-" else attr(x, "censo")  %||% "?"
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
+ct  <- carregar_rodada("Resultados_Artigo/Fase_Controle/Dados", "Controle")
+d   <- carregar_rodada("Resultados_Artigo/Fase5_MiudoV2/Dados", "Femeas")
+esp <- carregar_rodada("Resultados_Artigo/Fase_Espelho/Dados",  "Espelho")
+
+# Co-evolução. Aqui as duas metades vêm em arquivos separados de propósito, e
+# as duas entram: a metade SEM seleção natural (que é idêntica nos dois regimes
+# de censo, porque ali o código nem chega à parte da cota) e a metade COM, que
+# rodou sob a cota. O nome carrega o modo de segregação e a versão do motor
+# para que rodadas de motores diferentes nunca se misturem.
+co <- local({
+  pasta <- "Resultados_Artigo/Fase_Coevolucao/Dados"
+  sem <- carregar(file.path(pasta,
+    c("resultados_Coevolucao_genica_neAdulto_sem_completo.rds",
+      "resultados_Coevolucao_genica_completo.rds")))
+  com <- carregar(file.path(pasta,
+    c("resultados_Coevolucao_genica_neAdulto_cota_com_completo.rds",
+      "resultados_Coevolucao_genica_neAdulto_cota_ambos_completo.rds")))
+  # Se o arquivo que existir for o "ambos", ele traz as duas metades; fico só
+  # com a metade COM, que é a que aquele arquivo acrescenta.
+  if (!is.null(com)) com <- filter(com, selecao_natural)
+  partes <- list(sem, com)
+  partes <- partes[!vapply(partes, is.null, logical(1))]
+  if (!length(partes)) NULL else distinct(bind_rows(partes))
+})
+
+ok  <- function(x) !is.null(x) && nrow(x) > 0
+
+# As figuras que mostram uma população concreta, em vez de uma média sobre a
+# grade. Vêm de um script à parte, compartilhado com os outros documentos, para
+# que exista uma versão só de cada uma. Sourcear aqui apenas define as funções.
+source("10_Figuras_conceituais.R")
+CURVAS <- c("uniform", "gaussian", "sigmoid", "u-shaped")
+```
+
+```{r funcoes-painel}
+# ---------------------------------------------------------------------
+# Conjuntos de variáveis resposta. O nome à direita é o rótulo do painel;
+# a ordem do vetor é a ordem das linhas na figura.
+# ---------------------------------------------------------------------
+quais_metricas  <- c(Modularity     = "1. Modularidade",
+                     Nestedness     = "2. Aninhamento (NODF)",
+                     Centralization = "3. Centralização",
+                     I_s            = "4. Oportunidade (Is)")
+quais_poliandria <- c(grau_medio_femeas        = "1. Poliandria realizada",
+                      prop_femeas_atingiu_k    = "2. Proporção que atingiu k",
+                      arestas                  = "3. Arestas (densidade)",
+                      prop_femeas_sem_acasalar = "4. Fêmeas sem acasalar")
+quais_traco     <- c(zbar_males = "Média do traço (z)",
+                     varz_males = "Variância do traço (Var z)")
+# Duas linhas só, para o painel ficar simétrico ao do traço no estudo das
+# fêmeas. Usamos a preferência das fêmeas adultas, que é o espelho exato de
+# zbar_males lá: em cada estudo, a característica medida no sexo que a
+# expressa. O pool genotípico (pbar_pop, varp_pop) continua gravado e anda
+# praticamente colado nestas duas.
+quais_pref      <- c(pbar_femeas = "Média da preferência (p)",
+                     varp_femeas = "Variância da preferência (Var p)")
+
+tema_painel <- function(cor_faixa = "#2C3E50") {
+  theme_light(base_size = 11) +
+    theme(strip.placement   = "outside",
+          strip.background  = element_rect(fill = cor_faixa, color = NA),
+          strip.text        = element_text(color = "white", face = "bold"),
+          strip.text.y.left = element_text(color = "white", face = "bold", angle = 90),
+          axis.title.x      = element_text(face = "bold", size = 10, margin = margin(t = 6)))
+}
+
+cols_presentes <- function(df, quais) {
+  m <- names(quais)[names(quais) %in% names(df)]
+  if (!length(m)) NULL else m
+}
+
+# ---------------------------------------------------------------------
+# CONTROLE — superfície σp × σz (uma geração, sem trajetória)
+# Uma faixa de heatmaps por variável resposta, com escala de cor própria,
+# porque as métricas têm ordens de grandeza diferentes e uma escala comum
+# achataria as de menor amplitude.
+# ---------------------------------------------------------------------
+plot_superficie <- function(df, kk, amax, ns, quais, titulo) {
+  if (!ok(df)) return(NULL)
+  base  <- df %>% filter(k_fixo == kk, encounters_n == amax, selecao_natural == ns)
+  mcols <- cols_presentes(base, quais)
+  if (nrow(base) < 20 || is.null(mcols)) return(NULL)
+
+  cel <- base %>%
+    group_by(tipo_selecao, sigma_p, sigma_z) %>%
+    summarise(across(all_of(mcols), ~ mean(.x, na.rm = TRUE)), .groups = "drop")
+
+  faixas <- lapply(seq_along(mcols), function(i) {
+    m <- mcols[i]
+    g <- ggplot(cel, aes(x = factor(sigma_z), y = factor(sigma_p), fill = .data[[m]])) +
+      geom_tile(color = "white", linewidth = 0.3) +
+      facet_wrap(~ tipo_selecao, nrow = 1,
+                 labeller = labeller(tipo_selecao = labels_4)) +
+      scale_fill_viridis_c(option = "magma", name = NULL) +
+      labs(x = NULL, y = quais[[m]]) +
+      tema_painel() +
+      theme(panel.grid = element_blank(),
+            axis.title.y = element_text(face = "bold", size = 9.5))
+    if (i > 1) g <- g + theme(strip.text = element_blank(), strip.background = element_blank())
+    if (i == length(mcols)) g <- g + labs(x = "σz — variação do traço dos machos")
+    g
+  })
+
+  wrap_plots(faixas, ncol = 1) +
+    plot_annotation(
+      title   = titulo,
+      caption = paste("Cada célula é a média das 20 réplicas de uma geração.",
+                      "Eixo y = σp (variação da preferência entre fêmeas), eixo x = σz.",
+                      "A escala de cor é independente em cada faixa."),
+      theme   = theme(plot.title   = element_text(face = "bold", size = 13),
+                      plot.caption = element_text(hjust = 0, face = "italic", size = 8.5)))
+}
+
+# CONTROLE — cortes: a métrica ao longo de σz, uma linha por nível de σp
+plot_cortes <- function(df, kk, amax, ns, quais, titulo) {
+  if (!ok(df)) return(NULL)
+  base  <- df %>% filter(k_fixo == kk, encounters_n == amax, selecao_natural == ns)
+  mcols <- cols_presentes(base, quais)
+  if (nrow(base) < 20 || is.null(mcols)) return(NULL)
+
+  dd <- base %>%
+    pivot_longer(all_of(mcols), names_to = "q", values_to = "v") %>%
+    group_by(tipo_selecao, sigma_p, sigma_z, q) %>%
+    summarise(m = mean(v, na.rm = TRUE), .groups = "drop") %>%
+    mutate(q = factor(quais[q], levels = unname(quais[mcols])))
+
+  ggplot(dd, aes(x = sigma_z, y = m, color = factor(sigma_p), group = factor(sigma_p))) +
+    geom_line(linewidth = 0.8) +
+    geom_point(size = 1.1) +
+    facet_grid(q ~ tipo_selecao, scales = "free_y", switch = "y",
+               labeller = labeller(tipo_selecao = labels_4)) +
+    scale_color_viridis_d(name = "σp", end = 0.92) +
+    labs(x = "σz — variação do traço dos machos", y = NULL, title = titulo,
+         caption = "Média das 20 réplicas. Cada linha é um nível de σp: escura = fêmeas homogêneas, clara = fêmeas heterogêneas.") +
+    tema_painel() +
+    theme(legend.position = "bottom",
+          plot.title      = element_text(face = "bold", size = 13),
+          plot.caption    = element_text(hjust = 0, face = "italic", size = 8.5))
+}
+
+# ---------------------------------------------------------------------
+# ESTUDOS EVOLUTIVOS — gradiente na geração final + trajetórias
+#   coluna 1  : variável vs o eixo do experimento, na geração final
+#   colunas 2-3: média ± 1 SD ao longo das gerações, no σ baixo e no σ alto
+# ---------------------------------------------------------------------
+plot_evolucao <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo,
+                          cor_faixa = "#2C3E50") {
+  if (!ok(df) || !all(c(var_col, "k_fixo", "generation") %in% names(df))) return(NULL)
+  base  <- df %>% filter(k_fixo == kk, encounters_n == amax, selecao_natural == ns)
+  mcols <- cols_presentes(base, quais)
+  if (nrow(base) < 20 || is.null(mcols)) return(NULL)
+
+  gfin <- max(base$generation, na.rm = TRUE)
+  vals <- sort(unique(base[[var_col]]))
+  nv   <- c(low = vals[1], high = vals[length(vals)])
+  if (nv["low"] == nv["high"]) return(NULL)
+
+  lab1 <- sprintf("1. vs %s (geração %d)", var_lab, gfin)
+  lab2 <- sprintf("2. %s = %.1f", var_lab, nv["low"])
+  lab3 <- sprintf("3. %s = %.1f", var_lab, nv["high"])
+
+  d1 <- base %>%
+    filter(generation == gfin) %>%
+    pivot_longer(all_of(mcols), names_to = "q", values_to = "v") %>%
+    mutate(xval  = .data[[var_col]],
+           panel = factor(lab1, levels = lab1),
+           q     = factor(quais[q], levels = unname(quais[mcols])))
+
+  d23 <- base %>%
+    filter(.data[[var_col]] %in% nv) %>%
+    mutate(panel = ifelse(.data[[var_col]] == nv["low"], lab2, lab3)) %>%
+    pivot_longer(all_of(mcols), names_to = "q", values_to = "v") %>%
+    group_by(tipo_selecao, q, xval = generation, panel) %>%
+    summarise(m = mean(v, na.rm = TRUE), s = sd(v, na.rm = TRUE), .groups = "drop") %>%
+    mutate(q     = factor(quais[q], levels = unname(quais[mcols])),
+           panel = factor(panel, levels = c(lab2, lab3)))
+
+  ref <- data.frame(panel = factor(lab1, levels = lab1), x = 1.0)
+
+  p1 <- ggplot(d1) +
+    geom_vline(data = ref, aes(xintercept = x), linetype = "dashed",
+               color = "red", alpha = 0.45) +
+    geom_jitter(aes(x = xval, y = v, color = tipo_selecao),
+                alpha = 0.20, size = 1.0, width = 0.02) +
+    geom_smooth(aes(x = xval, y = v, color = tipo_selecao),
+                method = "loess", formula = y ~ x, se = FALSE, linewidth = 1.2) +
+    facet_grid(q ~ panel, scales = "free_y", switch = "y") +
+    scale_color_manual(values = cores_4, labels = labels_4) +
+    labs(x = var_lab, y = NULL) +
+    tema_painel(cor_faixa) + theme(legend.position = "none")
+
+  p23 <- ggplot(d23) +
+    geom_ribbon(aes(x = xval, ymin = m - s, ymax = m + s, fill = tipo_selecao),
+                alpha = 0.13, color = NA) +
+    geom_line(aes(x = xval, y = m, color = tipo_selecao), linewidth = 0.9) +
+    facet_grid(q ~ panel, scales = "free_y") +
+    scale_color_manual(values = cores_4, labels = labels_4, name = NULL) +
+    scale_fill_manual(values = cores_4, guide = "none") +
+    labs(x = "Geração", y = NULL) +
+    tema_painel(cor_faixa) +
+    theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+  (p1 | p23) + plot_layout(widths = c(1, 2)) +
+    plot_annotation(
+      title   = titulo,
+      caption = paste("Coluna 1: cada ponto é uma réplica na geração final, a linha é um loess.",
+                      "Colunas 2-3: linha = média das réplicas, sombra = ±1 SD.",
+                      "A linha vermelha tracejada marca σ = 1.0, o ponto onde os dois estudos se cruzam."),
+      theme   = theme(plot.title      = element_text(face = "bold", size = 13),
+                      plot.caption    = element_text(hjust = 0, face = "italic", size = 8.5),
+                      legend.position = "bottom"))
+}
+
+# ---------------------------------------------------------------------
+# Driver das abas: seleção natural → A_max → k.
+# Os níveis começam em ### porque o cabeçalho da seção é ##, que é o que
+# aparece na barra lateral.
+# ---------------------------------------------------------------------
+render_tabs <- function(f) {
+  for (ns in c(FALSE, TRUE)) {
+    cat(sprintf("\n### %s {.tabset}\n\n",
+                if (ns) "Com seleção natural" else "Sem seleção natural"))
+    for (amax in c(200, 40, 10)) {
+      cat(sprintf("\n#### A_max = %d {.tabset}\n\n", amax))
+      for (kk in c(5, 10, 20)) {
+        cat(sprintf("\n##### k = %d\n\n", kk))
+        p <- tryCatch(f(kk, amax, ns), error = function(e) NULL)
+        if (is.null(p)) { cat("\n*Sem dados para esta combinação.*\n\n"); next }
+        print(p); cat("\n\n")
+      }
+    }
+  }
+}
+
+rotulo <- function(base, ns, amax, kk) {
+  sprintf("%s · %s · A_max = %d · k = %d", base,
+          if (ns) "com seleção natural" else "sem seleção natural", amax, kk)
+}
+```
+
+# Apresentação
+
+Este documento é o anexo de resultados do relatório. Ele reúne, num formato
+navegável, todos os painéis produzidos pelos quatro experimentos de simulação
+do projeto, incluindo as combinações de parâmetros que não caberiam num texto
+impresso. O corpo do relatório discute as conclusões; aqui está o material em
+que elas se apoiam.
+
+As primeiras seções apresentam os conceitos e o desenho experimental, para que
+o documento possa ser lido sem recorrer a outras fontes.
+
+## O problema biológico
+
+Em muitas espécies, as fêmeas não acasalam com um parceiro qualquer: avaliam
+vários machos e acasalam preferencialmente com alguns. Essa escolha é a
+principal causa da **seleção sexual**, o processo evolutivo que explica
+características masculinas exageradas e aparentemente custosas, como a cauda do
+pavão ou o canto de muitos insetos. Quando as fêmeas preferem um valor
+determinado de uma característica, os machos que o possuem deixam mais
+descendentes, e a característica se desloca ao longo das gerações.
+
+O que raramente se considera é que a escolha de parceiro não produz apenas uma
+pressão seletiva média sobre os machos. Ela produz também um **padrão** de quem
+acasala com quem, e esse padrão tem estrutura. Se todas as fêmeas de uma
+população preferem a mesma coisa, poucos machos concentram quase todos os
+acasalamentos. Se as fêmeas discordam entre si sobre o que preferem, formam-se
+grupos de acasalamento relativamente independentes uns dos outros. As duas
+situações podem produzir a mesma intensidade média de seleção e, ainda assim,
+consequências evolutivas diferentes, porque a variação genética fica
+distribuída de maneira diferente na população.
+
+Este projeto trata desse padrão como objeto de estudo por direito próprio. A
+pergunta geral é: que estrutura a escolha de parceiro produz, e essa estrutura
+tem consequências evolutivas próprias, além das que a intensidade média da
+seleção já explicaria?
+
+## A rede de acasalamentos
+
+Para tratar o padrão de forma quantitativa, representamos os acasalamentos de
+cada geração como uma **rede bipartida**. "Rede" quer dizer um conjunto de
+pontos, chamados nós, ligados por linhas, chamadas arestas. "Bipartida" quer
+dizer que os nós são de dois tipos, aqui machos e fêmeas, e que só existem
+arestas entre tipos diferentes: um macho pode estar ligado a uma fêmea, nunca a
+outro macho. Cada aresta representa um acasalamento que ocorreu, e a rede é
+binária, ou seja, um mesmo casal nunca é contado duas vezes.
+
+Essa representação vem da ecologia de interações, onde é usada desde os anos
+1980 para descrever quem poliniza quem ou quem come quem, e traz consigo um
+conjunto de métricas já estabelecidas. Medimos quatro:
+
+- **Modularidade**: o quanto a rede se divide em grupos que interagem
+  preferencialmente entre si. Numa rede de acasalamentos, modularidade alta
+  significa que a população está repartida em subconjuntos que acasalam quase
+  só internamente. Calculamos com o algoritmo de Louvain sobre a projeção
+  unimodal da rede.
+- **Aninhamento** (índice NODF): o quanto os parceiros dos indivíduos menos
+  procurados formam um subconjunto dos parceiros dos mais procurados. É uma
+  medida de hierarquia: aninhamento alto descreve uma população em que há
+  machos "populares" que acasalam com quase todas as fêmeas e machos
+  periféricos que acasalam apenas com as fêmeas menos exigentes.
+- **Centralização**: o quanto os acasalamentos se concentram em poucos
+  indivíduos. O valor máximo corresponde a uma rede em estrela, com um único
+  macho ligado a todas as fêmeas.
+- **Oportunidade de seleção sexual** (Is): a variância no número de parceiras
+  entre os machos, dividida pelo quadrado da média. É a única das quatro que
+  não vem da ecologia de redes, e sim da genética quantitativa, onde é uma
+  medida clássica do potencial de seleção sexual. Vale zero quando todos os
+  machos acasalam igualmente, e cresce quanto mais desigual é o sucesso.
+
+Também registramos a **poliandria realizada**, que é o número médio de
+parceiros das fêmeas que acasalaram. Ela não é um parâmetro do modelo, e sim um
+resultado: as fêmeas buscam um certo número de parceiros, mas conseguem apenas
+os que aceitam entre os que chegam a avaliar.
+
+## O modelo
+
+Simulamos uma população de 200 machos e 200 fêmeas com gerações discretas e não
+sobrepostas. Cada macho expressa uma característica sexualmente selecionada, o
+**traço**, que chamamos de `z`. Cada fêmea tem um **pico de preferência**, `p`,
+que é o valor de traço masculino que ela mais aprecia, e uma **exigência**, `s`,
+que determina o quanto ela tolera afastamentos desse pico. A probabilidade de
+uma fêmea aceitar um macho depende da distância entre o traço dele e o pico
+dela.
+
+Duas quantidades organizam todo o desenho experimental:
+
+- **σp** é a dispersão dos picos de preferência entre as fêmeas. σp pequeno
+  descreve uma população em que todas as fêmeas querem praticamente a mesma
+  coisa; σp grande, uma população em que discordam bastante sobre o que
+  preferem.
+- **σz** é a dispersão do traço entre os machos, ou seja, o quanto o material
+  disponível para as fêmeas escolherem é variado.
+
+A distinção entre as duas é o eixo conceitual do projeto. A mesma intensidade
+média de seleção sexual pode resultar de fêmeas homogêneas diante de machos
+variados ou do contrário, e a estrutura da rede não é a mesma nos dois casos.
+
+### As quatro regras de escolha
+
+A forma da função de preferência é o outro fator central, e comparamos quatro.
+`P` é a probabilidade de a fêmea aceitar o macho. Todas partem do mesmo pico
+médio, de modo que as diferenças entre elas vêm da geometria da regra, e não de
+as fêmeas quererem coisas diferentes em média.
+
+| regra | função | leitura biológica |
+|---|---|---|
+| [**aleatória**]{style="color:gray55"} | `P = 0.5` | a fêmea não discrimina. Não há seleção sexual, e serve de controle |
+| [**gaussiana**]{style="color:#E6B800"} | `P = exp(-s (z - p)²)` | preferência por semelhança ao próprio pico: seleção estabilizadora |
+| [**sigmoide**]{style="color:#3BA273"} | `P = 1 / (1 + exp(-s (z - p)))` | quanto maior o traço, maior o aceite: seleção direcional |
+| [**disruptiva**]{style="color:#9932CC"} | `P = 1 - exp(-s (z - p)²)` | preferência por afastamento do próprio pico: seleção disruptiva |
+
+Essas cores identificam as quatro regras em todas as figuras do documento.
+
+A regra aleatória merece ênfase, porque é o que torna o resto interpretável.
+Nela a fêmea aceita qualquer macho com a mesma probabilidade, então nenhuma
+estrutura da rede pode ser atribuída à escolha. Toda métrica medida sob a
+aleatória é o valor que aquela métrica assume por acaso, dado o tamanho da
+população e o número de acasalamentos. É o piso contra o qual as outras três se
+leem.
+
+### Como as fêmeas buscam
+
+Duas restrições ecológicas atravessam os quatro experimentos, porque na
+natureza nenhuma fêmea avalia todos os machos disponíveis nem acasala com
+quantos quiser:
+
+- **A_max** é o número de machos distintos que cada fêmea consegue avaliar
+  antes de decidir, com os níveis 200, 40 e 10. Representa o custo de procurar
+  parceiro. O nível 200 corresponde à população inteira, ou seja, à ausência de
+  restrição de busca.
+- **k** é o número de parceiros que cada fêmea pode aceitar, com os níveis 5,
+  10 e 20. É um limite superior, não uma cota: a fêmea avalia os A_max machos e
+  fica com os k melhores entre aqueles que aceitou, de modo que o número de
+  parceiros que efetivamente consegue depende também da taxa de aceite da sua
+  regra de preferência. Essa regra de decisão, em que a fêmea amostra antes de
+  decidir, corresponde ao que a literatura de escolha de parceiro chama de
+  comparação em pool, ou *best-of-n*, e é a suposição habitual para leks e
+  agregações.
+
+Além disso, cada experimento roda com e sem **seleção natural** sobre o traço
+masculino. Quando ligada, cada macho juvenil sobrevive com probabilidade
+`V = exp(-γ (z - φ)²)`, com γ = 0.2 e φ = 5: quanto mais o traço se afasta do
+ótimo ecológico φ, menor a chance de sobreviver. É a força que se opõe à
+seleção sexual, e o que permite perguntar se a estrutura da rede se sustenta
+quando há um custo de carregar o traço. A seleção natural nunca age sobre a
+preferência.
+
+## Os quatro experimentos
+
+Os quatro compartilham exatamente o mesmo ciclo de vida, as mesmas quatro
+regras e os mesmos fatores ecológicos. O que muda entre eles é quais
+características são herdadas, ou seja, quais estão livres para responder à
+seleção. Cada um isola uma peça do sistema.
+
+| experimento | o que varia | traço do macho | preferência da fêmea | o que isola |
+|---|---|---|---|---|
+| 1. Controle | σp e σz | sorteado | sorteada | a estrutura que as regras de escolha produzem sozinhas, sem resposta evolutiva |
+| 2. Fêmeas variando | σp | herdável | re-sorteada | como a heterogeneidade de preferência afeta a evolução do traço |
+| 3. Machos variando | σz | re-sorteado | herdável | como a variedade de machos disponíveis afeta a evolução da preferência |
+| 4. Co-evolução | os dois, só como condição inicial | herdável | herdável | o feedback entre as duas características |
+
+O Controle roda uma geração, porque sem herança a segunda geração seria um
+sorteio independente com a mesma distribuição. Isso o torna cerca de cem vezes
+mais barato que os outros, e é o que permite cruzar σp com σz por inteiro. Os
+outros três rodam 100 gerações.
+
+Nos experimentos 2 e 3 a característica que não é herdada é re-sorteada a cada
+geração da mesma distribuição. Isso é deliberado: mantém a dispersão fixa no
+valor do tratamento durante as 100 gerações e impede que ela mude ao mesmo
+tempo que a outra, o que confundiria a interpretação. No experimento 4 isso é
+impossível, porque re-sortear é exactamente o que impede a herança, e por isso
+ali os dois sigmas são apenas condição inicial.
+
+Todos os cenários rodaram com **20 réplicas**, ou seja, 20 repetições com
+sementes diferentes. Vinte e não uma centena porque os efeitos em questão são
+grandes e sistemáticos, não questão de ruído amostral.
+
+## Como navegar
+
+A barra lateral tem uma entrada por experimento, e dentro de cada uma as
+variáveis resposta que fazem sentido naquele experimento. A navegação por
+dentro de cada painel é por abas, sempre na mesma ordem: **seleção natural**
+(sem, com), depois **A_max** (200, 40, 10), depois **k** (5, 10, 20). São as 18
+combinações do desenho ecológico. A aba que abre por padrão é a menos
+restritiva, sem seleção natural e com A_max = 200.
+
+As figuras de rede deste documento não são esquemas: desenham réplicas que
+realmente rodaram, reconstruídas a partir da semente original, e o valor da
+métrica reproduzida é conferido contra o valor guardado antes de a figura ser
+desenhada.
+
+## Uma nota de método: o censo de machos
+
+Esta seção registra uma decisão metodológica que afeta a leitura de parte dos
+painéis, e que preferimos declarar explicitamente.
+
+A regra de comparação em pool tornou a seleção sexual bastante mais forte do
+que numa versão anterior do modelo, que era o objetivo. Uma consequência não
+prevista apareceu no experimento 2, nas regras sigmoide e disruptiva com
+seleção natural ligada: o traço se afasta tanto do ótimo ecológico que a
+viabilidade `V = exp(-γ (z - φ)²)` colapsa para todos os machos ao mesmo tempo,
+e sobram pouquíssimos adultos. Nessas células a rede foi calculada sobre duas
+ou três dezenas de machos em vez de 200, e as métricas de topologia deixam de
+ser comparáveis com as demais, porque todas elas dependem do tamanho da rede.
+
+Isso expôs uma ambiguidade real no modelo, e não um detalhe de implementação.
+O número 200 admite duas leituras biológicas distintas:
+
+- **Teto.** 200 é um máximo. Cada juvenil sobrevive ou não de forma
+  independente, com probabilidade V, e o censo adulto é quem sobrou. A
+  viabilidade é mortalidade em termos absolutos e o tamanho da população é um
+  resultado do modelo. Corresponde ao que a literatura chama de seleção dura.
+- **Cota.** 200 é a capacidade de suporte do ambiente. Sorteia-se sempre 200
+  juvenis com peso proporcional a V, de modo que a viabilidade decide quais
+  machos ocupam as vagas, nunca quantas vagas existem. A população fica
+  regulada por densidade. Corresponde à seleção branda.
+
+Rodamos as duas versões nas mesmas células e com as mesmas sementes, o que
+permite uma comparação pareada. A diferença é substantiva: sob a regra
+sigmoide, a centralização passa de 0.59 com o teto para 0.19 com a cota,
+enquanto a oportunidade de seleção sexual passa de 0.50 para 6.95. As duas
+métricas apontam para lados opostos porque normalizam de formas diferentes, e
+isso é em si um resultado sobre a robustez das métricas ao tamanho da rede.
+
+Os painéis deste documento usam a cota onde ela foi rodada. As células em que o
+censo ficou abaixo de 200 aparecem marcadas com um X branco nos painéis da
+seção 4, para que não sejam lidas como comparáveis.
+
+As regras aleatória e gaussiana não têm esse problema, porque nelas o traço não
+se afasta o bastante para a viabilidade colapsar, e os dois regimes dão
+resultados praticamente idênticos. Os experimentos 1 e 3 também não, porque
+nesses o traço é re-sorteado a cada geração em torno de φ.
+
+### A aritmética do colapso do censo
+
+A figura abaixo não usa dados de simulação: é apenas a conta analítica do
+modelo, e serve para mostrar por que o colapso do censo é abrupto em vez de
+gradual.
+
+Cada macho juvenil sobrevive com probabilidade
+
+$$V = \exp\!\left(-\gamma\,(z - \phi)^2\right), \qquad \gamma = 0.2,\ \phi = 5$$
+
+Cada geração produz 10.000 filhotes (200 fêmeas x 50 cada), dos quais
+metade, 5.000, são machos juvenis. É sobre esses 5.000 que a viabilidade
+age, e de quem sobreviver saem os 200 adultos.
+
+```{r viabilidade-conta, fig.width=11, fig.height=4.4}
+GAMMA <- 0.2; PHI <- 5; SIG <- 1; N_JUV <- 5000; N_AD <- 200
+
+# (a) A curva de viabilidade, e onde a população a encontra.
+# As densidades estão reescaladas para caber no mesmo eixo da probabilidade;
+# o que importa nelas é a POSIÇÃO, não a altura.
+z     <- seq(0, 22, length.out = 800)
+curva <- data.frame(z = z, V = exp(-GAMMA * (z - PHI)^2))
+medias <- c(5, 10, 15)
+dens <- do.call(rbind, lapply(medias, function(m)
+  data.frame(z = z, d = dnorm(z, m, SIG) / dnorm(0, 0, SIG),
+             media = factor(sprintf("média do traço = %d", m),
+                            levels = sprintf("média do traço = %d", medias)))))
+
+pa <- ggplot() +
+  geom_area(data = dens, aes(z, d, fill = media), position = "identity",
+            alpha = 0.30, color = NA) +
+  geom_line(data = curva, aes(z, V), linewidth = 1.3, color = "#2C3E50") +
+  geom_vline(xintercept = PHI, linetype = "dashed", color = "red", alpha = 0.6) +
+  annotate("text", x = PHI + 0.3, y = 1.02, label = "phi == 5", parse = TRUE,
+           hjust = 0, color = "red", size = 3.4, fontface = "italic") +
+  scale_fill_manual(values = c("#3BA273", "#E6B800", "#9932CC"), name = NULL) +
+  labs(title = "a. A viabilidade, e onde a população a encontra",
+       x = "z — traço do macho", y = "probabilidade de sobreviver") +
+  theme_light(base_size = 11) +
+  theme(legend.position = "bottom", panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", size = 11))
+
+# (b) Quantos dos 5.000 juvenis sobrevivem, em função de onde está a média.
+# Para z ~ N(mu, sigma^2), a média de exp(-gamma (z-phi)^2) tem forma fechada,
+# então não é preciso simular nada aqui.
+mu   <- seq(5, 18, length.out = 600)
+EV   <- (1 / sqrt(1 + 2*GAMMA*SIG^2)) *
+        exp(-GAMMA * (mu - PHI)^2 / (1 + 2*GAMMA*SIG^2))
+surv <- data.frame(mu = mu, n = N_JUV * EV)
+limiar <- uniroot(function(m)
+  N_JUV * (1/sqrt(1 + 2*GAMMA*SIG^2)) *
+    exp(-GAMMA*(m - PHI)^2 / (1 + 2*GAMMA*SIG^2)) - N_AD, c(5, 18))$root
+
+pb <- ggplot(surv, aes(mu, pmax(n, 1e-3))) +
+  geom_hline(yintercept = N_AD, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = limiar, linetype = "dotted", color = "red") +
+  geom_line(linewidth = 1.3, color = "#2C3E50") +
+  annotate("text", x = 5.2, y = N_AD * 1.6, label = "os 200 adultos necessários",
+           hjust = 0, color = "red", size = 3.4, fontface = "italic") +
+  annotate("text", x = limiar + 0.3, y = 3e3,
+           label = sprintf("a partir de z = %.1f\nnão dá mais", limiar),
+           hjust = 0, color = "red", size = 3.4, fontface = "italic", lineheight = 0.95) +
+  scale_y_log10(breaks = c(1e-2, 1, 100, 1e4),
+                labels = c("0,01", "1", "100", "10.000")) +
+  labs(title = "b. Quantos dos 5.000 juvenis sobrevivem",
+       x = "média do traço na população", y = "machos sobreviventes (escala log)") +
+  theme_light(base_size = 11) +
+  theme(panel.grid.minor = element_blank(),
+        plot.title = element_text(face = "bold", size = 11))
+
+pa | pb
+```
+
+O painel (a) mostra a origem do problema. Enquanto a média da população está
+sobre o ótimo, a distribuição dos juvenis se sobrepõe ao pico da curva de
+viabilidade e quase todos sobrevivem. Conforme a média se desloca, a
+sobreposição desaparece, e a sobrevivência não diminui gradualmente: cai por
+ordens de grandeza, porque a viabilidade é uma gaussiana no expoente.
+
+O painel (b) quantifica isso. Com σz = 1, o traço médio pode se afastar até
+cerca de 9,5 e ainda sobram os 200 machos que o censo requer. Além desse ponto,
+não sobram: com a média em 15, o número esperado de sobreviventes entre os
+5.000 juvenis é inferior a um. Nos cenários da regra sigmoide o traço médio
+chega a passar de 20, o que explica as redes calculadas sobre dois ou três
+machos.
+
+A figura também deixa claro por que a cota resolve o problema do censo:
+sorteando 200 juvenis com peso proporcional a V, o que passa a importar é a
+viabilidade *relativa* entre eles, que continua a discriminar normalmente
+mesmo quando o valor absoluto é minúsculo para todos.
+
+A comparação pareada mostrou, porém, que a cota tem uma consequência própria.
+Como as 200 vagas se preenchem sempre, com os melhores juvenis que existirem,
+não há mortalidade em termos absolutos contendo o deslocamento, e o traço se
+afasta mais do ótimo, não menos: sob a regra sigmoide, a média do traço na
+geração 100 passa de 9.40 com o teto para 12.79 com a cota. Essa é a diferença
+biológica entre seleção branda e seleção dura, e não duas formas de implementar
+a mesma coisa.
+
+## O desenho experimental numa figura
+
+O esquema abaixo resume o que cada experimento fixa e o que deixa evoluir. Os
+pontos cinza são as condições iniciais do desenho; as setas vermelhas indicam o
+que fica livre para se mover ao longo das cem gerações. Esta é a única figura
+do documento que é um esquema: todas as outras são saída da simulação.
+
+```{r fig-desenho, fig.width=10, fig.height=8}
+figura_desenho()
+```
+
+## Cobertura dos dados
+
+```{r status}
+n_cen <- function(x, eixos) {
+  if (!ok(x)) return("-")
+  cols <- intersect(c("tipo_selecao", eixos, "encounters_n", "k_fixo",
+                      "selecao_natural", "replica"), names(x))
+  format(nrow(distinct(x[, cols])), big.mark = ".")
+}
+n_ger <- function(x) if (!ok(x)) "-" else
+  if ("generation" %in% names(x)) as.character(max(x$generation, na.rm = TRUE)) else "1"
+
+tibble(
+  Estudo     = c("Controle", "Fêmeas variando", "Machos variando", "Co-evolução"),
+  Eixo       = c("σp × σz (superfície)", "σp", "σz", "os dois, herdáveis"),
+  `O que evolui` = c("nada", "o traço do macho (z)", "a preferência da fêmea (p)", "os dois"),
+  Rodada     = c(rodada_de(ct), rodada_de(d), rodada_de(esp),
+                 if (ok(co)) "bestOfN" else "-"),
+  # O regime do censo é o que estava em aberto desde agosto, então tem de estar
+  # à vista: um estudo lido sob a cota e outro sob o teto não se comparam.
+  Censo      = c(censo_de(ct), censo_de(d), censo_de(esp),
+                 if (ok(co)) "sem NS: igual nos dois; com NS: cota" else "-"),
+  Gerações   = c(n_ger(ct), n_ger(d), n_ger(esp), n_ger(co)),
+  Cenários   = c(n_cen(ct, c("sigma_p", "sigma_z")), n_cen(d, "sigma_p"),
+                 n_cen(esp, "sigma_z"), n_cen(co, c("sigma_p_init", "sigma_z_init"))),
+  Situação   = c(if (ok(ct)) "concluído" else "sem dados",
+                 if (ok(d))  "concluído" else "sem dados",
+                 if (ok(esp)) "concluído" else "sem dados",
+                 if (ok(co)) "concluído" else "não rodado")
+) %>% kable(caption = "O que está neste documento. Cenários inclui as 20 réplicas. No Controle e em Machos variando o traço é re-sorteado a cada geração e o censo nunca encurta, então os dois regimes dão o mesmo.")
+```
+
+------------------------------------------------------------------------
+
+# 1. Controle: a superfície σp × σz numa geração
+
+> Nenhuma característica é herdada. Os traços e as preferências são sorteados, a
+> rede de acasalamentos se forma, as métricas são medidas, e o cenário termina.
+> É o único experimento que cruza os dois eixos de variação por inteiro.
+
+Este experimento responde à pergunta mais básica do conjunto: que estrutura as
+regras de escolha produzem por si só, antes de qualquer resposta evolutiva?
+
+Como não há geração seguinte, não existe trajetória: cada cenário é um ponto, e
+o que se explora é o plano (σp, σz). Os dois eixos percorrem sete níveis, de
+0.2 a 2.0, e a diagonal σp = σz é o conjunto de casos em que os dois sexos são
+igualmente heterogêneos. Uma geração basta porque, sem herança, a segunda
+geração seria um sorteio independente da mesma distribuição.
+
+A seleção natural entra aqui como filtro puramente ecológico: altera quais
+machos estão disponíveis para as fêmeas, mas não tem consequência evolutiva,
+porque não há descendência que a receba.
+
+## 1.0 O que existe dentro de uma célula do desenho
+
+Todos os painéis seguintes são médias de 20 réplicas sobre uma grade de
+parâmetros. Antes de passar a elas, vale ver o objeto concreto que está por
+trás de cada valor: uma população de 400 indivíduos e a rede de acasalamentos
+que ela formou.
+
+Chamamos de **célula** uma combinação concreta dos fatores do desenho, e de
+**réplica** cada uma das 20 repetições daquela célula com sementes diferentes.
+As redes desenhadas abaixo são réplicas reais: dentro de cada célula o
+procedimento localiza a réplica cuja modularidade está mais próxima da média da
+célula, recupera a semente com que foi gerada, reconstrói a rede e confere que a
+métrica reproduzida coincide com a que havia sido registrada. O rodapé de cada
+painel identifica a réplica.
+
+A figura mostra os quatro cantos do plano (σp, σz). Os quadrados são machos, os
+círculos são fêmeas, e as cores vêm do mesmo algoritmo de Louvain que calcula a
+modularidade, de modo que os agrupamentos visíveis no desenho são exatamente os
+que o número conta. Em cinza claro estão os indivíduos que não acasalaram.
+
+### Curva por curva {.tabset}
+
+Comparar as abas entre si isola a regra de escolha: a composição da população é
+idêntica nas quatro, e a única coisa que muda é a função de preferência.
+
+```{r ct-rede-cantos, results='asis', fig.width=9, fig.height=9}
+for (cv in CURVAS) {
+  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
+  figura_redes(tipo = cv)
+  cat("\n\n")
+}
+```
+
+A figura anterior varia a composição da população. A seguinte varia o outro
+nível do desenho, o regime de busca, que nos resultados é o que mais pesa.
+Agora a composição da população é a mesma nos quatro painéis, e o que muda é
+quantos machos cada fêmea avalia e quantos pode aceitar. A razão k/A_max é a
+intensidade de seleção por truncamento: quanto menor, mais seletiva é a
+escolha.
+
+### O regime de busca, curva por curva {.tabset}
+
+```{r ct-rede-busca, results='asis', fig.width=9, fig.height=9}
+for (cv in CURVAS) {
+  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
+  figura_busca(tipo = cv)
+  cat("\n\n")
+}
+```
+
+## 1.1 Superfície das métricas de rede {.tabset}
+
+Cada faixa horizontal é uma métrica, com escala de cor própria, porque as
+quatro vêm em ordens de grandeza diferentes e uma escala comum achataria as de
+menor amplitude. Dentro de cada faixa, as quatro colunas são as quatro regras
+de escolha.
+
+Há duas coisas a observar ao percorrer as abas. A primeira é a direção do
+gradiente de cor: se corre na vertical, σp é o que determina a métrica; se na
+horizontal, σz; se na diagonal, a combinação dos dois. A segunda é se as quatro
+regras desenham a mesma superfície ou superfícies distintas, que é a pergunta
+sobre quanto a forma da preferência importa.
+
+```{r ct-superficie, results='asis', fig.width=12, fig.height=13}
+if (!ok(ct)) cat("\n*Sem dados do Controle. Rode `Fase_Controle.R`.*\n") else
+render_tabs(function(kk, amax, ns)
+  plot_superficie(ct, kk, amax, ns, quais_metricas,
+                  rotulo("CONTROLE — métricas de rede", ns, amax, kk)))
+```
+
+## 1.2 Cortes ao longo de σz {.tabset}
+
+A mesma informação da seção anterior, agora em linhas em vez de cores, o que
+facilita a leitura de valores. Cada linha corresponde a um nível de σp: as
+escuras são populações de fêmeas homogêneas, as claras de fêmeas heterogêneas.
+
+A forma do conjunto de linhas responde a uma pergunta estatística direta. Se
+forem paralelas, σp e σz agem de forma aditiva. Se se cruzarem ou abrirem em
+leque, há interação entre os dois, ou seja, o efeito da variação entre machos
+depende de quanta variação existe entre fêmeas.
+
+```{r ct-cortes, results='asis', fig.width=12, fig.height=10}
+if (!ok(ct)) cat("\n*Sem dados do Controle.*\n") else
+render_tabs(function(kk, amax, ns)
+  plot_cortes(ct, kk, amax, ns, quais_metricas,
+              rotulo("CONTROLE — cortes ao longo de σz", ns, amax, kk)))
+```
+
+<!-- ## 1.3 Divergência entre as curvas de preferência -->
+
+<!-- Esta é a grandeza que construímos para perguntar *onde no plano as -->
+
+<!-- quatro curvas produzem topologias diferentes umas das outras*. Dentro de -->
+
+<!-- cada célula do desenho tira-se a média de cada métrica para cada curva, -->
+
+<!-- e a divergência é o quanto essas quatro posições se afastam do centro -->
+
+<!-- comum delas, no espaço das quatro métricas padronizadas. Vale zero se as -->
+
+<!-- quatro curvas produzem exatamente a mesma rede, e cresce quanto mais -->
+
+<!-- elas se separam. -->
+
+<!-- Padronizar aqui quer dizer converter cada métrica em z-score, subtraindo -->
+
+<!-- a média e dividindo pelo desvio padrão, para que as quatro fiquem na -->
+
+<!-- mesma unidade antes de entrarem numa distância. Sem isso a conta seria -->
+
+<!-- dominada pelo aninhamento, que é definido de 0 a 100 enquanto a -->
+
+<!-- modularidade e a centralização ficam entre 0 e 1, e a divergência -->
+
+<!-- mediria uma métrica só. A padronização é feita uma vez sobre a tabela -->
+
+<!-- inteira, e não dentro de cada célula: se fosse por célula, cada uma -->
+
+<!-- seria esticada pela sua própria dispersão e todas sairiam parecidas, que -->
+
+<!-- é exatamente o contrário do que este mapa quer mostrar. -->
+
+<!-- ```{r ct-divergencia, fig.width=11, fig.height=7.5} -->
+
+<!-- if (!ok(ct)) { -->
+
+<!--   cat("*Sem dados do Controle.*") -->
+
+<!-- } else { -->
+
+<!--   mets <- intersect(c("Modularity", "Nestedness", "Centralization", "I_s"), names(ct)) -->
+
+<!--   chave <- c("sigma_p", "sigma_z", "encounters_n", "k_fixo", "selecao_natural") -->
+
+<!--   padr <- ct %>% -->
+
+<!--     filter(if_all(all_of(mets), ~ !is.na(.x))) %>% -->
+
+<!--     mutate(across(all_of(mets), ~ as.numeric(scale(.x)))) -->
+
+<!--   cel <- padr %>% -->
+
+<!--     group_by(across(all_of(c(chave, "tipo_selecao")))) %>% -->
+
+<!--     summarise(across(all_of(mets), ~ mean(.x, na.rm = TRUE)), .groups = "drop") %>% -->
+
+<!--     pivot_longer(all_of(mets), names_to = "met", values_to = "v") -->
+
+<!--   centro <- cel %>% -->
+
+<!--     group_by(across(all_of(c(chave, "met")))) %>% -->
+
+<!--     summarise(centro = mean(v, na.rm = TRUE), .groups = "drop") -->
+
+<!--   div <- cel %>% -->
+
+<!--     left_join(centro, by = c(chave, "met")) %>% -->
+
+<!--     group_by(across(all_of(c(chave, "tipo_selecao")))) %>% -->
+
+<!--     summarise(dist = sqrt(sum((v - centro)^2)), .groups = "drop") %>% -->
+
+<!--     group_by(across(all_of(chave))) %>% -->
+
+<!--     summarise(divergencia = mean(dist), .groups = "drop") -->
+
+<!--   # Para o mapa, os três valores de k entram promediados; a figura seguinte -->
+
+<!--   # abre por k para conferir se essa média não está escondendo nada. -->
+
+<!--   div_mapa <- div %>% -->
+
+<!--     group_by(sigma_p, sigma_z, encounters_n, selecao_natural) %>% -->
+
+<!--     summarise(divergencia = mean(divergencia), .groups = "drop") -->
+
+<!--   ggplot(div_mapa, aes(x = factor(sigma_z), y = factor(sigma_p), fill = divergencia)) + -->
+
+<!--     geom_tile(color = "white", linewidth = 0.3) + -->
+
+<!--     facet_grid(selecao_natural ~ encounters_n, -->
+
+<!--                labeller = labeller( -->
+
+<!--                  encounters_n    = function(x) paste0("A_max = ", x), -->
+
+<!--                  selecao_natural = function(x) ifelse(as.logical(x), "com seleção natural", -->
+
+<!--                                                       "sem seleção natural"))) + -->
+
+<!--     scale_fill_viridis_c(option = "magma", name = "divergência") + -->
+
+<!--     labs(title = "CONTROLE — onde as quatro curvas de preferência divergem mais", -->
+
+<!--          subtitle = "Média sobre os três valores de k. Eixo y = σp, eixo x = σz.", -->
+
+<!--          x = "σz — variação do traço dos machos", -->
+
+<!--          y = "σp — variação da preferência entre fêmeas", -->
+
+<!--          caption = "Distância média das quatro curvas ao centroide delas, no espaço das quatro métricas padronizadas.") + -->
+
+<!--     tema_painel() + -->
+
+<!--     theme(panel.grid = element_blank(), -->
+
+<!--           plot.title = element_text(face = "bold", size = 13), -->
+
+<!--           plot.caption = element_text(hjust = 0, face = "italic", size = 8.5)) -->
+
+<!-- } -->
+
+<!-- ``` -->
+
+<!-- ```{r ct-divergencia-k, fig.width=11, fig.height=4.2} -->
+
+<!-- if (ok(ct)) { -->
+
+<!--   # A mesma divergência, agora aberta por k e contra a assimetria com sinal. -->
+
+<!--   divk <- div %>% mutate(assimetria = log(sigma_z / sigma_p)) -->
+
+<!--   ggplot(divk, aes(x = assimetria, y = divergencia, color = factor(k_fixo))) + -->
+
+<!--     geom_point(alpha = 0.5, size = 1.3) + -->
+
+<!--     geom_smooth(method = "loess", formula = y ~ x, se = FALSE, linewidth = 1) + -->
+
+<!--     facet_grid(selecao_natural ~ encounters_n, -->
+
+<!--                labeller = labeller( -->
+
+<!--                  encounters_n    = function(x) paste0("A_max = ", x), -->
+
+<!--                  selecao_natural = function(x) ifelse(as.logical(x), "com NS", "sem NS"))) + -->
+
+<!--     scale_color_viridis_d(name = "k", end = 0.85) + -->
+
+<!--     labs(title = "A mesma divergência contra a assimetria log(σz/σp)", -->
+
+<!--          x = "assimetria — negativa: fêmeas variam mais; positiva: machos variam mais", -->
+
+<!--          y = "divergência", -->
+
+<!--          caption = "Cada ponto é uma célula (σp, σz). Zero no eixo x é a diagonal, onde os dois sexos variam igual.") + -->
+
+<!--     tema_painel() + -->
+
+<!--     theme(plot.title = element_text(face = "bold", size = 12), -->
+
+<!--           plot.caption = element_text(hjust = 0, face = "italic", size = 8.5)) -->
+
+<!-- } -->
+
+<!-- ``` -->
+
+## 1.3 Poliandria realizada e acesso ao acasalamento {.tabset}
+
+Esta seção trata de uma distinção que é fácil de perder de vista e que muda a
+interpretação dos resultados. O parâmetro k não é o número de parceiros que a
+fêmea tem, e sim o máximo que ela pode ter. O número efetivo é
+`min(k, machos aceitos entre os A_max avaliados)`, porque a amostragem é sem
+reposição e ela nunca acasala com mais machos do que chegou a avaliar.
+
+A consequência é que os tratamentos nominais de poliandria não se realizam em
+todo o desenho. Com A_max = 10 e k = 20, nenhuma fêmea chega aos 20 parceiros,
+e possivelmente nem aos 10, porque não acasala com os dez que avaliou, e sim
+com aqueles que aceitou entre esses dez. Quantos parceiros ela consegue depende
+portanto da regra de preferência e de A_max, e não apenas de k.
+
+Por isso registramos a poliandria realizada como variável resposta, e é ela que
+entra nas análises em lugar do k nominal. Os painéis abaixo mostram o panorama
+completo, com a proporção de fêmeas que atingiu k, o número de arestas da rede
+e a proporção de fêmeas que não conseguiu acasalar.
+
+```{r ct-poliandria, results='asis', fig.width=12, fig.height=13}
+if (!ok(ct)) cat("\n*Sem dados do Controle.*\n") else
+render_tabs(function(kk, amax, ns)
+  plot_superficie(ct, kk, amax, ns, quais_poliandria,
+                  rotulo("CONTROLE — poliandria e acesso", ns, amax, kk)))
+```
+
+------------------------------------------------------------------------
+
+# 2. Fêmeas variando (σp): a evolução do traço masculino
+
+> O eixo do experimento é σp, a dispersão do pico de preferência entre as
+> fêmeas. A preferência é re-sorteada a cada geração de N(5, σp) e portanto não
+> evolui; o traço do macho é herdável e livre para responder à seleção. σz é
+> apenas condição inicial, fixada em 1.0.
+
+Este experimento pergunta como a heterogeneidade de preferência entre as fêmeas
+afeta a resposta evolutiva do traço masculino. São cem gerações por réplica.
+
+Aqui a escolha da fêmea é a *causa* da seleção: a distribuição de preferências
+não muda ao longo do tempo, e é ela que gera a pressão seletiva sobre os
+machos. Manter σp fixo durante as cem gerações é deliberado, e é o que permite
+atribuir a resposta do traço à largura dessa distribuição, sem o confundimento
+de a preferência estar mudando ao mesmo tempo.
+
+Em todos os painéis desta seção, a coluna 1 mostra o gradiente ao longo de σp
+na geração 100, e as colunas 2 e 3 mostram as trajetórias que levaram até lá,
+nos dois extremos do gradiente, σp = 0.2 e σp = 2.0.
+
+## 2.0 O efeito de σp numa população concreta
+
+O eixo deste experimento é simples de enunciar e difícil de visualizar. As duas
+colunas abaixo são as duas pontas do gradiente, com os *mesmos* machos nas
+duas, de modo que a única coisa que difere entre elas é o quanto as fêmeas
+discordam entre si sobre o que preferem.
+
+Em cima, a curva de aceite de catorze fêmeas sorteadas, com os machos
+disponíveis marcados no eixo: com σp pequeno as curvas se empilham umas sobre
+as outras, porque todas querem o mesmo macho. No meio, os casais que se
+formaram, com a diagonal marcando onde o macho é igual ao pico da fêmea.
+Embaixo, quantas parceiras cada macho teve, que é sobre quem a seleção sexual
+está agindo neste estudo.
+
+### Curva por curva {.tabset}
+
+```{r fem-mecanismo, results='asis', fig.width=11, fig.height=9}
+for (cv in CURVAS) {
+  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
+  print(figura_sigma_p(tipo = cv))
+  cat("\n\n")
+}
+```
+
+Na aba da regra aleatória as duas colunas são equivalentes, o que confirma o
+controle: com P = 0.5 para qualquer par, σp não tem por onde produzir efeito.
+
+### E o que cem gerações fazem {.tabset}
+
+A figura anterior contrasta σp baixo com σp alto, ou seja, duas populações
+diferentes. Esta contrasta outra coisa: *a mesma população na geração 1 e na
+geração 100*, depois de o traço masculino ter evoluído.
+
+Em cima está a rede de acasalamentos, e abaixo os três painéis que mostram os
+indivíduos que a formaram, todos da mesma réplica. Como neste experimento a
+preferência é re-sorteada a cada geração, as curvas de aceite ocupam a mesma
+posição nas duas colunas, e o que se desloca são os machos. A comparação a
+fazer é entre a posição dos tracinhos no eixo, que marcam os machos
+existentes, e a posição das curvas, que não se movem.
+
+```{r fem-rede-evolucao, results='asis', fig.width=10, fig.height=12}
+for (cv in CURVAS) {
+  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
+  print(figura_mecanismo_geracoes("2", tipo = cv))
+  cat("\n\n")
+}
+```
+
+## 2.1 Métricas de rede {.tabset}
+
+```{r fem-metricas, results='asis', fig.width=13, fig.height=9}
+if (!ok(d)) cat("\n*Sem dados. Rode `Fase4_TodasAsCurvas.R`.*\n") else
+render_tabs(function(kk, amax, ns)
+  plot_evolucao(d, "sigma_p", "σp", kk, amax, ns, quais_metricas,
+                rotulo("FÊMEAS VARIANDO — métricas de rede", ns, amax, kk)))
+```
+
+## 2.2 O traço do macho (z) {.tabset}
+
+O traço é a variável evolutiva deste experimento, e os dois painéis mostram a
+sua média e a sua variância.
+
+Dois aspectos merecem atenção. Sem seleção natural, a média do traço se desloca
+bem além do ótimo ecológico, que é 5, porque nada se opõe à seleção sexual.
+Quanto à variância, o modelo usa segregação infinitesimal, ou seja, o desvio de
+cada filhote em relação à média dos pais tem variância proporcional à variância
+parental, e não um valor fixo arbitrado. Essa escolha importa para a
+interpretação: com um ruído de tamanho fixo, a variância genética convergiria
+sempre para o mesmo piso em todos os cenários, e a pergunta sobre manutenção de
+variação viria com a resposta embutida. Com segregação infinitesimal, cada
+combinação de regra e regime chega ao seu próprio equilíbrio.
+
+```{r fem-traco, results='asis', fig.width=13, fig.height=5.5}
+if (!ok(d)) cat("\n*Sem dados.*\n") else
+render_tabs(function(kk, amax, ns)
+  plot_evolucao(d, "sigma_p", "σp", kk, amax, ns, quais_traco,
+                rotulo("FÊMEAS VARIANDO — traço z", ns, amax, kk),
+                cor_faixa = "#6B3A8C"))
+```
+
+## 2.3 Poliandria realizada {.tabset}
+
+As mesmas quatro variáveis de acesso ao acasalamento da seção 1.3, agora ao
+longo das cem gerações.
+
+```{r fem-poliandria, results='asis', fig.width=13, fig.height=9}
+if (!ok(d)) cat("\n*Sem dados.*\n") else
+render_tabs(function(kk, amax, ns)
+  plot_evolucao(d, "sigma_p", "σp", kk, amax, ns, quais_poliandria,
+                rotulo("FÊMEAS VARIANDO — poliandria e acesso", ns, amax, kk),
+                cor_faixa = "#1F6F8B"))
+```
+
+------------------------------------------------------------------------
+
+# 3. Machos variando (σz): a evolução da preferência feminina
+
+> O espelho do experimento anterior. O traço do macho passa a ser ambiental,
+> re-sorteado a cada geração de N(5, σz) e não herdado, e o pico de preferência
+> da fêmea passa a ser herdável e transmitido pelos dois sexos. σp é apenas
+> condição inicial, fixada em 1.0.
+
+Aqui o papel da escolha feminina se inverte: deixa de ser a causa da seleção e
+passa a ser o alvo dela. A força seletiva que age sobre a preferência não é
+sexual, e sim ecológica: é a disponibilidade de machos com traços adequados.
+Uma analogia útil é a de um herbívoro e as suas plantas hospedeiras. A planta
+não escolhe, mas a disponibilidade de plantas gera seleção sobre a preferência
+do herbívoro que escolhe.
+
+Tratar o traço masculino como ambiental tem uma leitura biológica própria, a de
+dependência de condição: o macho expressa aquele traço por causa do ambiente em
+que se desenvolveu, e não por causa dos genes que transmite.
+
+O experimento exige uma condição para funcionar, que vale explicitar. Para que
+exista seleção sobre a preferência é preciso que haja variância de sucesso
+reprodutivo entre as fêmeas. No modelo, a fecundidade é neutra, ou seja, toda
+fêmea que acasala produz o mesmo número de descendentes, independentemente de
+com quantos machos acasalou. A única forma de uma fêmea perder é não aceitar
+nenhum macho. Por isso a proporção de fêmeas sem acasalar, que nos outros
+experimentos é apenas descritiva, aqui é o indicador direto da força de seleção
+sobre a preferência.
+
+Há também uma assimetria de desenho a declarar na comparação com o experimento
+2. Lá σp é imposto a cada geração; aqui σz também é imposto a cada geração, mas
+σp é apenas o ponto de partida, porque a preferência é a característica que
+evolui. Da geração 2 em diante, a largura da distribuição de preferências é o
+que a seleção e a deriva fizerem dela. Os dois experimentos são espelhos no que
+diz respeito ao eixo do tratamento, mas não no que diz respeito à característica
+que responde.
+
+## 3.0 O efeito de σz numa população concreta
+
+A mesma construção da seção 2.0, com a variação trocada de lado. Vale ler as
+duas em sequência.
+
+Agora as fêmeas são as *mesmas* nas duas colunas, com as mesmas curvas de
+aceite, e o que difere são os machos disponíveis, marcados no eixo inferior. As
+curvas paradas enquanto o material muda são a representação visual do que este
+experimento isola.
+
+A linha de baixo também se inverte em relação à seção 2.0: mostra quantos
+parceiros teve cada fêmea, contra o seu próprio pico de preferência. Quem fica
+de fora aqui é a fêmea que não encontra nenhum macho que sirva, e é essa
+exclusão que gera a seleção sobre a preferência.
+
+### Curva por curva {.tabset}
+
+```{r esp-mecanismo, results='asis', fig.width=11, fig.height=9}
+for (cv in CURVAS) {
+  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
+  print(figura_sigma_z(tipo = cv))
+  cat("\n\n")
+}
+```
+
+### A mesma população na geração 1 e na geração 100 {.tabset}
+
+O espelho exato da figura equivalente do experimento 2, e o contraste entre as
+duas é o ponto.
+
+Lá as curvas de aceite permaneciam no lugar e os machos se deslocavam. Aqui é o
+contrário: o traço é re-sorteado a cada geração, de modo que os machos marcados
+no eixo inferior ocupam a mesma posição nas duas colunas, e o que se desloca
+são as curvas. As fêmeas passaram a preferir outro valor de traço.
+
+```{r esp-rede-evolucao, results='asis', fig.width=10, fig.height=12}
+for (cv in CURVAS) {
+  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
+  print(figura_mecanismo_geracoes("3", tipo = cv))
+  cat("\n\n")
+}
+```
+
+## 3.1 Métricas de rede {.tabset}
+
+```{r mac-metricas, results='asis', fig.width=13, fig.height=9}
+if (!ok(esp)) cat("\n*Sem dados. Rode `Fase_Espelho.R`.*\n") else
+render_tabs(function(kk, amax, ns)
+  plot_evolucao(esp, "sigma_z", "σz", kk, amax, ns, quais_metricas,
+                rotulo("MACHOS VARIANDO — métricas de rede", ns, amax, kk)))
+```
+
+## 3.2 A preferência da fêmea (p) {.tabset}
+
+A variável evolutiva deste experimento, medida nas fêmeas adultas. É o
+equivalente exato do painel 2.2: lá a característica medida no sexo que a
+expressa, aqui a característica medida no sexo que a utiliza. As duas figuras
+se leem em paralelo.
+
+```{r mac-pref, results='asis', fig.width=13, fig.height=5.5}
+if (!ok(esp)) cat("\n*Sem dados.*\n") else
+render_tabs(function(kk, amax, ns)
+  plot_evolucao(esp, "sigma_z", "σz", kk, amax, ns, quais_pref,
+                rotulo("MACHOS VARIANDO — preferência da fêmea", ns, amax, kk),
+                cor_faixa = "#1F7A4C"))
+```
+
+## 3.3 Poliandria realizada {.tabset}
+
+Neste experimento estes painéis deixam de ser apenas descritivos. A proporção
+de fêmeas sem acasalar é a medida direta da força de seleção sobre a
+preferência: quem não aceita nenhum macho deixa zero descendentes, e é essa
+variância de sucesso reprodutivo que permite à preferência evoluir.
+
+```{r mac-poliandria, results='asis', fig.width=13, fig.height=9}
+if (!ok(esp)) cat("\n*Sem dados.*\n") else
+render_tabs(function(kk, amax, ns)
+  plot_evolucao(esp, "sigma_z", "σz", kk, amax, ns, quais_poliandria,
+                rotulo("MACHOS VARIANDO — poliandria e acesso", ns, amax, kk),
+                cor_faixa = "#1F6F8B"))
+```
+
+------------------------------------------------------------------------
+
+# 4. Os quatro experimentos projetados no mesmo plano
+
+Esta seção responde a uma pergunta que as anteriores não permitem formular: o
+Controle, que mede a estrutura produzida pelas regras de escolha sem qualquer
+evolução, prevê onde os experimentos evolutivos acabam parando?
+
+A construção é a seguinte. O Controle varre o plano (σp, σz) por inteiro, e
+cada experimento evolutivo percorre uma linha desse plano. Mas essa linha não
+fica parada. No experimento 2, σp é imposto e re-sorteado a cada geração, de
+modo que a posição vertical não se altera; já σz é livre, e na geração 100 a
+população pode estar num σz bem diferente do 1.0 de onde partiu. No experimento
+3 ocorre o inverso: σz permanece onde foi fixado e é σp que se desloca.
+
+A co-evolução é o caso extremo, porque ali nada é imposto: as duas dispersões
+são medidas e as duas se movem. A célula não fica presa a uma coluna nem a uma
+linha e pode aparecer em qualquer ponto do plano. Observar para onde essas
+células migram responde visualmente a uma pergunta que os painéis anteriores
+não fazem: quando nenhum dos dois eixos é mantido fixo, em que direção a
+população caminha?
+
+Cada experimento aparece então duas vezes, na geração 1 e na geração 100, sobre
+a mesma grade de 7 × 7 do Controle e com a mesma escala de cor em todas as
+linhas da figura. A escala compartilhada é o que torna a comparação
+interpretável: se a célula de um experimento evolutivo tem a mesma cor da
+célula do Controle em que veio a cair, a regra de acasalamento sozinha já
+explicava o resultado; se a cor difere, a evolução produziu algo que o Controle
+não previa.
+
+Apenas parte da grade fica preenchida, e isso decorre do desenho, não de falta
+de dados. Na geração 1 do experimento 2 existe somente a coluna σz = 1.0,
+porque é ali que todos os cenários começam; na do experimento 3, somente a
+linha σp = 1.0. Na co-evolução a geração 1 ocupa os três valores de partida do
+desenho, 0.5, 1.0 e 2.0, nos dois eixos, e a geração 100 fica onde a dinâmica a
+levar.
+
+As duas metades da co-evolução entram nos painéis. A metade sem seleção natural
+é idêntica nos dois regimes de censo, porque nela o procedimento devolve uma
+amostra aleatória de 200 antes de chegar à etapa da cota; a metade com seleção
+natural é a rodada sob a cota.
+
+Três ressalvas são necessárias para ler os painéis corretamente:
+
+-   O plano é uma projeção e omite uma dimensão relevante. No Controle o traço
+    e a preferência estão sempre centrados em 5. Na geração 100 do experimento
+    2, porém, a média do traço pode ter se deslocado bastante, enquanto as
+    preferências continuam sendo re-sorteadas em torno de 5. Duas situações com
+    o mesmo par (σp, σz) mas com médias diferentes não são equivalentes, e esse
+    desencontro entre os sexos não aparece em nenhum dos dois eixos. Por isso a
+    legenda de cada figura informa o afastamento máximo da média em relação a
+    φ = 5, por regra de escolha: onde esse valor é pequeno a comparação com o
+    Controle é direta, e onde é grande ela é apenas indicativa.
+
+-   A posição das células dos experimentos evolutivos corresponde à dispersão
+    *medida*, isto é, à raiz da variância registrada, enquanto a grade do
+    Controle corresponde à dispersão *imposta*. As duas coincidem quando a
+    seleção natural está desligada. Com ela ligada, a viabilidade estreita a
+    distribuição dos machos e a dispersão medida fica abaixo da imposta, o que é
+    mais uma razão para comparar entre si as abas com e sem seleção natural.
+
+-   A dispersão medida é uma variável contínua e, para ser projetada na grade,
+    é arredondada para o mais próximo dos sete níveis do desenho. Valores
+    superiores a 2.0 são todos alocados em 2.0, e a legenda informa quantos
+    casos ficaram acima do limite da grade. Um número elevado indicaria que a
+    grade do Controle precisa ser estendida.
+
+```{r plano-dados}
+METS_PLANO <- c(Modularity = "Modularidade", Nestedness = "Aninhamento (NODF)",
+                Centralization = "Centralização", I_s = "Oportunidade (Is)")
+NIVEIS_SIGMA <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
+
+# Arredonda a dispersão medida para o nível mais próximo da grade do desenho.
+# `fora` marca quem estava acima do teto da grade, para poder ser contado.
+encaixar <- function(x) {
+  out <- rep(NA_real_, length(x))
+  ok_x <- !is.na(x)
+  if (any(ok_x)) {
+    i <- max.col(-abs(outer(x[ok_x], NIVEIS_SIGMA, "-")), ties.method = "first")
+    out[ok_x] <- NIVEIS_SIGMA[i]
+  }
+  out
+}
+
+CHAVE <- c("tipo_selecao", "encounters_n", "k_fixo", "selecao_natural")
+
+# Uma tabela pequena com tudo o que os painéis precisam, montada uma vez só:
+# são milhões de linhas nos dois estudos evolutivos e 72 figuras para desenhar.
+plano <- local({
+  partes <- list()
+
+  if (ok(ct)) {
+    partes$ct <- ct %>%
+      group_by(across(all_of(CHAVE)), sig_z = sigma_z, sig_p = sigma_p) %>%
+      summarise(across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
+                desvio_media = mean(abs(zbar_males - 5), na.rm = TRUE),
+                censo_curto = mean(n_machos_surv < 200, na.rm = TRUE),
+                .groups = "drop") %>%
+      mutate(painel = "Controle (superfície completa)", fora = FALSE)
+  }
+
+  # Fêmeas variando: σp é imposto (fica), σz é medido (anda)
+  if (ok(d)) {
+    g <- max(d$generation, na.rm = TRUE)
+    partes$fem <- d %>%
+      filter(generation %in% c(1L, g)) %>%
+      group_by(across(all_of(CHAVE)), sig_p = sigma_p, generation) %>%
+      summarise(sig_z_medido = mean(sqrt(varz_males), na.rm = TRUE),
+                across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
+                desvio_media = mean(abs(zbar_males - 5), na.rm = TRUE),
+                # fração de réplicas em que o censo adulto não chegou a 200.
+                # Onde isso for alto, a rede foi calculada sobre pouquíssimos
+                # machos e a célula não é comparável com o Controle.
+                censo_curto = mean(n_machos_surv < 200, na.rm = TRUE),
+                .groups = "drop") %>%
+      mutate(sig_z  = encaixar(sig_z_medido),
+             fora   = sig_z_medido > max(NIVEIS_SIGMA),
+             painel = sprintf("Fêmeas variando · geração %d", generation)) %>%
+      dplyr::select(-generation, -sig_z_medido)
+  }
+
+  # Machos variando: σz é imposto (fica), σp é medido (anda)
+  if (ok(esp)) {
+    g <- max(esp$generation, na.rm = TRUE)
+    partes$esp <- esp %>%
+      filter(generation %in% c(1L, g)) %>%
+      group_by(across(all_of(CHAVE)), sig_z = sigma_z, generation) %>%
+      summarise(sig_p_medido = mean(sqrt(varp_femeas), na.rm = TRUE),
+                across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
+                desvio_media = mean(abs(pbar_femeas - 5), na.rm = TRUE),
+                censo_curto = mean(n_machos_surv < 200, na.rm = TRUE),
+                .groups = "drop") %>%
+      mutate(sig_p  = encaixar(sig_p_medido),
+             fora   = sig_p_medido > max(NIVEIS_SIGMA),
+             painel = sprintf("Machos variando · geração %d", generation)) %>%
+      dplyr::select(-generation, -sig_p_medido)
+  }
+
+  # Co-evolução: NADA é imposto, as duas dispersões são medidas e as duas andam.
+  # Por isso a célula não fica presa a uma coluna nem a uma linha: ela pode
+  # aparecer em qualquer ponto do plano, e é o único estudo em que isso acontece.
+  # As duas metades entram, e cada uma aparece na sua aba de seleção natural.
+  if (ok(co)) {
+    g <- max(co$generation, na.rm = TRUE)
+    partes$co <- co %>%
+      filter(generation %in% c(1L, g)) %>%
+      group_by(across(all_of(CHAVE)), generation) %>%
+      summarise(sig_z_medido = mean(sqrt(varz_pop), na.rm = TRUE),
+                sig_p_medido = mean(sqrt(varp_pop), na.rm = TRUE),
+                across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
+                desvio_media = mean(abs(zbar_pop - 5), na.rm = TRUE),
+                censo_curto = mean(n_machos_surv < 200, na.rm = TRUE),
+                .groups = "drop") %>%
+      mutate(sig_z  = encaixar(sig_z_medido),
+             sig_p  = encaixar(sig_p_medido),
+             fora   = sig_z_medido > max(NIVEIS_SIGMA) | sig_p_medido > max(NIVEIS_SIGMA),
+             painel = sprintf("Co-evolução · geração %d", generation)) %>%
+      dplyr::select(-generation, -sig_z_medido, -sig_p_medido)
+  }
+
+  if (!length(partes)) NULL else {
+    ordem <- c("Controle (superfície completa)",
+               "Fêmeas variando · geração 1", sprintf("Fêmeas variando · geração %d",
+                 if (ok(d)) max(d$generation, na.rm = TRUE) else 100),
+               "Machos variando · geração 1", sprintf("Machos variando · geração %d",
+                 if (ok(esp)) max(esp$generation, na.rm = TRUE) else 100),
+               "Co-evolução · geração 1", sprintf("Co-evolução · geração %d",
+                 if (ok(co)) max(co$generation, na.rm = TRUE) else 100))
+    bind_rows(partes) %>% mutate(painel = factor(painel, levels = unique(ordem)))
+  }
+})
+
+plot_plano <- function(metrica, kk, amax, ns) {
+  if (is.null(plano)) return(NULL)
+  dd <- plano %>%
+    filter(k_fixo == kk, encounters_n == amax, selecao_natural == ns,
+           !is.na(.data[[metrica]]))
+  if (nrow(dd) == 0) return(NULL)
+
+  n_fora <- sum(dd$fora, na.rm = TRUE)
+
+  # Células em que o censo adulto não chegou aos 200 em pelo menos metade das
+  # réplicas. Nelas a rede foi calculada sobre pouquíssimos machos, então a
+  # topologia não é comparável com a do Controle. Ficam marcadas com um X na
+  # figura, e não só avisadas no texto: numa aba lá pelo painel 40 ninguém se
+  # lembra de um aviso que ficou na introdução.
+  curtas <- dd %>% filter(!is.na(censo_curto), censo_curto >= 0.5)
+
+  # O afastamento da média POR CURVA, e não um máximo só para a figura toda.
+  # Um número global não serve: basta uma curva fugir para o aviso contaminar
+  # os quatro painéis, quando na verdade três deles podem estar comparáveis.
+  # O Controle fica de fora da conta porque nele as médias são 5 por
+  # construção; quem pode ter se deslocado são as gerações dos estudos.
+  desv_txt <- dd %>%
+    filter(!grepl("^Controle", painel)) %>%
+    group_by(tipo_selecao) %>%
+    summarise(dv = max(desvio_media, na.rm = TRUE), .groups = "drop") %>%
+    mutate(txt = sprintf("%s %.2f", labels_4[as.character(tipo_selecao)], dv)) %>%
+    pull(txt) %>% paste(collapse = "  ·  ")
+
+  # Níveis explícitos nos dois eixos: sem isso o ggplot desenharia só as
+  # colunas e linhas que têm dado, e a grade do Controle deixaria de servir
+  # de referência. É justamente o vazio que mostra por onde o estudo passa.
+  dd <- dd %>% mutate(sig_z = factor(sig_z, levels = NIVEIS_SIGMA),
+                      sig_p = factor(sig_p, levels = NIVEIS_SIGMA))
+
+  ggplot(dd, aes(x = sig_z, y = sig_p, fill = .data[[metrica]])) +
+    geom_tile(color = "white", linewidth = 0.3) +
+    { if (nrow(curtas)) geom_point(data = curtas, shape = 4, size = 3,
+                                   stroke = 1.1, color = "white") } +
+    facet_grid(painel ~ tipo_selecao,
+               labeller = labeller(tipo_selecao = labels_4,
+                                   painel = label_wrap_gen(18))) +
+    scale_fill_viridis_c(option = "magma", name = METS_PLANO[[metrica]]) +
+    scale_x_discrete(drop = FALSE) + scale_y_discrete(drop = FALSE) +
+    labs(title = sprintf("%s · %s · A_max = %d · k = %d", METS_PLANO[[metrica]],
+                         if (ns) "com seleção natural" else "sem seleção natural", amax, kk),
+         x = "σz — variação do traço dos machos",
+         y = "σp — variação da preferência entre fêmeas",
+         caption = sprintf(paste("Mesma escala de cor em todas as linhas: a comparação entre elas é direta.",
+                                 "Células vazias são combinações que aquele estudo não visita.",
+                                 "\nAfastamento máximo da média em relação a phi = 5, por curva: %s.",
+                                 "\nAcima de ~1 a comparação com o Controle deixa de ser direta, porque lá os dois",
+                                 "sexos estão sempre centrados em 5 e aqui não.",
+                                 "\nCélulas cuja dispersão medida passou de 2.0 e foi encostada no teto da grade: %d.",
+                                 "\nX branco = censo adulto abaixo de 200 na maioria das réplicas (%d células):",
+                                 "a rede saiu de pouquíssimos machos e a topologia não é comparável."),
+                           desv_txt, n_fora, nrow(curtas))) +
+    tema_painel() +
+    theme(panel.grid = element_blank(),
+          strip.text.y = element_text(color = "white", face = "bold", size = 8, angle = 0),
+          plot.title   = element_text(face = "bold", size = 13),
+          plot.caption = element_text(hjust = 0, face = "italic", size = 8.5))
+}
+```
+
+## 4.1 Modularidade {.tabset}
+
+```{r plano-mod, results='asis', fig.width=12, fig.height=11}
+if (is.null(plano)) cat("\n*Sem dados suficientes.*\n") else
+render_tabs(function(kk, amax, ns) plot_plano("Modularity", kk, amax, ns))
+```
+
+## 4.2 Aninhamento (NODF) {.tabset}
+
+```{r plano-nodf, results='asis', fig.width=12, fig.height=11}
+if (is.null(plano)) cat("\n*Sem dados suficientes.*\n") else
+render_tabs(function(kk, amax, ns) plot_plano("Nestedness", kk, amax, ns))
+```
+
+## 4.3 Centralização {.tabset}
+
+```{r plano-centr, results='asis', fig.width=12, fig.height=11}
+if (is.null(plano)) cat("\n*Sem dados suficientes.*\n") else
+render_tabs(function(kk, amax, ns) plot_plano("Centralization", kk, amax, ns))
+```
+
+## 4.4 Oportunidade de seleção sexual (Is) {.tabset}
+
+```{r plano-is, results='asis', fig.width=12, fig.height=11}
+if (is.null(plano)) cat("\n*Sem dados suficientes.*\n") else
+render_tabs(function(kk, amax, ns) plot_plano("I_s", kk, amax, ns))
+```
+
+------------------------------------------------------------------------
+
+# 5. Co-evolução de traço e preferência
+
+Neste experimento as duas características são herdáveis ao mesmo tempo. Cada
+indivíduo carrega os dois genótipos e expressa apenas um: o macho exibe o traço
+e transmite também a preferência que não usa; a fêmea escolhe com a sua
+preferência e transmite também o traço que não exibe. A expressão continua
+dimórfica, mas a transmissão é biparental para as duas características.
+
+Essa configuração permite estudar o mecanismo clássico de Fisher, ou *runaway*.
+O acasalamento não aleatório cria uma associação estatística entre os genes de
+preferência e os genes do traço, chamada **covariância genética**. Uma vez que
+essa associação existe, a seleção que age sobre o traço arrasta a preferência
+consigo, mesmo sem nenhuma seleção agindo diretamente sobre ela, e o processo
+pode se auto-reforçar. A covariância, e não a média de cada característica, é a
+grandeza central aqui.
+
+Os dois sigmas passam a ser apenas condição inicial, com três níveis cada, 0.5,
+1.0 e 2.0. Impor a dispersão a cada geração seria re-sortear os valores, e
+re-sortear é precisamente o que impede a herança.
+
+As tabelas e figuras desta seção mostram a metade sem seleção natural, que é
+onde o mecanismo de Fisher aparece isolado, sem a viabilidade competindo com
+ele. A metade com seleção natural está nos painéis da seção 4, na aba
+correspondente.
+
+## 5.0 Desequilíbrio de ligamento
+
+Neste experimento a variância do traço se decompõe em duas quantidades. A
+variância **génica** é a que a segregação transmite aos descendentes. A
+variância **total** é a que a população exibe. A diferença entre as duas é o
+**desequilíbrio de ligamento**: o excesso de variância que o acasalamento não
+aleatório acumula sem que exista genótipo novo por trás. Vale zero quando o
+acasalamento é aleatório, e é uma quantidade que os três experimentos
+anteriores não têm como mostrar, porque neles apenas uma das duas
+características é herdada.
+
+```{r co-ld}
+if (!ok(co)) cat("\n*Sem dados da co-evolução.*\n") else
+co %>% filter(generation == max(generation), !selecao_natural) %>%
+  group_by(tipo_selecao) %>%
+  summarise(`var total` = round(mean(varz_pop), 2),
+            `var génica` = round(mean(var_genica_z), 2),
+            `desequilíbrio` = round(mean(varz_pop - var_genica_z), 2),
+            `cov(z,p)` = round(mean(cov_zp), 2),
+            `cor(z,p)` = round(mean(cor_zp), 2),
+            .groups = "drop") %>%
+  mutate(tipo_selecao = labels_4[tipo_selecao]) %>%
+  rename(curva = tipo_selecao) %>%
+  kable(caption = "Geração 100, sem seleção natural, promediando todos os sigma iniciais, A_max e k.")
+```
+
+A regra gaussiana é a única que acopla as duas características, e é nela que o
+mecanismo de Fisher opera: acasalamento assortativo, desequilíbrio de ligamento
+e covariância genética positiva aparecem juntos, como a teoria prevê.
+
+A regra sigmoide produz o mesmo desequilíbrio que a aleatória, ou seja nenhum,
+apesar de ser a regra em que o traço se desloca mais. A razão é que sob a
+sigmoide todas as fêmeas preferem o mesmo, o macho de maior traço,
+independentemente do seu próprio pico. Fêmeas de pico alto e de pico baixo
+acasalam com os mesmos machos, de modo que o acasalamento é direcional mas não
+assortativo, e a covariância não se acumula. O resultado é deslocamento do
+traço sem acoplamento entre as duas características, o que não corresponde ao
+mecanismo de Fisher.
+
+## 5.1 A mesma população na geração 1 e na geração 100 {.tabset}
+
+A mesma construção das seções 2.0 e 3.0, e o contraste entre as três é o ponto.
+No experimento 2 as curvas de aceite permaneciam paradas e os machos se
+deslocavam; no experimento 3 era o contrário. Aqui os dois lados se movem,
+porque nada é imposto e as duas características evoluem.
+
+Sob a regra sigmoide, os machos se deslocam mais rapidamente do que as curvas
+os acompanham, e é por isso que a preferência acaba deixando de discriminar
+entre eles.
+
+```{r co-mecanismo, results='asis', fig.width=10, fig.height=12}
+for (cv in CURVAS) {
+  cat("\n\n### ", labels_4[[cv]], "\n\n", sep = "")
+  print(figura_mecanismo_geracoes("4", tipo = cv))
+  cat("\n\n")
+}
+```
+
+## 5.2 As trajetórias ao longo das cem gerações
+
+Os quatro painéis mostram a covariância genética, a oportunidade de seleção
+sexual, a distância entre as médias das duas características e o tamanho
+efetivo da população, geração a geração. O tamanho efetivo, Ne, é o tamanho que
+uma população ideal precisaria ter para sofrer tanta deriva genética quanto
+esta: quando poucos machos deixam quase todos os descendentes, o Ne fica bem
+abaixo do número de indivíduos. Aqui o censo é de 400 adultos.
+
+```{r co-trajetoria, fig.width=12, fig.height=7}
+if (!ok(co)) cat("\n*Sem dados da co-evolução.*\n") else {
+  tr <- co %>% filter(!selecao_natural) %>%
+    group_by(tipo_selecao, generation) %>%
+    summarise(`covariância genética cov(z,p)` = mean(cov_zp, na.rm = TRUE),
+              `oportunidade de seleção sexual (Is)` = mean(I_s, na.rm = TRUE),
+              `distância entre traço e preferência` = mean(zbar_pop - pbar_pop),
+              `tamanho efetivo (Ne)` = mean(Ne, na.rm = TRUE),
+              .groups = "drop") %>%
+    pivot_longer(-c(tipo_selecao, generation))
+  print(
+    ggplot(tr, aes(generation, value, color = tipo_selecao)) +
+      geom_line(linewidth = 1.1) +
+      facet_wrap(~name, scales = "free_y", nrow = 2) +
+      scale_color_manual(values = cores_4, labels = labels_4,
+                         name = "Curva de preferência") +
+      labs(title = "CO-EVOLUÇÃO — as duas características evoluindo juntas",
+           subtitle = "Sem seleção natural | promediando todos os sigma iniciais, A_max e k\nCenso de 400 adultos, então Ne = 400 seria uma população sem desigualdade de sucesso reprodutivo",
+           x = "geração", y = NULL) +
+      theme_light(base_size = 12)
+  )
+}
+```
+
+A covariância genética se acumula sob a regra gaussiana e se torna negativa sob
+a disruptiva, o que corresponde ao esperado para acasalamento assortativo e
+dissortativo, respectivamente. Sob a sigmoide ela permanece em torno de zero,
+apesar de ser a regra em que o traço mais se desloca.
+
+O conjunto dos painéis revela um resultado que a formulação inicial do projeto
+não antecipava. Sob a sigmoide, o traço se afasta tanto da distribuição de
+preferências que a função de aceite satura e deixa de discriminar entre machos:
+a oportunidade de seleção sexual parte de 7.4 e termina em 0.15, e a rede da
+geração 100 é indistinguível da rede produzida pela regra aleatória. A variância
+do traço não diminui nesse intervalo, o que descarta perda de variação genética
+como explicação. O que ocorre é o deslocamento da média para fora da faixa em
+que a preferência discrimina. A regra disruptiva chega ao mesmo estado por outro
+caminho, alargando a distribuição do traço até que qualquer fêmea encontre
+machos distantes do seu próprio pico.
+
+O painel do tamanho efetivo mostra que o fenômeno não é apenas topológico.
+Enquanto a seleção sexual opera, ela reduz o Ne a aproximadamente metade do
+censo; quando o traço escapa da faixa de discriminação, a população retorna ao
+seu tamanho de censo. Nas condições deste modelo, portanto, a seleção sexual
+atua como uma força demográfica transitória.
+
+Nas regras em que a estrutura se dissolve, as métricas de rede da geração 100
+são as de uma rede formada sem escolha alguma. Isso não é uma limitação dos
+painéis: é o resultado, e é uma das questões que o projeto passa a investigar.
+
+------------------------------------------------------------------------
+
+# Reprodutibilidade
+
+Todas as figuras e tabelas deste documento são geradas a partir dos resultados
+das simulações, sem nenhum valor digitado à mão. O código está organizado
+assim:
+
+- `01_metricas_e_utilitarios.R` contém o ciclo de vida, as quatro funções de
+  preferência, a formação da rede de acasalamentos e o cálculo das métricas de
+  topologia. É o mesmo código nos quatro experimentos, o que garante que as
+  diferenças entre eles vêm apenas do que de fato muda no desenho.
+- `Fase_Controle.R`, `Fase4_TodasAsCurvas.R`, `Fase_Espelho.R` e
+  `Fase_Coevolucao.R` são os quatro experimentos.
+- `11_Rede_Representativa.R` reconstrói uma réplica a partir da semente
+  original para as figuras de rede, e confere que a métrica reproduzida
+  coincide com a registrada antes de a figura ser desenhada.
+- `10_Figuras_conceituais.R` contém as figuras que mostram populações
+  concretas.
+
+Cada cenário é semeado de forma determinística, de modo que qualquer réplica
+pode ser reproduzida exatamente. Os resultados ficam em `Resultados_Artigo/`,
+organizados por experimento.
