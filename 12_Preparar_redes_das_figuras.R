@@ -60,6 +60,28 @@ for (cv in CURVAS) {
   }
 }
 
+# A célula do meio, sigma = 1.0, que é o DEFAULT de figura_mecanismo_geracoes()
+# e portanto a que os documentos desenham. Faltava aqui: as duas pontas do
+# gradiente estavam no cache e o meio não, então essas figuras reconstruíam cem
+# gerações dentro do knit, que é o que este script existe para evitar.
+cat("\n== Estudos 2 e 3: a célula do meio, sigma = 1.0 ==\n")
+for (cv in CURVAS) {
+  cat("  ", cv, "\n")
+  pedir("2", sigma_p = 1.0, tipo_selecao = cv, encounters_n = 200L,
+        k_fixo = 5L, selecao_natural = FALSE, capturar = c(1L, 100L))
+  pedir("3", sigma_z = 1.0, tipo_selecao = cv, encounters_n = 200L,
+        k_fixo = 5L, selecao_natural = FALSE, capturar = c(1L, 100L))
+}
+
+# O Estudo 4 não estava neste script, e é o único do documento da conversa.
+cat("\n== Estudo 4: a rede da geração 1 contra a da 100 ==\n")
+for (cv in CURVAS) {
+  cat("  ", cv, "\n")
+  pedir("4", sigma_p_init = 1.0, sigma_z_init = 1.0, tipo_selecao = cv,
+        encounters_n = 200L, k_fixo = 5L, selecao_natural = FALSE,
+        capturar = c(1L, 100L))
+}
+
 cat(sprintf("\n%d redes no cache, em %s\n", feito, ARQUIVO_CACHE_REDES))
 if (length(falhou)) {
   cat(sprintf("%d pedidos sem resultado (sem dados, ou conferência falhada):\n", length(falhou)))
