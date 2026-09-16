@@ -21,9 +21,15 @@
 #     C = (N_f * k) / (n_m * N_f) = k / n_m
 #
 # ou seja a conectância é k dividido pelo censo de machos, e N_f se cancela.
-# É por isso que quando o censo desaba a conectância dispara, e é por isso
-# que as métricas de topologia daquelas células não são comparáveis com as
-# das outras: aninhamento e centralização respondem forte à conectância.
+# Com um tecto: a conectância é uma proporção e não passa de 1, e nenhuma
+# fêmea consegue mais parceiros do que há machos. A conta completa é
+#
+#     C = min(k, A_max, n_m) / n_m
+#
+# Então, à medida que o censo encurta, a conectância SOBE, até saturar.
+# É por isso que as métricas de topologia das células de censo curto não
+# são comparáveis com as das outras: aninhamento e centralização respondem
+# forte à conectância.
 # =====================================================================
 
 suppressPackageStartupMessages({
@@ -38,19 +44,25 @@ dir.create("Resultados_Artigo/Figuras", recursive = TRUE, showWarnings = FALSE)
 # ---------------------------------------------------------------------
 # (a) A conta, sem dado nenhum: C = k / n_m
 # ---------------------------------------------------------------------
+# O tecto de 1 não é decoração: a conectância é uma proporção. A conta
+# C = k/n_m supõe que cada fêmea consegue k parceiros, o que é impossível
+# quando há menos de k machos: com 2 machos nenhuma fêmea tem 5 parceiros,
+# tem 2. O grau de uma fêmea é no máximo min(k, A_max, machos disponíveis),
+# então a curva fica em 1 enquanto o censo não passar de k, e só depois cai.
 curva <- expand.grid(n_m = 2:200, k = KS) %>%
-  mutate(C = k / n_m, k = factor(k, levels = KS))
+  mutate(C = pmin(k, n_m) / n_m, k = factor(k, levels = KS))
 
 # Os pontos do desenho: censo cheio, um por k.
 desenho <- data.frame(n_m = 200, k = factor(KS, levels = KS), C = KS / 200)
 
 pa <- ggplot(curva, aes(n_m, C, color = k)) +
+  geom_hline(yintercept = 1, linetype = "dotted", color = "gray40") +
   geom_line(linewidth = 1.1) +
   geom_point(data = desenho, size = 2.6) +
   scale_color_brewer(palette = "Dark2", name = "k") +
   scale_x_continuous(breaks = c(2, 38, 50, 100, 150, 200)) +
-  labs(title = "a. A conta: conectância = k / censo de machos",
-       subtitle = "Cada fêmea busca até k parceiros, então o número de arestas não depende de quantos\nmachos existem. Os pontos marcam o censo cheio de 200. O 38 é o censo médio das\ncélulas em que o teto encurtou.",
+  labs(title = "a. A conta: conectância = min(k, censo) / censo de machos",
+       subtitle = "Cada fêmea busca até k parceiros, então o número de arestas não depende de quantos\nmachos existem: o censo entra só no denominador. Quando o censo encurta a\nconectância SOBE, até saturar em 1. Os pontos marcam o censo cheio de 200.",
        x = "censo de machos", y = "conectância") +
   theme_light(base_size = 11) +
   theme(plot.title = element_text(face = "bold", size = 11),
@@ -58,12 +70,13 @@ pa <- ggplot(curva, aes(n_m, C, color = k)) +
 
 # O mesmo em log-log, onde a relação vira uma reta de inclinação -1.
 pb <- ggplot(curva, aes(n_m, C, color = k)) +
+  geom_hline(yintercept = 1, linetype = "dotted", color = "gray40") +
   geom_line(linewidth = 1.1) +
   geom_point(data = desenho, size = 2.6) +
   scale_color_brewer(palette = "Dark2", guide = "none") +
   scale_x_log10() + scale_y_log10() +
   labs(title = "b. O mesmo em escala log",
-       subtitle = "Reta de inclinação -1: cada vez que o censo cai pela metade, a conectância dobra.",
+       subtitle = "Acima de k a relação é uma reta de inclinação -1: cada vez que o censo cai pela\nmetade, a conectância dobra. Abaixo de k ela satura em 1 e não pode subir mais.",
        x = "censo de machos (log)", y = "conectância (log)") +
   theme_light(base_size = 11) +
   theme(plot.title = element_text(face = "bold", size = 11),
