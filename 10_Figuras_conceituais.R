@@ -47,6 +47,17 @@ suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(ggplot2); library(patchwork)
 })
 
+# O rótulo da réplica nas figuras de rede. É formatado AQUI, e não em
+# 11_Rede_Representativa.R, por dois motivos: é apresentação, e aquele arquivo
+# entra na impressão que invalida o cache das redes, de modo que mexer nele por
+# uma questão de texto obrigaria a refazer dezenas de reconstruções de cem
+# gerações. `replica` já vem guardada no cache; o `rotulo` antigo continua lá e
+# serve de reserva para os painéis que geram a população na hora.
+rotulo_replica <- function(r) {
+  if (!is.null(r$replica)) sprintf("réplica %d, a mais próxima da média", r$replica)
+  else r$rotulo %||% ""
+}
+
 # ---------------------------------------------------------------------
 # O MECANISMO, PARA QUALQUER DOS DOIS EIXOS
 # ---------------------------------------------------------------------
@@ -386,7 +397,7 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
                                encounters_n = A_max, k_fixo = k,
                                selecao_natural = selecao_natural, verboso = FALSE)
       if (!is.null(r))
-        return(c(preparar_rede(r$M), list(met = r$metrics, fonte = r$rotulo)))
+        return(c(preparar_rede(r$M), list(met = r$metrics, fonte = rotulo_replica(r))))
     }
     set.seed(seed + round(100 * sz) + round(10000 * sp))
     male_z   <- pmax(0, rnorm(N, phi, sz))
@@ -447,7 +458,7 @@ figura_busca <- function(amax = c(10L, 200L), ks = c(5L, 20L),
                                tipo_selecao = tipo, encounters_n = A, k_fixo = k,
                                selecao_natural = selecao_natural, verboso = FALSE)
       if (!is.null(r))
-        return(c(preparar_rede(r$M), list(met = r$metrics, fonte = r$rotulo)))
+        return(c(preparar_rede(r$M), list(met = r$metrics, fonte = rotulo_replica(r))))
     }
     set.seed(seed + A * 100 + k)
     male_z   <- pmax(0, rnorm(N, phi, sigma_z))
@@ -559,7 +570,7 @@ figura_rede_evolucao <- function(estudo = c("2", "3"),
                     sprintf("%s = %.1f, geração %d\nmodularidade %.2f | aninhamento %.2f | Is %.2f\n%d componentes | %d comunidades | %s = %.2f\n%s",
                             letra, sigma, g,
                             d$metrics$Modularity, d$metrics$Nestedness, d$metrics$I_s,
-                            rr$n_comp, rr$n_com, nome_var, v[1], r$rotulo))
+                            rr$n_comp, rr$n_com, nome_var, v[1], rotulo_replica(r)))
     }
   }
   mtext(sprintf("Estudo %s: o que cem gerações fazem com a rede", estudo),
@@ -620,7 +631,7 @@ figura_estrutura_se_apaga <- function(curvas = c("sigmoid", "uniform"),
       desenhar_rede(rr, sprintf(
         "%s, geração %d\nIs %.2f | modularidade %.2f | centralização %.3f\nvar(z) %.2f | zbar - pbar %.1f\n%s",
         labels_curva(cv), g, d$metrics$I_s, d$metrics$Modularity, d$metrics$Centralization,
-        li$varz_pop[1], li$zbar_pop[1] - li$pbar_pop[1], r$rotulo))
+        li$varz_pop[1], li$zbar_pop[1] - li$pbar_pop[1], rotulo_replica(r)))
     }
   }
   # O título é DESCRITIVO de propósito. Já foi "a seleção sexual apaga a própria
@@ -824,7 +835,7 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
       subtitle = sprintf("%s\n%s | A_max = %d | k = %d | %s\n%s",
                          o_que_anda, sigmas_txt, A_max, k,
                          if (selecao_natural) "com seleção natural" else "sem seleção natural",
-                         r$rotulo),
+                         rotulo_replica(r)),
       caption = paste0(
         "Linha 1: a rede de acasalamentos. Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.\n",
         "Nas outras três, o eixo de baixo é o traço do macho, e é O MESMO nas duas colunas: sem isso a fuga do traço não se veria.\n",
