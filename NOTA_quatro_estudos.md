@@ -104,7 +104,7 @@ Cada estudo isola uma peça diferente do sistema:
 
 | Estudo | O que varia | Traço do macho (z) | Preferência da fêmea (p) | O que o estudo isola |
 |----|----|----|----|----|
-| Controle | sigma_p e sigma_z | sorteado | sorteada | o efeito das regras de acasalamento sozinhas, sem nenhuma resposta evolutiva |
+| Controle | sigma_p e sigma_z | sorteado | sorteada | o efeito das curvas de preferência sozinhas, sem nenhuma resposta evolutiva |
 | Fêmeas variando | sigma_p | herdável, livre para evoluir | re-sorteada | como a heterogeneidade de preferência afeta a resposta evolutiva do traço |
 | Machos variando | sigma_z | re-sorteado (ambiental) | herdável, livre para evoluir | como a disponibilidade de machos afeta a resposta evolutiva da preferência |
 | Co-evolução | os dois, só como condição inicial | herdável, livre para evoluir | herdável, livre para evoluir | o feedback entre as duas (mecanismo de Fisher) |
@@ -149,7 +149,7 @@ Fêmeas variando, Machos variando e Co-evolução; uma geração no Controle.
 As quatro curvas de preferência. P_ij é a probabilidade de a fêmea i
 aceitar o macho j, onde s é a exigência dela, p é o pico dela e z é o
 traço dele. Todas partem do mesmo pico médio, de modo que as diferenças
-entre elas vêm da geometria da regra e não de as fêmeas quererem coisas
+entre elas vêm da geometria da curva e não de as fêmeas quererem coisas
 diferentes em média:
 
 -   Aleatória (nula): P = 0.5, constante. A fêmea aceita qualquer macho
@@ -333,7 +333,7 @@ isso aconteceu. Quando a réplica chega ao fim normalmente,
 Daqui em diante, um estudo por seção. Tudo o que não estiver dito é o
 que ficou descrito acima, no ciclo de vida e nos fatores comuns.
 
-Que topologia de rede as regras de acasalamento produzem por si só,
+Que topologia de rede as curvas de preferência produzem por si só,
 antes de qualquer resposta evolutiva?
 
 Nenhuma característica é herdada. O traço dos machos e o pico de

@@ -475,23 +475,23 @@ A distinção entre as duas é o eixo conceitual do projeto. A mesma intensidade
 média de seleção sexual pode resultar de fêmeas homogêneas diante de machos
 variados ou do contrário, e a estrutura da rede não é a mesma nos dois casos.
 
-### As quatro regras de escolha
+### As quatro curvas de preferência
 
 A forma da função de preferência é o outro fator central, e comparamos quatro.
 `P` é a probabilidade de a fêmea aceitar o macho. Todas partem do mesmo pico
-médio, de modo que as diferenças entre elas vêm da geometria da regra, e não de
+médio, de modo que as diferenças entre elas vêm da geometria da curva, e não de
 as fêmeas quererem coisas diferentes em média.
 
-| regra | função | leitura biológica |
+| curva | função | leitura biológica |
 |---|---|---|
 | [**aleatória**]{style="color:gray55"} | `P = 0.5` | a fêmea não discrimina. Não há seleção sexual, e serve de controle |
 | [**gaussiana**]{style="color:#E6B800"} | `P = exp(-s (z - p)²)` | preferência por semelhança ao próprio pico: seleção estabilizadora |
 | [**sigmoide**]{style="color:#3BA273"} | `P = 1 / (1 + exp(-s (z - p)))` | quanto maior o traço, maior o aceite: seleção direcional |
 | [**disruptiva**]{style="color:#9932CC"} | `P = 1 - exp(-s (z - p)²)` | preferência por afastamento do próprio pico: seleção disruptiva |
 
-Essas cores identificam as quatro regras em todas as figuras do documento.
+Essas cores identificam as quatro curvas em todas as figuras do documento.
 
-A regra aleatória merece ênfase, porque é o que torna o resto interpretável.
+A curva aleatória merece ênfase, porque é o que torna o resto interpretável.
 Nela a fêmea aceita qualquer macho com a mesma probabilidade, então nenhuma
 estrutura da rede pode ser atribuída à escolha. Toda métrica medida sob a
 aleatória é o valor que aquela métrica assume por acaso, dado o tamanho da
@@ -512,7 +512,7 @@ quantos quiser:
   10 e 20. É um limite superior, não um número garantido: a fêmea avalia os A_max machos e
   fica com os k melhores entre aqueles que aceitou, de modo que o número de
   parceiros que efetivamente consegue depende também da taxa de aceite da sua
-  regra de preferência. Essa regra de decisão, em que a fêmea amostra antes de
+  curva de preferência. Essa regra de decisão, em que a fêmea amostra antes de
   decidir, corresponde ao que a literatura de escolha de parceiro chama de
   comparação em pool, ou *best-of-n*, e é a suposição habitual para leks e
   agregações.
@@ -550,13 +550,13 @@ adultas são um sorteio uniforme entre as juvenis.
 ## Os quatro estudos
 
 Os quatro compartilham exatamente o mesmo ciclo de vida, as mesmas quatro
-regras e os mesmos fatores ecológicos. O que muda entre eles é quais
+curvas e os mesmos fatores ecológicos. O que muda entre eles é quais
 características são herdadas, ou seja, quais estão livres para responder à
 seleção. Cada um isola uma peça do sistema.
 
 | estudo | o que varia | traço do macho | preferência da fêmea | o que isola |
 |---|---|---|---|---|
-| 1. Controle | σp e σz | sorteado | sorteada | a estrutura que as regras de escolha produzem sozinhas, sem resposta evolutiva |
+| 1. Controle | σp e σz | sorteado | sorteada | a estrutura que as curvas de preferência produzem sozinhas, sem resposta evolutiva |
 | 2. Fêmeas variando | σp | herdável | re-sorteada | como a heterogeneidade de preferência afeta a evolução do traço |
 | 3. Machos variando | σz | re-sorteado | herdável | como a variedade de machos disponíveis afeta a evolução da preferência |
 | 4. Co-evolução | os dois, só como condição inicial | herdável | herdável | o feedback entre as duas características |
@@ -646,7 +646,7 @@ figura_desenho()
 > É o único estudo que cruza os dois eixos de variação por inteiro.
 
 Este estudo responde à pergunta mais básica do conjunto: que estrutura as
-regras de escolha produzem por si só, antes de qualquer resposta evolutiva?
+curvas de preferência produzem por si só, antes de qualquer resposta evolutiva?
 
 Como não há geração seguinte, não existe trajetória: cada cenário é um ponto, e
 o que se explora é o plano (σp, σz). Os dois eixos percorrem sete níveis, de
@@ -682,7 +682,7 @@ que o número conta. Em cinza claro estão os indivíduos que não acasalaram.
 
 ### Curva por curva {.tabset}
 
-Comparar as abas entre si isola a regra de escolha: a composição da população é
+Comparar as abas entre si isola a curva de preferência: a composição da população é
 idêntica nas quatro, e a única coisa que muda é a função de preferência.
 
 ```{r ct-rede-cantos, results='asis', fig.width=9, fig.height=9}
@@ -715,13 +715,13 @@ for (cv in CURVAS) {
 
 Cada faixa horizontal é uma métrica, com escala de cor própria, porque as
 quatro vêm em ordens de grandeza diferentes e uma escala comum achataria as de
-menor amplitude. Dentro de cada faixa, as quatro colunas são as quatro regras
+menor amplitude. Dentro de cada faixa, as quatro colunas são as quatro curvas
 de escolha.
 
 Há duas coisas a observar ao percorrer as abas. A primeira é a direção do
 gradiente de cor: se corre na vertical, σp é o que determina a métrica; se na
 horizontal, σz; se na diagonal, a combinação dos dois. A segunda é se as quatro
-regras desenham a mesma superfície ou superfícies distintas, que é a pergunta
+curvas desenham a mesma superfície ou superfícies distintas, que é a pergunta
 sobre quanto a forma da preferência importa.
 
 ```{r ct-superficie, results='asis', fig.width=12, fig.height=13}
@@ -929,7 +929,7 @@ A consequência é que os tratamentos nominais de poliandria não se realizam em
 todo o desenho. Com A_max = 10 e k = 20, nenhuma fêmea chega aos 20 parceiros,
 e possivelmente nem aos 10, porque não acasala com os dez que avaliou, e sim
 com aqueles que aceitou entre esses dez. Quantos parceiros ela consegue depende
-portanto da regra de preferência e de A_max, e não apenas de k.
+portanto da curva de preferência e de A_max, e não apenas de k.
 
 Por isso registramos a poliandria realizada como variável resposta, e é ela que
 entra nas análises em lugar do k nominal. Os painéis abaixo mostram o panorama
@@ -989,7 +989,7 @@ for (cv in CURVAS) {
 }
 ```
 
-Na aba da regra aleatória as duas colunas são equivalentes, o que confirma o
+Na aba da curva aleatória as duas colunas são equivalentes, o que confirma o
 controle: com P = 0.5 para qualquer par, σp não tem por onde produzir efeito.
 
 ### A mesma população na geração 1 e na geração 100 {.tabset}
@@ -1035,7 +1035,7 @@ parental, e não um valor fixo arbitrado. Essa escolha importa para a
 interpretação: com um ruído de tamanho fixo, a variância genética convergiria
 sempre para o mesmo piso em todos os cenários, e a pergunta sobre manutenção de
 variação viria com a resposta embutida. Com segregação infinitesimal, cada
-combinação de regra e regime chega ao seu próprio equilíbrio.
+combinação de curva e regime chega ao seu próprio equilíbrio.
 
 ```{r fem-traco, results='asis', fig.width=13, fig.height=5.5}
 if (!ok(d)) cat("\n*Sem dados.*\n") else
@@ -1182,7 +1182,7 @@ render_tabs(function(kk, amax, ns)
 # 4. Os quatro estudos projetados no mesmo plano
 
 Esta seção responde a uma pergunta que as anteriores não permitem formular: o
-Controle, que mede a estrutura produzida pelas regras de escolha sem qualquer
+Controle, que mede a estrutura produzida pelas curvas de preferência sem qualquer
 evolução, prevê onde os estudos evolutivos acabam parando?
 
 A construção é a seguinte. O Controle varre o plano (σp, σz) por inteiro, e
@@ -1203,7 +1203,7 @@ Cada estudo aparece então duas vezes, na geração 1 e na geração 100, sobre
 a mesma grade de 7 × 7 do Controle e com a mesma escala de cor em todas as
 linhas da figura. A escala compartilhada é o que torna a comparação
 interpretável: se a combinação de um estudo evolutivo tem a mesma cor da
-combinação do Controle em que veio a cair, a regra de acasalamento sozinha já
+combinação do Controle em que veio a cair, a curva de preferência sozinha já
 explicava o resultado; se a cor difere, a evolução produziu algo que o Controle
 não previa.
 
@@ -1228,7 +1228,7 @@ Três ressalvas são necessárias para ler os painéis corretamente:
     o mesmo par (σp, σz) mas com médias diferentes não são equivalentes, e esse
     desencontro entre os sexos não aparece em nenhum dos dois eixos. Por isso a
     legenda de cada figura informa o afastamento máximo da média em relação a
-    φ = 5, por regra de escolha: onde esse valor é pequeno a comparação com o
+    φ = 5, por curva de preferência: onde esse valor é pequeno a comparação com o
     Controle é direta, e onde é grande ela é apenas indicativa.
 
 -   A posição das combinações dos estudos evolutivos corresponde à dispersão
@@ -1496,12 +1496,12 @@ co %>% filter(generation == max(generation), !selecao_natural) %>%
   kable(caption = "Geração 100, sem seleção natural, promediando todos os sigma iniciais, A_max e k.")
 ```
 
-A regra gaussiana é a única que acopla as duas características, e é nela que o
+A curva gaussiana é a única que acopla as duas características, e é nela que o
 mecanismo de Fisher opera: acasalamento assortativo, desequilíbrio de ligamento
 e covariância genética positiva aparecem juntos, como a teoria prevê.
 
-A regra sigmoide produz o mesmo desequilíbrio que a aleatória, ou seja nenhum,
-apesar de ser a regra em que o traço se desloca mais. A razão é que sob a
+A curva sigmoide produz o mesmo desequilíbrio que a aleatória, ou seja nenhum,
+apesar de ser a curva em que o traço se desloca mais. A razão é que sob a
 sigmoide todas as fêmeas preferem o mesmo, o macho de maior traço,
 independentemente do seu próprio pico. Fêmeas de pico alto e de pico baixo
 acasalam com os mesmos machos, de modo que o acasalamento é direcional mas não
@@ -1516,7 +1516,7 @@ No Estudo 2 as curvas de aceite permaneciam paradas e os machos se
 deslocavam; no Estudo 3 era o contrário. Aqui os dois lados se movem,
 porque nada é imposto e as duas características evoluem.
 
-Sob a regra sigmoide, os machos se deslocam mais rapidamente do que as curvas
+Sob a curva sigmoide, os machos se deslocam mais rapidamente do que as curvas
 os acompanham, e é por isso que a preferência acaba deixando de discriminar
 entre eles.
 
@@ -1561,19 +1561,19 @@ if (!ok(co)) cat("\n*Sem dados da co-evolução.*\n") else {
 }
 ```
 
-A covariância genética se acumula sob a regra gaussiana e se torna negativa sob
+A covariância genética se acumula sob a curva gaussiana e se torna negativa sob
 a disruptiva, o que corresponde ao esperado para acasalamento assortativo e
 dissortativo, respectivamente. Sob a sigmoide ela permanece em torno de zero,
-apesar de ser a regra em que o traço mais se desloca.
+apesar de ser a curva em que o traço mais se desloca.
 
 O conjunto dos painéis revela um resultado que a formulação inicial do projeto
 não antecipava. Sob a sigmoide, o traço se afasta tanto da distribuição de
 preferências que a função de aceite satura e deixa de discriminar entre machos:
 a oportunidade de seleção sexual parte de 7.4 e termina em 0.15, e a rede da
-geração 100 é indistinguível da rede produzida pela regra aleatória. A variância
+geração 100 é indistinguível da rede produzida pela curva aleatória. A variância
 do traço não diminui nesse intervalo, o que descarta perda de variação genética
 como explicação. O que ocorre é o deslocamento da média para fora da faixa em
-que a preferência discrimina. A regra disruptiva chega ao mesmo estado por outro
+que a preferência discrimina. A curva disruptiva chega ao mesmo estado por outro
 caminho, alargando a distribuição do traço até que qualquer fêmea encontre
 machos distantes do seu próprio pico.
 
@@ -1583,7 +1583,7 @@ censo; quando o traço escapa da faixa de discriminação, a população retorna
 seu tamanho de censo. Nas condições deste modelo, portanto, a seleção sexual
 atua como uma força demográfica transitória.
 
-Nas regras em que a estrutura se dissolve, as métricas de rede da geração 100
+Nas curvas em que a estrutura se dissolve, as métricas de rede da geração 100
 são as de uma rede formada sem escolha alguma. Isso não é uma limitação dos
 painéis: é o resultado, e é uma das questões que o projeto passa a investigar.
 

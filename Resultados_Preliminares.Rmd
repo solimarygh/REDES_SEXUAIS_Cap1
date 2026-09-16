@@ -178,7 +178,7 @@ parâmetros está mostrando. Onde estiver escrito "todos os k", os três valores
 juntos, e como k pesa bastante, vale conferir no anexo se o padrão se mantém em cada um deles.
 
 > Um segundo aviso, este mais sério e válido para o documento inteiro. Esta rodada usa a versão
-> mais recente do modelo, com a regra de escolha que apelidamos de *best-of-n*: a fêmea avalia
+> mais recente do modelo, com a curva de preferência que apelidamos de *best-of-n*: a fêmea avalia
 > os A_max machos, todos, e só depois fica com os k melhores entre os que aceitou. O desenho
 > está em `NOTA_quatro_estudos.md`.
 >
@@ -281,7 +281,7 @@ próprio algoritmo da métrica de modularidade: os módulos que se veem são os 
 o número conta. Cinza claro é quem não acasalou.
 
 Vale comparar as abas entre si: é a mesma composição de população em todas, e o
-que muda é só a regra de escolha.
+que muda é só a curva de preferência.
 
 ```{r fig-redes-curvas, results='asis', fig.height=8.5, fig.width=9}
 for (cv in CURVAS) {
@@ -361,9 +361,9 @@ for (cv in CURVAS) {
 # Estudo 1. Controle
 
 > Nada evolui. Uma geração só, com sigma_p e sigma_z impostos, para medir a topologia que cada
-> regra de escolha produz sobre cada composição de população.
+> curva de preferência produz sobre cada composição de população.
 
-É o único desenho que cruza os três níveis por inteiro: a regra de escolha, a variação disponível
+É o único desenho que cruza os três níveis por inteiro: a curva de preferência, a variação disponível
 e a restrição ecológica. Por isso é aqui que se pergunta qual deles domina e como interagem, que
 é o conteúdo de H1.
 

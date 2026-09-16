@@ -43,9 +43,9 @@ Uma população de 200 machos e 200 fêmeas, gerações discretas. Cada macho te
 traço `z`; cada fêmea tem um pico de preferência `p` e uma exigência `s`, e
 aceita um macho com probabilidade que depende de quão bem `z` casa com `p`.
 
-São quatro regras de acasalamento. `P` é a probabilidade de a fêmea aceitar o
+São quatro curvas de preferência. `P` é a probabilidade de a fêmea aceitar o
 macho, e as quatro partem do mesmo pico médio, de modo que o que difere entre
-elas é a geometria da regra e não as fêmeas quererem coisas diferentes em
+elas é a geometria da curva e não as fêmeas quererem coisas diferentes em
 média. Cada uma leva daqui em diante a cor que tem nas figuras:
 
 - <span style="color:#8a8a8a;font-weight:bold">aleatória</span> (nula): `P = 0.5`, constante. Aceita qualquer macho com a
@@ -72,7 +72,7 @@ desta grade, e vale ter a grade à vista para saber de qual:
 
 | fator | níveis |
 |---|---|
-| regra de escolha | aleatória, gaussiana, sigmoide, disruptiva |
+| curva de preferência | aleatória, gaussiana, sigmoide, disruptiva |
 | σp inicial, dispersão da preferência na geração 1 | 0.5, 1.0, 2.0 |
 | σz inicial, dispersão do traço na geração 1 | 0.5, 1.0, 2.0 |
 | A_max, quantos machos cada fêmea avalia | 200, 40, 10 |
@@ -95,8 +95,8 @@ Os três últimos são os fatores ecológicos, e são os mesmos nos quatro estud
   que é o mesmo valor 5 em que as duas características começam. Age só sobre os
   machos e só sobre o traço, nunca sobre a preferência.
 
-Fixada a regra de escolha e o regime de seleção natural, sobram 3 x 3 x 3 x 3 =
-81 combinações, cada uma rodada 20 vezes. Com as quatro regras, são 6.480
+Fixada a curva de preferência e o regime de seleção natural, sobram 3 x 3 x 3 x 3 =
+81 combinações, cada uma rodada 20 vezes. Com as quatro curvas, são 6.480
 corridas de 100 gerações em cada metade do desenho.
 
 Deste espaço todo, aqui eu olho um canto só: *A_max = 200, k = 5, σp inicial =
@@ -148,7 +148,7 @@ sem nenhuma desigualdade de sucesso reprodutivo.
 
 ## O que muda entre a geração 1 e a 100 {.tabset}
 
-Uma aba por regra de escolha, e dentro de cada uma a mesma réplica duas vezes:
+Uma aba por curva de preferência, e dentro de cada uma a mesma réplica duas vezes:
 geração 1 à esquerda, geração 100 à direita. A geração 1 é a rede antes de
 qualquer resposta evolutiva, então o controle está dentro da própria figura.
 
@@ -260,7 +260,7 @@ réplica.
 
 As abas acima são duas fotos da rede, a geração 1 e a 100, e não dizem o que
 acontece no meio. Esta figura preenche isso: as quatro métricas de topologia
-geração a geração, uma linha por regra de escolha.
+geração a geração, uma linha por curva de preferência.
 
 Mesma célula das abas, e cada linha é a média das 20 réplicas com a sombra de
 um desvio. Cada painel tem a sua escala, porque as quatro métricas vêm em
@@ -294,7 +294,7 @@ if (ok(co)) {
 
 A linha cinza da aleatória é a referência em todos os painéis: é a estrutura
 que uma rede sem escolha nenhuma produz, com este número de indivíduos e esta
-densidade. Onde uma regra encosta nela, a topologia dela deixou de se
+densidade. Onde uma curva encosta nela, a topologia dela deixou de se
 distinguir de acasalamento ao acaso.
 
 Vale reparar em quando isso acontece, e não só em se acontece. A conversa que
@@ -318,8 +318,8 @@ ligada. O eixo vertical é o mesmo nos quatro painéis, senão a fuga do traço 
 a sigmoide não se veria.
 
 Um aviso sobre a cor, porque aqui ela muda de significado. Em todas as outras
-figuras a cor é a regra de escolha, com o cinza, o amarelo, o verde e o roxo da
-lista lá de cima. Nesta não: a regra de escolha é o painel, e a cor distingue
+figuras a cor é a curva de preferência, com o cinza, o amarelo, o verde e o roxo da
+lista lá de cima. Nesta não: a curva de preferência é o painel, e a cor distingue
 as duas características, o traço do macho da preferência da fêmea. Por isso as
 duas também vão com traço diferente, o traço em linha cheia e a preferência em
 tracejado, que é o que se lê primeiro.
@@ -387,7 +387,7 @@ resultado. É uma das coisas que ainda quero olhar réplica a réplica.
 ## As trajetórias
 
 Tudo até aqui é uma célula do desenho. Esta figura é o contrário: cada linha é
-a média das 81 células daquela regra e das 20 réplicas de cada uma, geração a
+a média das 81 células daquela curva e das 20 réplicas de cada uma, geração a
 geração. Serve para ver se a forma das trajetórias se sustenta fora daquele
 canto, e não para ler valores exatos, porque as células individuais variam
 bastante em torno da média.
@@ -406,14 +406,14 @@ if (ok(co)) {
     geom_line(linewidth = 1.1) +
     facet_wrap(~name, scales = "free_y") +
     scale_color_manual(values = cores_4, labels = labels_4, name = NULL) +
-    labs(subtitle = "Média das 81 células de cada regra (todos os sigma iniciais, A_max e k) e das 20 réplicas de cada uma. Sem seleção natural.\nCenso de 400 adultos, então Ne = 400 seria uma população sem desigualdade de sucesso reprodutivo.",
+    labs(subtitle = "Média das 81 células de cada curva (todos os sigma iniciais, A_max e k) e das 20 réplicas de cada uma. Sem seleção natural.\nCenso de 400 adultos, então Ne = 400 seria uma população sem desigualdade de sucesso reprodutivo.",
          x = "geração", y = NULL) +
     theme_light(base_size = 12) + theme(legend.position = "top")
 }
 ```
 
 O Is cai enquanto a distância entre traço e preferência cresce, e as duas
-curvas se espelham. A leitura que eu daria é que a regra de escolha satura
+curvas se espelham. A leitura que eu daria é que a curva de preferência satura
 quando a média do traço sai da faixa em que ela distingue, mas é leitura minha:
 vocês leriam assim?
 
@@ -460,7 +460,7 @@ if (ok(co)) {
 ```
 
 E esta diz se aquela célula é representativa. Cada uma das 81 células de uma
-regra tem a sua média de desequilíbrio; o que está aqui é a mediana e os
+curva tem a sua média de desequilíbrio; o que está aqui é a mediana e os
 extremos dessas 81:
 
 ```{r ld-todas}
@@ -512,12 +512,12 @@ por tamanho e densidade:
 ```{r r2}
 tibble(
   `métrica` = c("modularidade", "centralização", "Is", "aninhamento (NODF)"),
-  `R² só da regra de escolha` = c(0.443, 0.247, 0.177, 0.019),
+  `R² só da curva de preferência` = c(0.443, 0.247, 0.177, 0.019),
   `R² parcial, controlando tamanho e densidade` = c(0.464, 0.259, 0.181, 0.039)
 ) %>% kable(caption = "Estudo 1 (uma geração, sem evolução), 70.560 redes.")
 ```
 
-Três aguentam; o aninhamento não. A regra de escolha explica 2% da variação
+Três aguentam; o aninhamento não. A curva de preferência explica 2% da variação
 dele e a densidade explica 45%. Como vocês lidam com isso? Vale reportar a
 métrica relativa a um modelo nulo que preserve a sequência de graus, em vez do
 valor cru?

@@ -380,7 +380,7 @@ parceiros elas de fato conseguiram, que não é o mesmo que o k que
 buscavam.
 
 > Esta rodada usa a versão mais recente do modelo, a que saiu da minha
-> última conversa com o Miudo, e inclui a regra de escolha que
+> última conversa com o Miudo, e inclui a curva de preferência que
 > apelidamos de *best-of-n*: a fêmea avalia os A_max machos, todos, e só
 > depois fica com os k melhores entre os que aceitou. O desenho está em
 > `NOTA_quatro_estudos.md`.
@@ -595,7 +595,7 @@ os que o número da faixa 1.1 conta. Cinza claro é quem não acasalou.
 
 ### Curva por curva {.tabset}
 
-Comparar as abas entre si isola exatamente a regra de escolha: a composição da
+Comparar as abas entre si isola exatamente a curva de preferência: a composição da
 população é idêntica nas quatro, e o que muda é só a curva de preferência.
 
 ```{r ct-rede-cantos, results='asis', fig.width=9, fig.height=9}
@@ -1071,7 +1071,7 @@ Então aqui cada estudo aparece duas vezes, na geração 1 e na geração
 100, sobre a mesma grade 7×7 do Controle e com a mesma escala de cor em
 todas as linhas da figura. É essa escala compartilhada que faz a
 comparação valer: se a célula do estudo evolutivo tem a mesma cor da
-célula do Controle onde ela caiu, a regra de acasalamento sozinha já
+célula do Controle onde ela caiu, a curva de preferência sozinha já
 explicava o resultado; se a cor difere, a evolução produziu algo que o
 Controle não previa.
 
