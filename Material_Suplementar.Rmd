@@ -561,6 +561,17 @@ seleção. Cada um isola uma peça do sistema.
 | 3. Machos variando | σz | re-sorteado | herdável | como a variedade de machos disponíveis afeta a evolução da preferência |
 | 4. Co-evolução | os dois, só como condição inicial | herdável | herdável | o feedback entre as duas características |
 
+A figura abaixo mostra onde cada um começa no plano (σp, σz). A grade é a mesma
+nos quatro painéis, e em vermelho estão as condições iniciais que aquele
+experimento visita: o Controle cruza a grade inteira, os dois espelhos percorrem
+uma coluna ou uma linha, com o outro eixo fixado em 1.0, e a co-evolução parte
+do cruzamento de três níveis em cada eixo. É a única figura do documento que é
+um esquema; todas as outras são saída da simulação.
+
+```{r fig-desenho, fig.width=10, fig.height=8}
+figura_desenho()
+```
+
 O Controle roda uma geração, porque sem herança a segunda geração seria um
 sorteio independente com a mesma distribuição. Isso o torna cerca de cem vezes
 mais barato que os outros, e é o que permite cruzar σp com σz por inteiro. Os
@@ -590,17 +601,6 @@ As figuras de rede deste documento não são esquemas: desenham réplicas que
 realmente rodaram, reconstruídas a partir da semente original, e o valor da
 métrica reproduzida é conferido contra o valor guardado antes de a figura ser
 desenhada.
-
-## O desenho experimental numa figura
-
-O esquema abaixo resume o que cada experimento fixa e o que deixa evoluir. Os
-pontos cinza são as condições iniciais do desenho; as setas vermelhas indicam o
-que fica livre para se mover ao longo das cem gerações. Esta é a única figura
-do documento que é um esquema: todas as outras são saída da simulação.
-
-```{r fig-desenho, fig.width=10, fig.height=8}
-figura_desenho()
-```
 
 ## Cobertura dos dados
 

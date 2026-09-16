@@ -839,40 +839,48 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
 # =====================================================================
 # Um esquema, este sim, e não saída do motor. Serve para dizer numa figura só
 # o que cada estudo fixa e o que deixa evoluir.
-figura_desenho <- function(valores = c(0.2, 0.5, 1.0, 1.5, 2.0)) {
+# A grade é a MESMA nos quatro painéis, de propósito: é o que permite ver de
+# relance que cada experimento ocupa uma parte diferente do mesmo plano. Os
+# pontos cinza são a grade do desenho; os vermelhos, as condições iniciais que
+# aquele experimento visita.
+#
+# A versão anterior desenhava setas para o que fica livre para se mover, mas a
+# seta tinha de escolher um destino, e nenhum destino é o certo: o quanto a
+# dispersão anda é resultado e varia entre células. O que fica livre está dito
+# na tabela dos quatro experimentos, que é onde essa informação pertence.
+figura_desenho <- function(valores = c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0),
+                           inicio_coevo = c(0.5, 1.0, 2.0)) {
   grade <- expand.grid(sigma_z = valores, sigma_p = valores)
 
-  painel <- function(titulo, subtitulo, setas = NULL, pontos = TRUE) {
-    g <- ggplot(grade, aes(sigma_z, sigma_p)) +
+  painel <- function(titulo, subtitulo, iniciais) {
+    ggplot(grade, aes(sigma_z, sigma_p)) +
+      geom_point(color = "gray72", size = 1.7) +
+      geom_point(data = iniciais, color = "#C0392B", size = 2.6) +
+      scale_x_continuous(breaks = valores) +
+      scale_y_continuous(breaks = valores) +
       labs(title = titulo, subtitle = subtitulo,
            x = expression(sigma[z]~"(variação entre machos)"),
            y = expression(sigma[p]~"(variação entre fêmeas)")) +
       theme_light(base_size = 11) +
-      theme(plot.title = element_text(face = "bold", size = 12))
-    if (pontos) g <- g + geom_point(color = "gray45", size = 1.6)
-    if (!is.null(setas))
-      g <- g + geom_segment(data = setas,
-                            aes(x = x, y = y, xend = xend, yend = yend),
-                            inherit.aes = FALSE, color = "#C0392B", linewidth = 0.7,
-                            arrow = arrow(length = unit(0.16, "cm"), type = "closed"))
-    g
+      theme(plot.title = element_text(face = "bold", size = 12),
+            panel.grid.minor = element_blank())
   }
 
-  # Estudo 2: sigma_p é imposto e sigma_z é livre, então o ponto anda na
-  # horizontal. Estudo 3 é o espelho. Estudo 4 não tem nada imposto.
-  h <- data.frame(x = 1.0, y = valores, xend = 1.75, yend = valores)
-  v <- data.frame(x = valores, y = 1.0, xend = valores, yend = 1.75)
-  d4 <- data.frame(x = 1.0, y = 1.0, xend = c(1.7, 0.4, 1.6, 0.5),
-                   yend = c(1.6, 1.7, 0.45, 0.4))
+  # Onde cada experimento começa. O Controle cruza a grade inteira; os dois
+  # espelhos percorrem uma linha ou uma coluna, com o outro eixo fixado em 1.0;
+  # a co-evolução parte do cruzamento de três níveis em cada eixo.
+  ini_ct  <- grade
+  ini_fem <- data.frame(sigma_z = 1.0, sigma_p = valores)
+  ini_mac <- data.frame(sigma_z = valores, sigma_p = 1.0)
+  ini_co  <- expand.grid(sigma_z = inicio_coevo, sigma_p = inicio_coevo)
 
-  (painel("1. Controle", "nada evolui: mede a topologia sobre a grade inteira") |
-      painel("2. Fêmeas variando", "sigma_p imposto, o traço do macho evolui", setas = h)) /
-    (painel("3. Machos variando", "sigma_z imposto, a preferência evolui", setas = v) |
-       painel("4. Co-evolução", "nada imposto: as duas evoluem juntas",
-              setas = d4, pontos = FALSE)) +
+  (painel("1. Controle", "cruza a grade inteira, numa geração", ini_ct) |
+     painel("2. Fêmeas variando", "varre σp, com σz inicial em 1.0", ini_fem)) /
+    (painel("3. Machos variando", "varre σz, com σp inicial em 1.0", ini_mac) |
+       painel("4. Co-evolução", "três níveis em cada eixo, cruzados", ini_co)) +
     plot_annotation(
-      title = "Os quatro estudos no mesmo plano",
-      subtitle = "Os pontos cinza são as condições iniciais do desenho; as setas vermelhas, o que fica livre para se mover ao longo das 100 gerações",
+      title = "Onde cada experimento começa, no mesmo plano",
+      subtitle = "Cinza: a grade do desenho. Vermelho: as condições iniciais que aquele experimento visita.",
       theme = theme(plot.title = element_text(face = "bold", size = 15)))
 }
 

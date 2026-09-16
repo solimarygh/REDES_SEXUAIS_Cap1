@@ -515,9 +515,11 @@ como "população gerada agora", é porque falta rodar aquele script.
 
 ## Os quatro estudos num plano só
 
-O que cada estudo fixa e o que deixa evoluir. Os pontos cinza são as condições
-iniciais do desenho; as setas vermelhas, o que fica livre para se mover ao
-longo das cem gerações. Esta é a única figura do documento que é um esquema:
+Onde cada estudo começa no plano (σp, σz). A grade é a mesma nos quatro
+painéis, e em vermelho estão as condições iniciais que aquele estudo visita: o
+Controle cruza a grade inteira, os dois espelhos percorrem uma coluna ou uma
+linha, com o outro eixo fixado em 1.0, e a co-evolução parte do cruzamento de
+três níveis em cada eixo. Esta é a única figura do documento que é um esquema:
 todas as outras saem do motor.
 
 ```{r fig-desenho, fig.width=10, fig.height=8}

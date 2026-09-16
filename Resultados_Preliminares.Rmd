@@ -265,7 +265,9 @@ bind_rows(checar_um(ct, "Controle"), checar_um(d, "Fêmeas variando"),
 Antes dos resultados, o que cada estudo faz. Todas as figuras desta seção saem
 do motor de verdade, com o mesmo `mate_with_survivors` e o mesmo
 `calc_metrics_from_M` dos estudos, e as métricas nos rótulos são as calculadas
-ali. A única exceção é o esquema logo abaixo, que é um desenho.
+ali. A única exceção é o esquema logo abaixo, que é um desenho: mostra onde
+cada estudo começa no plano (σp, σz), com a mesma grade nos quatro painéis e em
+vermelho as condições iniciais que aquele estudo visita.
 
 ```{r fig-desenho, fig.height=7.5}
 figura_desenho()
