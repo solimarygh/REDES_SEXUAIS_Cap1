@@ -286,7 +286,7 @@ figura_cantos <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
               inherit.aes = FALSE, size = 3, color = "gray30") +
     facet_grid(lin ~ col, switch = "y") +
     coord_cartesian(ylim = c(-25, N), clip = "off") +
-    labs(title = "O que importa não é quanta variação há, é de que lado ela está",
+    labs(title = "Estudo 1: a matriz de acasalamentos nos quatro cantos do plano σp × σz",
          subtitle = sprintf("Preferência gaussiana | %d machos e %d fêmeas | A_max = %d | k = %d | uma geração", N, N, A_max, k),
          x = "fêmeas, ordenadas pelo seu pico de preferência",
          y = "machos, ordenados pelo seu traço",
@@ -415,7 +415,7 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
                              r$met$Modularity, r$met$Nestedness, r$met$I_s,
                              r$n_comp, r$n_com, r$sem, r$fonte))
   }
-  mtext("A mesma regra de escolha, quatro composições da população",
+  mtext("Estudo 1: a rede nos quatro cantos do plano σp × σz",
         outer = TRUE, side = 3, line = 0.5, cex = 1.3, font = 2)
   mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain, que é o algoritmo da métrica de modularidade.  Cinza: sem acasalar.\nComponente é um pedaço sem ligação com o resto; comunidade é o que o Louvain separa dentro dele. As duas contagens ignoram quem não acasalou.",
         outer = TRUE, side = 1, line = 1, cex = 0.8, col = "gray30")
@@ -472,7 +472,7 @@ figura_busca <- function(amax = c(10L, 200L), ks = c(5L, 20L),
                              r$met$Modularity, r$met$Nestedness, r$met$I_s,
                              r$n_comp, r$n_com, r$sem, r$fonte))
   }
-  mtext("Estudo 1: o mesmo material, quatro regimes de busca",
+  mtext("Estudo 1: a rede sob os quatro regimes de busca",
         outer = TRUE, side = 3, line = 1.5, cex = 1.3, font = 2)
   mtext(sprintf("preferência %s | sigma_z = %.1f e sigma_p = %.1f nos quatro painéis | %d machos e %d fêmeas | uma geração",
                 tipo, sigma_z, sigma_p, N, N),
@@ -879,8 +879,8 @@ figura_desenho <- function(valores = c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0),
     (painel("3. Machos variando", "varre σz, com σp inicial em 1.0", ini_mac) |
        painel("4. Co-evolução", "três níveis em cada eixo, cruzados", ini_co)) +
     plot_annotation(
-      title = "Onde cada experimento começa, no mesmo plano",
-      subtitle = "Cinza: a grade do desenho. Vermelho: as condições iniciais que aquele experimento visita.",
+      title = "Condições iniciais de cada estudo no plano σp × σz",
+      subtitle = "Cinza: a grade do desenho. Vermelho: as condições iniciais que aquele estudo visita.",
       theme = theme(plot.title = element_text(face = "bold", size = 15)))
 }
 
