@@ -561,17 +561,6 @@ seleção. Cada um isola uma peça do sistema.
 | 3. Machos variando | σz | re-sorteado | herdável | como a variedade de machos disponíveis afeta a evolução da preferência |
 | 4. Co-evolução | os dois, só como condição inicial | herdável | herdável | o feedback entre as duas características |
 
-A figura abaixo mostra onde cada um começa no plano (σp, σz). A grade é a mesma
-nos quatro painéis, e em vermelho estão as condições iniciais que aquele
-experimento visita: o Controle cruza a grade inteira, os dois espelhos percorrem
-uma coluna ou uma linha, com o outro eixo fixado em 1.0, e a co-evolução parte
-do cruzamento de três níveis em cada eixo. É a única figura do documento que é
-um esquema; todas as outras são saída da simulação.
-
-```{r fig-desenho, fig.width=10, fig.height=8}
-figura_desenho()
-```
-
 O Controle roda uma geração, porque sem herança a segunda geração seria um
 sorteio independente com a mesma distribuição. Isso o torna cerca de cem vezes
 mais barato que os outros, e é o que permite cruzar σp com σz por inteiro. Os
@@ -628,6 +617,24 @@ tibble(
                  if (ok(esp)) "concluído" else "sem dados",
                  if (ok(co)) "concluído" else "não rodado")
 ) %>% kable(caption = "O que está neste documento. Cenários inclui as 20 réplicas de cada combinação de parâmetros.")
+```
+
+A tabela diz quantos cenários existem; a figura diz sobre que parte do espaço
+de parâmetros eles estão distribuídos. A grade é a mesma nos quatro painéis, e
+em vermelho estão as condições iniciais que aquele experimento visita: o
+Controle cruza a grade inteira, os dois espelhos percorrem uma coluna ou uma
+linha, com o outro eixo fixado em 1.0, e a co-evolução parte do cruzamento de
+três níveis em cada eixo.
+
+O contraste entre os painéis explica a diferença de custo. O Controle mede a
+superfície inteira porque roda uma geração só; os outros três rodam cem, e por
+isso percorrem uma linha, uma coluna ou um punhado de pontos de partida.
+
+Esta é a única figura do documento que é um esquema. Todas as outras são saída
+da simulação.
+
+```{r fig-desenho, fig.width=10, fig.height=8}
+figura_desenho()
 ```
 
 ------------------------------------------------------------------------
