@@ -1020,6 +1020,12 @@ colunas abaixo são as duas pontas do gradiente, com os *mesmos* machos nas
 duas, de modo que a única coisa que difere entre elas é o quanto as fêmeas
 discordam entre si sobre o que preferem.
 
+Ao contrário das figuras de rede, a população desta figura não é uma réplica
+recuperada das rodadas: é gerada com uma semente fixa, para que as duas colunas
+partam do mesmo material. O acasalamento e as métricas saem das mesmas funções
+que os estudos usam, mas o que a figura mostra é a regra de acasalamento, e não
+um resultado.
+
 Em cima, a curva de aceite de catorze fêmeas sorteadas, com os machos
 disponíveis marcados no eixo: com σp pequeno as curvas se empilham umas sobre
 as outras, porque todas querem o mesmo macho. No meio, os casais que se
@@ -1148,8 +1154,8 @@ que responde.
 
 ## 3.0 O efeito de σz sobre uma população
 
-A mesma construção da seção 2.0, com a variação trocada de lado. Vale ler as
-duas em sequência.
+A mesma construção da seção 2.0, com a variação trocada de lado, e a mesma
+ressalva: a população é gerada com semente fixa e não recuperada das rodadas.
 
 Agora as fêmeas são as *mesmas* nas duas colunas, com as mesmas curvas de
 aceite, e o que difere são os machos disponíveis, marcados no eixo inferior. As

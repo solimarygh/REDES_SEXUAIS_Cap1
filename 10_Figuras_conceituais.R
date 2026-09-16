@@ -202,8 +202,11 @@ figura_eixo <- function(eixo = c("sigma_p", "sigma_z"),
         "O eixo de baixo é o traço do macho nas duas primeiras linhas.\n",
         "Linha 1: a curva de aceite de ", n_curvas, " fêmeas sorteadas, e os machos disponíveis marcados no eixo.\n",
         "Linha 2: cada ponto é um casal, e a diagonal marca onde o macho é igual ao pico da fêmea.\n",
-        if (varia_femeas) "Linha 3: quantas parceiras cada macho teve."
-        else "Linha 3: quantos parceiros cada fêmea teve, contra o seu próprio pico."),
+        if (varia_femeas) "Linha 3: quantas parceiras cada macho teve.\n"
+        else "Linha 3: quantos parceiros cada fêmea teve, contra o seu próprio pico.\n",
+        "População gerada com semente fixa (", seed, "), e não recuperada das rodadas: ",
+        "esta figura mostra a regra de acasalamento, não um resultado.\n",
+        "O acasalamento e as métricas saem das mesmas funções dos estudos, mate_with_survivors e calc_metrics_from_M."),
       theme = theme(plot.title = element_text(face = "bold", size = 15)))
 }
 
