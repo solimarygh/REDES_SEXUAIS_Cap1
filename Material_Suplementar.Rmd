@@ -398,7 +398,20 @@ binária, ou seja, um mesmo casal nunca é contado duas vezes.
 
 Essa representação vem da ecologia de interações, onde é usada desde os anos
 1980 para descrever quem poliniza quem ou quem come quem, e traz consigo um
-conjunto de métricas já estabelecidas. Medimos quatro:
+conjunto de métricas já estabelecidas.
+
+De cada rede registramos duas coisas que convém não confundir. As **métricas de
+estrutura** descrevem como as arestas estão arranjadas: se a população se
+reparte em grupos, se existe hierarquia, se o sucesso se concentra. Os
+**descritores da rede** dizem quantas arestas existem e sobre quantos
+indivíduos, e não descrevem arranjo nenhum.
+
+A distinção não é cosmética. As quatro métricas de estrutura dependem dos
+descritores, e nenhuma delas é comparável entre redes de tamanho ou densidade
+muito diferentes. Por isso os descritores entram nas análises como covariáveis,
+e não como respostas.
+
+### As quatro métricas de estrutura
 
 - **Modularidade**: o quanto a rede se divide em grupos que interagem
   preferencialmente entre si. Numa rede de acasalamentos, modularidade alta
@@ -419,10 +432,34 @@ conjunto de métricas já estabelecidas. Medimos quatro:
   medida clássica do potencial de seleção sexual. Vale zero quando todos os
   machos acasalam igualmente, e cresce quanto mais desigual é o sucesso.
 
-Também registramos a **poliandria realizada**, que é o número médio de
-parceiros das fêmeas que acasalaram. Ela não é um parâmetro do modelo, e sim um
-resultado: as fêmeas buscam um certo número de parceiros, mas conseguem apenas
-os que aceitam entre os que chegam a avaliar.
+### Os descritores da rede
+
+- **Conectância**: a fração dos pares possíveis que de fato acasalaram, ou seja
+  o número de acasalamentos dividido por (machos × fêmeas). Numa rede bipartida
+  o denominador é esse, e não n(n−1)/2, porque os pares macho-macho e
+  fêmea-fêmea não são zeros observados, são estruturalmente impossíveis.
+- **Censo de machos**: quantos machos adultos existiam naquela geração. Deveria
+  ser sempre 200, e a seção sobre o censo explica os casos em que não é.
+- **Poliandria realizada**: o número médio de parceiros das fêmeas que
+  acasalaram. Não é um parâmetro do modelo, e sim um resultado, porque as
+  fêmeas buscam um certo número de parceiros mas conseguem apenas os que
+  aceitam entre os que chegam a avaliar.
+- **Proporção de fêmeas sem acasalar** e **proporção que atingiu o teto k**: as
+  duas pontas da distribuição anterior. A primeira é a medida direta da força
+  de seleção agindo sobre a preferência feminina, porque uma fêmea que não
+  aceita ninguém deixa zero descendentes.
+- **Machos avaliados, machos aceitos e taxa de aceite**: quantos machos cada
+  fêmea chegou a ver, quantos aceitaria entre esses, e a razão entre os dois.
+  Estes três separam as três coisas que limitam a poliandria e que de outro
+  modo só se veem somadas: a busca, a exigência da curva de preferência e o
+  teto k.
+
+A poliandria realizada e a conectância são as duas faces do mesmo número. Se
+cada fêmea consegue k parceiros, o total de arestas é (número de fêmeas × k), e
+a conectância se reduz a k dividido pelo censo de machos. Em outras palavras, o
+número de acasalamentos é fixado pelo lado das fêmeas, e o número de machos
+entra apenas no denominador. É por isso que, quando o censo encurta, a
+conectância sobe em vez de descer.
 
 ## O modelo
 
@@ -552,8 +589,15 @@ prevista apareceu no experimento 2, nas regras sigmoide e disruptiva com
 seleção natural ligada: o traço se afasta tanto do ótimo ecológico que a
 viabilidade `V = exp(-γ (z - φ)²)` colapsa para todos os machos ao mesmo tempo,
 e sobram pouquíssimos adultos. Nessas células a rede foi calculada sobre duas
-ou três dezenas de machos em vez de 200, e as métricas de topologia deixam de
-ser comparáveis com as demais, porque todas elas dependem do tamanho da rede.
+ou três dezenas de machos em vez de 200, e as métricas de estrutura deixam de
+ser comparáveis com as demais, porque todas elas dependem do tamanho e da
+densidade da rede.
+
+A conectância torna isso concreto. Com 200 machos e k = 5 ela vale 0.025; com
+38 machos e o mesmo k vale 0.13, cinco vezes mais, sem que nada tenha mudado no
+comportamento das fêmeas. Como o número de acasalamentos é fixado pelo lado das
+fêmeas, encurtar o censo de machos não reduz as arestas, apenas as concentra
+sobre menos indivíduos.
 
 Isso expôs uma ambiguidade real no modelo, e não um detalhe de implementação.
 O número 200 admite duas leituras biológicas distintas:
