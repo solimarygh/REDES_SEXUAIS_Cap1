@@ -201,6 +201,21 @@ calc_metrics_from_M <- function(M, k_alvo = NULL) {
   # razões é o que responde "que fração dos machos que viu ela aceitaria".
   taxa_aceite <- if (tem_aceite && all(av > 0)) mean(ac / av) else NA_real_
 
+  # CONECTÂNCIA: a fração dos pares possíveis que de fato acasalaram. A rede é
+  # bipartida, então o denominador é machos x fêmeas, e não n(n-1)/2: os pares
+  # macho-macho e fêmea-fêmea não são zeros observados, são impossíveis.
+  #
+  # Entra como COVARIÁVEL e não como quinta métrica de topologia. As outras
+  # quatro descrevem como as arestas estão arranjadas; esta descreve quantas
+  # são, e aqui é quase um parâmetro: min(k, A_max, censo) / censo. Serve de
+  # controle nas análises, porque aninhamento e centralização respondem forte
+  # a ela, e é o que torna as células de censo curto incomparáveis.
+  #
+  # O denominador usa TODAS as fêmeas, inclusive as que não acasalaram: elas
+  # estavam disponíveis como parceiras, então os zeros delas são resultado e
+  # não impossibilidade.
+  conectancia <- if (nrow(M) > 0 && ncol(M) > 0) sum(M) / (nrow(M) * ncol(M)) else NA_real_
+
   # Proporção de fêmeas que NÃO acasalaram. Sem a regra de escape, esta é a
   # medida direta da força de seleção agindo sobre a preferência feminina.
   prop_sem_acasalar <- if (ncol(M) > 0) mean(grau_femeas == 0) else NA_real_
@@ -233,6 +248,7 @@ calc_metrics_from_M <- function(M, k_alvo = NULL) {
                       grau_medio_femeas = grau_medio_femeas,
                       prop_femeas_atingiu_k = prop_atingiu_k,
                       arestas = arestas,
+                      conectancia = conectancia,
                       machos_avaliados_medio = machos_avaliados_medio,
                       machos_aceitos_medio = machos_aceitos_medio,
                       taxa_aceite = taxa_aceite))
@@ -255,7 +271,8 @@ calc_metrics_from_M <- function(M, k_alvo = NULL) {
     prop_femeas_sem_acasalar = prop_sem_acasalar,
     grau_medio_femeas = grau_medio_femeas,       # poliandria REALIZADA
     prop_femeas_atingiu_k = prop_atingiu_k,      # quantas chegaram ao teto k
-    arestas = arestas,                           # densidade da rede
+    arestas = arestas,                           # nº de acasalamentos
+    conectancia = conectancia,                   # arestas / (machos x fêmeas)
     machos_avaliados_medio = machos_avaliados_medio,  # min(A_max, censo)
     machos_aceitos_medio = machos_aceitos_medio,      # aceitos ANTES do teto k
     taxa_aceite = taxa_aceite                         # aceitos / avaliados
