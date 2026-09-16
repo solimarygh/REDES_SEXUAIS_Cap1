@@ -378,14 +378,14 @@ o documento possa ser lido sem recorrer a outras fontes.
 
 Em muitas espécies, as fêmeas não acasalam com um parceiro qualquer: avaliam
 vários machos e acasalam preferencialmente com alguns. Essa escolha é a
-principal causa da **seleção sexual**, o processo evolutivo que explica
+principal causa da *seleção sexual*, o processo evolutivo que explica
 características masculinas exageradas e aparentemente custosas, como a cauda do
 pavão ou o canto de muitos insetos. Quando as fêmeas preferem um valor
 determinado de uma característica, os machos que o possuem deixam mais
 descendentes, e a característica se desloca ao longo das gerações.
 
 O que raramente se considera é que a escolha de parceiro não produz apenas uma
-pressão seletiva média sobre os machos. Ela produz também um **padrão** de quem
+pressão seletiva média sobre os machos. Ela produz também um *padrão* de quem
 acasala com quem, e esse padrão tem estrutura. Se todas as fêmeas de uma
 população preferem a mesma coisa, poucos machos concentram quase todos os
 acasalamentos. Se as fêmeas discordam entre si sobre o que preferem, formam-se
@@ -402,7 +402,7 @@ seleção já explicaria?
 ## A rede de acasalamentos
 
 Para tratar o padrão de forma quantitativa, representamos os acasalamentos de
-cada geração como uma **rede bipartida**. "Rede" quer dizer um conjunto de
+cada geração como uma *rede bipartida*. "Rede" quer dizer um conjunto de
 pontos, chamados nós, ligados por linhas, chamadas arestas. "Bipartida" quer
 dizer que os nós são de dois tipos, aqui machos e fêmeas, e que só existem
 arestas entre tipos diferentes: um macho pode estar ligado a uma fêmea, nunca a
@@ -414,9 +414,9 @@ Essa representação vem da ecologia de interações, onde é usada desde os ano
 conjunto de métricas já estabelecidas.
 
 De cada rede registramos dois conjuntos de quantidades, que não devem ser
-confundidos. As **métricas de estrutura** descrevem como as arestas estão arranjadas: se a população se
+confundidos. As *métricas de estrutura* descrevem como as arestas estão arranjadas: se a população se
 reparte em grupos, se existe hierarquia, se o sucesso se concentra. Os
-**descritores da rede** dizem quantas arestas existem e sobre quantos
+*descritores da rede* dizem quantas arestas existem e sobre quantos
 indivíduos, e não descrevem arranjo nenhum.
 
 A distinção não é cosmética. As quatro métricas de estrutura dependem dos
@@ -426,20 +426,20 @@ e não como respostas.
 
 ### As quatro métricas de estrutura
 
-- **Modularidade**: o quanto a rede se divide em grupos que interagem
+- *Modularidade*: o quanto a rede se divide em grupos que interagem
   preferencialmente entre si. Numa rede de acasalamentos, modularidade alta
   significa que a população está repartida em subconjuntos que acasalam quase
   só internamente. Calculamos com o algoritmo de Louvain sobre a projeção
   unimodal da rede.
-- **Aninhamento** (índice NODF): o quanto os parceiros dos indivíduos menos
+- *Aninhamento* (índice NODF): o quanto os parceiros dos indivíduos menos
   procurados formam um subconjunto dos parceiros dos mais procurados. É uma
   medida de hierarquia: aninhamento alto descreve uma população em que há
   machos "populares" que acasalam com quase todas as fêmeas e machos
   periféricos que acasalam apenas com as fêmeas menos exigentes.
-- **Centralização**: o quanto os acasalamentos se concentram em poucos
+- *Centralização*: o quanto os acasalamentos se concentram em poucos
   indivíduos. O valor máximo corresponde a uma rede em estrela, com um único
   macho ligado a todas as fêmeas.
-- **Oportunidade de seleção sexual** (Is): a variância no número de parceiras
+- *Oportunidade de seleção sexual* (Is): a variância no número de parceiras
   entre os machos, dividida pelo quadrado da média. É a única das quatro que
   não vem da ecologia de redes, e sim da genética quantitativa, onde é uma
   medida clássica do potencial de seleção sexual. Vale zero quando todos os
@@ -447,22 +447,22 @@ e não como respostas.
 
 ### Os descritores da rede
 
-- **Conectância**: a fração dos pares possíveis que de fato acasalaram, ou seja
+- *Conectância*: a fração dos pares possíveis que de fato acasalaram, ou seja
   o número de acasalamentos dividido por (machos × fêmeas). Numa rede bipartida
   o denominador é esse, e não n(n−1)/2, porque os pares macho-macho e
   fêmea-fêmea não são zeros observados, são estruturalmente impossíveis.
-- **Censo de machos**: quantos machos adultos existiam naquela geração. Por
+- *Censo de machos*: quantos machos adultos existiam naquela geração. Por
   construção do modelo é sempre 200, e a coluna serve de verificação: qualquer
   valor diferente indicaria um cenário degenerado, e não um resultado.
-- **Poliandria realizada**: o número médio de parceiros das fêmeas que
+- *Poliandria realizada*: o número médio de parceiros das fêmeas que
   acasalaram. Não é um parâmetro do modelo, e sim um resultado, porque as
   fêmeas buscam um certo número de parceiros mas conseguem apenas os que
   aceitam entre os que chegam a avaliar.
-- **Proporção de fêmeas sem acasalar** e **proporção que atingiu o teto k**: as
+- *Proporção de fêmeas sem acasalar* e *proporção que atingiu o teto k*: as
   duas pontas da distribuição anterior. A primeira é a medida direta da força
   de seleção agindo sobre a preferência feminina, porque uma fêmea que não
   aceita ninguém deixa zero descendentes.
-- **Machos avaliados, machos aceitos e taxa de aceite**: quantos machos cada
+- *Machos avaliados, machos aceitos e taxa de aceite*: quantos machos cada
   fêmea chegou a ver, quantos aceitaria entre esses, e a razão entre os dois.
   Estes três separam as três coisas que limitam a poliandria e que de outro
   modo só se veem somadas: a busca, a exigência da curva de preferência e o
@@ -479,19 +479,19 @@ conectância sobe em vez de descer.
 
 Simulamos uma população de 200 machos e 200 fêmeas com gerações discretas e não
 sobrepostas. Cada macho expressa uma característica sexualmente selecionada, o
-**traço**, que chamamos de `z`. Cada fêmea tem um **pico de preferência**, `p`,
-que é o valor de traço masculino que ela mais aprecia, e uma **exigência**, `s`,
+*traço*, que chamamos de `z`. Cada fêmea tem um *pico de preferência*, `p`,
+que é o valor de traço masculino que ela mais aprecia, e uma *exigência*, `s`,
 que determina o quanto ela tolera afastamentos desse pico. A probabilidade de
 uma fêmea aceitar um macho depende da distância entre o traço dele e o pico
 dela.
 
 Duas quantidades organizam todo o desenho experimental:
 
-- **σp** é a dispersão dos picos de preferência entre as fêmeas. σp pequeno
+- *σp* é a dispersão dos picos de preferência entre as fêmeas. σp pequeno
   descreve uma população em que todas as fêmeas querem praticamente a mesma
   coisa; σp grande, uma população em que discordam bastante sobre o que
   preferem.
-- **σz** é a dispersão do traço entre os machos, ou seja, o quanto o material
+- *σz* é a dispersão do traço entre os machos, ou seja, o quanto o material
   disponível para as fêmeas escolherem é variado.
 
 A distinção entre as duas é o eixo conceitual do projeto. A mesma intensidade
@@ -527,11 +527,11 @@ Duas restrições ecológicas atravessam os quatro estudos, porque na
 natureza nenhuma fêmea avalia todos os machos disponíveis nem acasala com
 quantos quiser:
 
-- **A_max** é o número de machos distintos que cada fêmea consegue avaliar
+- *A_max* é o número de machos distintos que cada fêmea consegue avaliar
   antes de decidir, com os níveis 200, 40 e 10. Representa o custo de procurar
   parceiro. O nível 200 corresponde à população inteira, ou seja, à ausência de
   restrição de busca.
-- **k** é o número de parceiros que cada fêmea pode aceitar, com os níveis 5,
+- *k* é o número de parceiros que cada fêmea pode aceitar, com os níveis 5,
   10 e 20. É um limite superior, não um número garantido: a fêmea avalia os A_max machos e
   fica com os k melhores entre aqueles que aceitou, de modo que o número de
   parceiros que efetivamente consegue depende também da taxa de aceite da sua
@@ -542,13 +542,13 @@ quantos quiser:
 
 ### A seleção natural e o censo de adultos
 
-Cada estudo roda com e sem **seleção natural** sobre o traço masculino. É
+Cada estudo roda com e sem *seleção natural* sobre o traço masculino. É
 a força que se opõe à seleção sexual, e o que permite perguntar se a estrutura
 da rede se sustenta quando carregar o traço tem um custo. A seleção natural age
 apenas sobre os machos e apenas sobre o traço, nunca sobre a preferência.
 
 Cada geração produz cerca de 5.000 machos juvenis, e desses saem os 200 machos
-adultos que as fêmeas encontram. Os 200 são a **capacidade de suporte** do
+adultos que as fêmeas encontram. Os 200 são a *capacidade de suporte* do
 ambiente, e é assim que a viabilidade entra: sorteiam-se sempre 200 juvenis,
 com peso proporcional a
 
@@ -558,8 +558,8 @@ de modo que quanto mais o traço de um juvenil se afasta do ótimo ecológico φ
 menor a sua chance de ocupar uma vaga. Quando a seleção natural está desligada,
 o sorteio é uniforme entre os juvenis.
 
-O ponto a reter é que a viabilidade decide **quais** machos ocupam as 200 vagas
-e nunca **quantas** vagas existem. O tamanho da população é constante por
+O ponto a reter é que a viabilidade decide *quais* machos ocupam as 200 vagas
+e nunca *quantas* vagas existem. O tamanho da população é constante por
 construção, e é essa escolha que mantém as redes comparáveis entre combinações: a
 seleção natural muda a composição do pool de machos, que é o efeito de
 interesse, e não a sua densidade, que seria um confundimento. Na terminologia
@@ -596,7 +596,7 @@ tempo que a outra, o que confundiria a interpretação. No Estudo 4 isso é
 impossível, porque re-sortear é exactamente o que impede a herança, e por isso
 ali os dois sigmas são apenas condição inicial.
 
-Todos os cenários rodaram com **20 réplicas**, ou seja, 20 repetições com
+Todos os cenários rodaram com *20 réplicas*, ou seja, 20 repetições com
 sementes diferentes. Vinte e não uma centena porque os efeitos em questão são
 grandes e sistemáticos, não questão de ruído amostral.
 
@@ -604,8 +604,8 @@ grandes e sistemáticos, não questão de ruído amostral.
 
 A barra lateral tem uma entrada por estudo, e dentro de cada uma as
 variáveis resposta que fazem sentido naquele estudo. A navegação por
-dentro de cada painel é por abas, sempre na mesma ordem: **seleção natural**
-(sem, com), depois **A_max** (200, 40, 10), depois **k** (5, 10, 20). São as 18
+dentro de cada painel é por abas, sempre na mesma ordem: *seleção natural*
+(sem, com), depois *A_max* (200, 40, 10), depois *k* (5, 10, 20). São as 18
 combinações do desenho ecológico. A aba que abre por padrão é a menos
 restritiva, sem seleção natural e com A_max = 200.
 
@@ -688,8 +688,8 @@ parâmetros. Antes de passar a elas, vale ver o objeto concreto que está por
 trás de cada valor: uma população de 400 indivíduos e a rede de acasalamentos
 que ela formou.
 
-Chamamos de **combinação** um ponto concreto do desenho, ou seja um valor
-fixado para cada um dos seis fatores, e de **réplica** cada uma das 20
+Chamamos de *combinação* um ponto concreto do desenho, ou seja um valor
+fixado para cada um dos seis fatores, e de *réplica* cada uma das 20
 repetições daquela combinação com sementes diferentes.
 
 As redes desenhadas abaixo são réplicas reais: dentro de cada combinação o
@@ -1506,7 +1506,7 @@ dimórfica, mas a transmissão é biparental para as duas características.
 
 Essa configuração permite estudar o mecanismo clássico de Fisher, ou *runaway*.
 O acasalamento não aleatório cria uma associação estatística entre os genes de
-preferência e os genes do traço, chamada **covariância genética**. Uma vez que
+preferência e os genes do traço, chamada *covariância genética*. Uma vez que
 essa associação existe, a seleção que age sobre o traço arrasta a preferência
 consigo, mesmo sem nenhuma seleção agindo diretamente sobre ela, e o processo
 pode se auto-reforçar. A covariância, e não a média de cada característica, é a
@@ -1524,9 +1524,9 @@ correspondente.
 ## 5.0 Desequilíbrio de ligamento
 
 Neste estudo a variância do traço se decompõe em duas quantidades. A
-variância **génica** é a que a segregação transmite aos descendentes. A
-variância **total** é a que a população exibe. A diferença entre as duas é o
-**desequilíbrio de ligamento**: o excesso de variância que o acasalamento não
+variância *génica* é a que a segregação transmite aos descendentes. A
+variância *total* é a que a população exibe. A diferença entre as duas é o
+*desequilíbrio de ligamento*: o excesso de variância que o acasalamento não
 aleatório acumula sem que exista genótipo novo por trás. Vale zero quando o
 acasalamento é aleatório, e é uma quantidade que os três estudos
 anteriores não têm como mostrar, porque neles apenas uma das duas
