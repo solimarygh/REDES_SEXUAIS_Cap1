@@ -188,6 +188,19 @@ safe_opportunity_sexual_selection <- function(M) {
 calc_metrics_from_M <- function(M, k_alvo = NULL) {
   grau_femeas <- colSums(M)
 
+  # Os dois números que `mate_with_survivors` pendura na matriz. Vêm como
+  # atributo, então somem se quem chamar tiver feito qualquer operação sobre
+  # M (o Estudo 5 soma as matrizes das semanas, por exemplo). Nesse caso as
+  # colunas saem NA em vez de dar erro.
+  av <- attr(M, "n_avaliados"); ac <- attr(M, "n_aceitos")
+  tem_aceite <- !is.null(av) && !is.null(ac) && length(av) == ncol(M)
+  machos_avaliados_medio <- if (tem_aceite) mean(av) else NA_real_
+  machos_aceitos_medio   <- if (tem_aceite) mean(ac) else NA_real_
+  # A taxa de aceite é por fêmea e depois promediada, e não a razão das duas
+  # médias: são fêmeas diferentes com exigências diferentes, e a média das
+  # razões é o que responde "que fração dos machos que viu ela aceitaria".
+  taxa_aceite <- if (tem_aceite && all(av > 0)) mean(ac / av) else NA_real_
+
   # Proporção de fêmeas que NÃO acasalaram. Sem a regra de escape, esta é a
   # medida direta da força de seleção agindo sobre a preferência feminina.
   prop_sem_acasalar <- if (ncol(M) > 0) mean(grau_femeas == 0) else NA_real_
@@ -219,7 +232,10 @@ calc_metrics_from_M <- function(M, k_alvo = NULL) {
                       prop_femeas_sem_acasalar = prop_sem_acasalar,
                       grau_medio_femeas = grau_medio_femeas,
                       prop_femeas_atingiu_k = prop_atingiu_k,
-                      arestas = arestas))
+                      arestas = arestas,
+                      machos_avaliados_medio = machos_avaliados_medio,
+                      machos_aceitos_medio = machos_aceitos_medio,
+                      taxa_aceite = taxa_aceite))
   }
 
   n_m <- nrow(Mm); n_f <- ncol(Mm)
@@ -239,7 +255,10 @@ calc_metrics_from_M <- function(M, k_alvo = NULL) {
     prop_femeas_sem_acasalar = prop_sem_acasalar,
     grau_medio_femeas = grau_medio_femeas,       # poliandria REALIZADA
     prop_femeas_atingiu_k = prop_atingiu_k,      # quantas chegaram ao teto k
-    arestas = arestas                            # densidade da rede
+    arestas = arestas,                           # densidade da rede
+    machos_avaliados_medio = machos_avaliados_medio,  # min(A_max, censo)
+    machos_aceitos_medio = machos_aceitos_medio,      # aceitos ANTES do teto k
+    taxa_aceite = taxa_aceite                         # aceitos / avaliados
   )
 }
 
@@ -414,6 +433,17 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
     else stop("tipo_selecao desconhecido: ", tipo_selecao)
   }
 
+  # Quantos machos cada fêmea AVALIOU e quantos ACEITOU, antes de o teto k
+  # cortar. São os dois números que faltavam para separar as três coisas que
+  # limitam a poliandria: a busca (avaliados), a exigência da curva (aceitos)
+  # e o teto (k). Sem eles, só se via o resultado dos três juntos.
+  #
+  # Os avaliados também registram um efeito que era invisível: quando o censo
+  # de machos encurta, `n_aval <- min(encounters_n, n_m)` faz o tratamento de
+  # A_max deixar de valer, e até agora nada gravava isso.
+  n_avaliados <- integer(n_f)
+  n_aceitos   <- integer(n_f)
+
   for (i in seq_len(n_f)) {
     p_i <- female_p[i]; s_i <- female_s[i]; k_i <- matings_per_female[i]
 
@@ -423,6 +453,7 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
     n_aval    <- min(encounters_n, n_m)
     avaliados <- sample(seq_len(n_m), size = n_aval, replace = FALSE)
     P         <- prob_aceite(male_z_surv[avaliados], p_i, s_i)
+    n_avaliados[i] <- n_aval
 
     escolhidos <-
       if (regra == "sequencial") {
@@ -431,10 +462,16 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
           if (length(aceitos) >= k_i) break          # PARA ao atingir k
           if (runif(1) <= P[j]) aceitos <- c(aceitos, avaliados[j])
         }
+        # Aqui o número de aceitos é CENSURADO em k, porque a fêmea para ao
+        # atingi-lo. Não é a taxa de aceite da curva, e não se compara com a
+        # do best_of_n. Fica gravado do mesmo jeito, para não haver um NA
+        # silencioso, mas quem ler precisa saber disso.
+        n_aceitos[i] <- length(aceitos)
         aceitos
 
       } else {                                       # best_of_n
         aceitos <- which(runif(n_aval) <= P)         # avalia TODOS, sem parar
+        n_aceitos[i] <- length(aceitos)              # ANTES de o teto cortar
         if (length(aceitos) > k_i)                    # e só então compara
           aceitos <- aceitos[order(P[aceitos], decreasing = TRUE)][seq_len(k_i)]
         avaliados[aceitos]
@@ -442,6 +479,11 @@ mate_with_survivors <- function(male_z_surv, female_p, female_s, tipo_selecao,
 
     if (length(escolhidos)) M[escolhidos, i] <- 1L
   }
+
+  # Vão como atributos e não como uma lista, de propósito: assim a função
+  # continua devolvendo uma matriz e nenhum dos motores precisa mudar.
+  attr(M, "n_avaliados") <- n_avaliados
+  attr(M, "n_aceitos")   <- n_aceitos
 
   # SEM regra de escape (decisão Erika/Miudo, 2026-07): uma fêmea que não
   # aceita nenhum macho fica SEM acasalar e deixa 0 filhotes. Isso cria
