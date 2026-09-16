@@ -62,52 +62,42 @@ juntar_pedacos <- function(pasta, padrao) {
 # sentido nenhum. A rodada efetivamente lida aparece na tabela de situação.
 RODADAS <- c("bestOfN", "censoConst")
 
-# O regime do censo também entra no nome do arquivo, e desde a rodada de
-# setembro há os dois: sem sufixo é o TETO (200 como máximo, cada juvenil
-# sobrevive ou não de forma independente) e "_cota" é a COTA (200 como
-# capacidade de suporte, sorteados com peso proporcional à viabilidade).
+# O censo adulto de 200 machos é a capacidade de suporte do ambiente: sorteiam-se
+# sempre 200 juvenis com peso proporcional à viabilidade, de modo que a seleção
+# natural decide QUAIS machos ocupam as vagas e nunca QUANTAS vagas existem.
 #
-# A cota só foi rodada onde a decisão mudava alguma coisa, que é a metade COM
-# seleção natural: sem ela os dois regimes percorrem o mesmo caminho de código
-# e dão resultados idênticos. Então a regra não pode ser "se houver cota, use
-# só a cota", senão a metade sem seleção natural desaparece do documento.
-# É por regime de seleção natural: onde a cota cobre, manda a cota; o resto vem
-# do teto. Assim nenhum cenário aparece duas vezes e nenhum some.
-padrao_censo <- function(estudo, r, censo) {
-  if (censo == "cota") sprintf("^(backup|resultados)_%s_%s.*cota.*\\.rds$", estudo, r)
-  else                 sprintf("^(backup|resultados)_%s_%s(?!.*cota).*\\.rds$", estudo, r)
+# Sem seleção natural esse sorteio é uniforme e o arquivo não leva sufixo; com
+# seleção natural ele é ponderado e o arquivo leva "_cota". São as duas metades
+# do mesmo desenho, gravadas em arquivos separados, e a leitura junta cada uma
+# de onde ela está: assim nenhum cenário aparece duas vezes e nenhum some.
+padrao_arquivo <- function(estudo, r, metade) {
+  if (metade == "com_sufixo") sprintf("^(backup|resultados)_%s_%s.*cota.*\\.rds$", estudo, r)
+  else                        sprintf("^(backup|resultados)_%s_%s(?!.*cota).*\\.rds$", estudo, r)
 }
 
-combinar_censo <- function(teto, cota) {
-  if (is.null(cota) || !nrow(cota)) return(teto)
-  if (is.null(teto) || !nrow(teto)) return(cota)
-  ns_cota <- unique(cota$selecao_natural)
-  bind_rows(cota, filter(teto, !(selecao_natural %in% ns_cota)))
-}
-
-descrever_censo <- function(teto, cota) {
-  tem <- function(x) !is.null(x) && nrow(x) > 0
-  if (!tem(cota)) return("teto")
-  if (!tem(teto)) return("cota")
-  if (all(unique(teto$selecao_natural) %in% unique(cota$selecao_natural))) "cota"
-  else "cota onde existe, teto no resto"
+# Junta as duas metades sem que nenhum cenário apareça duas vezes: onde a
+# metade com sufixo cobre um regime de seleção natural, é ela que vale; o resto
+# vem da outra.
+juntar_metades <- function(sem_sufixo, com_sufixo) {
+  if (is.null(com_sufixo) || !nrow(com_sufixo)) return(sem_sufixo)
+  if (is.null(sem_sufixo) || !nrow(sem_sufixo)) return(com_sufixo)
+  ns <- unique(com_sufixo$selecao_natural)
+  bind_rows(com_sufixo, filter(sem_sufixo, !(selecao_natural %in% ns)))
 }
 
 carregar_rodada <- function(pasta, estudo) {
   for (r in RODADAS) {
-    teto <- juntar_pedacos(pasta, padrao_censo(estudo, r, "teto"))
-    cota <- juntar_pedacos(pasta, padrao_censo(estudo, r, "cota"))
-    df   <- combinar_censo(teto, cota)
+    a  <- juntar_pedacos(pasta, padrao_arquivo(estudo, r, "sem_sufixo"))
+    b  <- juntar_pedacos(pasta, padrao_arquivo(estudo, r, "com_sufixo"))
+    df <- juntar_metades(a, b)
     if (!is.null(df) && nrow(df) > 0) {
       attr(df, "rodada") <- r
-      attr(df, "censo")  <- descrever_censo(teto, cota)
       return(df)
     }
   }
   NULL
 }
 rodada_de <- function(x) if (is.null(x)) "-" else attr(x, "rodada") %||% "?"
-censo_de  <- function(x) if (is.null(x)) "-" else attr(x, "censo")  %||% "?"
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
 ct  <- carregar_rodada("Resultados_Artigo/Fase_Controle/Dados", "Controle")
@@ -438,8 +428,9 @@ e não como respostas.
   o número de acasalamentos dividido por (machos × fêmeas). Numa rede bipartida
   o denominador é esse, e não n(n−1)/2, porque os pares macho-macho e
   fêmea-fêmea não são zeros observados, são estruturalmente impossíveis.
-- **Censo de machos**: quantos machos adultos existiam naquela geração. Deveria
-  ser sempre 200, e a seção sobre o censo explica os casos em que não é.
+- **Censo de machos**: quantos machos adultos existiam naquela geração. Por
+  construção do modelo é sempre 200, e a coluna serve de verificação: qualquer
+  valor diferente indicaria um cenário degenerado, e não um resultado.
 - **Poliandria realizada**: o número médio de parceiros das fêmeas que
   acasalaram. Não é um parâmetro do modelo, e sim um resultado, porque as
   fêmeas buscam um certo número de parceiros mas conseguem apenas os que
@@ -518,7 +509,7 @@ quantos quiser:
   parceiro. O nível 200 corresponde à população inteira, ou seja, à ausência de
   restrição de busca.
 - **k** é o número de parceiros que cada fêmea pode aceitar, com os níveis 5,
-  10 e 20. É um limite superior, não uma cota: a fêmea avalia os A_max machos e
+  10 e 20. É um limite superior, não um número garantido: a fêmea avalia os A_max machos e
   fica com os k melhores entre aqueles que aceitou, de modo que o número de
   parceiros que efetivamente consegue depende também da taxa de aceite da sua
   regra de preferência. Essa regra de decisão, em que a fêmea amostra antes de
@@ -526,13 +517,35 @@ quantos quiser:
   comparação em pool, ou *best-of-n*, e é a suposição habitual para leks e
   agregações.
 
-Além disso, cada experimento roda com e sem **seleção natural** sobre o traço
-masculino. Quando ligada, cada macho juvenil sobrevive com probabilidade
-`V = exp(-γ (z - φ)²)`, com γ = 0.2 e φ = 5: quanto mais o traço se afasta do
-ótimo ecológico φ, menor a chance de sobreviver. É a força que se opõe à
-seleção sexual, e o que permite perguntar se a estrutura da rede se sustenta
-quando há um custo de carregar o traço. A seleção natural nunca age sobre a
-preferência.
+### A seleção natural e o censo de adultos
+
+Cada experimento roda com e sem **seleção natural** sobre o traço masculino. É
+a força que se opõe à seleção sexual, e o que permite perguntar se a estrutura
+da rede se sustenta quando carregar o traço tem um custo. A seleção natural age
+apenas sobre os machos e apenas sobre o traço, nunca sobre a preferência.
+
+Cada geração produz cerca de 5.000 machos juvenis, e desses saem os 200 machos
+adultos que as fêmeas encontram. Os 200 são a **capacidade de suporte** do
+ambiente, e é assim que a viabilidade entra: sorteiam-se sempre 200 juvenis,
+com peso proporcional a
+
+$$V = \exp\!\left(-\gamma\,(z - \phi)^2\right), \qquad \gamma = 0.2,\ \phi = 5$$
+
+de modo que quanto mais o traço de um juvenil se afasta do ótimo ecológico φ,
+menor a sua chance de ocupar uma vaga. Quando a seleção natural está desligada,
+o sorteio é uniforme entre os juvenis.
+
+O ponto a reter é que a viabilidade decide **quais** machos ocupam as 200 vagas
+e nunca **quantas** vagas existem. O tamanho da população é constante por
+construção, e é essa escolha que mantém as redes comparáveis entre células: a
+seleção natural muda a composição do pool de machos, que é o efeito de
+interesse, e não a sua densidade, que seria um confundimento. Na terminologia
+de Wallace, é seleção branda, com regulação por densidade, e não seleção dura
+com mortalidade em termos absolutos.
+
+O mesmo vale para as fêmeas, com uma diferença: elas não passam por viabilidade,
+porque a seleção natural do modelo age sobre o traço masculino. As 200 fêmeas
+adultas são um sorteio uniforme entre as juvenis.
 
 ## Os quatro experimentos
 
@@ -607,10 +620,6 @@ tibble(
   `O que evolui` = c("nada", "o traço do macho (z)", "a preferência da fêmea (p)", "os dois"),
   Rodada     = c(rodada_de(ct), rodada_de(d), rodada_de(esp),
                  if (ok(co)) "bestOfN" else "-"),
-  # O regime do censo é o que estava em aberto desde agosto, então tem de estar
-  # à vista: um estudo lido sob a cota e outro sob o teto não se comparam.
-  Censo      = c(censo_de(ct), censo_de(d), censo_de(esp),
-                 if (ok(co)) "sem NS: igual nos dois; com NS: cota" else "-"),
   Gerações   = c(n_ger(ct), n_ger(d), n_ger(esp), n_ger(co)),
   Cenários   = c(n_cen(ct, c("sigma_p", "sigma_z")), n_cen(d, "sigma_p"),
                  n_cen(esp, "sigma_z"), n_cen(co, c("sigma_p_init", "sigma_z_init"))),
@@ -618,7 +627,7 @@ tibble(
                  if (ok(d))  "concluído" else "sem dados",
                  if (ok(esp)) "concluído" else "sem dados",
                  if (ok(co)) "concluído" else "não rodado")
-) %>% kable(caption = "O que está neste documento. Cenários inclui as 20 réplicas. No Controle e em Machos variando o traço é re-sorteado a cada geração e o censo nunca encurta, então os dois regimes dão o mesmo.")
+) %>% kable(caption = "O que está neste documento. Cenários inclui as 20 réplicas de cada combinação de parâmetros.")
 ```
 
 ------------------------------------------------------------------------
@@ -1231,7 +1240,7 @@ METS_PLANO <- c(Modularity = "Modularidade", Nestedness = "Aninhamento (NODF)",
 NIVEIS_SIGMA <- c(0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0)
 
 # Arredonda a dispersão medida para o nível mais próximo da grade do desenho.
-# `fora` marca quem estava acima do teto da grade, para poder ser contado.
+# `fora` marca quem estava acima do limite da grade, para poder ser contado.
 encaixar <- function(x) {
   out <- rep(NA_real_, length(x))
   ok_x <- !is.na(x)
@@ -1268,9 +1277,10 @@ plano <- local({
       summarise(sig_z_medido = mean(sqrt(varz_males), na.rm = TRUE),
                 across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
                 desvio_media = mean(abs(zbar_males - 5), na.rm = TRUE),
-                # fração de réplicas em que o censo adulto não chegou a 200.
-                # Onde isso for alto, a rede foi calculada sobre pouquíssimos
-                # machos e a célula não é comparável com o Controle.
+                # Verificação: o censo adulto é 200 por construção, então esta
+                # fração deve dar zero. Qualquer valor acima disso indicaria uma
+                # célula cuja rede saiu de menos indivíduos e que portanto não
+                # se compara com as do Controle.
                 censo_curto = mean(n_machos_surv < 200, na.rm = TRUE),
                 .groups = "drop") %>%
       mutate(sig_z  = encaixar(sig_z_medido),
@@ -1339,11 +1349,12 @@ plot_plano <- function(metrica, kk, amax, ns) {
 
   n_fora <- sum(dd$fora, na.rm = TRUE)
 
-  # Células em que o censo adulto não chegou aos 200 em pelo menos metade das
-  # réplicas. Nelas a rede foi calculada sobre pouquíssimos machos, então a
-  # topologia não é comparável com a do Controle. Ficam marcadas com um X na
-  # figura, e não só avisadas no texto: numa aba lá pelo painel 40 ninguém se
-  # lembra de um aviso que ficou na introdução.
+  # Verificação do invariante: o censo adulto de machos é 200 por construção,
+  # então esta seleção deve sair vazia. Se alguma célula aparecer marcada, a
+  # rede daquela célula foi calculada sobre menos indivíduos e a topologia não
+  # é comparável com a do Controle. Fica marcada com um X na própria figura, e
+  # não só avisada no texto: numa aba lá pelo painel 40 ninguém se lembra de um
+  # aviso que ficou na introdução.
   curtas <- dd %>% filter(!is.na(censo_curto), censo_curto >= 0.5)
 
   # O afastamento da média POR CURVA, e não um máximo só para a figura toda.
@@ -1382,9 +1393,9 @@ plot_plano <- function(metrica, kk, amax, ns) {
                                  "\nAfastamento máximo da média em relação a phi = 5, por curva: %s.",
                                  "\nAcima de ~1 a comparação com o Controle deixa de ser direta, porque lá os dois",
                                  "sexos estão sempre centrados em 5 e aqui não.",
-                                 "\nCélulas cuja dispersão medida passou de 2.0 e foi encostada no teto da grade: %d.",
-                                 "\nX branco = censo adulto abaixo de 200 na maioria das réplicas (%d células):",
-                                 "a rede saiu de pouquíssimos machos e a topologia não é comparável."),
+                                 "\nCélulas cuja dispersão medida passou de 2.0 e foi encostada no limite da grade: %d.",
+                                 "\nVerificação do censo: células com menos de 200 machos adultos, em que a topologia",
+                                 "não seria comparável: %d. O esperado é zero."),
                            desv_txt, n_fora, nrow(curtas))) +
     tema_painel() +
     theme(panel.grid = element_blank(),
