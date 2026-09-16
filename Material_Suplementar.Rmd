@@ -1,6 +1,6 @@
 ---
 title: "Material suplementar"
-subtitle: "Estrutura de redes de acasalamento sob escolha de parceiro: os quatro experimentos de simulação"
+subtitle: "Estrutura de redes de acasalamento sob escolha de parceiro: os quatro estudos de simulação"
 author: "Solimary García Hernández"
 date: "`r format(Sys.Date(), '%d de %B de %Y')`"
 output:
@@ -206,7 +206,7 @@ plot_superficie <- function(df, kk, amax, ns, quais, titulo) {
   wrap_plots(faixas, ncol = 1) +
     plot_annotation(
       title   = titulo,
-      caption = paste("Cada célula é a média das 20 réplicas de uma geração.",
+      caption = paste("Cada posição da grade é a média das 20 réplicas de uma geração.",
                       "Eixo y = σp (variação da preferência entre fêmeas), eixo x = σz.",
                       "A escala de cor é independente em cada faixa."),
       theme   = theme(plot.title   = element_text(face = "bold", size = 13),
@@ -242,7 +242,7 @@ plot_cortes <- function(df, kk, amax, ns, quais, titulo) {
 
 # ---------------------------------------------------------------------
 # ESTUDOS EVOLUTIVOS — gradiente na geração final + trajetórias
-#   coluna 1  : variável vs o eixo do experimento, na geração final
+#   coluna 1  : variável vs o eixo do estudo, na geração final
 #   colunas 2-3: média ± 1 SD ao longo das gerações, no σ baixo e no σ alto
 # ---------------------------------------------------------------------
 plot_evolucao <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo,
@@ -343,7 +343,7 @@ rotulo <- function(base, ns, amax, kk) {
 # Apresentação
 
 Este documento é o anexo de resultados do relatório. Ele reúne, num formato
-navegável, todos os painéis produzidos pelos quatro experimentos de simulação
+navegável, todos os painéis produzidos pelos quatro estudos de simulação
 do projeto, incluindo as combinações de parâmetros que não caberiam num texto
 impresso. O corpo do relatório discute as conclusões; aqui está o material em
 que elas se apoiam.
@@ -500,7 +500,7 @@ leem.
 
 ### Como as fêmeas buscam
 
-Duas restrições ecológicas atravessam os quatro experimentos, porque na
+Duas restrições ecológicas atravessam os quatro estudos, porque na
 natureza nenhuma fêmea avalia todos os machos disponíveis nem acasala com
 quantos quiser:
 
@@ -519,7 +519,7 @@ quantos quiser:
 
 ### A seleção natural e o censo de adultos
 
-Cada experimento roda com e sem **seleção natural** sobre o traço masculino. É
+Cada estudo roda com e sem **seleção natural** sobre o traço masculino. É
 a força que se opõe à seleção sexual, e o que permite perguntar se a estrutura
 da rede se sustenta quando carregar o traço tem um custo. A seleção natural age
 apenas sobre os machos e apenas sobre o traço, nunca sobre a preferência.
@@ -537,7 +537,7 @@ o sorteio é uniforme entre os juvenis.
 
 O ponto a reter é que a viabilidade decide **quais** machos ocupam as 200 vagas
 e nunca **quantas** vagas existem. O tamanho da população é constante por
-construção, e é essa escolha que mantém as redes comparáveis entre células: a
+construção, e é essa escolha que mantém as redes comparáveis entre combinações: a
 seleção natural muda a composição do pool de machos, que é o efeito de
 interesse, e não a sua densidade, que seria um confundimento. Na terminologia
 de Wallace, é seleção branda, com regulação por densidade, e não seleção dura
@@ -547,14 +547,14 @@ O mesmo vale para as fêmeas, com uma diferença: elas não passam por viabilida
 porque a seleção natural do modelo age sobre o traço masculino. As 200 fêmeas
 adultas são um sorteio uniforme entre as juvenis.
 
-## Os quatro experimentos
+## Os quatro estudos
 
 Os quatro compartilham exatamente o mesmo ciclo de vida, as mesmas quatro
 regras e os mesmos fatores ecológicos. O que muda entre eles é quais
 características são herdadas, ou seja, quais estão livres para responder à
 seleção. Cada um isola uma peça do sistema.
 
-| experimento | o que varia | traço do macho | preferência da fêmea | o que isola |
+| estudo | o que varia | traço do macho | preferência da fêmea | o que isola |
 |---|---|---|---|---|
 | 1. Controle | σp e σz | sorteado | sorteada | a estrutura que as regras de escolha produzem sozinhas, sem resposta evolutiva |
 | 2. Fêmeas variando | σp | herdável | re-sorteada | como a heterogeneidade de preferência afeta a evolução do traço |
@@ -566,10 +566,10 @@ sorteio independente com a mesma distribuição. Isso o torna cerca de cem vezes
 mais barato que os outros, e é o que permite cruzar σp com σz por inteiro. Os
 outros três rodam 100 gerações.
 
-Nos experimentos 2 e 3 a característica que não é herdada é re-sorteada a cada
+Nos Estudos 2 e 3 a característica que não é herdada é re-sorteada a cada
 geração da mesma distribuição. Isso é deliberado: mantém a dispersão fixa no
 valor do tratamento durante as 100 gerações e impede que ela mude ao mesmo
-tempo que a outra, o que confundiria a interpretação. No experimento 4 isso é
+tempo que a outra, o que confundiria a interpretação. No Estudo 4 isso é
 impossível, porque re-sortear é exactamente o que impede a herança, e por isso
 ali os dois sigmas são apenas condição inicial.
 
@@ -579,8 +579,8 @@ grandes e sistemáticos, não questão de ruído amostral.
 
 ## Como navegar
 
-A barra lateral tem uma entrada por experimento, e dentro de cada uma as
-variáveis resposta que fazem sentido naquele experimento. A navegação por
+A barra lateral tem uma entrada por estudo, e dentro de cada uma as
+variáveis resposta que fazem sentido naquele estudo. A navegação por
 dentro de cada painel é por abas, sempre na mesma ordem: **seleção natural**
 (sem, com), depois **A_max** (200, 40, 10), depois **k** (5, 10, 20). São as 18
 combinações do desenho ecológico. A aba que abre por padrão é a menos
@@ -621,7 +621,7 @@ tibble(
 
 A tabela diz quantos cenários existem; a figura diz sobre que parte do espaço
 de parâmetros eles estão distribuídos. A grade é a mesma nos quatro painéis, e
-em vermelho estão as condições iniciais que aquele experimento visita: o
+em vermelho estão as condições iniciais que aquele estudo visita: o
 Controle cruza a grade inteira, os dois espelhos percorrem uma coluna ou uma
 linha, com o outro eixo fixado em 1.0, e a co-evolução parte do cruzamento de
 três níveis em cada eixo.
@@ -643,9 +643,9 @@ figura_desenho()
 
 > Nenhuma característica é herdada. Os traços e as preferências são sorteados, a
 > rede de acasalamentos se forma, as métricas são medidas, e o cenário termina.
-> É o único experimento que cruza os dois eixos de variação por inteiro.
+> É o único estudo que cruza os dois eixos de variação por inteiro.
 
-Este experimento responde à pergunta mais básica do conjunto: que estrutura as
+Este estudo responde à pergunta mais básica do conjunto: que estrutura as
 regras de escolha produzem por si só, antes de qualquer resposta evolutiva?
 
 Como não há geração seguinte, não existe trajetória: cada cenário é um ponto, e
@@ -658,20 +658,22 @@ A seleção natural entra aqui como filtro puramente ecológico: altera quais
 machos estão disponíveis para as fêmeas, mas não tem consequência evolutiva,
 porque não há descendência que a receba.
 
-## 1.0 O que existe dentro de uma célula do desenho
+## 1.0 O que existe dentro de uma combinação do desenho
 
 Todos os painéis seguintes são médias de 20 réplicas sobre uma grade de
 parâmetros. Antes de passar a elas, vale ver o objeto concreto que está por
 trás de cada valor: uma população de 400 indivíduos e a rede de acasalamentos
 que ela formou.
 
-Chamamos de **célula** uma combinação concreta dos fatores do desenho, e de
-**réplica** cada uma das 20 repetições daquela célula com sementes diferentes.
-As redes desenhadas abaixo são réplicas reais: dentro de cada célula o
-procedimento localiza a réplica cuja modularidade está mais próxima da média da
-célula, recupera a semente com que foi gerada, reconstrói a rede e confere que a
-métrica reproduzida coincide com a que havia sido registrada. O rodapé de cada
-painel identifica a réplica.
+Chamamos de **combinação** um ponto concreto do desenho, ou seja um valor
+fixado para cada um dos seis fatores, e de **réplica** cada uma das 20
+repetições daquela combinação com sementes diferentes.
+
+As redes desenhadas abaixo são réplicas reais: dentro de cada combinação o
+procedimento localiza a réplica cuja modularidade está mais próxima da média
+das 20, recupera a semente com que foi gerada, reconstrói a rede e confere que
+a métrica reproduzida coincide com a que havia sido registrada. O rodapé de
+cada painel identifica a réplica.
 
 A figura mostra os quatro cantos do plano (σp, σz). Os quadrados são machos, os
 círculos são fêmeas, e as cores vêm do mesmo algoritmo de Louvain que calcula a
@@ -752,7 +754,7 @@ render_tabs(function(kk, amax, ns)
 
 <!-- quatro curvas produzem topologias diferentes umas das outras*. Dentro de -->
 
-<!-- cada célula do desenho tira-se a média de cada métrica para cada curva, -->
+<!-- cada combinação do desenho tira-se a média de cada métrica para cada curva, -->
 
 <!-- e a divergência é o quanto essas quatro posições se afastam do centro -->
 
@@ -774,7 +776,7 @@ render_tabs(function(kk, amax, ns)
 
 <!-- mediria uma métrica só. A padronização é feita uma vez sobre a tabela -->
 
-<!-- inteira, e não dentro de cada célula: se fosse por célula, cada uma -->
+<!-- inteira, e não dentro de cada combinação: se fosse por combinação, cada uma -->
 
 <!-- seria esticada pela sua própria dispersão e todas sairiam parecidas, que -->
 
@@ -902,7 +904,7 @@ render_tabs(function(kk, amax, ns)
 
 <!--          y = "divergência", -->
 
-<!--          caption = "Cada ponto é uma célula (σp, σz). Zero no eixo x é a diagonal, onde os dois sexos variam igual.") + -->
+<!--          caption = "Cada ponto é uma combinação (σp, σz). Zero no eixo x é a diagonal, onde os dois sexos variam igual.") + -->
 
 <!--     tema_painel() + -->
 
@@ -944,12 +946,12 @@ render_tabs(function(kk, amax, ns)
 
 # 2. Fêmeas variando (σp): a evolução do traço masculino
 
-> O eixo do experimento é σp, a dispersão do pico de preferência entre as
+> O eixo do estudo é σp, a dispersão do pico de preferência entre as
 > fêmeas. A preferência é re-sorteada a cada geração de N(5, σp) e portanto não
 > evolui; o traço do macho é herdável e livre para responder à seleção. σz é
 > apenas condição inicial, fixada em 1.0.
 
-Este experimento pergunta como a heterogeneidade de preferência entre as fêmeas
+Este estudo pergunta como a heterogeneidade de preferência entre as fêmeas
 afeta a resposta evolutiva do traço masculino. São cem gerações por réplica.
 
 Aqui a escolha da fêmea é a *causa* da seleção: a distribuição de preferências
@@ -964,7 +966,7 @@ nos dois extremos do gradiente, σp = 0.2 e σp = 2.0.
 
 ## 2.0 O efeito de σp numa população concreta
 
-O eixo deste experimento é simples de enunciar e difícil de visualizar. As duas
+O eixo deste estudo é simples de enunciar e difícil de visualizar. As duas
 colunas abaixo são as duas pontas do gradiente, com os *mesmos* machos nas
 duas, de modo que a única coisa que difere entre elas é o quanto as fêmeas
 discordam entre si sobre o que preferem.
@@ -996,7 +998,7 @@ diferentes. Esta contrasta outra coisa: *a mesma população na geração 1 e na
 geração 100*, depois de o traço masculino ter evoluído.
 
 Em cima está a rede de acasalamentos, e abaixo os três painéis que mostram os
-indivíduos que a formaram, todos da mesma réplica. Como neste experimento a
+indivíduos que a formaram, todos da mesma réplica. Como neste estudo a
 preferência é re-sorteada a cada geração, as curvas de aceite ocupam a mesma
 posição nas duas colunas, e o que se desloca são os machos. A comparação a
 fazer é entre a posição dos tracinhos no eixo, que marcam os machos
@@ -1021,7 +1023,7 @@ render_tabs(function(kk, amax, ns)
 
 ## 2.2 O traço do macho (z) {.tabset}
 
-O traço é a variável evolutiva deste experimento, e os dois painéis mostram a
+O traço é a variável evolutiva deste estudo, e os dois painéis mostram a
 sua média e a sua variância.
 
 Dois aspectos merecem atenção. Sem seleção natural, a média do traço se desloca
@@ -1059,7 +1061,7 @@ render_tabs(function(kk, amax, ns)
 
 # 3. Machos variando (σz): a evolução da preferência feminina
 
-> O espelho do experimento anterior. O traço do macho passa a ser ambiental,
+> O espelho do estudo anterior. O traço do macho passa a ser ambiental,
 > re-sorteado a cada geração de N(5, σz) e não herdado, e o pico de preferência
 > da fêmea passa a ser herdável e transmitido pelos dois sexos. σp é apenas
 > condição inicial, fixada em 1.0.
@@ -1075,20 +1077,20 @@ Tratar o traço masculino como ambiental tem uma leitura biológica própria, a 
 dependência de condição: o macho expressa aquele traço por causa do ambiente em
 que se desenvolveu, e não por causa dos genes que transmite.
 
-O experimento exige uma condição para funcionar, que vale explicitar. Para que
+O estudo exige uma condição para funcionar, que vale explicitar. Para que
 exista seleção sobre a preferência é preciso que haja variância de sucesso
 reprodutivo entre as fêmeas. No modelo, a fecundidade é neutra, ou seja, toda
 fêmea que acasala produz o mesmo número de descendentes, independentemente de
 com quantos machos acasalou. A única forma de uma fêmea perder é não aceitar
 nenhum macho. Por isso a proporção de fêmeas sem acasalar, que nos outros
-experimentos é apenas descritiva, aqui é o indicador direto da força de seleção
+estudos é apenas descritiva, aqui é o indicador direto da força de seleção
 sobre a preferência.
 
-Há também uma assimetria de desenho a declarar na comparação com o experimento
+Há também uma assimetria de desenho a declarar na comparação com o estudo
 2. Lá σp é imposto a cada geração; aqui σz também é imposto a cada geração, mas
 σp é apenas o ponto de partida, porque a preferência é a característica que
 evolui. Da geração 2 em diante, a largura da distribuição de preferências é o
-que a seleção e a deriva fizerem dela. Os dois experimentos são espelhos no que
+que a seleção e a deriva fizerem dela. Os dois estudos são espelhos no que
 diz respeito ao eixo do tratamento, mas não no que diz respeito à característica
 que responde.
 
@@ -1100,7 +1102,7 @@ duas em sequência.
 Agora as fêmeas são as *mesmas* nas duas colunas, com as mesmas curvas de
 aceite, e o que difere são os machos disponíveis, marcados no eixo inferior. As
 curvas paradas enquanto o material muda são a representação visual do que este
-experimento isola.
+estudo isola.
 
 A linha de baixo também se inverte em relação à seção 2.0: mostra quantos
 parceiros teve cada fêmea, contra o seu próprio pico de preferência. Quem fica
@@ -1119,7 +1121,7 @@ for (cv in CURVAS) {
 
 ### A mesma população na geração 1 e na geração 100 {.tabset}
 
-O espelho exato da figura equivalente do experimento 2, e o contraste entre as
+O espelho exato da figura equivalente do Estudo 2, e o contraste entre as
 duas é o ponto.
 
 Lá as curvas de aceite permaneciam no lugar e os machos se deslocavam. Aqui é o
@@ -1146,7 +1148,7 @@ render_tabs(function(kk, amax, ns)
 
 ## 3.2 A preferência da fêmea (p) {.tabset}
 
-A variável evolutiva deste experimento, medida nas fêmeas adultas. É o
+A variável evolutiva deste estudo, medida nas fêmeas adultas. É o
 equivalente exato do painel 2.2: lá a característica medida no sexo que a
 expressa, aqui a característica medida no sexo que a utiliza. As duas figuras
 se leem em paralelo.
@@ -1161,7 +1163,7 @@ render_tabs(function(kk, amax, ns)
 
 ## 3.3 Poliandria realizada {.tabset}
 
-Neste experimento estes painéis deixam de ser apenas descritivos. A proporção
+Neste estudo estes painéis deixam de ser apenas descritivos. A proporção
 de fêmeas sem acasalar é a medida direta da força de seleção sobre a
 preferência: quem não aceita nenhum macho deixa zero descendentes, e é essa
 variância de sucesso reprodutivo que permite à preferência evoluir.
@@ -1176,37 +1178,37 @@ render_tabs(function(kk, amax, ns)
 
 ------------------------------------------------------------------------
 
-# 4. Os quatro experimentos projetados no mesmo plano
+# 4. Os quatro estudos projetados no mesmo plano
 
 Esta seção responde a uma pergunta que as anteriores não permitem formular: o
 Controle, que mede a estrutura produzida pelas regras de escolha sem qualquer
-evolução, prevê onde os experimentos evolutivos acabam parando?
+evolução, prevê onde os estudos evolutivos acabam parando?
 
 A construção é a seguinte. O Controle varre o plano (σp, σz) por inteiro, e
-cada experimento evolutivo percorre uma linha desse plano. Mas essa linha não
-fica parada. No experimento 2, σp é imposto e re-sorteado a cada geração, de
+cada estudo evolutivo percorre uma linha desse plano. Mas essa linha não
+fica parada. No Estudo 2, σp é imposto e re-sorteado a cada geração, de
 modo que a posição vertical não se altera; já σz é livre, e na geração 100 a
-população pode estar num σz bem diferente do 1.0 de onde partiu. No experimento
+população pode estar num σz bem diferente do 1.0 de onde partiu. No estudo
 3 ocorre o inverso: σz permanece onde foi fixado e é σp que se desloca.
 
 A co-evolução é o caso extremo, porque ali nada é imposto: as duas dispersões
-são medidas e as duas se movem. A célula não fica presa a uma coluna nem a uma
+são medidas e as duas se movem. A combinação não fica presa a uma coluna nem a uma
 linha e pode aparecer em qualquer ponto do plano. Observar para onde essas
-células migram responde visualmente a uma pergunta que os painéis anteriores
+combinações migram responde visualmente a uma pergunta que os painéis anteriores
 não fazem: quando nenhum dos dois eixos é mantido fixo, em que direção a
 população caminha?
 
-Cada experimento aparece então duas vezes, na geração 1 e na geração 100, sobre
+Cada estudo aparece então duas vezes, na geração 1 e na geração 100, sobre
 a mesma grade de 7 × 7 do Controle e com a mesma escala de cor em todas as
 linhas da figura. A escala compartilhada é o que torna a comparação
-interpretável: se a célula de um experimento evolutivo tem a mesma cor da
-célula do Controle em que veio a cair, a regra de acasalamento sozinha já
+interpretável: se a combinação de um estudo evolutivo tem a mesma cor da
+combinação do Controle em que veio a cair, a regra de acasalamento sozinha já
 explicava o resultado; se a cor difere, a evolução produziu algo que o Controle
 não previa.
 
 Apenas parte da grade fica preenchida, e isso decorre do desenho, não de falta
-de dados. Na geração 1 do experimento 2 existe somente a coluna σz = 1.0,
-porque é ali que todos os cenários começam; na do experimento 3, somente a
+de dados. Na geração 1 do Estudo 2 existe somente a coluna σz = 1.0,
+porque é ali que todos os cenários começam; na do Estudo 3, somente a
 linha σp = 1.0. Na co-evolução a geração 1 ocupa os três valores de partida do
 desenho, 0.5, 1.0 e 2.0, nos dois eixos, e a geração 100 fica onde a dinâmica a
 levar.
@@ -1219,7 +1221,7 @@ natural é a rodada sob a cota.
 Três ressalvas são necessárias para ler os painéis corretamente:
 
 -   O plano é uma projeção e omite uma dimensão relevante. No Controle o traço
-    e a preferência estão sempre centrados em 5. Na geração 100 do experimento
+    e a preferência estão sempre centrados em 5. Na geração 100 do estudo
     2, porém, a média do traço pode ter se deslocado bastante, enquanto as
     preferências continuam sendo re-sorteadas em torno de 5. Duas situações com
     o mesmo par (σp, σz) mas com médias diferentes não são equivalentes, e esse
@@ -1228,7 +1230,7 @@ Três ressalvas são necessárias para ler os painéis corretamente:
     φ = 5, por regra de escolha: onde esse valor é pequeno a comparação com o
     Controle é direta, e onde é grande ela é apenas indicativa.
 
--   A posição das células dos experimentos evolutivos corresponde à dispersão
+-   A posição das combinações dos estudos evolutivos corresponde à dispersão
     *medida*, isto é, à raiz da variância registrada, enquanto a grade do
     Controle corresponde à dispersão *imposta*. As duas coincidem quando a
     seleção natural está desligada. Com ela ligada, a viabilidade estreita a
@@ -1286,7 +1288,7 @@ plano <- local({
                 desvio_media = mean(abs(zbar_males - 5), na.rm = TRUE),
                 # Verificação: o censo adulto é 200 por construção, então esta
                 # fração deve dar zero. Qualquer valor acima disso indicaria uma
-                # célula cuja rede saiu de menos indivíduos e que portanto não
+                # combinação cuja rede saiu de menos indivíduos e que portanto não
                 # se compara com as do Controle.
                 censo_curto = mean(n_machos_surv < 200, na.rm = TRUE),
                 .groups = "drop") %>%
@@ -1314,7 +1316,7 @@ plano <- local({
   }
 
   # Co-evolução: NADA é imposto, as duas dispersões são medidas e as duas andam.
-  # Por isso a célula não fica presa a uma coluna nem a uma linha: ela pode
+  # Por isso a combinação não fica presa a uma coluna nem a uma linha: ela pode
   # aparecer em qualquer ponto do plano, e é o único estudo em que isso acontece.
   # As duas metades entram, e cada uma aparece na sua aba de seleção natural.
   if (ok(co)) {
@@ -1357,8 +1359,8 @@ plot_plano <- function(metrica, kk, amax, ns) {
   n_fora <- sum(dd$fora, na.rm = TRUE)
 
   # Verificação do invariante: o censo adulto de machos é 200 por construção,
-  # então esta seleção deve sair vazia. Se alguma célula aparecer marcada, a
-  # rede daquela célula foi calculada sobre menos indivíduos e a topologia não
+  # então esta seleção deve sair vazia. Se alguma combinação aparecer marcada, a
+  # rede daquela combinação foi calculada sobre menos indivíduos e a topologia não
   # é comparável com a do Controle. Fica marcada com um X na própria figura, e
   # não só avisada no texto: numa aba lá pelo painel 40 ninguém se lembra de um
   # aviso que ficou na introdução.
@@ -1396,12 +1398,12 @@ plot_plano <- function(metrica, kk, amax, ns) {
          x = "σz — variação do traço dos machos",
          y = "σp — variação da preferência entre fêmeas",
          caption = sprintf(paste("Mesma escala de cor em todas as linhas: a comparação entre elas é direta.",
-                                 "Células vazias são combinações que aquele estudo não visita.",
+                                 "As posições vazias da grade são combinações que aquele estudo não visita.",
                                  "\nAfastamento máximo da média em relação a phi = 5, por curva: %s.",
                                  "\nAcima de ~1 a comparação com o Controle deixa de ser direta, porque lá os dois",
                                  "sexos estão sempre centrados em 5 e aqui não.",
-                                 "\nCélulas cuja dispersão medida passou de 2.0 e foi encostada no limite da grade: %d.",
-                                 "\nVerificação do censo: células com menos de 200 machos adultos, em que a topologia",
+                                 "\nCombinações cuja dispersão medida passou de 2.0 e foi encostada no limite da grade: %d.",
+                                 "\nVerificação do censo: combinações com menos de 200 machos adultos, em que a topologia",
                                  "não seria comparável: %d. O esperado é zero."),
                            desv_txt, n_fora, nrow(curtas))) +
     tema_painel() +
@@ -1444,7 +1446,7 @@ render_tabs(function(kk, amax, ns) plot_plano("I_s", kk, amax, ns))
 
 # 5. Co-evolução de traço e preferência
 
-Neste experimento as duas características são herdáveis ao mesmo tempo. Cada
+Neste estudo as duas características são herdáveis ao mesmo tempo. Cada
 indivíduo carrega os dois genótipos e expressa apenas um: o macho exibe o traço
 e transmite também a preferência que não usa; a fêmea escolhe com a sua
 preferência e transmite também o traço que não exibe. A expressão continua
@@ -1469,12 +1471,12 @@ correspondente.
 
 ## 5.0 Desequilíbrio de ligamento
 
-Neste experimento a variância do traço se decompõe em duas quantidades. A
+Neste estudo a variância do traço se decompõe em duas quantidades. A
 variância **génica** é a que a segregação transmite aos descendentes. A
 variância **total** é a que a população exibe. A diferença entre as duas é o
 **desequilíbrio de ligamento**: o excesso de variância que o acasalamento não
 aleatório acumula sem que exista genótipo novo por trás. Vale zero quando o
-acasalamento é aleatório, e é uma quantidade que os três experimentos
+acasalamento é aleatório, e é uma quantidade que os três estudos
 anteriores não têm como mostrar, porque neles apenas uma das duas
 características é herdada.
 
@@ -1509,8 +1511,8 @@ mecanismo de Fisher.
 ## 5.1 A mesma população na geração 1 e na geração 100 {.tabset}
 
 A mesma construção das seções 2.0 e 3.0, e o contraste entre as três é o ponto.
-No experimento 2 as curvas de aceite permaneciam paradas e os machos se
-deslocavam; no experimento 3 era o contrário. Aqui os dois lados se movem,
+No Estudo 2 as curvas de aceite permaneciam paradas e os machos se
+deslocavam; no Estudo 3 era o contrário. Aqui os dois lados se movem,
 porque nada é imposto e as duas características evoluem.
 
 Sob a regra sigmoide, os machos se deslocam mais rapidamente do que as curvas
@@ -1594,10 +1596,10 @@ assim:
 
 - `01_metricas_e_utilitarios.R` contém o ciclo de vida, as quatro funções de
   preferência, a formação da rede de acasalamentos e o cálculo das métricas de
-  topologia. É o mesmo código nos quatro experimentos, o que garante que as
+  topologia. É o mesmo código nos quatro estudos, o que garante que as
   diferenças entre eles vêm apenas do que de fato muda no desenho.
 - `Fase_Controle.R`, `Fase4_TodasAsCurvas.R`, `Fase_Espelho.R` e
-  `Fase_Coevolucao.R` são os quatro experimentos.
+  `Fase_Coevolucao.R` são os quatro estudos.
 - `11_Rede_Representativa.R` reconstrói uma réplica a partir da semente
   original para as figuras de rede, e confere que a métrica reproduzida
   coincide com a registrada antes de a figura ser desenhada.
@@ -1606,4 +1608,4 @@ assim:
 
 Cada cenário é semeado de forma determinística, de modo que qualquer réplica
 pode ser reproduzida exatamente. Os resultados ficam em `Resultados_Artigo/`,
-organizados por experimento.
+organizados por estudo.
