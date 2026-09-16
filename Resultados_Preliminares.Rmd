@@ -297,8 +297,8 @@ Os quatro cantos mostram o material. Falta o outro nível que o Controle cruza, 
 é o que mais pesa: quantos machos a fêmea consegue avaliar (A_max) e quantos ela aceita (k).
 
 Aqui a composição da população é a mesma nos quatro painéis. O que muda é só o quanto ela consegue
-amostrar antes de decidir. A proporção k/A_max é a intensidade de seleção por truncamento, e está
-escrita em cada painel.
+amostrar antes de decidir. Cada painel traz os dois números do tratamento e, ao lado, a poliandria
+realizada, que é quantos parceiros as fêmeas de fato conseguiram.
 
 ```{r fig-busca, fig.height=8.5, fig.width=9}
 figura_busca()

@@ -609,8 +609,8 @@ for (cv in CURVAS) {
 O Controle cruza dois níveis, e o parágrafo acima cobre um só. O outro é o
 regime de busca, que nos resultados é o que mais pesa. Aqui a composição da
 população é a mesma nos quatro painéis, e o que muda é quantos machos a fêmea
-avalia e quantos aceita. A proporção k/A_max é a intensidade de seleção por
-truncamento.
+avalia e quantos pode aceitar. Cada painel traz esses dois números e, ao lado, a
+poliandria realizada, que é quantos parceiros as fêmeas de fato conseguiram.
 
 ### O regime de busca, curva por curva {.tabset}
 

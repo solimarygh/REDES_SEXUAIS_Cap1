@@ -443,8 +443,13 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
 #
 # A composição da população é a mesma nos quatro painéis, com sigma_z e sigma_p
 # fixos. O que muda é só quanto a fêmea consegue amostrar antes de decidir e
-# quantos parceiros ela aceita. A proporção k/A_max é a intensidade de seleção
-# por truncamento, e vem escrita em cada painel.
+# quantos parceiros ela pode aceitar.
+#
+# Cada painel traz os dois números do tratamento e, ao lado, a POLIANDRIA
+# REALIZADA, que é quantos parceiros as fêmeas de fato conseguiram. Antes vinha
+# ali a razão k/A_max, chamada de "aceita X% do que avalia", e era errado duas
+# vezes: não é taxa de aceite, que depende da curva de preferência, e passa de
+# 100% sempre que k é maior que A_max (com A_max = 10 e k = 20 dava 200%).
 figura_busca <- function(amax = c(10L, 200L), ks = c(5L, 20L),
                          N = 200, phi = 5, sigma_z = 1.0, sigma_p = 1.0,
                          s_media = 2, sigma_s = 0.2, tipo = "gaussian",
@@ -478,8 +483,8 @@ figura_busca <- function(amax = c(10L, 200L), ks = c(5L, 20L),
   for (i in seq_len(nrow(celulas))) {
     A <- celulas$A[i]; k <- celulas$k[i]
     r <- uma(A, k)
-    desenhar_rede(r, sprintf("A_max = %d, k = %d  (aceita %.0f%% do que avalia)\nmodularidade %.2f | aninhamento %.2f | Is %.2f\n%d componentes | %d comunidades | %d fêmeas sem acasalar\n%s",
-                             min(A, N), k, 100 * k / min(A, N),
+    desenhar_rede(r, sprintf("avalia %d, aceita até %d, conseguiu %.1f parceiros por fêmea\nmodularidade %.2f | aninhamento %.2f | Is %.2f\n%d componentes | %d comunidades | %d fêmeas sem acasalar\n%s",
+                             min(A, N), k, r$met$grau_medio_femeas,
                              r$met$Modularity, r$met$Nestedness, r$met$I_s,
                              r$n_comp, r$n_com, r$sem, r$fonte))
   }

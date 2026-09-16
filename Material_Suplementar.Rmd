@@ -696,9 +696,10 @@ for (cv in CURVAS) {
 A figura anterior varia a composição da população. A seguinte varia o outro
 nível do desenho, o regime de busca, que nos resultados é o que mais pesa.
 Agora a composição da população é a mesma nos quatro painéis, e o que muda é
-quantos machos cada fêmea avalia e quantos pode aceitar. A razão k/A_max é a
-intensidade de seleção por truncamento: quanto menor, mais seletiva é a
-escolha.
+quantos machos cada fêmea avalia e quantos pode aceitar. Cada painel traz esses
+dois números do tratamento e, ao lado, a poliandria realizada, que é quantos
+parceiros as fêmeas de fato conseguiram: é ela, e não o k nominal, que diz o
+quanto a escolha foi seletiva naquela combinação.
 
 ### O regime de busca, curva por curva {.tabset}
 
