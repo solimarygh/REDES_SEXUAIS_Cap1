@@ -127,6 +127,19 @@ co <- local({
 
 ok  <- function(x) !is.null(x) && nrow(x) > 0
 
+# Grau médio dos machos sobre TODOS eles, que é arestas dividido pelo censo.
+# Não precisa de coluna nova no motor: sai do que já está gravado, inclusive nas
+# rodadas antigas. Difere de grau_medio_machos, que é a média só entre os que
+# acasalaram, e a distância entre os dois é justamente quantos ficaram de fora.
+com_derivadas <- function(x) {
+  if (is.null(x) || !nrow(x)) return(x)
+  if (all(c("arestas", "n_machos_surv") %in% names(x)))
+    x$grau_medio_machos_derivado <- x$arestas / x$n_machos_surv
+  x
+}
+ct <- com_derivadas(ct); d <- com_derivadas(d)
+esp <- com_derivadas(esp); co <- com_derivadas(co)
+
 # As figuras que mostram uma população concreta, em vez de uma média sobre a
 # grade. Vêm de um script à parte, compartilhado com os outros documentos, para
 # que exista uma versão só de cada uma. Sourcear aqui apenas define as funções.
@@ -147,6 +160,16 @@ quais_poliandria <- c(grau_medio_femeas        = "1. Poliandria realizada",
                       prop_femeas_atingiu_k    = "2. Proporção que atingiu k",
                       arestas                  = "3. Arestas (densidade)",
                       prop_femeas_sem_acasalar = "4. Fêmeas sem acasalar")
+# O lado dos machos, espelho do conjunto anterior. `grau_medio_machos` e
+# `prop_machos_sem_acasalar` são colunas novas do motor: em dados gravados antes
+# delas os painéis correspondentes simplesmente não aparecem, porque
+# cols_presentes() descarta o que não existe. `grau_medio_machos_derivado` é o
+# grau médio sobre TODOS os machos, inclusive os que não acasalaram, e sai de
+# arestas / censo, então funciona em qualquer rodada.
+quais_machos    <- c(grau_medio_machos_derivado = "1. Parceiras por macho (todos)",
+                     grau_medio_machos          = "2. Parceiras por macho que acasalou",
+                     prop_machos_sem_acasalar   = "3. Machos sem acasalar",
+                     I_s                        = "4. Oportunidade (Is)")
 quais_traco     <- c(zbar_males = "Média do traço (z)",
                      varz_males = "Variância do traço (Var z)")
 # Duas linhas só, para o painel ficar simétrico ao do traço no estudo das
@@ -917,7 +940,7 @@ render_tabs(function(kk, amax, ns)
 
 <!-- ``` -->
 
-## 1.3 Poliandria realizada e acesso ao acasalamento {.tabset}
+## 1.3 O acesso ao acasalamento, do lado das fêmeas {.tabset}
 
 Esta seção trata de uma distinção que muda a interpretação dos resultados. O
 parâmetro k não é o número de parceiros que a fêmea tem, e sim o máximo que ela
@@ -941,6 +964,31 @@ if (!ok(ct)) cat("\n*Sem dados do Controle.*\n") else
 render_tabs(function(kk, amax, ns)
   plot_superficie(ct, kk, amax, ns, quais_poliandria,
                   rotulo("CONTROLE — poliandria e acesso", ns, amax, kk)))
+```
+
+## 1.4 O acesso ao acasalamento, do lado dos machos {.tabset}
+
+As quatro variáveis da seção anterior descrevem o lado das fêmeas. Esta seção é
+o espelho, e não é a mesma informação: numa rede bipartida os dois lados podem
+ter distribuições de grau bem diferentes, porque o número total de
+acasalamentos é o mesmo mas o número de indivíduos que o reparte não é.
+
+O primeiro painel é o grau médio sobre todos os machos, o segundo a média só
+entre os que acasalaram, e a distância entre os dois mede exatamente quantos
+ficaram de fora, que é o terceiro painel. O quarto é a oportunidade de seleção
+sexual, que resume essa mesma distribuição num número: é o quadrado do
+coeficiente de variação do grau dos machos.
+
+Os dois primeiros painéis dizem por que o Is não basta sozinho. Duas populações
+com distribuições de grau bem diferentes podem ter o mesmo Is, e em particular
+ele não separa uma população em que metade dos machos ficou sem acasalar de
+outra em que todos acasalaram alguma vez.
+
+```{r ct-machos, results='asis', fig.width=12, fig.height=13}
+if (!ok(ct)) cat("\n*Sem dados do Controle.*\n") else
+render_tabs(function(kk, amax, ns)
+  plot_superficie(ct, kk, amax, ns, quais_machos,
+                  rotulo("CONTROLE — acesso ao acasalamento nos machos", ns, amax, kk)))
 ```
 
 ------------------------------------------------------------------------

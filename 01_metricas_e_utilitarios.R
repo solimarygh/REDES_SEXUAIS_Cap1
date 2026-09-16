@@ -231,6 +231,19 @@ calc_metrics_from_M <- function(M, k_alvo = NULL) {
   # inalcançável por construção, e mesmo com A_max = 10 e k = 5 só uma parte das
   # fêmeas chega lá, em proporção que varia com a curva.
   grau_medio_femeas <- if (any(grau_femeas > 0)) mean(grau_femeas[grau_femeas > 0]) else NA_real_
+
+  # O LADO DOS MACHOS, que faltava. O Is resume a distribuição do grau dos
+  # machos num número só (é o quadrado do coeficiente de variação dela), mas
+  # duas distribuições bem diferentes podem dar o mesmo Is. Em particular, o Is
+  # não distingue uma população em que metade dos machos ficou de fora de outra
+  # em que todos acasalaram alguma vez, e são coisas biologicamente distintas.
+  #
+  # `prop_machos_sem_acasalar` é o espelho exato de prop_femeas_sem_acasalar, e
+  # `grau_medio_machos` o de grau_medio_femeas: a média entre os que acasalaram,
+  # para que os dois lados se leiam juntos.
+  grau_machos <- rowSums(M)
+  prop_machos_sem_acasalar <- if (nrow(M) > 0) mean(grau_machos == 0) else NA_real_
+  grau_medio_machos <- if (any(grau_machos > 0)) mean(grau_machos[grau_machos > 0]) else NA_real_
   prop_atingiu_k <- if (!is.null(k_alvo) && !is.na(k_alvo) && ncol(M) > 0) {
     mean(grau_femeas >= as.numeric(k_alvo))
   } else NA_real_
@@ -247,6 +260,8 @@ calc_metrics_from_M <- function(M, k_alvo = NULL) {
                       prop_femeas_sem_acasalar = prop_sem_acasalar,
                       grau_medio_femeas = grau_medio_femeas,
                       prop_femeas_atingiu_k = prop_atingiu_k,
+                      prop_machos_sem_acasalar = prop_machos_sem_acasalar,
+                      grau_medio_machos = grau_medio_machos,
                       arestas = arestas,
                       conectancia = conectancia,
                       machos_avaliados_medio = machos_avaliados_medio,
@@ -271,6 +286,8 @@ calc_metrics_from_M <- function(M, k_alvo = NULL) {
     prop_femeas_sem_acasalar = prop_sem_acasalar,
     grau_medio_femeas = grau_medio_femeas,       # poliandria REALIZADA
     prop_femeas_atingiu_k = prop_atingiu_k,      # quantas chegaram ao teto k
+    prop_machos_sem_acasalar = prop_machos_sem_acasalar,  # o espelho, nos machos
+    grau_medio_machos = grau_medio_machos,       # parceiras do macho que acasalou
     arestas = arestas,                           # nº de acasalamentos
     conectancia = conectancia,                   # arestas / (machos x fêmeas)
     machos_avaliados_medio = machos_avaliados_medio,  # min(A_max, censo)
