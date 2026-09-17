@@ -1812,25 +1812,3 @@ atua como uma força demográfica transitória.
 Nas curvas em que a estrutura se dissolve, as métricas de rede da geração 100
 são as de uma rede formada sem escolha alguma. Isso não é uma limitação dos
 painéis: é o resultado, e é uma das questões que o projeto passa a investigar.
-
-# Reprodutibilidade
-
-Todas as figuras e tabelas deste documento são geradas a partir dos resultados
-das simulações, sem nenhum valor digitado à mão. O código está organizado
-assim:
-
-- `01_metricas_e_utilitarios.R` contém o ciclo de vida, as quatro funções de
-  preferência, a formação da rede de acasalamentos e o cálculo das métricas de
-  topologia. É o mesmo código nos quatro estudos, o que garante que as
-  diferenças entre eles vêm apenas do que de fato muda no desenho.
-- `Fase_Controle.R`, `Fase4_TodasAsCurvas.R`, `Fase_Espelho.R` e
-  `Fase_Coevolucao.R` são os quatro estudos.
-- `11_Rede_Representativa.R` reconstrói uma réplica a partir da semente
-  original para as figuras de rede, e confere que a métrica reproduzida
-  coincide com a registrada antes de a figura ser desenhada.
-- `10_Figuras_conceituais.R` contém as figuras que mostram populações
-  concretas.
-
-Cada cenário é semeado de forma determinística, de modo que qualquer réplica
-pode ser reproduzida exatamente. Os resultados ficam em `Resultados_Artigo/`,
-organizados por estudo.

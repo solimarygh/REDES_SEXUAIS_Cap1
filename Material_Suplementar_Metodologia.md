@@ -648,22 +648,3 @@ Nos estudos evolutivos registram-se além disso, geração a geração, a média
 variância da característica herdável, e na Co-evolução a covariância e a
 correlação entre traço e preferência, a variância génica de cada uma e o tamanho
 efetivo da população.
-
-## Reprodutibilidade
-
-O código está organizado de modo que o motor seja um só:
-
--   `01_metricas_e_utilitarios.R` contém o ciclo de vida, as quatro curvas de
-    preferência, a formação da rede de acasalamentos e o cálculo de todas as
-    variáveis resposta. É o mesmo código nos quatro estudos, o que garante que
-    as diferenças entre eles vêm apenas do que de fato muda no desenho.
--   `Fase_Controle.R`, `Fase4_TodasAsCurvas.R`, `Fase_Espelho.R` e
-    `Fase_Coevolucao.R` são os quatro estudos.
--   `11_Rede_Representativa.R` reconstrói uma réplica a partir da semente
-    original, para as figuras que desenham uma população concreta, e confere que
-    a métrica reproduzida coincide com a registrada antes de a figura ser
-    desenhada.
-
-Cada cenário é semeado de forma determinística, a partir de uma semente base por
-estudo mais o índice do cenário na grade, de modo que qualquer réplica pode ser
-reproduzida exatamente.
