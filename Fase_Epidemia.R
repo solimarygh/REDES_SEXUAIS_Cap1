@@ -22,35 +22,45 @@
 # verdadeiro, porque é ele que se herda: h muda o que a fêmea vê, não o que o
 # macho transmite aos filhos.
 #
-# A TEMPORADA, AS SEMANAS E OS ENCONTROS
+# A TEMPORADA, AS SEMANAS E AS PARCERIAS
 # Cada ronda é uma SEMANA da temporada reprodutiva. Dentro de uma semana a
-# fêmea NÃO inspeciona a população inteira: ela encontra ao acaso um punhado de
-# machos, avalia cada um, e acasala com o melhor entre os que aceitou.
+# fêmea NÃO inspeciona a população inteira, e não parte do zero: ela tem um
+# conjunto de parcerias VIGENTES, que copulam e se dissolvem, e só procura
+# parceiro novo se houver espaço abaixo do teto de parcerias simultâneas.
 #
-# O "entre os que aceitou" é onde mora o erro. A aceitação é probabilística
-# (P_ij), e não uma regra determinística de ficar com o de maior z: um macho
-# bom pode não passar, e uma semana pode não dar em nada.
+# Cada semana, para cada fêmea, nesta ordem:
+#   1. cada parceria vigente copula com probabilidade `cop_semana`;
+#   2. cada parceria vigente se dissolve com probabilidade 1 / `dur_parceria`;
+#   3. se o número de parcerias vigentes ficou abaixo de `concorrencia`, ela
+#      encontra `encontros` machos ao acaso, aplica a regra de dois passos, e
+#      forma UMA parceria nova com o melhor entre os que aceitou, copulando.
 #
-# Na semana seguinte ela encontra outro punhado, que pode incluir machos novos
-# ou os mesmos de antes. Se acasalar de novo com quem já era parceiro, não é um
-# parceiro novo: é outra cópula com o mesmo par.
+# POR QUE AS PARCERIAS PRECISAM SER EXPLÍCITAS
+# A primeira versão deste motor não as tinha: cada semana a fêmea sorteava
+# machos do zero, e uma cópula repetida com o mesmo macho só acontecia por
+# azar de reencontro. Medindo, a razão entre cópulas e parceiros ficava em 1.3
+# a 1.45, ou seja praticamente uma cópula por parceria, e isso não é uma IST:
+# é um modelo de contato instantâneo, em que a estrutura temporal da rede não
+# faz nada. Baixar o teto de parceiros não resolvia, porque a razão se mantinha
+# plana em 1.4 para qualquer teto; só aumentavam as semanas vazias. Com as
+# parcerias explícitas a razão passa a 3 a 5, que é o regime em que uma IST tem
+# a sua dinâmica característica.
 #
-# QUANDO A SEMANA PASSA EM BRANCO
-# A escolha tem dois passos, e é o primeiro que permite a semana vazia. Cada
-# macho encontrado passa ou não passa POR SEPARADO, com a sua própria
-# probabilidade P_ij; só depois, entre os que passaram, ela fica com o de maior
-# P. Se nenhum dos encontrados passar, ela não acasala naquela semana.
+# A CONCORRÊNCIA É O PARÂMETRO QUE MANDA
+# Medido sobre o próprio modelo, com duração 5 semanas e cópula 0.7 por semana,
+# a incidência acumulada ao fim da temporada vai de 16% com uma parceria
+# simultânea a 53% com duas, 80% com três e 93% com quatro. É o resultado
+# clássico da epidemiologia de redes sexuais, e aqui sai como resultado e não
+# como escolha de calibração.
 #
-# A probabilidade de semana em branco é o produto de (1 - P) sobre os machos
-# encontrados. Com dez machos de P = 0.1 cada, dá 0.9^10, ou seja 35% das
-# semanas em branco. Se todos tivessem P = 0.5, seria 0.5^10, quase nunca.
-#
-# Vale registrar a alternativa que foi considerada e descartada: identificar o
-# melhor dos encontrados e só então decidir sobre ele, com a probabilidade
-# dele. Com os mesmos dez machos de P = 0.1 isso daria 10% de semanas com
-# acasalamento em vez de 65%, uma diferença enorme. Ficamos com a regra de dois
-# passos porque é a dos Estudos 1 a 4, o que mantém a comparabilidade, e porque
-# faz mais sentido que uma fêmea que encontrou dez machos considere mais de um.
+# A REGRA DE DOIS PASSOS, NA BUSCA
+# O passo 3 usa exatamente a regra dos Estudos 1 a 4, o que mantém a
+# comparabilidade: cada macho encontrado passa ou não passa POR SEPARADO, com a
+# sua própria probabilidade P_ij, e só depois, entre os que passaram, ela fica
+# com o de maior P. Se nenhum passar, não se forma parceria nova naquela
+# semana. A alternativa considerada e descartada era identificar o melhor dos
+# encontrados e só então decidir sobre ele; faz mais sentido que uma fêmea que
+# encontrou dez machos considere mais de um.
 #
 # A DIFERENÇA IMPORTANTE EM RELAÇÃO AOS OUTROS ESTUDOS: número de PARCEIROS e
 # número de CÓPULAS deixam de ser a mesma coisa. Nos Estudos 1 a 4, em que a
@@ -83,19 +93,39 @@ simulate_epidemia <- function(N_machos = 200, N_femeas = 200,
                               # análogo de A_max, mas na escala de uma semana e
                               # não de uma geração inteira.
                               encontros = 10L,
-                              # teto de parceiros DISTINTOS na temporada, que é
-                              # o "limite de parceiros por indivíduo" do plano.
-                              # Costuma não apertar: o número de parceiros sai
-                              # dos encontros e da aceitação.
-                              k_teto = 10L,
+                              # AS PARCERIAS. `concorrencia` é o teto de
+                              # parcerias SIMULTÂNEAS, que substitui o teto de
+                              # parceiros da temporada da versão anterior: é a
+                              # concorrência, e é o parâmetro que mais move a
+                              # epidemia. `dur_parceria` é a duração média em
+                              # semanas, e `cop_semana` a probabilidade de um
+                              # casal estabelecido copular numa semana.
+                              #
+                              # Os três valores abaixo dão, na medição, cerca de
+                              # 8 parceiros e 33 cópulas por fêmea na temporada,
+                              # ou seja 4 cópulas por parceria.
+                              concorrencia  = 2L,
+                              dur_parceria  = 5,
+                              cop_semana    = 0.7,
                               # 20 semanas: uma temporada reprodutiva de cerca
                               # de quatro meses, contada em semanas.
                               rodadas = 20L,
                               # a doença
                               modelo = c("SIS", "SIR"),
                               h_I = 0,          # efeito da infecção no sinal
-                              beta = 0.10,      # transmissão por cópula
-                              gamma_rec = 0.1,  # recuperação por semana
+                              # beta e gamma_rec calibrados sobre o próprio
+                              # modelo, com as parcerias já implementadas: dão
+                              # cerca de 32% de incidência acumulada e 17% de
+                              # prevalência ao fim da temporada, o que passa o
+                              # critério de "grande epidemia" do plano (15%) e
+                              # deixa espaço para h_I mover nos dois sentidos.
+                              # O período infeccioso é 1/gamma_rec = 10 semanas,
+                              # metade da temporada, de modo que a recuperação
+                              # acontece e o contraste SIS contra SIR tem
+                              # conteúdo. Com o beta de 0.10 da versão anterior,
+                              # e sem parcerias, a epidemia se extinguia.
+                              beta = 0.15,      # transmissão por cópula
+                              gamma_rec = 0.10, # recuperação por semana
                               prev0 = 0.05,     # prevalência inicial
                               # a viabilidade fica DESLIGADA por padrão: é uma
                               # temporada só, não há resposta evolutiva para a
@@ -128,7 +158,8 @@ simulate_epidemia <- function(N_machos = 200, N_femeas = 200,
   ja_infectado_m <- estado_m == 1L   # incidência acumulada
   ja_infectado_f <- estado_f == 1L
 
-  M_acum  <- matrix(0L, nrow = n_m, ncol = N_femeas)  # a rede da temporada
+  M_acum  <- matrix(0L, nrow = n_m, ncol = N_femeas)  # toda parceria já formada
+  atuais  <- matrix(0L, nrow = n_m, ncol = N_femeas)  # as parcerias VIGENTES
   copulas <- matrix(0L, nrow = n_m, ncol = N_femeas)  # quantas vezes cada par
   out <- vector("list", rodadas)
 
@@ -139,24 +170,38 @@ simulate_epidemia <- function(N_machos = 200, N_femeas = 200,
     estado_m_ini <- estado_m
     z_efetivo <- male_z + ifelse(estado_m == 1L, h_I, 0)
 
-    # Encontra `encontros` machos ao acaso, avalia cada um, acasala com o melhor
-    # entre os que aceitou. Pedir k_fixo = 1 a mate_with_survivors é exatamente
-    # isso, e por isso não precisa de código novo: a função sorteia os
-    # encontrados sem reposição, aplica P_ij a cada um, e fica com o de maior P
-    # entre os aceitos. Se ela não aceitar ninguém, a semana passa em branco.
-    M_semana <- mate_with_survivors(z_efetivo, female_p, female_s, tipo_selecao,
-                                    encounters_n = encontros, k_fixo = 1L,
-                                    regra = regra)
+    M_semana <- matrix(0L, nrow = n_m, ncol = N_femeas)
+    vig <- which(atuais == 1L, arr.ind = TRUE)
 
-    # (2) O teto de parceiros distintos. Quem já chegou ao teto só pode acasalar
-    # de novo com quem já era parceiro; um macho novo fica de fora.
-    no_teto <- colSums(M_acum) >= as.integer(k_teto)
-    if (any(no_teto)) {
-      novo_par <- M_semana == 1L & M_acum == 0L
-      M_semana[novo_par & rep(no_teto, each = n_m)] <- 0L
+    # (2) As parcerias vigentes copulam, e depois dissolvem-se. A ordem
+    # importa: uma parceria que se dissolve nesta semana ainda copulou nela.
+    if (nrow(vig)) {
+      copulou <- runif(nrow(vig)) < cop_semana
+      if (any(copulou)) M_semana[vig[copulou, , drop = FALSE]] <- 1L
+      solta <- runif(nrow(vig)) < 1 / dur_parceria
+      if (any(solta)) atuais[vig[solta, , drop = FALSE]] <- 0L
     }
 
-    M_acum  <- pmax(M_acum, M_semana)   # a rede da temporada até aqui
+    # (3) Quem tem espaço abaixo do teto de parcerias simultâneas procura. A
+    # busca é a regra de dois passos dos Estudos 1 a 4: mate_with_survivors com
+    # k_fixo = 1 sorteia os `encontros` machos sem reposição, aplica P_ij a cada
+    # um e devolve o de maior P entre os aceitos. Se o escolhido já for parceiro
+    # vigente, nada acontece: ele já copulou no passo 2, com a sua própria
+    # probabilidade.
+    com_espaco <- colSums(atuais) < as.integer(concorrencia)
+    if (any(com_espaco)) {
+      M_busca <- mate_with_survivors(z_efetivo, female_p, female_s, tipo_selecao,
+                                     encounters_n = encontros, k_fixo = 1L,
+                                     regra = regra)
+      novos <- M_busca == 1L & atuais == 0L
+      novos[, !com_espaco] <- FALSE
+      if (any(novos)) {
+        atuais[novos]   <- 1L
+        M_semana[novos] <- 1L
+      }
+    }
+
+    M_acum  <- pmax(M_acum, M_semana)   # toda parceria já formada
     copulas <- copulas + M_semana       # quantas vezes cada par copulou
 
     # (3) Transmissão sobre as cópulas DESTA semana, nos dois sentidos.
@@ -186,13 +231,17 @@ simulate_epidemia <- function(N_machos = 200, N_femeas = 200,
 
     # (5) Registro. As métricas de rede e a seleção são sobre a rede ACUMULADA,
     # que é a rede da temporada até aqui.
-    metrics <- calc_metrics_from_M(M_acum, k_alvo = k_teto)
+    # Sem k_alvo: na rede acumulada da temporada não há teto de parceiros. O
+    # limite que existe é de parcerias SIMULTÂNEAS, e ele é registrado abaixo.
+    metrics <- calc_metrics_from_M(M_acum)
     sel     <- diferencial_de_selecao(male_z, copulas)
 
     out[[r]] <- data.frame(
       semana = r, tipo_selecao = tipo_selecao, modelo = modelo, regra = regra,
       sigma_p = sigma_p, sigma_z = sigma_z,
-      encontros = as.integer(encontros), k_teto = as.integer(k_teto),
+      encontros = as.integer(encontros),
+      concorrencia = as.integer(concorrencia),
+      dur_parceria = dur_parceria, cop_semana = cop_semana,
       rodadas = as.integer(rodadas),
       h_I = h_I, beta = beta, gamma_rec = gamma_rec, prev0 = prev0,
       selecao_natural = selecao_natural,
@@ -206,9 +255,19 @@ simulate_epidemia <- function(N_machos = 200, N_femeas = 200,
 
       # --- a rede, e a distinção entre parceiros e cópulas ---
       parceiros_distintos = mean(colSums(M_acum)),
-      prop_femeas_no_teto = mean(colSums(M_acum) >= as.integer(k_teto)),
       copulas_acumuladas  = mean(colSums(copulas)),
       copulas_na_semana   = mean(colSums(M_semana)),
+      # A razão que justifica a formação explícita de parcerias. Sem elas, cada
+      # parceiro rende ~1.4 cópulas e a doença não circula; com elas, a razão
+      # sobe para a faixa de 3 a 5, e é ela que dá tempo de transmissão a cada
+      # parceria.
+      copulas_por_parceria = if (sum(M_acum) > 0) sum(copulas) / sum(M_acum) else NA_real_,
+      # As parcerias vigentes no fim desta semana: a concorrência REALIZADA,
+      # que é menor do que o teto porque uma parceria só se forma se a fêmea
+      # aceitar alguém.
+      concorrencia_realizada = mean(colSums(atuais)),
+      prop_femeas_na_concorrencia = mean(colSums(atuais) >= as.integer(concorrencia)),
+      prop_femeas_sem_parceria    = mean(colSums(atuais) == 0),
       # quantas fêmeas passaram esta semana em branco, sem aceitar ninguém
       prop_semana_em_branco = mean(colSums(M_semana) == 0),
       n_machos_surv = n_m,
@@ -336,8 +395,13 @@ if (!exists("EPIDEMIA_SO_FUNCOES") || !isTRUE(EPIDEMIA_SO_FUNCOES)) {
   cat(sprintf("\nConcluído: %s linhas em %s\n",
               format(nrow(df), big.mark = "."), arquivo_final))
   fim <- df[df$semana == max(df$semana), ]
-  cat(sprintf("Parceiros por fêmea: %.1f | cópulas por fêmea: %.1f\n",
-              mean(fim$parceiros_distintos), mean(fim$copulas_acumuladas)))
+  cat(sprintf("Parceiros por fêmea: %.1f | cópulas por fêmea: %.1f | cópulas por parceria: %.2f\n",
+              mean(fim$parceiros_distintos), mean(fim$copulas_acumuladas),
+              mean(fim$copulas_por_parceria, na.rm = TRUE)))
+  cat(sprintf("Concorrência realizada: %.2f parcerias simultâneas por fêmea (teto %d)\n",
+              mean(fim$concorrencia_realizada), unique(fim$concorrencia)[1]))
+  cat(sprintf("Incidência acumulada: %.1f%% | prevalência final: %.1f%%\n",
+              100 * mean(fim$incid_acum), 100 * mean(fim$prev_total)))
   cat(sprintf("Grandes epidemias (pelo menos 15%% infectados): %.1f%% das réplicas\n",
               100 * mean(fim$grande_epidemia)))
 }
