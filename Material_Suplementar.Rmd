@@ -1394,8 +1394,22 @@ Três ressalvas são necessárias para ler os painéis corretamente:
 -   A dispersão medida é uma variável contínua e, para ser projetada na grade,
     é arredondada para o mais próximo dos sete níveis do desenho. Valores
     superiores a 2.0 são todos alocados em 2.0, e a legenda informa quantos
-    casos ficaram acima do limite da grade. Um número elevado indicaria que a
+    casos ficaram acima do limite da grade. Um número elevado indica que a
     grade do Controle precisa ser estendida.
+
+As duas últimas ressalvas mordem sobretudo na Co-evolução, e vale dizê-lo com
+os números. Nas suas combinações, a média do traço chega a se afastar de φ = 5
+em quase 28 unidades sob a sigmoide e em mais de 12 sob a disruptiva, quando o
+limite para uma comparação direta com o Controle é cerca de 1; e treze das 81
+combinações terminam com a dispersão acima de 2.0, encostadas no limite da
+grade. Ou seja, para este estudo a projeção sobre a grade do Controle é a mais
+fraca das quatro, porque as populações da geração 100 já não se parecem com
+nenhuma combinação do Controle, por mais que caiam sobre a mesma posição.
+
+A seção 5.2 resolve isso por outro caminho: em vez de comparar a Co-evolução com
+o Controle, compara-a consigo mesma, traçando o caminho de cada combinação
+inicial no plano ao longo das cem gerações. Nenhuma das duas ressalvas se aplica
+lá, e é a figura a usar para este estudo.
 
 ```{r plano-dados}
 METS_PLANO <- c(Modularity = "Modularidade", Nestedness = "Aninhamento (NODF)",
