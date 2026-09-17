@@ -26,12 +26,14 @@ editor_options:
    Na barra lateral ficam em maiúsculas e em negrito, com um traço em cima, de
    modo que as suas subseções se leiam como pertencentes a eles. No corpo,
    entram com uma regra grossa e mais respiro acima. */
+/* Sem text-transform: uppercase. Ele transformava σp em ΣP na barra lateral,
+   e sigma é o nome de uma variável, não texto a maiúsculas. O destaque vem do
+   peso da fonte e do traço em cima. */
 .tocify-header > .tocify-item {
-  font-weight: 700; text-transform: uppercase; font-size: 0.92em;
-  letter-spacing: 0.02em; border-top: 1px solid #d5dbe0; margin-top: 0.45em;
-  padding-top: 0.45em;
+  font-weight: 700; font-size: 0.97em;
+  border-top: 1px solid #d5dbe0; margin-top: 0.45em; padding-top: 0.45em;
 }
-.tocify-header > .tocify-subheader > .tocify-item { text-transform: none; font-weight: 400; }
+.tocify-header > .tocify-subheader > .tocify-item { font-weight: 400; }
 
 h1 {
   border-top: 3px solid #2C3E50; padding-top: 0.7em; margin-top: 2.2em;
@@ -403,7 +405,7 @@ que elas se apoiam.
 As primeiras seções apresentam os conceitos e o desenho experimental, para que
 o documento possa ser lido sem recorrer a outras fontes.
 
-## Introdução
+# Introdução
 
 Em muitas espécies, as fêmeas não acasalam com um parceiro qualquer: avaliam
 vários machos e acasalam preferencialmente com alguns. Essa escolha é a
@@ -451,7 +453,7 @@ descritores, e nenhuma delas é comparável entre redes de tamanho ou densidade
 muito diferentes. Por isso os descritores entram nas análises como covariáveis,
 e não como respostas.
 
-### As quatro métricas de estrutura
+## As quatro métricas de estrutura
 
 - *Modularidade*: o quanto a rede se divide em grupos que interagem
   preferencialmente entre si. Numa rede de acasalamentos, modularidade alta
@@ -472,7 +474,7 @@ e não como respostas.
   medida clássica do potencial de seleção sexual. Vale zero quando todos os
   machos acasalam igualmente, e cresce quanto mais desigual é o sucesso.
 
-### Os descritores da rede
+## Os descritores da rede
 
 - *Conectância*: a fração dos pares possíveis que de fato acasalaram, ou seja
   o número de acasalamentos dividido por (machos × fêmeas). Numa rede bipartida
@@ -502,7 +504,7 @@ número de acasalamentos é fixado pelo lado das fêmeas, e o número de machos
 entra apenas no denominador. É por isso que, quando o censo encurta, a
 conectância sobe em vez de descer.
 
-## O modelo
+# O modelo
 
 Simulamos uma população de 200 machos e 200 fêmeas com gerações discretas e não
 sobrepostas. Cada macho expressa uma característica sexualmente selecionada, o
@@ -525,7 +527,7 @@ A distinção entre as duas é o eixo conceitual do projeto. A mesma intensidade
 média de seleção sexual pode resultar de fêmeas homogêneas diante de machos
 variados ou do contrário, e a estrutura da rede não é a mesma nos dois casos.
 
-### As quatro curvas de preferência
+## As quatro curvas de preferência
 
 A forma da função de preferência é o outro fator central, e comparamos quatro.
 `P` é a probabilidade de a fêmea aceitar o macho. Todas partem do mesmo pico
@@ -548,7 +550,7 @@ aleatória é o valor que aquela métrica assume por acaso, dado o tamanho da
 população e o número de acasalamentos. É o piso contra o qual as outras três se
 leem.
 
-### A busca de parceiros
+## A busca de parceiros
 
 Duas restrições ecológicas atravessam os quatro estudos, porque na
 natureza nenhuma fêmea avalia todos os machos disponíveis nem acasala com
@@ -567,7 +569,7 @@ quantos quiser:
   comparação em pool, ou *best-of-n*, e é a suposição habitual para leks e
   agregações.
 
-### A seleção natural e o censo de adultos
+## A seleção natural e o censo de adultos
 
 Cada estudo roda com e sem *seleção natural* sobre o traço masculino. É
 a força que se opõe à seleção sexual, e o que permite perguntar se a estrutura
@@ -606,7 +608,7 @@ O mesmo vale para as fêmeas, com uma diferença: elas não passam por viabilida
 porque a seleção natural do modelo age sobre o traço masculino. As 200 fêmeas
 adultas são um sorteio uniforme entre as juvenis.
 
-## Os quatro estudos
+# Os quatro estudos
 
 Os quatro compartilham exatamente o mesmo ciclo de vida, as mesmas quatro
 curvas e os mesmos fatores ecológicos. O que muda entre eles é quais
@@ -636,7 +638,7 @@ Todos os cenários rodaram com *20 réplicas*, ou seja, 20 repetições com
 sementes diferentes. Vinte e não uma centena porque os efeitos em questão são
 grandes e sistemáticos, não questão de ruído amostral.
 
-## Organização do documento
+# Organização do documento
 
 A barra lateral tem uma entrada por estudo, e dentro de cada uma as
 variáveis resposta que fazem sentido naquele estudo. A navegação por
@@ -660,7 +662,7 @@ chegam aos cinco parceiros e a poliandria realizada é idêntica nas quatro. Por
 isso cada curva tem um tipo de traço próprio além da cor: onde os valores
 coincidem, a sobreposição fica visível em vez de esconder três das quatro.
 
-## Cobertura dos dados
+# Cobertura dos dados
 
 ```{r status}
 n_cen <- function(x, eixos) {

@@ -187,7 +187,7 @@ figura_eixo <- function(eixo = c("sigma_p", "sigma_z"),
   (col(lado_baixo, rotulos[1]) | col(lado_alto, rotulos[2])) +
     plot_annotation(
       title = if (varia_femeas)
-        "Estudo 2: o que sigma_p faz" else "Estudo 3: o que sigma_z faz",
+        "Estudo 2: o que σp faz" else "Estudo 3: o que σz faz",
       subtitle = sprintf(
         "Preferência %s | %s nas duas colunas | %d machos e %d fêmeas | A_max = %d | k = %d | uma geração",
         tipo,
@@ -493,7 +493,7 @@ figura_busca <- function(amax = c(10L, 200L), ks = c(5L, 20L),
   }
   mtext("Estudo 1: a rede sob os quatro regimes de busca",
         outer = TRUE, side = 3, line = 1.5, cex = 1.3, font = 2)
-  mtext(sprintf("preferência %s | sigma_z = %.1f e sigma_p = %.1f nos quatro painéis | %d machos e %d fêmeas | uma geração",
+  mtext(sprintf("preferência %s | σz = %.1f e σp = %.1f nos quatro painéis | %d machos e %d fêmeas | uma geração",
                 tipo, sigma_z, sigma_p, N, N),
         outer = TRUE, side = 3, line = 0.2, cex = 0.85, col = "gray30")
   mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.\nComponente é um pedaço sem ligação com o resto; comunidade é o que o Louvain separa dentro dele. As duas ignoram quem não acasalou.",
