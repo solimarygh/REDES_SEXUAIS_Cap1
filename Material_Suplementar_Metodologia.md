@@ -1,7 +1,7 @@
 ---
 title: "Material suplementar: metodologia"
 subtitle: "O modelo, o ciclo de vida e o desenho dos quatro estudos de simulação"
-author: "Solimary García Hernández, Erika Santana, Paulo Guimarães"
+author: "Solimary García Hernández, Erika M. Santana, Paulo Guimarães Jr."
 output:
   html_document:
     theme: flatly
