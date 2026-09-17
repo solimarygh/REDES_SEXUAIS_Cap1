@@ -1,7 +1,7 @@
 ---
 title: "Material suplementar"
 subtitle: "Estrutura de redes de acasalamento sob escolha de parceiro: os quatro estudos de simulação"
-author: "Solimary García Hernández"
+author: "Solimary García Hernández, Erika Santana, Paulo Guimarães"
 date: "`r format(Sys.Date(), '%d de %B de %Y')`"
 output:
   html_document:
@@ -21,6 +21,22 @@ editor_options:
 .main-container { max-width: 96% !important; width: 96% !important;
                   margin-left: auto; margin-right: auto; }
 .tocify { max-height: 90% !important; }
+
+/* Os cinco estudos são os cabeçalhos de nível 1, e é por eles que se navega.
+   Na barra lateral ficam em maiúsculas e em negrito, com um traço em cima, de
+   modo que as suas subseções se leiam como pertencentes a eles. No corpo,
+   entram com uma regra grossa e mais respiro acima. */
+.tocify-header > .tocify-item {
+  font-weight: 700; text-transform: uppercase; font-size: 0.92em;
+  letter-spacing: 0.02em; border-top: 1px solid #d5dbe0; margin-top: 0.45em;
+  padding-top: 0.45em;
+}
+.tocify-header > .tocify-subheader > .tocify-item { text-transform: none; font-weight: 400; }
+
+h1 {
+  border-top: 3px solid #2C3E50; padding-top: 0.7em; margin-top: 2.2em;
+}
+h1:first-of-type { border-top: none; padding-top: 0; margin-top: 0.6em; }
 ```
 
 ```{r setup, include=FALSE}
@@ -174,10 +190,14 @@ quais_poliandria <- c(grau_medio_femeas        = "1. Poliandria realizada",
 # cols_presentes() descarta o que não existe. `grau_medio_machos_derivado` é o
 # grau médio sobre TODOS os machos, inclusive os que não acasalaram, e sai de
 # arestas / censo, então funciona em qualquer rodada.
-quais_machos    <- c(grau_medio_machos_derivado = "1. Parceiras por macho (todos)",
-                     grau_medio_machos          = "2. Parceiras por macho que acasalou",
-                     prop_machos_sem_acasalar   = "3. Machos sem acasalar",
-                     I_s                        = "4. Oportunidade (Is)")
+# Sem numeração nos rótulos, ao contrário dos outros conjuntos: como duas destas
+# colunas podem não existir nos dados, a numeração fixa abria buracos na figura
+# (saíam as faixas "1" e "4" e parecia que duas se perderam). A ordem das linhas
+# já vem da ordem deste vetor.
+quais_machos    <- c(grau_medio_machos_derivado = "Parceiras por macho (todos)",
+                     grau_medio_machos          = "Parceiras por macho que acasalou",
+                     prop_machos_sem_acasalar   = "Machos sem acasalar",
+                     I_s                        = "Oportunidade de seleção sexual (Is)")
 quais_traco     <- c(zbar_males = "Média do traço (z)",
                      varz_males = "Variância do traço (Var z)")
 # Duas linhas só, para o painel ficar simétrico ao do traço no estudo das
@@ -374,8 +394,6 @@ rotulo <- function(base, ns, amax, kk) {
 }
 ```
 
-# Apresentação
-
 Este documento é o anexo de resultados do relatório. Ele reúne, num formato
 navegável, todos os painéis produzidos pelos quatro estudos de simulação
 do projeto, incluindo as combinações de parâmetros que não caberiam num texto
@@ -385,7 +403,7 @@ que elas se apoiam.
 As primeiras seções apresentam os conceitos e o desenho experimental, para que
 o documento possa ser lido sem recorrer a outras fontes.
 
-## O problema biológico
+## Introdução
 
 Em muitas espécies, as fêmeas não acasalam com um parceiro qualquer: avaliam
 vários machos e acasalam preferencialmente com alguns. Essa escolha é a
@@ -409,8 +427,6 @@ Este projeto trata desse padrão como objeto de estudo por direito próprio. A
 pergunta geral é: que estrutura a escolha de parceiro produz, e essa estrutura
 tem consequências evolutivas próprias, além das que a intensidade média da
 seleção já explicaria?
-
-## A rede de acasalamentos
 
 Para tratar o padrão de forma quantitativa, representamos os acasalamentos de
 cada geração como uma *rede bipartida*. "Rede" quer dizer um conjunto de
@@ -563,11 +579,20 @@ adultos que as fêmeas encontram. Os 200 são a *capacidade de suporte* do
 ambiente, e é assim que a viabilidade entra: sorteiam-se sempre 200 juvenis,
 com peso proporcional a
 
-$$V = \exp\!\left(-\gamma\,(z - \phi)^2\right), \qquad \gamma = 0.2,\ \phi = 5$$
+$$V = \exp\!\left(-\gamma\,(z - \phi)^2\right)$$
 
-de modo que quanto mais o traço de um juvenil se afasta do ótimo ecológico φ,
-menor a sua chance de ocupar uma vaga. Quando a seleção natural está desligada,
-o sorteio é uniforme entre os juvenis.
+Os dois parâmetros da fórmula têm significado biológico direto. *φ* é o ótimo
+ecológico, o valor do traço que maximiza a viabilidade, e vale 5, que é também
+o valor em torno do qual o traço e a preferência começam: a população parte
+adaptada, e é a seleção sexual que a desloca. *γ* é a severidade da seleção
+natural, ou seja o quanto a viabilidade cai quando o traço se afasta de φ, e
+vale 0.2. Como a distância entra ao quadrado, a queda é abrupta: um macho com o
+traço em 7 tem 45% da viabilidade máxima, em 10 tem 0.7%, e em 12 é
+praticamente zero.
+
+Quanto mais o traço de um juvenil se afasta de φ, portanto, menor a sua chance
+de ocupar uma vaga. Quando a seleção natural está desligada, o sorteio é
+uniforme entre os juvenis.
 
 O ponto a reter é que a viabilidade decide *quais* machos ocupam as 200 vagas
 e nunca *quantas* vagas existem. O tamanho da população é constante por
@@ -663,6 +688,23 @@ tibble(
 ) %>% kable(caption = "O que está neste documento. Cenários inclui as 20 réplicas de cada combinação de parâmetros.")
 ```
 
+Um cenário é uma réplica de uma combinação de parâmetros. Os fatores cruzados, e
+os níveis de cada um, são estes:
+
+| parâmetro | o que é | níveis |
+|---|---|---|
+| curva de preferência | a forma da função de aceitação | aleatória, gaussiana, sigmoide, disruptiva |
+| σp | dispersão do pico de preferência entre as fêmeas | 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0 |
+| σz | dispersão do traço entre os machos | 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0 |
+| A_max | quantos machos cada fêmea avalia | 200, 40, 10 |
+| k | com quantos parceiros ela pode acasalar | 5, 10, 20 |
+| seleção natural | viabilidade sobre o traço do macho | ligada, desligada |
+| réplica | repetição com outra semente | 20 por combinação |
+
+Os dois sigmas se cruzam por inteiro apenas no Controle. No Estudo 2 σp percorre
+os sete níveis e σz é condição inicial fixada em 1.0; no Estudo 3 é o espelho.
+No Estudo 4 os dois são condição inicial, com três níveis cada, 0.5, 1.0 e 2.0.
+
 A tabela diz quantos cenários existem; a figura diz sobre que parte do espaço
 de parâmetros eles estão distribuídos. A grade é a mesma nos quatro painéis, e
 em vermelho estão as condições iniciais que aquele estudo visita: o
@@ -680,8 +722,6 @@ da simulação.
 ```{r fig-desenho, fig.width=10, fig.height=8}
 figura_desenho()
 ```
-
-------------------------------------------------------------------------
 
 # 1. Controle: a superfície σp × σz numa geração
 
@@ -1012,8 +1052,6 @@ render_tabs(function(kk, amax, ns)
                   rotulo("CONTROLE — acesso ao acasalamento nos machos", ns, amax, kk)))
 ```
 
-------------------------------------------------------------------------
-
 # 2. Fêmeas variando (σp): a evolução do traço masculino
 
 Este estudo pergunta como a heterogeneidade de preferência entre as fêmeas
@@ -1132,8 +1170,6 @@ render_tabs(function(kk, amax, ns)
                 rotulo("FÊMEAS VARIANDO — poliandria e acesso", ns, amax, kk),
                 cor_faixa = "#1F6F8B"))
 ```
-
-------------------------------------------------------------------------
 
 # 3. Machos variando (σz): a evolução da preferência feminina
 
@@ -1254,8 +1290,6 @@ render_tabs(function(kk, amax, ns)
                 rotulo("MACHOS VARIANDO — poliandria e acesso", ns, amax, kk),
                 cor_faixa = "#1F6F8B"))
 ```
-
-------------------------------------------------------------------------
 
 # 4. Os quatro estudos projetados no mesmo plano
 
@@ -1527,8 +1561,6 @@ if (is.null(plano)) cat("\n*Sem dados suficientes.*\n") else
 render_tabs(function(kk, amax, ns) plot_plano("I_s", kk, amax, ns))
 ```
 
-------------------------------------------------------------------------
-
 # 5. Co-evolução de traço e preferência
 
 Neste estudo as duas características são herdáveis ao mesmo tempo. Cada
@@ -1723,8 +1755,6 @@ atua como uma força demográfica transitória.
 Nas curvas em que a estrutura se dissolve, as métricas de rede da geração 100
 são as de uma rede formada sem escolha alguma. Isso não é uma limitação dos
 painéis: é o resultado, e é uma das questões que o projeto passa a investigar.
-
-------------------------------------------------------------------------
 
 # Reprodutibilidade
 
