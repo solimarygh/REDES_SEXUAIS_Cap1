@@ -1,0 +1,658 @@
+---
+title: |
+  | Relatório de Atividades
+  | \vspace{0.4cm} \large Projeto de Pesquisa - Regular No. 2024/02198-7
+  | \large Processo da bolsa de pós-doutorado No. 2024/18754-6
+  | \vspace{0.3cm} \normalsize Acordos de Cooperação / CNPq - Conselho Nacional de Desenvolvimento Científico e Tecnológico / Fixação de Jovens Doutores
+  | \vspace{0.8cm} \Large Papel das redes de interações sexuais na evolução de traços indicadores de qualidade sexualmente selecionados
+author: |
+  | Supervisor: Prof. Dr. Paulo Roberto Guimarães Jr.
+  | Pós-doutoranda: Dra. Solimary García Hernández
+date: "São Paulo, setembro de 2026"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    fig_caption: true
+    latex_engine: xelatex
+    keep_tex: false
+  html_document:
+    theme: flatly
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    toc_float: true
+geometry: margin=2.5cm
+fontsize: 11pt
+linestretch: 1.15
+lang: pt-BR
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.align = "center", out.width = "95%",
+                      fig.retina = 1, dpi = 150)
+suppressPackageStartupMessages({
+  library(dplyr); library(tidyr); library(ggplot2); library(knitr)
+})
+
+cores_4  <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
+labels_4 <- c("uniform"="Aleatória","gaussian"="Gaussiana","sigmoid"="Sigmoide","u-shaped"="Disruptiva")
+ORDEM_CURVAS  <- names(labels_4)
+ordenar_curva <- function(x) factor(as.character(x), levels = ORDEM_CURVAS)
+TIPOS_LINHA <- c("uniform" = "solid", "gaussian" = "22",
+                 "sigmoid" = "62",   "u-shaped" = "4212")
+
+# A leitura é a mesma dos dois anexos, para que o relatório nunca discorde deles
+# sobre o que está mostrando.
+carregar <- function(paths) {
+  hit <- paths[file.exists(paths)]
+  if (!length(hit)) return(NULL)
+  obj <- readRDS(hit[1])
+  if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
+}
+juntar_pedacos <- function(pasta, padrao) {
+  arqs <- list.files(pasta, full.names = TRUE)
+  arqs <- arqs[grepl(padrao, basename(arqs), perl = TRUE)]
+  if (!length(arqs)) return(NULL)
+  distinct(bind_rows(lapply(arqs, carregar)))
+}
+RODADAS <- c("bestOfN", "censoConst")
+padrao_arquivo <- function(estudo, r, metade) {
+  if (metade == "com_sufixo") sprintf("^(backup|resultados)_%s_%s.*cota.*\\.rds$", estudo, r)
+  else                        sprintf("^(backup|resultados)_%s_%s(?!.*cota).*\\.rds$", estudo, r)
+}
+juntar_metades <- function(a, b) {
+  if (is.null(b) || !nrow(b)) return(a)
+  if (is.null(a) || !nrow(a)) return(b)
+  ns <- unique(b$selecao_natural)
+  bind_rows(b, filter(a, !(selecao_natural %in% ns)))
+}
+carregar_rodada <- function(pasta, estudo) {
+  for (r in RODADAS) {
+    a <- juntar_pedacos(pasta, padrao_arquivo(estudo, r, "sem_sufixo"))
+    b <- juntar_pedacos(pasta, padrao_arquivo(estudo, r, "com_sufixo"))
+    df <- juntar_metades(a, b)
+    if (!is.null(df) && nrow(df) > 0) return(df)
+  }
+  NULL
+}
+
+ct  <- carregar_rodada("Resultados_Artigo/Fase_Controle/Dados", "Controle")
+d   <- carregar_rodada("Resultados_Artigo/Fase5_MiudoV2/Dados", "Femeas")
+esp <- carregar_rodada("Resultados_Artigo/Fase_Espelho/Dados",  "Espelho")
+co <- local({
+  pasta <- "Resultados_Artigo/Fase_Coevolucao/Dados"
+  sem <- carregar(file.path(pasta,
+    c("resultados_Coevolucao_genica_neAdulto_sem_completo.rds",
+      "resultados_Coevolucao_genica_completo.rds")))
+  com <- carregar(file.path(pasta,
+    c("resultados_Coevolucao_genica_neAdulto_cota_com_completo.rds",
+      "resultados_Coevolucao_genica_neAdulto_cota_ambos_completo.rds")))
+  if (!is.null(com)) com <- filter(com, selecao_natural)
+  partes <- list(sem, com); partes <- partes[!vapply(partes, is.null, logical(1))]
+  if (!length(partes)) NULL else distinct(bind_rows(partes))
+})
+ok <- function(x) !is.null(x) && nrow(x) > 0
+
+# Quantos cenários existem, para o relatório citar o número medido e não um
+# número escrito à mão.
+n_cen <- function(x, eixos) {
+  if (!ok(x)) return("-")
+  cols <- intersect(c("tipo_selecao", eixos, "encounters_n", "k_fixo",
+                      "selecao_natural", "replica"), names(x))
+  format(nrow(distinct(x[, cols])), big.mark = ".")
+}
+```
+
+# Introdução
+
+O presente relatório apresenta os avanços do projeto *Papel das redes de
+interações sexuais na evolução de traços indicadores de qualidade sexualmente
+selecionados*, financiado pela Fundação de Amparo à Pesquisa do Estado de São
+Paulo (FAPESP) e sob supervisão do Prof. Dr. Paulo Roberto Guimarães Jr. Cobre
+o período desde o relatório anterior, de agosto de 2025.
+
+O projeto investiga a interface entre redes sexuais e evolução fenotípica em
+populações animais. A pergunta central é como a variação na preferência do sexo
+que escolhe influencia a estrutura da rede sexual e a evolução de
+características sexualmente selecionadas. O segundo objetivo, avaliar como
+doenças transmitidas por contato que afetam a atratividade do sexo escolhido
+impactam essas redes e a seleção sobre as características, estava previsto para
+o segundo ano e é a frente em desenvolvimento no momento.
+
+## O que mudou desde o relatório anterior
+
+O relatório de 2025 organizava o trabalho em duas fases, uma em tempo ecológico
+e outra em tempo evolutivo. Ao longo deste ano as duas foram concluídas, e o
+desenvolvimento do motor de simulação abriu a possibilidade de responder duas
+perguntas adicionais que não estavam no plano original. O trabalho passou
+portanto a estar organizado em quatro estudos, que compartilham o mesmo motor e
+diferem apenas em quais características são herdáveis:
+
+| no relatório de 2025 | neste relatório | situação |
+|---|---|---|
+| Primeira fase, tempo ecológico | Estudo 1, Controle | concluído, com desenho muito ampliado |
+| Segunda fase, tempo evolutivo | Estudo 2, Fêmeas variando | concluído |
+| não previsto | Estudo 3, Machos variando | concluído |
+| não previsto | Estudo 4, Co-evolução | concluído |
+| Objetivo 2, doença na rede | Objetivo 2 | em desenvolvimento |
+
+A razão de os quatro compartilharem o motor é metodológica: descrever o ciclo
+de vida uma vez só torna explícito que as diferenças entre os estudos vêm
+apenas do que de fato muda no desenho, e não de implementações distintas.
+
+## Material suplementar
+
+Dois anexos acompanham este relatório, ambos gerados diretamente a partir dos
+resultados das simulações:
+
+- *Material suplementar: metodologia*, com o modelo, o ciclo de vida passo a
+  passo, as variáveis resposta e o desenho dos quatro estudos, incluindo as
+  decisões que o desenho exigiu e a justificação de cada uma.
+- *Material suplementar*, com o conjunto completo de painéis de resultados, em
+  todas as combinações de parâmetros, incluindo as que não caberiam num texto
+  impresso.
+
+O corpo deste relatório apresenta apenas os resultados principais de cada
+estudo.
+
+# O modelo de simulação
+
+O modelo é individual, com gerações discretas e não sobrepostas, e uma
+população constante de 200 machos e 200 fêmeas. Cada macho expressa uma
+característica sexualmente selecionada, o traço `z`. Cada fêmea tem um pico de
+preferência, `p`, que é o valor de traço que ela mais aprecia, e uma exigência
+que determina o quanto tolera afastamentos desse pico. A probabilidade de uma
+fêmea aceitar um macho depende da distância entre o traço dele e o pico dela.
+
+Duas quantidades organizam o desenho experimental, e a distinção entre elas é o
+eixo conceitual do projeto. **σp** é a dispersão dos picos de preferência entre
+as fêmeas, ou seja o quanto elas discordam entre si sobre o que preferem.
+**σz** é a dispersão do traço entre os machos, ou seja o quanto o material
+disponível para escolher é variado. A mesma intensidade média de seleção sexual
+pode resultar de fêmeas homogêneas diante de machos variados ou do contrário, e
+a estrutura da rede não é a mesma nos dois casos.
+
+## Avanços em relação ao modelo do relatório anterior
+
+O modelo descrito em 2025 foi estendido em quatro pontos, todos declarados no
+anexo de metodologia:
+
+1. **Quatro curvas de preferência em vez de duas.** Além da direcional e da
+   estabilizadora, o desenho passou a incluir uma curva nula, em que a fêmea
+   aceita qualquer macho com a mesma probabilidade, e uma disruptiva, em que ela
+   prefere machos que diferem do seu próprio pico. A curva nula é o que torna o
+   resto interpretável: qualquer métrica medida sob ela é o valor que aquela
+   métrica assume por acaso, dado o tamanho da população e o número de
+   acasalamentos, e serve de piso contra o qual as outras três se leem.
+
+2. **A regra de decisão da fêmea foi explicitada.** A fêmea avalia um número
+   determinado de machos, A_max, e só então escolhe entre os que aceitou. É a
+   regra de comparação em pool, ou *best-of-n*, suposição habitual para leks e
+   agregações. A alternativa, em que ela decide de um em um e para ao atingir o
+   número desejado de parceiros, foi implementada e descartada porque tornava o
+   gradiente de A_max inoperante.
+
+3. **Dois fatores ecológicos foram acrescentados ao desenho.** A_max representa
+   o custo de procurar parceiro, e k é o número máximo de parceiros que cada
+   fêmea pode aceitar. Nenhum dos dois estava no modelo de 2025, e nos
+   resultados o regime de busca acabou sendo o nível que mais pesa.
+
+4. **A regulação populacional foi declarada explicitamente.** Os 200 machos
+   adultos são a capacidade de suporte do ambiente, e a viabilidade decide quais
+   machos ocupam as vagas e nunca quantas vagas existem. Na terminologia de
+   Wallace, é seleção branda, com regulação por densidade. A alternativa, seleção
+   dura com mortalidade em termos absolutos, foi implementada e comparada de
+   forma pareada; a seção final deste relatório resume o que essa comparação
+   mostrou.
+
+Além disso, a variância de segregação passou a seguir o modelo infinitesimal,
+em que o desvio do filhote em relação à média dos pais tem variância
+proporcional à variância parental, e não um ruído de tamanho fixo arbitrado.
+Essa mudança é o que torna respondível a pergunta sobre manutenção de variação
+genética: com um ruído fixo, a variância genética convergiria sempre para o
+mesmo piso em todos os cenários, e a resposta viria embutida no modelo.
+
+# Estudo 1: a estrutura da rede numa geração
+
+Este estudo corresponde à primeira fase do relatório anterior, e responde à
+pergunta mais básica do conjunto: que estrutura as curvas de preferência
+produzem por si só, antes de qualquer resposta evolutiva? Nenhuma
+característica é herdada, os traços e as preferências são sorteados, a rede de
+acasalamentos se forma, as métricas são medidas, e o cenário termina.
+
+## O desenho foi ampliado em duas ordens de magnitude
+
+O desenho de 2025 cruzava cinco valores de dispersão da preferência com dois
+tipos de seleção, com 100 réplicas por combinação, e mantinha a dispersão do
+traço masculino implícita. O desenho atual cruza, por inteiro:
+
+| fator | níveis |
+|---|---|
+| curva de preferência | aleatória, gaussiana, sigmoide, disruptiva |
+| σp | 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0 |
+| σz | 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0 |
+| A_max, machos avaliados | 200, 40, 10 |
+| k, parceiros aceitos | 5, 10, 20 |
+| seleção natural | ligada, desligada |
+
+```{r n-cenarios-ct, results='asis'}
+if (ok(ct)) cat(sprintf(
+"São %s cenários de uma geração, com 20 réplicas por combinação de parâmetros.\n",
+  n_cen(ct, c("sigma_p", "sigma_z"))))
+```
+
+O número de réplicas por combinação passou de 100 a 20, e a razão é deliberada:
+os efeitos em questão são grandes e sistemáticos, não limitados por ruído
+amostral, e o orçamento computacional rende mais ao cobrir o espaço de
+parâmetros do que ao repetir a mesma combinação. O ganho é que σp e σz passam a
+ser cruzados por inteiro, de modo que se observam combinações extremas, como
+fêmeas muito homogêneas diante de machos muito variados, que o desenho anterior
+nunca visitava.
+
+## O desenho experimental dos quatro estudos
+
+```{r fig-desenho, fig.width=9, fig.height=7, fig.cap="Condições iniciais de cada estudo no plano σp × σz. A grade é a mesma nos quatro painéis, e em vermelho estão as condições iniciais que aquele estudo visita. O Controle cruza a grade inteira porque roda uma geração só; os dois estudos espelho percorrem uma coluna ou uma linha, com o outro eixo fixado em 1.0; a Co-evolução parte do cruzamento de três níveis em cada eixo."}
+source("10_Figuras_conceituais.R")
+figura_desenho()
+```
+
+## Resultados principais
+
+*Esta seção precisa dos números finais. O texto abaixo resume o que as análises
+atuais mostram, e cada afirmação está marcada com a sua origem para conferência
+antes da entrega.*
+
+### O nível ecológico domina a estrutura da rede
+
+O resultado mais robusto do Estudo 1 é que o regime de busca, ou seja quantos
+machos a fêmea consegue avaliar e quantos pode aceitar, explica mais de dois
+terços da divergência de topologia entre as quatro curvas de preferência.
+Dentro do que sobra, a assimetria entre os sexos, `log(σz/σp)`, explica cerca de
+vinte vezes mais que a variabilidade total, `sqrt(σp² + σz²)`.
+
+Isso reorienta a pergunta original do projeto. Não é quanta variação existe na
+preferência o que determina a estrutura da rede, e sim de que lado da interação
+essa variação está.
+
+### A divergência é máxima quando as fêmeas são homogêneas e os machos variados
+
+A divergência entre as quatro curvas, ou seja o quanto elas produzem topologias
+distintas entre si, é máxima quando as fêmeas concordam e os machos variam, e
+cai à medida que se caminha para o outro extremo do eixo da assimetria. Uma
+leitura possível, ainda não testada, é que quando todas as fêmeas querem a mesma
+coisa a geometria da curva se traduz sem ruído em quem acasala com quem, e
+quando elas discordam entre si a variação individual borra a assinatura.
+
+### Não todas as métricas de rede são igualmente informativas
+
+O desenho faz a densidade da rede variar por um fator de doze, porque o número
+de parceiros por fêmea vai de 5 a 20. Medindo quanto disso contamina cada
+métrica:
+
+```{r r2-metricas}
+tibble(
+  `métrica` = c("modularidade", "centralização",
+                "oportunidade de seleção sexual (Is)", "aninhamento (NODF)"),
+  `R² da curva de preferência` = c(0.443, 0.247, 0.177, 0.019),
+  `R² parcial, controlando tamanho e densidade` = c(0.464, 0.259, 0.181, 0.039)
+) %>% kable(caption = "Quanto a curva de preferência explica de cada métrica de topologia, antes e depois de controlar por tamanho e densidade da rede. Estudo 1, 70.560 redes de uma geração.")
+```
+
+Três das quatro métricas resistem ao controle. O aninhamento não: a curva de
+preferência explica 2% da variação dele, e a densidade explica 45%. A
+consequência metodológica é que o aninhamento, que era a métrica central no
+relatório de 2025, precisa ser reportado em relação a um modelo nulo que
+preserve a sequência de graus, e não em valor cru.
+
+# Estudo 2: a evolução do traço masculino
+
+Este estudo corresponde à segunda fase do relatório anterior, e está concluído.
+O eixo é σp, a dispersão do pico de preferência entre as fêmeas. A preferência é
+re-sorteada a cada geração da mesma distribuição e portanto não evolui; o traço
+do macho é herdável e livre para responder à seleção. São cem gerações por
+réplica.
+
+Manter σp fixo durante as cem gerações é deliberado, e é o que permite atribuir
+a resposta do traço à largura dessa distribuição sem o confundimento de a
+preferência estar mudando ao mesmo tempo. A escolha da fêmea é aqui a causa da
+seleção, e o estudo mede a resposta evolutiva do traço masculino.
+
+## Resultados principais
+
+### A heterogeneidade de preferência converte seleção estabilizadora em diversificadora
+
+```{r fig-varz, fig.width=8, fig.height=4, fig.cap="Variância genética do traço masculino na geração 100, em função da dispersão da preferência feminina. Sob a curva gaussiana, que é estabilizadora a nível individual, a variância genética da população cresce à medida que as fêmeas discordam mais entre si. A curva aleatória fica em torno do valor neutro e serve de controle de deriva. A_max = 200, sem seleção natural, promediando os três valores de k."}
+if (ok(d)) {
+  vz <- d %>%
+    filter(generation == max(generation), encounters_n == 200, !selecao_natural) %>%
+    group_by(tipo_selecao, sigma_p) %>%
+    summarise(varz = mean(varz_males, na.rm = TRUE), .groups = "drop") %>%
+    mutate(tipo_selecao = ordenar_curva(tipo_selecao))
+  ggplot(vz, aes(sigma_p, varz, color = tipo_selecao, linetype = tipo_selecao)) +
+    geom_hline(yintercept = 1, linetype = "dotted", color = "gray40") +
+    geom_line(linewidth = 1) + geom_point(size = 2) +
+    scale_color_manual(values = cores_4, labels = labels_4, name = NULL) +
+    scale_linetype_manual(values = TIPOS_LINHA, labels = labels_4, name = NULL) +
+    labs(x = expression(sigma[p]), y = "variância genética do traço") +
+    theme_light(base_size = 11) + theme(legend.position = "top")
+}
+```
+
+Este é o principal resultado do estudo. Uma curva de preferência
+estabilizadora, que a nível individual favorece machos parecidos com o pico de
+cada fêmea, produz a nível populacional manutenção e até aumento da variação
+genética, desde que as fêmeas discordem entre si sobre onde está esse pico. A
+linha pontilhada marca a variância inicial: acima dela, a população terminou as
+cem gerações com mais variação genética do que começou.
+
+### A topologia da rede prediz a variância genética mantida
+
+Duas predições foram formuladas sobre a relação entre topologia e trajetória do
+traço. A primeira, de que o aninhamento prediria a exageração do traço, não se
+confirmou: o sinal é firme estatisticamente, mas invertido, e não temos
+explicação para ele. Fica registrado como questão aberta, e a análise com a
+conectância da rede como covariável é o próximo passo para determinar se é
+artefato de densidade.
+
+A segunda predição se confirma: a modularidade prediz a variância genética
+mantida, com sinal positivo e efeito forte. Populações cuja rede de
+acasalamentos se reparte em grupos que acasalam preferencialmente entre si
+mantêm mais variação genética no traço, e esse é o mecanismo de resgate de
+diversidade que o projeto propunha testar.
+
+### A curva disruptiva produz estados alternativos
+
+Sob a curva disruptiva as populações não convergem para um valor intermediário
+do traço: cada réplica vai parar num dos dois extremos, e a média entre
+réplicas cai no meio, onde não existe nenhuma população. O teste de dip de
+Hartigan rejeita a unimodalidade. A consequência para o relato dos resultados é
+que essa curva precisa ser apresentada como distribuição, e a bimodalidade
+tratada como resultado e não como variabilidade.
+
+# Estudo 3: a evolução da preferência feminina
+
+Este estudo não estava previsto no plano original, e foi possível porque o
+motor desenvolvido para o Estudo 2 permitia inverter os papéis com uma
+modificação contida. É o espelho do anterior: o traço do macho passa a ser
+ambiental, re-sorteado a cada geração e não herdado, e o pico de preferência da
+fêmea passa a ser herdável e transmitido pelos dois sexos. O eixo é σz, a
+variedade de machos disponíveis.
+
+A inversão tem conteúdo biológico próprio. A escolha da fêmea deixa de ser a
+causa da seleção e passa a ser o alvo dela, e a força seletiva que age sobre a
+preferência não é sexual, e sim ecológica: é a disponibilidade de machos com
+traços adequados. Uma analogia útil é a de um herbívoro e as suas plantas
+hospedeiras, em que a planta não escolhe mas a sua disponibilidade gera seleção
+sobre a preferência do herbívoro. Tratar o traço masculino como ambiental tem
+também uma leitura de dependência de condição: o macho expressa aquele traço
+por causa do ambiente em que se desenvolveu, e não por causa dos genes que
+transmite.
+
+## Resultados principais
+
+### A variedade de machos determina se a variação de preferência se mantém
+
+```{r fig-varp, fig.width=8, fig.height=4, fig.cap="Variância da preferência feminina na geração 100, em função da variedade de machos disponíveis. Quando há pouca variedade de machos, a variação de preferência acaba eliminada; quando há muita, ela se mantém perto do valor neutro. A_max = 200, sem seleção natural, promediando os três valores de k."}
+if (ok(esp)) {
+  vp <- esp %>%
+    filter(generation == max(generation), encounters_n == 200, !selecao_natural) %>%
+    group_by(tipo_selecao, sigma_z) %>%
+    summarise(varp = mean(varp_femeas, na.rm = TRUE), .groups = "drop") %>%
+    mutate(tipo_selecao = ordenar_curva(tipo_selecao))
+  ggplot(vp, aes(sigma_z, varp, color = tipo_selecao, linetype = tipo_selecao)) +
+    geom_hline(yintercept = 1, linetype = "dotted", color = "gray40") +
+    geom_line(linewidth = 1) + geom_point(size = 2) +
+    scale_color_manual(values = cores_4, labels = labels_4, name = NULL) +
+    scale_linetype_manual(values = TIPOS_LINHA, labels = labels_4, name = NULL) +
+    labs(x = expression(sigma[z]), y = "variância da preferência") +
+    theme_light(base_size = 11) + theme(legend.position = "top")
+}
+```
+
+É a resposta direta à pergunta que motivou o estudo. A variação de preferência
+não se mantém por si só: depende de haver material sobre o qual discriminar.
+
+### A seleção sobre a preferência apaga a própria causa
+
+```{r fig-dinamica, fig.width=8, fig.height=3.6, fig.cap="Dinâmica das primeiras cinquenta gerações sob pouca variedade de machos, com curva de preferência gaussiana. As duas quantidades caem juntas: conforme a seleção elimina as preferências mal posicionadas, a variância cai, e com ela desaparecem as falhas de acasalamento que geravam a seleção. A_max = 200, σz = 0.2, sem seleção natural."}
+if (ok(esp)) {
+  din <- esp %>%
+    filter(encounters_n == 200, !selecao_natural, tipo_selecao == "gaussian",
+           sigma_z == 0.2, generation <= 50) %>%
+    group_by(generation) %>%
+    summarise(`variância da preferência` = mean(varp_femeas, na.rm = TRUE),
+              `proporção de fêmeas sem acasalar` = mean(prop_femeas_sem_acasalar, na.rm = TRUE),
+              .groups = "drop") %>%
+    pivot_longer(-generation)
+  ggplot(din, aes(generation, value)) +
+    geom_line(linewidth = 1, color = "#2C3E50") +
+    facet_wrap(~name, scales = "free_y") +
+    labs(x = "geração", y = NULL) +
+    theme_light(base_size = 11)
+}
+```
+
+Este é um resultado que a análise da geração final não revelaria. Olhando apenas
+a geração 100, pareceria não ter havido seleção nenhuma sobre a preferência. A
+seleção existe, é forte, e se extingue a si mesma nas primeiras gerações: ao
+eliminar as preferências que não encontram parceiro, remove a variância de
+sucesso reprodutivo que a alimentava. A consequência metodológica é que estudos
+que meçam apenas o estado final de uma população podem concluir ausência de
+seleção onde houve seleção intensa e transitória.
+
+# Estudo 4: co-evolução de traço e preferência
+
+Este estudo também não estava previsto, e responde à pergunta que naturalmente
+segue os dois anteriores: o que acontece quando as duas características são
+herdáveis ao mesmo tempo? Cada indivíduo carrega os dois genótipos e expressa
+apenas um, o macho o traço e a fêmea a preferência, mas a transmissão é
+bi-parental para as duas.
+
+A grandeza central deixa de ser a média de cada característica e passa a ser a
+covariância genética entre elas. O acasalamento não aleatório constrói essa
+associação, e uma vez que ela existe a seleção que age sobre o traço arrasta a
+preferência consigo, mesmo sem nenhuma seleção agindo diretamente sobre ela. É
+o mecanismo de Fisher.
+
+## Resultados principais
+
+### Só uma das quatro curvas acopla as duas características
+
+```{r tab-ld}
+if (ok(co)) {
+  co %>% filter(generation == max(generation), !selecao_natural) %>%
+    group_by(tipo_selecao) %>%
+    summarise(`var. total` = round(mean(varz_pop), 2),
+              `var. génica` = round(mean(var_genica_z), 2),
+              `desequilíbrio` = round(mean(varz_pop - var_genica_z), 2),
+              `cov(z,p)` = round(mean(cov_zp), 2),
+              `cor(z,p)` = round(mean(cor_zp), 2), .groups = "drop") %>%
+    arrange(ordenar_curva(tipo_selecao)) %>%
+    mutate(tipo_selecao = labels_4[tipo_selecao]) %>%
+    rename(`curva de preferência` = tipo_selecao) %>%
+    kable(caption = "Desequilíbrio de ligamento e covariância genética na geração 100, sem seleção natural, promediando todas as combinações de sigma inicial, A_max e k. O desequilíbrio é a diferença entre a variância total do traço e a variância génica, que é a que a segregação transmite.")
+}
+```
+
+A curva gaussiana é a única em que acasalamento assortativo, desequilíbrio de
+ligamento e covariância genética aparecem juntos, como a teoria de Fisher
+prevê. A sigmoide produz o mesmo desequilíbrio que a aleatória, ou seja nenhum,
+apesar de ser a curva em que o traço mais se desloca: sob ela todas as fêmeas
+preferem o mesmo, independentemente do seu próprio pico, de modo que o
+acasalamento é direcional mas não assortativo. O resultado é deslocamento do
+traço sem acoplamento, o que não corresponde ao mecanismo de Fisher.
+
+### A seleção sexual pode apagar a própria assinatura na rede
+
+```{r fig-trajetoria, fig.width=9, fig.height=3.6, fig.cap="Trajetórias ao longo das cem gerações, promediando todas as combinações de sigma inicial, A_max e k, sem seleção natural. O censo é de 400 adultos, de modo que Ne = 400 corresponderia a uma população sem desigualdade de sucesso reprodutivo."}
+if (ok(co)) {
+  tr <- co %>% filter(!selecao_natural) %>%
+    group_by(tipo_selecao, generation) %>%
+    summarise(`oportunidade de seleção sexual (Is)` = mean(I_s, na.rm = TRUE),
+              `distância entre traço e preferência` = mean(zbar_pop - pbar_pop),
+              `tamanho efetivo (Ne)` = mean(Ne, na.rm = TRUE),
+              .groups = "drop") %>%
+    pivot_longer(-c(tipo_selecao, generation)) %>%
+    mutate(tipo_selecao = ordenar_curva(tipo_selecao))
+  ggplot(tr, aes(generation, value, color = tipo_selecao, linetype = tipo_selecao)) +
+    geom_line(linewidth = 1) +
+    facet_wrap(~name, scales = "free_y") +
+    scale_color_manual(values = cores_4, labels = labels_4, name = NULL) +
+    scale_linetype_manual(values = TIPOS_LINHA, labels = labels_4, name = NULL) +
+    labs(x = "geração", y = NULL) +
+    theme_light(base_size = 11) + theme(legend.position = "top")
+}
+```
+
+Sob a curva sigmoide, o traço se afasta tanto da distribuição de preferências
+que a função de aceite satura e deixa de discriminar entre machos. A
+oportunidade de seleção sexual parte de um valor alto e termina próxima de
+zero, e a rede da geração 100 é indistinguível da rede produzida pela curva
+aleatória, tanto em modularidade como em centralização. A variância do traço
+não diminui nesse intervalo, o que descarta perda de variação genética como
+explicação: o que ocorre é o deslocamento da média para fora da faixa em que a
+preferência discrimina. A curva disruptiva chega ao mesmo estado por outro
+caminho, alargando a distribuição do traço até que qualquer fêmea encontre
+machos distantes do seu próprio pico.
+
+O painel do tamanho efetivo mostra que o fenômeno não é apenas topológico.
+Enquanto a seleção sexual opera, ela reduz o Ne a aproximadamente metade do
+censo; quando o traço escapa da faixa de discriminação, a população retorna ao
+seu tamanho de censo. Nas condições deste modelo, portanto, a seleção sexual
+atua como uma força demográfica transitória.
+
+Este resultado não estava previsto e é, na nossa avaliação, o mais interessante
+do conjunto. Ele sugere que a assinatura da seleção sexual na estrutura da rede
+pode ser transitória, e que uma população amostrada num único momento pode
+apresentar uma rede indistinguível do acasalamento ao acaso apesar de ter
+passado por seleção sexual intensa.
+
+# Uma decisão metodológica com conteúdo biológico
+
+Ao longo deste ano, uma consequência não prevista da regra de decisão mais
+forte expôs uma ambiguidade real no modelo, que vale registrar porque a sua
+resolução é um resultado em si.
+
+O número de 200 machos adultos admite duas leituras. Pode ser um teto, em que
+cada juvenil sobrevive de forma independente e o censo é quem sobrou, de modo
+que a viabilidade é mortalidade em termos absolutos e o tamanho da população é
+um resultado do modelo. Ou pode ser uma cota, em que 200 é a capacidade de
+suporte e a viabilidade decide quais machos ocupam as vagas, nunca quantas
+vagas existem. São, respectivamente, seleção dura e seleção branda.
+
+As duas versões foram rodadas nas mesmas combinações e com as mesmas sementes,
+o que permite uma comparação pareada. Três consequências:
+
+1. Sob o teto, nas combinações em que o traço se afasta muito do ótimo, a
+   viabilidade colapsa para todos os machos ao mesmo tempo e o censo cai a
+   poucas dezenas. Como todas as métricas de topologia dependem do tamanho e da
+   densidade da rede, essas combinações deixam de ser comparáveis com as
+   demais. O modelo passou a usar a cota por essa razão.
+
+2. A centralização e a oportunidade de seleção sexual respondem em direções
+   opostas à mudança de censo. Com poucos machos e muitas fêmeas todos os
+   machos acasalam muito, de modo que a desigualdade entre eles é baixa, mas a
+   centralização, que se normaliza pelo máximo possível para aquele tamanho de
+   rede, sai alta. A conclusão metodológica é que a centralização não é
+   comparável entre redes de tamanhos diferentes e o Is é, e isso precisa ir
+   para os Métodos do artigo.
+
+3. Contra a nossa expectativa, sob a cota o traço se afasta mais do ótimo, e
+   não menos. Como as vagas se preenchem sempre com os melhores juvenis que
+   existirem, não há mortalidade em termos absolutos contendo o deslocamento. A
+   explicação que nos parece mais provável é que o freio do teto não seja mais
+   seleção natural, e sim menos seleção sexual: quando o pool de machos
+   colapsa, a fêmea não consegue ser seletiva, e a seleção sexual se apaga a si
+   mesma. Essa cadeia causal ainda é inferência e está em verificação.
+
+# Objetivo 2: doença na rede sexual
+
+Este objetivo, previsto para o segundo ano, está em desenvolvimento. A pergunta
+é se e como uma doença que se espalha por contato sexual e altera a
+atratividade do sexo escolhido impacta a formação das redes sexuais e a seleção
+sobre a característica escolhida.
+
+*Esta seção precisa ser completada com o estado atual do desenvolvimento e com
+os primeiros resultados. O que está abaixo é o desenho, para revisão.*
+
+O desenho acrescenta ao motor existente uma estrutura temporal dentro da
+estação reprodutiva. A estação é dividida em semanas, e em cada semana as
+fêmeas encontram machos, aplicam a mesma regra de decisão dos estudos
+anteriores e podem copular. A transmissão ocorre nas cópulas daquela semana,
+com probabilidade por cópula, e a infecção altera o traço percebido do macho,
+com uma magnitude que é o parâmetro central do estudo. A estrutura de estados é
+do tipo suscetível-infectado, com recuperação.
+
+A parte de escolha de parceiro não muda: continua sendo a mesma função, com as
+mesmas quatro curvas de preferência. O que se acrescenta é a persistência das
+parcerias ao longo das semanas, que é a parte epidemiológica, porque é ela que
+gera cópulas repetidas com o mesmo parceiro, concorrência entre parcerias
+simultâneas e rotação de parceiros ao longo da estação.
+
+Três decisões estão em aberto e serão fixadas a partir da literatura: a duração
+média de uma parceria, a frequência de cópula de um casal estabelecido, e se a
+doença modelada é aguda, com recuperação rápida e estação curta, ou crônica.
+Essa última escolha é uma afirmação sobre que doença estamos modelando e será
+declarada nos Métodos.
+
+# Gestão e disponibilização dos códigos
+
+*Seção a completar: repositório, licença e plano de disponibilização.*
+
+# Atividades complementares
+
+*Seção a completar com as atividades do período: congressos, cursos,
+colaborações, orientações e participação em outros projetos.*
+
+# Projeção e recomendações
+
+*Seção a completar.*
+
+# Referências
+
+*Lista preliminar, a conferir e completar antes da entrega.*
+
+Almeida-Neto, M., Guimarães, P., Guimarães Jr., P.R., Loyola, R.D. & Ulrich, W.
+(2008) A consistent metric for nestedness analysis in ecological systems:
+reconciling concept and measurement. *Oikos*, 117, 1227-1239.
+
+Bell, D.A., Kovach, R.P., Robinson, Z.L., Whiteley, A.R. & Reed, T.E. (2021)
+The ecological causes and consequences of hard and soft selection. *Ecology
+Letters*, 24, 1505-1521.
+
+Blondel, V.D., Guillaume, J.-L., Lambiotte, R. & Lefebvre, E. (2008) Fast
+unfolding of communities in large networks. *Journal of Statistical Mechanics:
+Theory and Experiment*, 2008, P10008.
+
+Csardi, G. & Nepusz, T. (2006) The igraph software package for complex network
+research. *InterJournal Complex Systems*, 1695.
+
+Débarre, F. & Gandon, S. (2011) Evolution in heterogeneous environments:
+between soft and hard selection. *The American Naturalist*, 177, E84-E97.
+
+Dormann, C.F., Gruber, B. & Fründ, J. (2008) Introducing the bipartite package:
+analysing ecological networks. *R News*, 8, 8-11.
+
+Janetos, A.C. (1980) Strategies of female mate choice: a theoretical analysis.
+*Behavioral Ecology and Sociobiology*, 7, 107-112.
+
+Kirkpatrick, M. (1982) Sexual selection and the evolution of female choice.
+*Evolution*, 36, 1-12.
+
+Lande, R. (1981) Models of speciation by sexual selection on polygenic traits.
+*Proceedings of the National Academy of Sciences*, 78, 3721-3725.
+
+Real, L. (1990) Search theory and mate choice. I. Models of single-sex
+discrimination. *The American Naturalist*, 136, 376-405.
+
+Reznick, D. (2016) Hard and soft selection revisited: how evolution by natural
+selection works in the real world. *Journal of Heredity*, 107, 3-14.
+
+Roff, D.A. & Fairbairn, D.J. (2014) The evolution of phenotypes and genetic
+parameters under preferential mating. *Ecology and Evolution*, 4, 2759-2776.
+
+Seger, J. (1985) Unifying genetic models for the evolution of female choice.
+*Evolution*, 39, 1185-1193.
