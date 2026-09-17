@@ -38,6 +38,14 @@ suppressPackageStartupMessages({
 
 cores_4  <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
 labels_4 <- c("uniform"="Aleatória","gaussian"="Gaussiana","sigmoid"="Sigmoide","u-shaped"="Disruptiva")
+
+# Quando as quatro curvas dão o mesmo valor, as linhas ficam exatamente uma
+# sobre a outra e só se vê a última desenhada, o que faz parecer que faltam
+# dados. Acontece de verdade: com A_max = 200 e k = 5, por exemplo, as quatro
+# chegam ao teto de parceiros e a poliandria realizada é idêntica nas quatro.
+# O tipo de linha resolve, e de quebra a figura passa a se ler sem cor.
+TIPOS_LINHA <- c("uniform" = "solid", "gaussian" = "22",
+                 "sigmoid" = "62",    "u-shaped" = "4212")
 ```
 
 ```{r dados}
@@ -294,19 +302,21 @@ plot_evolucao <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo,
                color = "red", alpha = 0.45) +
     geom_jitter(aes(x = xval, y = v, color = tipo_selecao),
                 alpha = 0.20, size = 1.0, width = 0.02) +
-    geom_smooth(aes(x = xval, y = v, color = tipo_selecao),
+    geom_smooth(aes(x = xval, y = v, color = tipo_selecao, linetype = tipo_selecao),
                 method = "loess", formula = y ~ x, se = FALSE, linewidth = 1.2) +
     facet_grid(q ~ panel, scales = "free_y", switch = "y") +
     scale_color_manual(values = cores_4, labels = labels_4) +
+    scale_linetype_manual(values = TIPOS_LINHA, guide = "none") +
     labs(x = var_lab, y = NULL) +
     tema_painel(cor_faixa) + theme(legend.position = "none")
 
   p23 <- ggplot(d23) +
     geom_ribbon(aes(x = xval, ymin = m - s, ymax = m + s, fill = tipo_selecao),
                 alpha = 0.13, color = NA) +
-    geom_line(aes(x = xval, y = m, color = tipo_selecao), linewidth = 0.9) +
+    geom_line(aes(x = xval, y = m, color = tipo_selecao, linetype = tipo_selecao), linewidth = 0.9) +
     facet_grid(q ~ panel, scales = "free_y") +
     scale_color_manual(values = cores_4, labels = labels_4, name = NULL) +
+    scale_linetype_manual(values = TIPOS_LINHA, labels = labels_4, name = NULL) +
     scale_fill_manual(values = cores_4, guide = "none") +
     labs(x = "Geração", y = NULL) +
     tema_painel(cor_faixa) +
@@ -317,7 +327,8 @@ plot_evolucao <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo,
       title   = titulo,
       caption = paste("Coluna 1: cada ponto é uma réplica na geração final, a linha é um loess.",
                       "Colunas 2-3: linha = média das réplicas, sombra = ±1 SD.",
-                      "A linha vermelha tracejada marca σ = 1.0, o ponto onde os dois estudos se cruzam."),
+                      "A linha vermelha tracejada marca σ = 1.0, o ponto onde os dois estudos se cruzam.",
+                      "\nOnde as curvas dão o mesmo valor as linhas se sobrepõem: é por isso que o tipo de traço difere entre elas."),
       theme   = theme(plot.title      = element_text(face = "bold", size = 13),
                       plot.caption    = element_text(hjust = 0, face = "italic", size = 8.5),
                       legend.position = "bottom"))
