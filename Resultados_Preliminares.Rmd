@@ -178,7 +178,7 @@ parâmetros está mostrando. Onde estiver escrito "todos os k", os três valores
 juntos, e como k pesa bastante, vale conferir no anexo se o padrão se mantém em cada um deles.
 
 > Um segundo aviso, este mais sério e válido para o documento inteiro. Esta rodada usa a versão
-> mais recente do modelo, com a curva de preferência que apelidamos de *best-of-n*: a fêmea avalia
+> mais recente do modelo, com a regra de escolha que apelidamos de *best-of-n*: a fêmea avalia
 > os A_max machos, todos, e só depois fica com os k melhores entre os que aceitou. O desenho
 > está em `NOTA_quatro_estudos.md`.
 >
@@ -360,8 +360,8 @@ for (cv in CURVAS) {
 
 # Estudo 1. Controle
 
-> Nada evolui. Uma geração só, com sigma_p e sigma_z impostos, para medir a topologia que cada
-> curva de preferência produz sobre cada composição de população.
+Nada evolui. Uma geração só, com sigma_p e sigma_z impostos, para medir a topologia que cada
+curva de preferência produz sobre cada composição de população.
 
 É o único desenho que cruza os três níveis por inteiro: a curva de preferência, a variação disponível
 e a restrição ecológica. Por isso é aqui que se pergunta qual deles domina e como interagem, que
@@ -514,8 +514,8 @@ A_max = 200, que é exatamente o que a predição original diz.
 
 # Estudo 2. Fêmeas variando
 
-> O traço do macho evolui. sigma_p é imposto, e a pergunta é se a topologia que ele produz prediz
-> para onde o traço vai.
+O traço do macho evolui. sigma_p é imposto, e a pergunta é se a topologia que ele produz prediz
+para onde o traço vai.
 
 Este estudo e o seguinte são espelhos, e servem de replicação interna: se a relação for da rede e
 não da característica em particular, tem de aparecer nos dois lados.
@@ -525,11 +525,11 @@ não da característica em particular, tem de aparecer nos dois lados.
 > afasta do ótimo e o censo de machos desandava. Ou seja, o problema morava exatamente no canto
 > do desenho em que a resposta evolutiva é mais forte, que é o canto que esta hipótese quer
 > olhar.
->
-> Com a cota o censo é sempre 200 e essas células voltaram a ser comparáveis. O que mudou de
-> verdade foi a leitura: a subida da centralização que víamos ali era o censo curto, e o
-> resultado que fica no lugar dela é o Is, que aguenta a mudança de tamanho da rede. Está em
-> `NOTA_teto_contra_cota.md`.
+
+Com a cota o censo é sempre 200 e essas células voltaram a ser comparáveis. O que mudou de
+verdade foi a leitura: a subida da centralização que víamos ali era o censo curto, e o
+resultado que fica no lugar dela é o Is, que aguenta a mudança de tamanho da rede. Está em
+`NOTA_teto_contra_cota.md`.
 
 ```{r h2a-varz, fig.height=4.2}
 if (ok(d)) {
@@ -614,8 +614,8 @@ a avaliar 10 machos em vez de 200 quase não muda para onde o traço vai parar.
 
 # Estudo 3. Machos variando
 
-> A preferência da fêmea evolui. sigma_z é imposto, e é a disponibilidade de machos variados que
-> gera a seleção sobre a preferência.
+A preferência da fêmea evolui. sigma_z é imposto, e é a disponibilidade de machos variados que
+gera a seleção sobre a preferência.
 
 ```{r h2b-varp, fig.height=4.2}
 if (ok(esp)) {
@@ -670,8 +670,8 @@ nenhuma. Ela só aparece na dinâmica inicial.
 
 # Estudo 4. Co-evolução
 
-> As duas características são herdáveis, e a topologia determina se a covariância genética entre
-> elas chega a se acumular.
+As duas características são herdáveis, e a topologia determina se a covariância genética entre
+elas chega a se acumular.
 
 Rodou inteiro. A metade sem seleção natural são 6.480 cenários e a metade com seleção natural
 rodou depois, sob a cota. As tabelas e a figura desta seção mostram a metade sem seleção natural,

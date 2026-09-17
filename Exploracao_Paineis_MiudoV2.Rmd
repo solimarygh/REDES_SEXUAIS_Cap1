@@ -391,7 +391,7 @@ parceiros elas de fato conseguiram, que não é o mesmo que o k que
 buscavam.
 
 > Esta rodada usa a versão mais recente do modelo, a que saiu da minha
-> última conversa com o Miudo, e inclui a curva de preferência que
+> última conversa com o Miudo, e inclui a regra de escolha que
 > apelidamos de *best-of-n*: a fêmea avalia os A_max machos, todos, e só
 > depois fica com os k melhores entre os que aceitou. O desenho está em
 > `NOTA_quatro_estudos.md`.
@@ -573,10 +573,10 @@ tibble(
 
 # 1. Controle: a superfície σp × σz, uma geração
 
-> Nada é herdado. Os traços são sorteados, a rede se forma, as métricas
-> são medidas, e acabou. É o único estudo que cruza os dois eixos de
-> variação por inteiro, e por isso o único em que dá para ver a
-> superfície toda em vez de uma linha dela.
+Nada é herdado. Os traços são sorteados, a rede se forma, as métricas
+são medidas, e acabou. É o único estudo que cruza os dois eixos de
+variação por inteiro, e por isso o único em que dá para ver a
+superfície toda em vez de uma linha dela.
 
 Como não há geração seguinte, aqui não existe trajetória: cada cenário é
 um ponto, e o que se explora é o plano (σp, σz). Os dois eixos vão de
@@ -859,10 +859,10 @@ render_tabs(function(kk, amax, ns)
 
 # 2. Fêmeas variando (σp), o traço do macho evolui
 
-> O eixo é σp, a variação do pico de preferência entre as fêmeas. A
-> preferência é re-sorteada a cada geração de N(5, σp), então não
-> evolui, e o traço do macho é herdável e livre para responder à
-> seleção. σz fica fixo em 1.0 como condição inicial.
+O eixo é σp, a variação do pico de preferência entre as fêmeas. A
+preferência é re-sorteada a cada geração de N(5, σp), então não
+evolui, e o traço do macho é herdável e livre para responder à
+seleção. σz fica fixo em 1.0 como condição inicial.
 
 Cem gerações por réplica. A escolha da fêmea, aqui, é a causa da
 seleção: ela não muda ao longo do tempo, e é ela que gera a pressão
@@ -960,10 +960,10 @@ render_tabs(function(kk, amax, ns)
 
 # 3. Machos variando (σz), a preferência evolui
 
-> O espelho do anterior. O traço do macho passa a ser ambiental,
-> re-sorteado a cada geração de N(5, σz) e não herdado, e o pico de
-> preferência da fêmea passa a ser herdável e bi-parental. σp fica em
-> 1.0, mas só como condição inicial.
+O espelho do anterior. O traço do macho passa a ser ambiental,
+re-sorteado a cada geração de N(5, σz) e não herdado, e o pico de
+preferência da fêmea passa a ser herdável e bi-parental. σp fica em
+1.0, mas só como condição inicial.
 
 O papel da escolha da fêmea se inverte: ela deixa de ser a causa da
 seleção e passa a ser o alvo dela, e a força seletiva passa a ser a
