@@ -1068,9 +1068,22 @@ machos. Manter σp fixo durante as cem gerações é deliberado, e é o que perm
 atribuir a resposta do traço à largura dessa distribuição, sem o confundimento
 de a preferência estar mudando ao mesmo tempo.
 
-Em todos os painéis desta seção, a coluna 1 mostra o gradiente ao longo de σp
-na geração 100, e as colunas 2 e 3 mostram as trajetórias que levaram até lá,
-nos dois extremos do gradiente, σp = 0.2 e σp = 2.0.
+Todas as figuras das seções seguintes têm a mesma estrutura de três colunas, e
+vale entendê-la uma vez:
+
+- **Coluna 1** é um corte na geração 100. No eixo horizontal está σp, o
+  tratamento, e no vertical a variável resposta. Cada ponto é uma réplica e a
+  linha é um loess. Responde: depois de cem gerações, onde a população acaba,
+  em função de quanto as fêmeas discordam entre si?
+- **Colunas 2 e 3** são trajetórias. No eixo horizontal está a geração, de 1 a
+  100. Cada uma mostra uma das duas pontas do gradiente, σp = 0.2 à esquerda e
+  σp = 2.0 à direita, com a média das réplicas e uma sombra de um desvio.
+  Respondem: como a população chegou até lá, e se chegou a um valor estável ou
+  ainda estava se movendo na geração 100.
+
+Ou seja, a coluna 1 é o destino ao longo de todo o gradiente, e as colunas 2 e 3
+são o caminho, nos dois extremos dele. As linhas são as quatro curvas de
+preferência, com a mesma cor e o mesmo tipo de traço em todo o documento.
 
 ## 2.0 O efeito de σp sobre uma população
 
@@ -1128,6 +1141,10 @@ for (cv in CURVAS) {
 
 ## 2.1 Métricas de rede {.tabset}
 
+As quatro métricas de estrutura da rede. Na coluna 1, o valor de cada uma na
+geração 100 ao longo do gradiente de σp; nas colunas 2 e 3, como cada uma
+chegou até ali, com σp = 0.2 e com σp = 2.0.
+
 ```{r fem-metricas, results='asis', fig.width=13, fig.height=9}
 if (!ok(d)) cat("\n*Sem dados. Rode `Fase4_TodasAsCurvas.R`.*\n") else
 render_tabs(function(kk, amax, ns)
@@ -1137,8 +1154,10 @@ render_tabs(function(kk, amax, ns)
 
 ## 2.2 O traço do macho (z) {.tabset}
 
-O traço é a variável evolutiva deste estudo, e os dois painéis mostram a
-sua média e a sua variância.
+O traço é a variável evolutiva deste estudo, e as duas linhas de painéis mostram
+a sua média e a sua variância. Na coluna 1, os valores na geração 100 ao longo
+do gradiente de σp; nas colunas 2 e 3, as cem gerações que levaram até ali, com
+σp = 0.2 e com σp = 2.0.
 
 Dois aspectos merecem atenção. Sem seleção natural, a média do traço se desloca
 bem além do ótimo ecológico, que é 5, porque nada se opõe à seleção sexual.
@@ -1160,8 +1179,13 @@ render_tabs(function(kk, amax, ns)
 
 ## 2.3 Poliandria realizada {.tabset}
 
-As mesmas quatro variáveis de acesso ao acasalamento da seção 1.3, agora ao
-longo das cem gerações.
+As mesmas quatro variáveis de acesso ao acasalamento da seção 1.3, agora com
+evolução. Na coluna 1, o valor de cada uma na geração 100 ao longo do gradiente
+de σp; nas colunas 2 e 3, a trajetória nos dois extremos do gradiente.
+
+Aqui as colunas 2 e 3 dizem algo que a coluna 1 não mostra: se o acesso ao
+acasalamento se manteve estável ao longo das cem gerações ou se mudou enquanto
+o traço evoluía.
 
 ```{r fem-poliandria, results='asis', fig.width=13, fig.height=9}
 if (!ok(d)) cat("\n*Sem dados.*\n") else
@@ -1187,6 +1211,10 @@ sexual, e sim ecológica: é a disponibilidade de machos com traços adequados.
 Uma analogia útil é a de um herbívoro e as suas plantas hospedeiras. A planta
 não escolhe, mas a disponibilidade de plantas gera seleção sobre a preferência
 do herbívoro que escolhe.
+
+As figuras têm a mesma estrutura de três colunas do estudo anterior, com o eixo
+trocado: a coluna 1 é o corte na geração 100 ao longo do gradiente de σz, e as
+colunas 2 e 3 são as trajetórias nos dois extremos dele, σz = 0.2 e σz = 2.0.
 
 Tratar o traço masculino como ambiental tem uma leitura biológica própria, a de
 dependência de condição: o macho expressa aquele traço por causa do ambiente em
@@ -1254,6 +1282,10 @@ for (cv in CURVAS) {
 
 ## 3.1 Métricas de rede {.tabset}
 
+As mesmas quatro métricas da seção 2.1, agora contra σz. Na coluna 1, o valor de
+cada uma na geração 100 ao longo do gradiente; nas colunas 2 e 3, como cada uma
+chegou até ali, com σz = 0.2 e com σz = 2.0.
+
 ```{r mac-metricas, results='asis', fig.width=13, fig.height=9}
 if (!ok(esp)) cat("\n*Sem dados. Rode `Fase_Espelho.R`.*\n") else
 render_tabs(function(kk, amax, ns)
@@ -1263,10 +1295,13 @@ render_tabs(function(kk, amax, ns)
 
 ## 3.2 A preferência da fêmea (p) {.tabset}
 
-A variável evolutiva deste estudo, medida nas fêmeas adultas. É o
-equivalente exato do painel 2.2: lá a característica medida no sexo que a
-expressa, aqui a característica medida no sexo que a utiliza. As duas figuras
-se leem em paralelo.
+A variável evolutiva deste estudo, medida nas fêmeas adultas, na sua média e na
+sua variância. É o equivalente exato do painel 2.2: lá a característica medida
+no sexo que a expressa, aqui a característica medida no sexo que a utiliza. As
+duas figuras se leem em paralelo.
+
+Na coluna 1, os valores na geração 100 ao longo do gradiente de σz; nas colunas
+2 e 3, as cem gerações que levaram até ali, com σz = 0.2 e com σz = 2.0.
 
 ```{r mac-pref, results='asis', fig.width=13, fig.height=5.5}
 if (!ok(esp)) cat("\n*Sem dados.*\n") else
@@ -1282,6 +1317,12 @@ Neste estudo estes painéis deixam de ser apenas descritivos. A proporção
 de fêmeas sem acasalar é a medida direta da força de seleção sobre a
 preferência: quem não aceita nenhum macho deixa zero descendentes, e é essa
 variância de sucesso reprodutivo que permite à preferência evoluir.
+
+Por isso vale olhar aqui as colunas 2 e 3 antes da coluna 1. Se a proporção de
+fêmeas sem acasalar cai ao longo das gerações, a seleção está eliminando as
+preferências mal posicionadas e, ao fazê-lo, removendo a própria causa da
+seleção. Um valor baixo na geração 100 pode significar que nunca houve seleção
+ou que ela já terminou o seu trabalho, e só a trajetória separa os dois casos.
 
 ```{r mac-poliandria, results='asis', fig.width=13, fig.height=9}
 if (!ok(esp)) cat("\n*Sem dados.*\n") else
