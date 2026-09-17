@@ -1202,7 +1202,12 @@ plano <- local({
     g <- max(co$generation, na.rm = TRUE)
     partes$co <- co %>%
       filter(generation %in% c(1L, g)) %>%
-      group_by(across(all_of(CHAVE)), generation) %>%
+      # Os dois sigma iniciais TÊM de entrar no agrupamento. Sem eles as nove
+      # combinações de partida do desenho (0.5, 1.0 e 2.0 em cada eixo) eram
+      # promediadas numa só, e a linha inteira aparecia como uma única célula
+      # no meio do plano. É o equivalente ao sig_p das fêmeas e ao sig_z dos
+      # machos, que já estavam aqui.
+      group_by(across(all_of(CHAVE)), sigma_p_init, sigma_z_init, generation) %>%
       summarise(sig_z_medido = mean(sqrt(varz_pop), na.rm = TRUE),
                 sig_p_medido = mean(sqrt(varp_pop), na.rm = TRUE),
                 across(all_of(names(METS_PLANO)), ~ mean(.x, na.rm = TRUE)),
@@ -1213,7 +1218,8 @@ plano <- local({
              sig_p  = encaixar(sig_p_medido),
              fora   = sig_z_medido > max(NIVEIS_SIGMA) | sig_p_medido > max(NIVEIS_SIGMA),
              painel = sprintf("Co-evolução · geração %d", generation)) %>%
-      dplyr::select(-generation, -sig_z_medido, -sig_p_medido)
+      dplyr::select(-generation, -sig_z_medido, -sig_p_medido,
+                    -sigma_p_init, -sigma_z_init)
   }
 
   if (!length(partes)) NULL else {
