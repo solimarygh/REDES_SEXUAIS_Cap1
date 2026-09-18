@@ -382,15 +382,45 @@ if (!exists("EPIDEMIA_SO_FUNCOES") || !isTRUE(EPIDEMIA_SO_FUNCOES)) {
   arquivo_backup <- file.path(diretorios$dados, "backup_Epidemia.rds")
   arquivo_final  <- file.path(diretorios$dados, "resultados_Epidemia.rds")
 
+  # A assinatura do desenho. `rodar_cenarios` só recalcula as entradas NULL do
+  # backup, de modo que uma entrada já preenchida é aceita pela POSIÇÃO que
+  # ocupa na lista. Se a grade mudar, a mesma posição passa a significar outro
+  # cenário, e o backup antigo entraria como se fosse do novo desenho: sem erro
+  # nenhum, e com os dados errados. Foi o que quase aconteceu quando beta virou
+  # fator e a grade passou de 7.200 para 14.400 cenários.
+  #
+  # A assinatura guarda a grade inteira. Se ela não bater, o backup é de outro
+  # desenho e a corrida recomeça do zero, que é a única coisa correta a fazer.
+  assinatura <- function(cen) {
+    list(n = nrow(cen), cols = names(cen),
+         niveis = lapply(cen[, setdiff(names(cen), "idx_global"), drop = FALSE],
+                         function(x) sort(unique(as.character(x)))))
+  }
+  assin_agora <- assinatura(cenarios)
+
   lista <- if (file.exists(arquivo_backup)) {
     l <- readRDS(arquivo_backup)
-    cat("Backup encontrado, retomando.\n")
-    if (length(l) != nrow(cenarios)) length(l) <- nrow(cenarios)
-    l
+    assin_backup <- attr(l, "assinatura")
+    if (is.null(assin_backup) || !identical(assin_backup, assin_agora)) {
+      cat("Backup encontrado, mas de um desenho DIFERENTE do atual.\n")
+      if (!is.null(assin_backup))
+        cat(sprintf("  backup: %d cenários | atual: %d cenários\n",
+                    assin_backup$n, assin_agora$n))
+      else
+        cat("  backup sem assinatura, gravado por uma versão anterior do script\n")
+      cat("  Recomeçando do zero: reaproveitar seria misturar dois desenhos.\n")
+      vector("list", nrow(cenarios))
+    } else {
+      feitos <- sum(!vapply(l, is.null, logical(1)))
+      cat(sprintf("Backup do mesmo desenho, retomando: %d de %d já prontos.\n",
+                  feitos, nrow(cenarios)))
+      l
+    }
   } else {
     cat("Nenhum backup, começando do zero.\n")
     vector("list", nrow(cenarios))
   }
+  attr(lista, "assinatura") <- assin_agora
 
   simular_i <- function(i) {
     res <- simulate_epidemia(
