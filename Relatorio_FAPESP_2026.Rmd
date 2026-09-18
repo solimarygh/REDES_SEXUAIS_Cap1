@@ -114,13 +114,33 @@ selecionados*, financiado pela Fundação de Amparo à Pesquisa do Estado de Sã
 Paulo (FAPESP) e sob supervisão do Prof. Dr. Paulo Roberto Guimarães Jr. Cobre
 o período desde o relatório anterior, de agosto de 2025.
 
-O projeto investiga a interface entre redes sexuais e evolução fenotípica em
-populações animais. A pergunta central é como a variação na preferência do sexo
-que escolhe influencia a estrutura da rede sexual e a evolução de
-características sexualmente selecionadas. O segundo objetivo, avaliar como
-doenças transmitidas por contato que afetam a atratividade do sexo escolhido
-impactam essas redes e a seleção sobre as características, estava previsto para
-o segundo ano e é a frente em desenvolvimento no momento.
+O resumo original do projeto segue:
+
+> A seleção intersexual é um mecanismo em que indivíduos de um sexo escolhem
+> parceiros do sexo oposto com base em características morfológicas, químicas ou
+> comportamentais. Essa escolha influencia a evolução de características
+> exageradas no sexo escolhido e pode ter impactos ecológicos relevantes. Em
+> muitos casos, a seleção depende de sinais associados à boa condição de saúde,
+> como resistência a doenças. Estudos recentes indicam que a escolha intersexual
+> varia entre indivíduos e pode ser modulada pela interação entre fatores
+> genéticos e ambientais. Este projeto tem como objetivo explorar a interface
+> entre redes sexuais e evolução fenotípica em populações animais.
+> Especificamente, buscamos investigar como a variação na preferência do sexo que
+> escolhe influencia a estrutura da rede sexual e a evolução de características
+> sexualmente selecionadas. Além disso, pretendemos avaliar como doenças
+> transmitidas por contato, que afetam a atratividade do sexo escolhido, impactam
+> essas redes e a seleção de características. Para tanto, utilizamos modelos
+> matemáticos evolutivos, visando oferecer tanto avanços acadêmicos quanto
+> potenciais aplicações práticas, especialmente no entendimento e mitigação de
+> impactos causados por doenças.
+
+O primeiro objetivo, o de investigar como a variação na preferência do sexo que
+escolhe influencia a estrutura da rede sexual e a evolução das características
+sexualmente selecionadas, está concluído e ocupa a maior parte deste relatório.
+O segundo, o de avaliar como uma doença transmitida por contato que afeta a
+atratividade do sexo escolhido impacta essas redes e a seleção sobre as
+características, estava previsto para o segundo ano e é a frente em
+desenvolvimento no momento.
 
 ## O que mudou desde o relatório anterior
 
@@ -622,7 +642,38 @@ terminar. O anexo epidemiológico já traz o desenho e as figuras.*
 
 # Gestão e disponibilização dos códigos
 
-*Seção a completar: repositório, licença e plano de disponibilização.*
+Todos os códigos desenvolvidos no projeto estão organizados e documentados num
+repositório no GitHub (<https://github.com/solimarygh/REDES_SEXUAIS_Cap1>), que
+substitui o repositório citado no relatório anterior e reúne o motor de
+simulação, os scripts de cada estudo, as análises e os documentos que geram
+este relatório e os seus anexos. Após a publicação dos resultados o repositório
+será tornado público, garantindo a disponibilização transparente das análises.
+
+A organização segue três princípios, adotados ao longo deste ano à medida que o
+desenho crescia.
+
+O primeiro é o motor único. Todas as funções compartilhadas, da regra de
+decisão da fêmea ao cálculo das métricas de rede, estão num só arquivo, e cada
+estudo é um script curto que define o seu desenho experimental e chama esse
+motor. Assim, uma correção no motor alcança os quatro estudos ao mesmo tempo, e
+nenhuma diferença entre eles pode vir de implementações divergentes.
+
+O segundo é a reprodutibilidade por semente. Cada cenário recebe uma semente
+determinada pelo seu índice no desenho completo, de modo que produz exatamente
+o mesmo resultado quer a rodada seja feita de uma vez, quer seja dividida entre
+máquinas ou retomada depois de uma interrupção. As rodadas longas gravam um
+backup a cada bloco, e o backup carrega uma assinatura do desenho: se a grade
+de parâmetros mudar, a retomada é recusada em vez de misturar dois desenhos.
+
+O terceiro é que os documentos são gerados a partir dos dados. Este relatório e
+os seus anexos leem os mesmos arquivos de resultados com o mesmo código de
+leitura, e as figuras e os números são calculados na hora da compilação. Não há
+valores transcritos à mão que possam divergir dos dados, e os três documentos
+não podem discordar entre si sobre o que estão mostrando.
+
+As simulações foram realizadas em R (R Core Team 2026), com os pacotes igraph
+(Csardi & Nepusz 2006) para as métricas de rede e bipartite (Dormann et al.
+2008) para o aninhamento.
 
 # Atividades complementares
 
@@ -675,6 +726,9 @@ Kirkpatrick, M. (1982) Sexual selection and the evolution of female choice.
 
 Lande, R. (1981) Models of speciation by sexual selection on polygenic traits.
 *Proceedings of the National Academy of Sciences*, 78, 3721-3725.
+
+R Core Team (2026) *R: A Language and Environment for Statistical Computing*.
+R Foundation for Statistical Computing, Vienna.
 
 Real, L. (1990) Search theory and mate choice. I. Models of single-sex
 discrimination. *The American Naturalist*, 136, 376-405.
