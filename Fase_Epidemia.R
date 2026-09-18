@@ -342,11 +342,31 @@ if (!exists("EPIDEMIA_SO_FUNCOES") || !isTRUE(EPIDEMIA_SO_FUNCOES)) {
 
   n_replicas <- 100L
 
+  # A transmissão entra como FATOR, com dois níveis, e não como constante. A
+  # razão é que o critério de "grande epidemia" do plano de trabalho (15% da
+  # população infectada em algum momento) só tem informação numa faixa estreita
+  # de beta, e as duas perguntas do estudo vivem em faixas diferentes.
+  #
+  # Com beta = 0.15 a epidemia acontece em todas as células, e é isso que dá
+  # espaço para os contrastes secundários (h_I, SIS contra SIR, sigma_p) serem
+  # medidos: a incidência é uma resposta contínua com variação para os dois
+  # lados. O critério dos 15%, aí, é passado por 100% das temporadas e não
+  # distingue nada.
+  #
+  # Com beta = 0.06 o critério passa a discriminar, e a curva de preferência
+  # deixa de mudar o TAMANHO da epidemia para decidir se ela ACONTECE: na
+  # medição, a gaussiana não produz nenhuma grande epidemia e a disruptiva
+  # produz em cerca de 80% das temporadas, com os mesmos parâmetros em tudo o
+  # mais. É o resultado qualitativo, e ele não seria visível com um beta só.
+  #
+  # Os dois níveis dobram o custo da rodada, que fica na ordem de algumas
+  # horas. Para voltar a um beta só, basta deixar um valor no vetor abaixo.
   cenarios <- expand.grid(
     tipo_selecao = c("uniform", "gaussian", "sigmoid", "u-shaped"),
     sigma_p      = c(0.5, 1.0, 1.5),   # os níveis do plano de trabalho
     h_I          = c(-1, 0, 1),        # em unidades de sigma_z, que é 1.0
     modelo       = c("SIS", "SIR"),
+    beta         = c(0.06, 0.15),      # limiar e epidemia estabelecida
     replica      = seq_len(n_replicas),
     stringsAsFactors = FALSE
   )
@@ -377,7 +397,8 @@ if (!exists("EPIDEMIA_SO_FUNCOES") || !isTRUE(EPIDEMIA_SO_FUNCOES)) {
       tipo_selecao = as.character(cenarios$tipo_selecao[i]),
       sigma_p      = cenarios$sigma_p[i],
       h_I          = cenarios$h_I[i],
-      modelo       = as.character(cenarios$modelo[i])
+      modelo       = as.character(cenarios$modelo[i]),
+      beta         = cenarios$beta[i]
     )
     if (is.null(res) || nrow(res) == 0) return(NULL)
     res$replica <- cenarios$replica[i]
@@ -402,6 +423,10 @@ if (!exists("EPIDEMIA_SO_FUNCOES") || !isTRUE(EPIDEMIA_SO_FUNCOES)) {
               mean(fim$concorrencia_realizada), unique(fim$concorrencia)[1]))
   cat(sprintf("Incidência acumulada: %.1f%% | prevalência final: %.1f%%\n",
               100 * mean(fim$incid_acum), 100 * mean(fim$prev_total)))
-  cat(sprintf("Grandes epidemias (pelo menos 15%% infectados): %.1f%% das réplicas\n",
-              100 * mean(fim$grande_epidemia)))
+  # O critério do plano, por nível de transmissão e por curva: é aqui que se vê
+  # se o beta baixo está mesmo na faixa em que a curva decide se há epidemia.
+  cat("\nGrandes epidemias (pelo menos 15% infectados em algum momento):\n")
+  tab <- tapply(fim$grande_epidemia,
+                list(fim$tipo_selecao, fim$beta), mean)
+  print(round(100 * tab, 1))
 }

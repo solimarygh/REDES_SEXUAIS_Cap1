@@ -1,0 +1,1248 @@
+---
+title: "Material suplementar"
+subtitle: "Uma infecção sexualmente transmissível na rede de acasalamentos: o estudo epidemiológico"
+author: "Solimary García Hernández, Erika M. Santana, Paulo Guimarães Jr."
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    self_contained: false
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{css, echo=FALSE}
+.main-container { max-width: 96% !important; width: 96% !important;
+                  margin-left: auto; margin-right: auto; }
+.tocify { max-height: 90% !important; }
+
+/* Mesma convenção do outro material suplementar: os blocos de resultado são os
+   cabeçalhos de nível 1, e é por eles que se navega. Sem text-transform, que
+   transformaria σp em ΣP na barra lateral. */
+.tocify-header > .tocify-item {
+  font-weight: 700; font-size: 0.97em;
+  border-top: 1px solid #d5dbe0; margin-top: 0.45em; padding-top: 0.45em;
+}
+.tocify-header > .tocify-subheader > .tocify-item { font-weight: 400; }
+
+h1 {
+  border-top: 3px solid #2C3E50; padding-top: 0.7em; margin-top: 2.2em;
+}
+h1:first-of-type { border-top: none; padding-top: 0; margin-top: 0.6em; }
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.align = "center", out.width = "100%",
+                      fig.retina = 1, dpi = 96)
+suppressPackageStartupMessages({
+  library(dplyr); library(tidyr); library(ggplot2); library(patchwork); library(knitr)
+})
+
+cores_4  <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
+labels_4 <- c("uniform"="Aleatória","gaussian"="Gaussiana","sigmoid"="Sigmoide","u-shaped"="Disruptiva")
+TIPOS_LINHA <- c("uniform" = "solid", "gaussian" = "22",
+                 "sigmoid" = "62",    "u-shaped" = "4212")
+CURVAS <- c("uniform", "gaussian", "sigmoid", "u-shaped")
+
+# A ordem em que as curvas aparecem nos painéis. Sem isto o ggplot ordena
+# alfabeticamente pelo nome interno e a curva aleatória, que é o controle, cai
+# no fim da figura em vez de abrir.
+ordenar_curva <- function(x) factor(x, levels = CURVAS, labels = labels_4[CURVAS])
+
+tema_base <- theme_minimal(base_size = 10) +
+  theme(legend.position = "bottom",
+        strip.background = element_rect(fill = "gray95", colour = NA),
+        strip.text = element_text(face = "plain", size = 9),
+        plot.title = element_text(face = "plain", size = 11),
+        plot.subtitle = element_text(size = 9, colour = "gray30"),
+        panel.grid.minor = element_blank())
+```
+
+```{r dados}
+# ---------------------------------------------------------------------
+# Leitura. Mesma lógica dos outros documentos: procura o resultado final e, se
+# ele não existir, o backup da rodada em curso, de modo que o documento também
+# se lê enquanto a simulação ainda roda.
+# ---------------------------------------------------------------------
+carregar <- function(paths) {
+  hit <- paths[file.exists(paths)]
+  if (!length(hit)) return(NULL)
+  obj <- readRDS(hit[1])
+  if (is.data.frame(obj)) obj
+  else bind_rows(obj[!vapply(obj, is.null, logical(1))])
+}
+
+PASTA_EPI <- "Resultados_Artigo/Fase_Epidemia/Dados"
+ep <- carregar(file.path(PASTA_EPI, c("resultados_Epidemia.rds",
+                                      "backup_Epidemia.rds")))
+
+ok  <- function(x) !is.null(x) && nrow(x) > 0
+tem <- function(x, cols) ok(x) && all(cols %in% names(x))
+
+ep_tudo <- ep
+
+# A transmissão tem dois níveis no desenho, e eles descrevem dois regimes
+# diferentes: o limiar, em que a epidemia pode ou não pegar, e a epidemia já
+# estabelecida. Misturá-los num mesmo painel daria médias que não correspondem a
+# nenhum dos dois. Por isso as seções 1 a 7 ficam num nível só, o mais alto, em
+# que todos os contrastes têm sinal; o outro nível tem uma seção própria, que é
+# onde o efeito da curva de preferência aparece como resultado qualitativo.
+BETA_FOCO <- 0.15
+if (tem(ep, "beta") && BETA_FOCO %in% unique(ep$beta)) {
+  ep <- filter(ep, beta == BETA_FOCO)
+} else if (tem(ep, "beta")) {
+  BETA_FOCO <- max(ep$beta)          # rodadas antigas, com um beta só
+  ep <- filter(ep, beta == BETA_FOCO)
+}
+
+# A última semana de cada réplica é o estado do fim da temporada, e é sobre ela
+# que quase todos os resumos são feitos.
+fim      <- if (ok(ep))      filter(ep,      semana == max(semana)) else NULL
+fim_tudo <- if (ok(ep_tudo)) filter(ep_tudo, semana == max(semana)) else NULL
+
+# Quantas casas decimais, sem repetir o format() em cada frase do texto.
+p1 <- function(x) sprintf("%.1f", x)
+p2 <- function(x) sprintf("%.2f", x)
+pc <- function(x) sprintf("%.1f%%", 100 * x)
+md <- function(x, ...) mean(x, na.rm = TRUE, ...)
+```
+
+```{r aviso-sem-dados, results='asis'}
+if (!ok(ep)) {
+  cat(paste0(
+    "<div style='border-left:4px solid #c0392b; padding:0.4em 1em; ",
+    "background:#fdf2f0;'>Os resultados deste documento saem de <code>",
+    PASTA_EPI, "/resultados_Epidemia.rds</code>, que não foi encontrado. ",
+    "As figuras e os números aparecem depois de rodar ",
+    "<code>Rscript Fase_Epidemia.R</code>. O texto do modelo e do desenho, ",
+    "abaixo, não depende dos dados.</div>\n"))
+}
+```
+
+Este documento acompanha o relatório científico apresentado à FAPESP e traz o
+material do segundo objetivo do projeto: entender se, e como, uma infecção
+que se transmite por contato sexual e altera a atratividade do sexo escolhido
+muda a estrutura da rede de acasalamentos e a seleção sobre a característica
+sob escolha.
+
+Os quatro estudos anteriores estão descritos num material suplementar
+próprio, e a formulação completa do modelo, noutro. Aqui o foco é o estudo
+epidemiológico, que chamamos de Estudo 5. Ele usa o mesmo motor de escolha de
+parceiro dos estudos anteriores, com uma diferença de escala de tempo que é
+o ponto de partida de tudo o que vem a seguir.
+
+# Introdução
+
+Uma infecção sexualmente transmissível se propaga pelos mesmos contatos que
+a escolha de parceiro produz. Isso faz dela um caso particular entre as
+doenças infecciosas: a rede de contatos não é um dado do ambiente, é o
+resultado de um comportamento que está, ele mesmo, sob seleção. Quem decide
+com quem copular decide também, sem saber, por onde o patógeno pode andar.
+
+A epidemiologia matemática reconhece há décadas que não é a média do número de
+parceiros que governa o tamanho de uma epidemia sexual. Na formulação clássica
+de May e Anderson (1987), o número reprodutivo básico depende da média *e* da
+variância do número de parceiros, de modo que duas populações com a mesma média
+e variâncias diferentes têm epidemias de tamanhos diferentes. Uma população em
+que todos têm dois parceiros e uma em que a maioria tem um e uns poucos têm
+trinta podem ter exatamente a mesma média. Os poucos indivíduos de muitos
+parceiros funcionam como pontes que ligam partes da população que de outro modo
+não se tocariam, e essa concentração da transmissão em poucos indivíduos é um
+padrão geral das doenças infecciosas (Lloyd-Smith et al. 2005).
+
+A literatura também mostra que a variância não esgota o problema. Morris e
+Kretzschmar (1997) mostraram que parcerias *concorrentes*, isto é, sobrepostas
+no tempo, amplificam a epidemia muito além do que o número de parceiros
+prediz, porque é a sobreposição que liga as parcerias num componente conectado
+grande em vez de deixar o patógeno preso num par. E Potterat et al. (2000)
+reuniram evidência de que a conformação da rede tem efeitos que nenhum resumo
+do número de parceiros captura. Esse é precisamente o terreno em que este
+estudo se coloca: os quatro cenários que comparamos têm o mesmo volume de sexo
+por construção, e diferem apenas em como as parcerias se arranjam.
+
+Do lado da seleção sexual, essa distribuição desigual tem outro nome. Ela é
+justamente o que medimos como *oportunidade de seleção sexual*, e é
+consequência direta da regra de escolha: uma preferência que ordena os machos
+de forma consistente concentra os acasalamentos em poucos deles, e uma
+preferência que não os ordena espalha os acasalamentos por todos. As duas
+literaturas descrevem a mesma quantidade a partir de motivações diferentes,
+e é esse encontro que o Estudo 5 explora.
+
+A segunda parte do objetivo inverte a direção da pergunta. Muitas infecções
+alteram a aparência ou o comportamento do hospedeiro, e algumas alteram
+exatamente os sinais que o sexo escolhedor avalia. Se a infecção muda a
+atratividade, então a doença deixa de ser apenas passageira da rede e passa
+a agir sobre a seleção: ela redistribui os acasalamentos, e ao redistribuí-los
+muda o diferencial de seleção sobre a característica. Chamamos esse efeito de
+$h_I$, e ele é um dos fatores cruzados do desenho.
+
+As duas perguntas, portanto, são estas. Primeira: dada a mesma quantidade de
+cópulas, a forma da curva de preferência muda o tamanho da epidemia? Segunda:
+quando a infecção altera a atratividade do macho infectado, isso muda a
+seleção sobre a característica dele?
+
+## A rede de acasalamentos
+
+A rede de que falamos tem dois conjuntos de indivíduos, machos e fêmeas, e
+uma ligação entre um macho e uma fêmea sempre que os dois copularam. Não há
+ligações dentro de um mesmo sexo. Uma rede com essa forma se chama
+*bipartida*, e as ligações aqui não têm direção nem peso: registram que o par
+existiu.
+
+Duas descrições dessa rede aparecem em todo o documento. A rede *acumulada* é
+o registro de todas as parcerias que já se formaram desde o início da
+temporada, e é sobre ela que se medem as propriedades estruturais. As
+parcerias *vigentes* são as que estão ativas numa determinada semana, e são
+elas que produzem as cópulas daquela semana. A distinção é o que permite que a
+doença tenha tempo: uma parceria dura várias semanas, e em cada uma delas o
+par pode copular outra vez.
+
+# O modelo de uma temporada
+
+Os Estudos 1 a 4 simulam gerações: uma população acasala, produz filhotes, e
+os filhotes substituem os pais. O tempo ali se conta em gerações, e cada
+geração é um único episódio de acasalamento. Uma epidemia não caberia nessa
+escala, porque a transmissão precisa de repetição dentro da vida dos mesmos
+indivíduos.
+
+O Estudo 5 muda a escala. Ele simula uma temporada reprodutiva de 20 semanas
+com os mesmos 200 machos e 200 fêmeas do começo ao fim. Não há reprodução nem
+substituição de indivíduos: a temporada é um período de acasalamento
+contínuo, e o que se acompanha ao longo dela é a rede que vai se formando e a
+infecção que vai circulando por ela.
+
+## A semana
+
+Cada uma das 20 semanas tem três passos, e a ordem entre eles importa.
+
+- *As parcerias vigentes copulam*: cada par que está junto naquela semana
+  copula com probabilidade `c`, a frequência de cópula por semana. Uma cópula
+  registra uma ligação na rede daquela semana, e é sobre essas ligações que a
+  transmissão acontece.
+- *As parcerias vigentes se dissolvem*: cada par ativo se separa com
+  probabilidade `1/d`, onde `d` é a duração média de uma parceria em semanas.
+  Um par que se desfaz nesta semana ainda copulou nela, e não antes, e é por
+  isso que a dissolução vem depois da cópula.
+- *Quem tem espaço procura um parceiro novo*: uma fêmea que está com menos
+  parcerias simultâneas do que o teto de concorrência sai à procura. A procura
+  é exatamente a regra de decisão dos Estudos 1 a 4, aplicada com teto um: a
+  fêmea encontra um número fixo de machos, avalia cada um segundo a sua curva
+  de preferência, e fica com o melhor entre os que aceitou. Se o macho
+  escolhido já for parceiro dela, nada muda, porque ele já copulou no primeiro
+  passo.
+
+O parâmetro que limita a fêmea aqui não é o número de parceiros da temporada,
+é o número de parcerias que ela mantém *ao mesmo tempo*. Essa quantidade tem
+nome na epidemiologia, *concorrência*, e é um dos conceitos centrais da área:
+duas parcerias sobrepostas no tempo abrem um caminho para o patógeno que duas
+parcerias em sequência não abrem (Morris & Kretzschmar 1997).
+
+A forma como o modelo representa isso, com uma rede de parcerias potenciais
+das quais apenas algumas estão ativas em cada semana, é a de Eames e Keeling
+(2004), e a distinção entre a rede acumulada e as parcerias vigentes vem daí.
+
+## Por que as parcerias precisam ser explícitas
+
+A primeira versão deste estudo não tinha parcerias. Cada semana as fêmeas
+escolhiam do zero, e por isso quase nunca voltavam ao mesmo macho. Medindo o
+resultado, cada parceiro rendia cerca de 1,4 cópulas ao longo de toda a
+temporada, o que equivale a dizer que praticamente toda cópula era com alguém
+novo.
+
+Com uma razão dessas a doença não circula. A transmissão por cópula é um
+evento de probabilidade baixa, e um patógeno que tem uma única oportunidade
+por parceiro se extingue antes de encontrar a próxima pessoa. Baixar o teto de
+parceiros não resolvia o problema: a razão de cópulas por parceiro ficava
+plana em torno de 1,4 qualquer que fosse o teto, porque o que faltava não era
+oportunidade de escolher menos gente, era um mecanismo que fizesse a fêmea
+voltar ao mesmo macho. O que mudava, ao baixar o teto, era só o número de
+semanas em que a fêmea não copulava com ninguém.
+
+As parcerias explícitas resolvem isso pela via biológica em vez da via do
+parâmetro. Um par que se forma continua junto por algumas semanas, e em cada
+uma delas pode copular outra vez. A razão de cópulas por parceria sobe para a
+faixa de quatro, e a transmissão passa a ter onde acontecer.
+
+```{r checa-parcerias, results='asis'}
+if (tem(fim, c("copulas_por_parceria", "parceiros_distintos",
+               "copulas_acumuladas", "concorrencia_realizada"))) {
+  cat(sprintf(paste0(
+    "Nos dados, ao fim da temporada, cada fêmea acumulou %s parceiros ",
+    "distintos e %s cópulas, ou seja %s cópulas por parceria. As parcerias ",
+    "vigentes numa semana qualquer são %s por fêmea, contra um teto de ",
+    "concorrência de %d.\n\n"),
+    p1(md(fim$parceiros_distintos)), p1(md(fim$copulas_acumuladas)),
+    p2(md(fim$copulas_por_parceria)), p2(md(fim$concorrencia_realizada)),
+    as.integer(fim$concorrencia[1])))
+}
+```
+
+## A doença
+
+A infecção tem três estados possíveis por indivíduo: suscetível, infectado e
+recuperado. A temporada começa com uma fração pequena da população já
+infectada, sorteada ao acaso em cada sexo, e a partir daí a doença anda pelas
+cópulas.
+
+A transmissão se decide por cópula, nos dois sentidos, e sempre contra o
+estado que os dois indivíduos tinham no *início* da semana. Sem essa
+precaução, quem se infectasse no primeiro sentido já contagiaria no segundo
+dentro da mesma semana, e a transmissão ficaria assimétrica entre os sexos
+apenas por causa da ordem em que o código está escrito.
+
+A recuperação vem depois da transmissão, de modo que quem se infectou numa
+semana ainda não pode se curar nela. Dois destinos são possíveis, e é o
+contraste entre eles que define os dois modelos do desenho. No *SIS* o
+indivíduo recuperado volta a ser suscetível, e pode se reinfectar; é o caso
+das infecções bacterianas, que não deixam imunidade. No *SIR* ele fica imune
+pelo resto da temporada, e sai efetivamente da população de contatos
+infectáveis.
+
+## O efeito da infecção na atratividade
+
+O parâmetro $h_I$ é o deslocamento que a infecção causa no sinal do macho. Um
+macho infectado é avaliado pelas fêmeas como se a sua característica fosse
+$z + h_I$ em vez de $z$, e $h_I$ está em unidades do desvio-padrão da
+característica na população, que é 1,0.
+
+Três valores entram no desenho. Com $h_I = 0$ a infecção não muda nada na
+avaliação, e este é o braço de referência. Com $h_I = -1$ ela desloca o sinal
+para baixo, o caso de uma infecção que deixa o hospedeiro em pior condição.
+Com $h_I = +1$ ela o desloca para cima, que parece estranho mas é um caso
+documentado: há infecções que aumentam o esforço reprodutivo do hospedeiro, e
+há patógenos cuja transmissão depende de o hospedeiro continuar acasalando.
+
+O efeito de um deslocamento no sinal depende inteiramente da forma da curva de
+preferência, e é isso que faz de $h_I$ um fator interessante em vez de uma
+mera perturbação. Sob a curva gaussiana a atratividade é máxima quando o sinal
+coincide com a preferência, de modo que qualquer deslocamento, para cima ou
+para baixo, *reduz* a atratividade. Sob a sigmoide a atratividade cresce com o
+sinal, e então o sinal dos efeitos segue o sinal de $h_I$. Sob a disruptiva a
+atratividade cresce com a *distância* à preferência, e os dois deslocamentos a
+aumentam. Sob a curva aleatória a atratividade não depende do sinal, e $h_I$
+não pode ter efeito nenhum: esse braço funciona como um controle interno do
+próprio código.
+
+## Medir o efeito de $h_I$ na ordem causal certa
+
+Comparar machos infectados com machos suscetíveis ao fim da temporada não mede
+o efeito da infecção na atratividade, e é importante dizer por quê.
+
+Os machos que copulam mais são os que têm mais oportunidades de se infectar, e
+portanto se infectam primeiro. Ao fim da temporada, o grupo dos infectados é
+um grupo enriquecido em machos de muito sucesso, e essa diferença existiria
+mesmo com $h_I = 0$, quando a infecção não afeta a atratividade em nada.
+Tomada sem cuidado, ela apareceria como um efeito da doença sobre o sucesso,
+quando é o contrário: o sucesso é a causa da infecção.
+
+O registro separa as duas coisas. As cópulas ganhas em cada semana são
+atribuídas aos machos segundo o estado que eles tinham no *início* daquela
+semana, o que é a ordem causal correta para o efeito de $h_I$. E o
+confundidor fica à vista, porque também se registra a média da característica
+nos dois grupos: se os infectados já tinham $z$ maior, parte da diferença é do
+traço e não da doença. A comparação sobre a rede acumulada é registrada também,
+mas serve a outra pergunta, que é a de mostrar que quem mais acasala é quem
+mais se infecta.
+
+# Os parâmetros
+
+```{r tabela-parametros}
+# Construída como data.frame e não com tribble(), que vem do tibble e não está
+# entre os pacotes carregados aqui. Os nomes das colunas levam acento, e por
+# isso entram por names() depois, e não como nomes de argumento: um nome de
+# argumento com acento depende do locale e falha num locale C.
+par_tab <- data.frame(
+  parametro = c("Censo", "Duração da temporada", "Variação da característica",
+                "Variação da preferência", "Valor central", "Exigência",
+                "Encontros por semana", "Concorrência", "Duração da parceria",
+                "Cópula por semana", "Transmissão", "Recuperação",
+                "Prevalência inicial", "Efeito na atratividade",
+                "Curva de preferência", "Modelo epidemiológico", "Réplicas"),
+  simbolo = c("N", "", "σz", "σp", "φ", "s", "A", "", "d", "c",
+              "β", "γrec", "", "hI", "", "", ""),
+  valor = c("200 + 200", "20 semanas", "1.0", "0.5 / 1.0 / 1.5", "5",
+            "média 2, dp 0.2", "10", "2", "5 semanas", "0.7", "0.06 / 0.15", "0.10",
+            "0.05", "-1 / 0 / +1", "quatro formas", "SIS / SIR", "100"),
+  descricao = c(
+    "Machos e fêmeas adultos, fixos do início ao fim da temporada",
+    "Uma estação reprodutiva, contada em semanas",
+    "Desvio-padrão da característica do macho na população",
+    "Desvio-padrão da preferência da fêmea, um dos fatores cruzados",
+    "Média das distribuições da característica e da preferência; é também o ótimo da viabilidade, que aqui fica desligada",
+    "Inclinação da curva de preferência de cada fêmea, sorteada uma vez e válida por toda a temporada",
+    "Machos distintos que a fêmea avalia quando sai à procura",
+    "Teto de parcerias simultâneas por fêmea",
+    "Duração média de uma parceria; a dissolução tem probabilidade 1/d por semana",
+    "Probabilidade de um par vigente copular numa semana",
+    "Probabilidade de transmissão por cópula, em cada sentido; um dos fatores cruzados",
+    "Probabilidade de recuperação por semana; um período infeccioso de 10 semanas",
+    "Fração da população já infectada no início da temporada",
+    "Deslocamento do sinal do macho infectado, em unidades de σz",
+    "Aleatória, gaussiana, sigmoide e disruptiva",
+    "Se a recuperação devolve à suscetibilidade ou dá imunidade",
+    "Temporadas independentes por combinação de parâmetros"),
+  stringsAsFactors = FALSE
+)
+names(par_tab) <- c("Parâmetro", "Símbolo", "Valor", "O que é")
+kable(par_tab, caption = "Os parâmetros do Estudo 5. Os cinco fatores cruzados são a curva de preferência, σp, hI, o modelo epidemiológico e β; os demais ficam fixos.")
+```
+
+## As quatro curvas de preferência
+
+A curva de preferência é a regra que traduz a característica de um macho, $z$,
+na probabilidade de aquela fêmea aceitá-lo, $P$. Cada fêmea tem a sua
+preferência $p$ e a sua exigência $s$, e as quatro formas são as mesmas dos
+estudos anteriores.
+
+$$P = 0.5 \qquad \text{(aleatória)}$$
+
+$$P = \exp\!\left(-s\,(z-p)^2\right) \qquad \text{(gaussiana)}$$
+
+$$P = \frac{1}{1 + \exp\!\left(-s\,(z-p)\right)} \qquad \text{(sigmoide)}$$
+
+$$P = 1 - \exp\!\left(-s\,(z-p)^2\right) \qquad \text{(disruptiva)}$$
+
+A aleatória não olha a característica, e serve de controle: qualquer padrão
+que apareça nela vem da estrutura do processo e não da escolha. A gaussiana
+prefere o macho parecido com a preferência da fêmea, e é estabilizadora. A
+sigmoide prefere o macho de característica maior, e é direcional. A disruptiva
+prefere o macho *diferente* da preferência, nos dois sentidos, e favorece os
+extremos.
+
+## A viabilidade e por que ela fica desligada aqui
+
+Nos Estudos 1 a 4 a seleção natural age sobre a característica do macho por
+meio de uma viabilidade, $V = \exp(-\gamma (z - \phi)^2)$, em que $\phi$ é o
+valor da característica com melhor sobrevivência e $\gamma$ mede quão
+rapidamente a sobrevivência cai quando a característica se afasta dele. Com
+$\gamma = 0.2$ e $\phi = 5$, um macho com a característica no ótimo sobrevive
+com probabilidade 1 e um macho a dois desvios do ótimo, com probabilidade
+próxima de 0.45.
+
+No Estudo 5 essa parte fica desligada por padrão, e a razão é a escala de
+tempo. A temporada é única e não há reprodução, de modo que não existe resposta
+evolutiva para a seleção natural modular: ela apenas retiraria machos do censo
+no início, sem que nada dependesse disso mais adiante. Deixando-a de fora, o
+censo é exatamente 200 machos por construção, e as diferenças entre células do
+desenho não se confundem com diferenças no tamanho da população.
+
+# O desenho do estudo
+
+Cinco fatores se cruzam: a curva de preferência com quatro níveis, a variação
+da preferência feminina com três, o efeito da infecção na atratividade com
+três, o modelo epidemiológico com dois e a taxa de transmissão com dois. São
+144 combinações, cada uma com 100 temporadas independentes, e cada temporada
+registra as suas 20 semanas.
+
+```{r desenho, results='asis'}
+if (ok(ep_tudo)) {
+  eixos  <- intersect(c("tipo_selecao", "sigma_p", "h_I", "modelo", "beta"),
+                      names(ep_tudo))
+  n_comb <- ep_tudo %>% distinct(across(all_of(eixos))) %>% nrow()
+  n_rep  <- ep_tudo %>% distinct(across(all_of(c(eixos, "replica")))) %>% nrow()
+  cat(sprintf(paste0("Os dados deste documento têm %s linhas, que são %d ",
+                     "combinações de parâmetros, %s temporadas e %d semanas ",
+                     "por temporada.\n\n"),
+              format(nrow(ep_tudo), big.mark = ".", decimal.mark = ","),
+              n_comb,
+              format(n_rep, big.mark = ".", decimal.mark = ","),
+              max(ep_tudo$semana)))
+}
+```
+
+## Por que a transmissão é um fator e não uma constante
+
+O critério de grande epidemia do plano de trabalho, 15% da população infectada
+em algum momento, só carrega informação numa faixa estreita de $\beta$. Acima
+dela toda temporada o cumpre, e o critério deixa de distinguir qualquer coisa;
+abaixo dela nenhuma o cumpre. E as duas perguntas do estudo não vivem na mesma
+faixa.
+
+Com $\beta = 0.15$ a epidemia acontece em todas as células do desenho, e é
+isso que dá espaço para os contrastes secundários. A incidência é uma resposta
+contínua, com variação para os dois lados, e os efeitos de $h_I$, do modelo
+epidemiológico e de $\sigma_p$ podem ser medidos sem esbarrar num piso ou num
+teto.
+
+Com $\beta = 0.06$ a epidemia fica no limiar, e a pergunta muda de natureza:
+deixa de ser quanto a curva de preferência muda o tamanho da epidemia e passa a
+ser se ela decide que a epidemia aconteça. Os contrastes secundários, aí, ficam
+dominados por extinção estocástica e têm pouco sinal, mas o efeito principal
+aparece na sua forma mais forte.
+
+Rodar os dois níveis custa o dobro e responde às duas perguntas. As seções 1 a
+7 abaixo ficam em $\beta = `r BETA_FOCO`$, e a
+seção 8 compara os dois.
+
+## As variáveis resposta
+
+Três conjuntos de variáveis saem de cada temporada, e vale separá-los porque
+respondem a perguntas diferentes.
+
+As da epidemia:
+
+- *Prevalência*: a fração da população infectada num dado momento. Sobe e desce
+  ao longo da temporada, porque os indivíduos se recuperam.
+- *Incidência acumulada*: a fração que se infectou em algum momento. Só pode
+  crescer, e é ela que diz o tamanho final da epidemia.
+- *Recuperados*: a fração que passou pela infecção e se curou. Só existe no
+  modelo SIR, porque no SIS a cura devolve o indivíduo à suscetibilidade.
+- *Grande epidemia*: seguindo o critério do plano de trabalho, uma temporada em
+  que ao menos 15% da população se infectou.
+
+As da estrutura da rede, que são as mesmas dos Estudos 1 a 4:
+
+- *Modularidade*: o quanto a rede se divide em grupos que acasalam mais entre
+  si do que com o resto da população.
+- *Aninhamento* (índice NODF): o quanto os parceiros dos indivíduos menos
+  conectados são um subconjunto dos parceiros dos mais conectados.
+- *Centralização*: o quanto a rede depende de poucos indivíduos muito
+  conectados.
+- *Oportunidade de seleção sexual* (Is): a variância do sucesso de
+  acasalamento dividida pelo quadrado da sua média, que mede quão
+  desigualmente os acasalamentos se distribuem entre os machos.
+
+E os descritores, que dizem quanto sexo houve e sobre quantos indivíduos ele
+se repartiu:
+
+- *Parceiros distintos por fêmea* e *cópulas por fêmea* na temporada.
+- *Cópulas por parceria*: a razão entre as duas anteriores, e a quantidade que
+  motivou a mudança do modelo descrita acima.
+- *Concorrência realizada*: quantas parcerias simultâneas uma fêmea de fato
+  mantém, que é menor do que o teto porque uma parceria só se forma se ela
+  aceitar alguém.
+- *Conectância*: a fração dos pares possíveis que de fato acasalaram.
+- *Proporção de machos que não acasalou* e *de fêmeas sem parceria na semana*.
+
+Os descritores não são propriedades estruturais no mesmo sentido, mas são
+indispensáveis para interpretar as outras: sem eles não se distingue uma
+diferença que vem da forma da rede de uma diferença que vem apenas do volume
+de sexo.
+
+E, à parte, o diferencial de seleção sobre a característica do macho. $S$ é a
+média de $z$ pesada pelo sucesso menos a média de $z$ na população, e $i = S /
+\mathrm{sd}(z)$ é a mesma quantidade em unidades de desvio-padrão, o que
+permite comparar células com variâncias diferentes. O sucesso aqui é pesado
+pelas *cópulas* e não pelos parceiros, porque é o número de cópulas que conta
+como sucesso reprodutivo: um macho que copulou dez vezes teve mais sucesso do
+que um que copulou uma vez.
+
+# Cobertura dos dados
+
+```{r cobertura}
+if (ok(ep_tudo)) {
+  eixos <- intersect(c("tipo_selecao", "sigma_p", "h_I", "modelo", "beta"),
+                     names(ep_tudo))
+  cob <- ep_tudo %>%
+    distinct(across(all_of(c(eixos, "replica")))) %>%
+    count(across(all_of(intersect(c("tipo_selecao", "modelo", "beta"), eixos))),
+          name = "Temporadas") %>%
+    mutate(Curva = labels_4[tipo_selecao]) %>%
+    select(-tipo_selecao) %>%
+    relocate(Curva) %>%
+    arrange(Curva)
+  names(cob)[names(cob) == "modelo"] <- "Modelo"
+  names(cob)[names(cob) == "beta"]   <- "β"
+  kable(cob, caption = "Temporadas simuladas por curva de preferência, modelo epidemiológico e taxa de transmissão. Cada temporada inclui os três níveis de σp e os três de hI.")
+} else {
+  cat("Sem dados carregados.\n")
+}
+```
+
+# 1. A epidemia ao longo da temporada
+
+A primeira coisa a olhar é se a epidemia acontece, e com que forma. A figura
+mostra a prevalência e a incidência acumulada semana a semana, uma linha por
+curva de preferência.
+
+```{r fig-curva-epidemica, fig.height=3.6}
+if (tem(ep, c("semana", "prev_total", "incid_acum", "tipo_selecao", "modelo"))) {
+  base <- ep %>%
+    filter(h_I == 0) %>%
+    group_by(tipo_selecao, modelo, semana) %>%
+    summarise(prev = md(prev_total), incid = md(incid_acum), .groups = "drop") %>%
+    mutate(curva = ordenar_curva(tipo_selecao))
+
+  faz <- function(yvar, titulo, ylab) {
+    ggplot(base, aes(semana, .data[[yvar]], colour = curva, linetype = curva)) +
+      geom_line(linewidth = 0.7) +
+      facet_wrap(~ modelo) +
+      scale_colour_manual(values = setNames(cores_4[CURVAS], labels_4[CURVAS]),
+                          name = NULL) +
+      scale_linetype_manual(values = setNames(TIPOS_LINHA[CURVAS], labels_4[CURVAS]),
+                            name = NULL) +
+      scale_y_continuous(labels = scales::percent) +
+      labs(title = titulo, x = "Semana da temporada", y = ylab) +
+      tema_base
+  }
+  (faz("prev", "Prevalência", "Infectados na população") |
+   faz("incid", "Incidência acumulada", "Já infectados em algum momento")) +
+    plot_layout(guides = "collect") &
+    theme(legend.position = "bottom")
+}
+```
+
+Na leitura, a prevalência pode subir e depois cair, porque os indivíduos se
+recuperam; a incidência acumulada nunca cai, porque registra quem já passou
+pela infecção. No modelo SIS os recuperados voltam a ser suscetíveis e a
+prevalência tende a um patamar; no SIR eles saem da população infectável e a
+prevalência decai depois do pico.
+
+```{r resumo-epidemia, results='asis'}
+if (tem(fim, c("incid_acum", "prev_total", "grande_epidemia", "tipo_selecao"))) {
+  r <- fim %>% filter(h_I == 0) %>%
+    group_by(modelo) %>%
+    summarise(incid = md(incid_acum), prev = md(prev_total),
+              gr = md(grande_epidemia), .groups = "drop")
+  for (k in seq_len(nrow(r))) {
+    cat(sprintf(paste0("No modelo %s, ao fim da temporada e no braço de ",
+                       "referência, a incidência acumulada média é %s e a ",
+                       "prevalência %s; %s das temporadas passam o critério ",
+                       "de grande epidemia.\n\n"),
+                r$modelo[k], pc(r$incid[k]), pc(r$prev[k]), pc(r$gr[k])))
+  }
+}
+```
+
+# 2. A curva de preferência e o tamanho da epidemia
+
+Esta é a primeira das duas perguntas do objetivo. As quatro curvas produzem
+aproximadamente o mesmo *volume* de sexo, porque o que limita a fêmea é a
+concorrência e não a sua exigência: com dois parceiros simultâneos e cinco
+semanas de duração média, quase toda fêmea mantém as suas duas parcerias em
+quase toda semana, qualquer que seja a curva. A pergunta é se, mantido o
+volume, a forma da rede muda a epidemia.
+
+```{r fig-curva-vs-epidemia, fig.height=3.2}
+if (tem(fim, c("tipo_selecao", "incid_acum", "parceiros_distintos",
+               "copulas_acumuladas"))) {
+  r <- fim %>%
+    filter(h_I == 0) %>%
+    group_by(tipo_selecao, modelo) %>%
+    summarise(across(any_of(c("incid_acum", "parceiros_distintos",
+                              "copulas_acumuladas", "conectancia", "I_s")),
+                     md),
+              .groups = "drop") %>%
+    mutate(curva = ordenar_curva(tipo_selecao))
+
+  barra <- function(yvar, titulo, ylab, perc = FALSE) {
+    p <- ggplot(r, aes(curva, .data[[yvar]], fill = curva)) +
+      geom_col(width = 0.68) +
+      facet_wrap(~ modelo) +
+      scale_fill_manual(values = setNames(cores_4[CURVAS], labels_4[CURVAS]),
+                        guide = "none") +
+      labs(title = titulo, x = NULL, y = ylab) +
+      tema_base +
+      theme(axis.text.x = element_text(angle = 30, hjust = 1))
+    if (perc) p <- p + scale_y_continuous(labels = scales::percent)
+    p
+  }
+  ps <- list(barra("copulas_acumuladas", "O volume de sexo",
+                   "Cópulas por fêmea na temporada"))
+  if ("I_s" %in% names(r))
+    ps <- c(ps, list(barra("I_s", "A desigualdade entre os machos",
+                           "Oportunidade de seleção sexual (Is)")))
+  ps <- c(ps, list(barra("incid_acum", "O tamanho da epidemia",
+                         "Incidência acumulada", perc = TRUE)))
+  wrap_plots(ps, nrow = 1)
+}
+```
+
+Os três painéis são a mesma pergunta em três passos. O primeiro
+mostra que o volume de sexo é praticamente o mesmo nas quatro curvas. O
+segundo mostra que a desigualdade na distribuição dos acasalamentos entre os
+machos, ao contrário, difere muito. O terceiro mostra o tamanho da epidemia.
+Se os painéis primeiro e terceiro discordam e o segundo e o terceiro
+concordam, então o que governa a epidemia é a estrutura e não o volume.
+
+```{r conta-curva-vs-epidemia, results='asis'}
+if (tem(fim, c("tipo_selecao", "incid_acum", "copulas_acumuladas"))) {
+  r <- fim %>% filter(h_I == 0) %>%
+    group_by(tipo_selecao) %>%
+    summarise(incid = md(incid_acum), cop = md(copulas_acumuladas),
+              Is = if ("I_s" %in% names(fim)) md(I_s) else NA_real_,
+              .groups = "drop")
+  hi <- r$tipo_selecao[which.max(r$incid)]
+  lo <- r$tipo_selecao[which.min(r$incid)]
+  cat(sprintf(paste0("Entre as quatro curvas, a incidência acumulada vai de ",
+                     "%s sob a curva %s a %s sob a %s, um fator de %s. As ",
+                     "cópulas por fêmea, no mesmo intervalo, vão de %s a %s, ",
+                     "um fator de %s.\n\n"),
+              pc(min(r$incid)), tolower(labels_4[lo]),
+              pc(max(r$incid)), tolower(labels_4[hi]),
+              p2(max(r$incid) / min(r$incid)),
+              p1(r$cop[which.min(r$incid)]), p1(r$cop[which.max(r$incid)]),
+              p2(max(r$cop) / min(r$cop))))
+  if (!all(is.na(r$Is)))
+    cat(sprintf(paste0("A oportunidade de seleção sexual, no mesmo intervalo, ",
+                       "vai de %s a %s.\n\n"),
+                p2(min(r$Is, na.rm = TRUE)), p2(max(r$Is, na.rm = TRUE))))
+}
+```
+
+## O mesmo, contra a estrutura da rede
+
+Se a explicação é estrutural, então a incidência deve seguir as medidas de
+estrutura mesmo quando se olham todas as células do desenho juntas, e não
+apenas as médias por curva.
+
+```{r fig-incid-vs-estrutura, fig.height=3.2}
+estr <- intersect(c("I_s", "Centralization", "Modularity", "Nestedness",
+                    "conectancia"), names(fim))
+if (ok(fim) && length(estr)) {
+  r <- fim %>%
+    group_by(tipo_selecao, sigma_p, h_I, modelo) %>%
+    summarise(incid = md(incid_acum),
+              across(all_of(estr), md), .groups = "drop") %>%
+    mutate(curva = ordenar_curva(tipo_selecao))
+
+  rotulos <- c(I_s = "Oportunidade de seleção sexual (Is)",
+               Centralization = "Centralização",
+               Modularity = "Modularidade",
+               Nestedness = "Aninhamento (NODF)",
+               conectancia = "Conectância")
+  ps <- lapply(estr, function(v) {
+    ggplot(r, aes(.data[[v]], incid, colour = curva, shape = modelo)) +
+      geom_point(size = 1.6, alpha = 0.85) +
+      scale_colour_manual(values = setNames(cores_4[CURVAS], labels_4[CURVAS]),
+                          name = NULL) +
+      scale_shape_manual(values = c(SIS = 16, SIR = 1), name = NULL) +
+      scale_y_continuous(labels = scales::percent) +
+      labs(x = rotulos[[v]], y = "Incidência acumulada") +
+      tema_base
+  })
+  wrap_plots(ps, nrow = 1) + plot_layout(guides = "collect") &
+    theme(legend.position = "bottom")
+}
+```
+
+Cada ponto é uma combinação de parâmetros, com as suas 100
+temporadas já promediadas. Os pontos cheios são o modelo SIS e os vazios o
+SIR. Uma nuvem inclinada indica que aquela medida de estrutura acompanha o
+tamanho da epidemia; uma nuvem sem inclinação indica que não.
+
+# 3. Quem se infecta
+
+A explicação estrutural tem uma consequência verificável no nível do
+indivíduo. Se a epidemia é grande porque poucos machos concentram muitos
+acasalamentos, então são esses machos que devem se infectar primeiro e com
+mais frequência.
+
+```{r fig-quem-se-infecta, fig.height=3.2}
+if (tem(fim, c("grau_acum_infectados", "grau_acum_suscetiveis", "tipo_selecao"))) {
+  r <- fim %>%
+    filter(h_I == 0) %>%
+    group_by(tipo_selecao, modelo) %>%
+    summarise(inf = md(grau_acum_infectados),
+              sus = md(grau_acum_suscetiveis), .groups = "drop") %>%
+    pivot_longer(c(inf, sus), names_to = "grupo", values_to = "grau") %>%
+    mutate(curva = ordenar_curva(tipo_selecao),
+           grupo = factor(grupo, levels = c("sus", "inf"),
+                          labels = c("Suscetíveis", "Infectados")))
+
+  ggplot(r, aes(curva, grau, fill = grupo)) +
+    geom_col(position = position_dodge(width = 0.72), width = 0.68) +
+    facet_wrap(~ modelo) +
+    scale_fill_manual(values = c(Suscetíveis = "gray70", Infectados = "#C0392B"),
+                      name = NULL) +
+    labs(title = "Parceiras acumuladas dos machos, segundo o estado no fim da temporada",
+         subtitle = "Braço de referência, hI = 0: a infecção não afeta a atratividade em nada",
+         x = NULL, y = "Parceiras por macho na temporada") +
+    tema_base +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1))
+}
+```
+
+Esta figura é do braço $h_I = 0$, em que a infecção não muda a
+atratividade. Qualquer diferença entre as duas barras, portanto, não pode ser
+efeito da doença sobre o sucesso: é o contrário, o sucesso é que levou à
+infecção. A altura da diferença mede quanto o processo é dominado por poucos
+machos muito ativos.
+
+# 4. O efeito da infecção na atratividade
+
+Esta é a segunda pergunta do objetivo. Aqui os três níveis de $h_I$ entram, e
+a leitura tem de ser feita curva por curva, porque o efeito de deslocar o
+sinal depende da forma da curva.
+
+```{r fig-hI, fig.height=3.4}
+if (tem(fim, c("h_I", "incid_acum", "tipo_selecao"))) {
+  r <- fim %>%
+    group_by(tipo_selecao, modelo, h_I) %>%
+    summarise(incid = md(incid_acum),
+              Is = if ("I_s" %in% names(fim)) md(I_s) else NA_real_,
+              .groups = "drop") %>%
+    mutate(curva = ordenar_curva(tipo_selecao))
+
+  p1g <- ggplot(r, aes(factor(h_I), incid, fill = curva)) +
+    geom_col(position = position_dodge(width = 0.8), width = 0.75) +
+    facet_wrap(~ modelo) +
+    scale_fill_manual(values = setNames(cores_4[CURVAS], labels_4[CURVAS]),
+                      name = NULL) +
+    scale_y_continuous(labels = scales::percent) +
+    labs(title = "O tamanho da epidemia", x = expression(h[I]),
+         y = "Incidência acumulada") +
+    tema_base
+
+  if (!all(is.na(r$Is))) {
+    p2g <- ggplot(r, aes(factor(h_I), Is, fill = curva)) +
+      geom_col(position = position_dodge(width = 0.8), width = 0.75) +
+      facet_wrap(~ modelo) +
+      scale_fill_manual(values = setNames(cores_4[CURVAS], labels_4[CURVAS]),
+                        name = NULL) +
+      labs(title = "A desigualdade entre os machos", x = expression(h[I]),
+           y = "Oportunidade de seleção sexual (Is)") +
+      tema_base
+    (p1g | p2g) + plot_layout(guides = "collect") &
+      theme(legend.position = "bottom")
+  } else p1g
+}
+```
+
+A curva aleatória é o controle interno: como ela não olha a
+característica, as três barras dela têm de ser iguais, e qualquer diferença
+apontaria um problema no código e não um resultado. Sob a gaussiana espera-se
+um padrão simétrico, com $h_I = 0$ no extremo, porque ali a atratividade é
+máxima quando o sinal coincide com a preferência e qualquer deslocamento a
+reduz. Sob a sigmoide espera-se um padrão monótono, porque a atratividade
+cresce com o sinal. Sob a disruptiva espera-se o padrão inverso ao da
+gaussiana, porque ali a atratividade cresce com a distância à preferência.
+
+## O efeito medido semana a semana
+
+```{r fig-hI-semanal, fig.height=3.2}
+if (tem(ep, c("copulas_semana_infectados", "copulas_semana_suscetiveis",
+              "z_infectados", "z_suscetiveis"))) {
+  r <- ep %>%
+    filter(modelo == "SIS") %>%
+    group_by(tipo_selecao, h_I, semana) %>%
+    summarise(dif_cop = md(copulas_semana_infectados) - md(copulas_semana_suscetiveis),
+              dif_z   = md(z_infectados) - md(z_suscetiveis), .groups = "drop") %>%
+    mutate(curva = ordenar_curva(tipo_selecao))
+
+  faz <- function(yvar, titulo, ylab) {
+    ggplot(r, aes(semana, .data[[yvar]], colour = factor(h_I))) +
+      geom_hline(yintercept = 0, colour = "gray70", linewidth = 0.3) +
+      geom_line(linewidth = 0.6) +
+      facet_wrap(~ curva, nrow = 1) +
+      scale_colour_manual(values = c("-1" = "#2980B9", "0" = "gray40",
+                                     "1" = "#C0392B"),
+                          name = expression(h[I])) +
+      labs(title = titulo, x = "Semana", y = ylab) +
+      tema_base
+  }
+  faz("dif_cop",
+      "Cópulas ganhas na semana: infectados menos suscetíveis",
+      "Diferença em cópulas") /
+  faz("dif_z",
+      "O confundidor, à vista: a característica média dos dois grupos",
+      "Diferença em z") +
+    plot_layout(guides = "collect") & theme(legend.position = "right")
+}
+```
+
+No painel de cima, os machos são separados pelo estado que tinham
+no *início* da semana, que é a ordem causal certa para o efeito de $h_I$. No
+painel de baixo está o confundidor: se a linha se afasta de zero, os
+infectados já tinham característica diferente dos suscetíveis, e parte da
+diferença de cópulas é do traço e não da doença. As duas linhas têm de ser
+lidas juntas, e é a comparação entre os três níveis de $h_I$ dentro de cada
+curva que isola o efeito da infecção.
+
+# 5. A doença e a seleção sobre o traço
+
+Uma temporada já diz algo sobre evolução, sem simular gerações. O diferencial
+de seleção $S$ é a diferença entre a característica média dos machos pesada
+pelo sucesso e a característica média na população, e a equação do criador o
+transforma em resposta esperada. Se a doença redistribui os acasalamentos,
+então ela muda $S$, e isso é seleção.
+
+```{r fig-selecao, fig.height=3.4}
+if (tem(fim, c("i_traco", "h_I", "tipo_selecao"))) {
+  r <- fim %>%
+    group_by(tipo_selecao, modelo, h_I, sigma_p) %>%
+    summarise(i = md(i_traco), .groups = "drop") %>%
+    mutate(curva = ordenar_curva(tipo_selecao))
+
+  ggplot(r, aes(factor(h_I), i, colour = factor(sigma_p),
+                group = factor(sigma_p))) +
+    geom_hline(yintercept = 0, colour = "gray70", linewidth = 0.3) +
+    geom_line(linewidth = 0.5) +
+    geom_point(size = 1.9) +
+    facet_grid(modelo ~ curva, scales = "free_y") +
+    scale_colour_manual(values = c("0.5" = "#2980B9", "1" = "gray40",
+                                   "1.5" = "#C0392B"),
+                        name = expression(sigma[p])) +
+    labs(title = "Diferencial de seleção padronizado sobre a característica do macho",
+         subtitle = "i = S / sd(z), com o sucesso pesado pelas cópulas; a escala do eixo y difere entre curvas",
+         x = expression(h[I]), y = "i") +
+    tema_base +
+    theme(legend.position = "right")
+}
+```
+
+O eixo y tem escala livre por curva, e isso é deliberado: as
+magnitudes diferem por mais de uma ordem entre a sigmoide e as outras três, e
+com escala comum as três ficariam achatadas numa linha. O que interessa em
+cada painel é se $i$ se afasta de zero e em que direção quando $h_I$ muda.
+
+Sob a curva aleatória $i$ deve ficar em zero nos três níveis, porque não há
+seleção sobre a característica. Sob a sigmoide $i$ é grande já no braço de
+referência, porque a preferência é direcional e seleciona a característica
+independentemente de qualquer doença. As duas curvas simétricas, gaussiana e
+disruptiva, são o caso a observar com mais atenção: nelas a preferência não tem
+componente direcional, de modo que $i$ parte de perto de zero, e um afastamento
+de zero que apareça só quando $h_I \neq 0$ seria seleção produzida pela
+doença.
+
+A geometria do modelo dá uma expectativa para a direção desse afastamento, e
+ela é oposta nas duas curvas. Sob a gaussiana o macho infectado se afasta do
+pico de preferência nos dois sentidos e perde atratividade; como os machos
+infectados são, em média, os que mais copularam, a doença penalizaria quem tem
+sucesso, e o sinal de $i$ ficaria contrário ao de $h_I$. Sob a disruptiva o
+mesmo afastamento *aumenta* a atratividade, e o sinal de $i$ acompanharia o de
+$h_I$. A tabela abaixo é o que permite conferir se os dados seguem essa
+expectativa e qual das curvas tem a maior amplitude entre os dois extremos.
+
+```{r conta-selecao, results='asis'}
+if (tem(fim, c("i_traco", "h_I", "tipo_selecao"))) {
+  r <- fim %>%
+    group_by(tipo_selecao, h_I) %>%
+    summarise(i = md(i_traco), .groups = "drop") %>%
+    pivot_wider(names_from = h_I, values_from = i, names_prefix = "h")
+  nm <- names(r)
+  if (all(c("h-1", "h0", "h1") %in% nm)) {
+    r <- r %>% mutate(amplitude = abs(`h1` - `h-1`)) %>% arrange(desc(amplitude))
+    cat("Amplitude de i entre os dois extremos de hI, por curva:\n\n")
+    tb <- r %>% transmute(Curva = labels_4[tipo_selecao],
+                          `i em hI = -1` = round(`h-1`, 3),
+                          `i em hI = 0`  = round(`h0`, 3),
+                          `i em hI = +1` = round(`h1`, 3),
+                          `Amplitude`    = round(amplitude, 3))
+    print(kable(tb))
+    cat("\n\n")
+  }
+}
+```
+
+# 6. SIS contra SIR
+
+Os dois modelos diferem apenas no destino de quem se recupera, e a comparação
+diz quanto a imunidade importa numa temporada curta. No SIS o recuperado volta
+ao estoque de suscetíveis e a epidemia se sustenta; no SIR ele sai da
+população infectável, o que reduz progressivamente o número de contatos
+capazes de propagar a doença.
+
+```{r fig-sis-sir, fig.height=3.2}
+if (tem(ep, c("modelo", "prev_total", "incid_acum", "recuperados"))) {
+  r <- ep %>%
+    filter(h_I == 0) %>%
+    group_by(tipo_selecao, modelo, semana) %>%
+    summarise(prev = md(prev_total), incid = md(incid_acum),
+              rec = md(recuperados), .groups = "drop") %>%
+    mutate(curva = ordenar_curva(tipo_selecao)) %>%
+    pivot_longer(c(prev, incid, rec), names_to = "q", values_to = "v") %>%
+    mutate(q = factor(q, levels = c("prev", "incid", "rec"),
+                      labels = c("Prevalência", "Incidência acumulada",
+                                 "Recuperados")))
+
+  ggplot(r, aes(semana, v, colour = curva, linetype = modelo)) +
+    geom_line(linewidth = 0.65) +
+    facet_wrap(~ q, nrow = 1) +
+    scale_colour_manual(values = setNames(cores_4[CURVAS], labels_4[CURVAS]),
+                        name = NULL) +
+    scale_linetype_manual(values = c(SIS = "solid", SIR = "22"), name = NULL) +
+    scale_y_continuous(labels = scales::percent) +
+    labs(title = "Os dois modelos epidemiológicos ao longo da temporada",
+         subtitle = "Braço de referência, hI = 0",
+         x = "Semana", y = NULL) +
+    tema_base
+}
+```
+
+A linha cheia é o SIS e a tracejada o SIR. O painel dos
+recuperados é zero por construção no SIS, e cresce no SIR: é a fração da
+população que a doença já atravessou e que não pode mais se reinfectar. A
+diferença entre os dois modelos no painel da incidência mede quanto a imunidade
+freou a epidemia ao longo das 20 semanas.
+
+# 7. A variação da preferência feminina
+
+O terceiro fator do desenho, $\sigma_p$, é o mesmo que organiza os Estudos 1 a
+4: quanto as fêmeas diferem umas das outras naquilo que preferem. Ele entra
+aqui porque muda a estrutura da rede pela mesma via dos outros estudos. Quando
+todas as fêmeas preferem a mesma coisa, elas competem pelos mesmos machos e os
+acasalamentos se concentram; quando cada uma prefere algo diferente, os
+acasalamentos se espalham.
+
+```{r fig-sigmap, fig.height=3.2}
+if (tem(fim, c("sigma_p", "incid_acum", "tipo_selecao"))) {
+  r <- fim %>%
+    filter(h_I == 0) %>%
+    group_by(tipo_selecao, modelo, sigma_p) %>%
+    summarise(incid = md(incid_acum),
+              parc = md(parceiros_distintos),
+              sem  = if ("prop_femeas_sem_parceria" %in% names(fim))
+                       md(prop_femeas_sem_parceria) else NA_real_,
+              .groups = "drop") %>%
+    mutate(curva = ordenar_curva(tipo_selecao))
+
+  faz <- function(yvar, titulo, ylab, perc = FALSE) {
+    p <- ggplot(r, aes(sigma_p, .data[[yvar]], colour = curva, linetype = curva)) +
+      geom_line(linewidth = 0.7) + geom_point(size = 1.7) +
+      facet_wrap(~ modelo) +
+      scale_colour_manual(values = setNames(cores_4[CURVAS], labels_4[CURVAS]),
+                          name = NULL) +
+      scale_linetype_manual(values = setNames(TIPOS_LINHA[CURVAS], labels_4[CURVAS]),
+                            name = NULL) +
+      labs(title = titulo, x = expression(sigma[p]), y = ylab) +
+      tema_base
+    if (perc) p <- p + scale_y_continuous(labels = scales::percent)
+    p
+  }
+  ps <- list(faz("incid", "O tamanho da epidemia", "Incidência acumulada", TRUE),
+             faz("parc", "O volume de sexo", "Parceiros por fêmea"))
+  if (!all(is.na(r$sem)))
+    ps <- c(ps, list(faz("sem", "Fêmeas sem parceria na semana",
+                         "Fração das fêmeas", TRUE)))
+  wrap_plots(ps, nrow = 1) + plot_layout(guides = "collect") &
+    theme(legend.position = "bottom")
+}
+```
+
+Os três painéis separam dois efeitos que $\sigma_p$ tem ao mesmo
+tempo, e é por isso que o painel da esquerda não se lê sozinho. Quando as
+preferências se espalham, algumas fêmeas passam a preferir machos que quase não
+existem na população e ficam mais semanas sem parceria, o que reduz o volume de
+sexo; e ao mesmo tempo os acasalamentos das demais se distribuem por mais
+machos, o que reduz a concentração. Os dois efeitos podem empurrar a epidemia
+no mesmo sentido ou em sentidos opostos, e a comparação entre os painéis é o
+que diz qual dos dois pesa mais em cada curva.
+
+# 8. A taxa de transmissão, e a curva que decide se há epidemia
+
+As seções anteriores ficaram num regime em que a epidemia acontece sempre, e
+ali a curva de preferência muda o *tamanho* dela. Esta seção acrescenta o outro
+nível de $\beta$, em que a epidemia fica no limiar, e a pergunta passa a ser
+outra: com todo o resto igual, a forma da curva de preferência decide se a
+epidemia acontece?
+
+O critério é o do plano de trabalho. Uma temporada conta como grande epidemia
+quando ao menos 15% da população se infectou em algum momento.
+
+```{r fig-beta, fig.height=3.2}
+if (tem(fim_tudo, c("beta", "incid_acum", "grande_epidemia", "tipo_selecao")) &&
+    length(unique(fim_tudo$beta)) > 1) {
+  r <- fim_tudo %>%
+    filter(h_I == 0) %>%
+    group_by(tipo_selecao, beta, modelo) %>%
+    summarise(incid = md(incid_acum), gr = md(grande_epidemia),
+              .groups = "drop") %>%
+    mutate(curva = ordenar_curva(tipo_selecao),
+           rot_beta = paste0("β = ", format(beta)))
+
+  faz <- function(yvar, titulo, ylab) {
+    ggplot(r, aes(curva, .data[[yvar]], fill = curva)) +
+      geom_col(width = 0.68) +
+      facet_grid(modelo ~ rot_beta) +
+      scale_fill_manual(values = setNames(cores_4[CURVAS], labels_4[CURVAS]),
+                        guide = "none") +
+      scale_y_continuous(labels = scales::percent) +
+      labs(title = titulo, x = NULL, y = ylab) +
+      tema_base +
+      theme(axis.text.x = element_text(angle = 30, hjust = 1))
+  }
+  faz("incid", "O tamanho da epidemia", "Incidência acumulada") |
+  faz("gr", "A epidemia acontece?",
+      "Temporadas que passam o critério de 15%")
+}
+```
+
+Os dois painéis dizem coisas diferentes, e é a comparação entre as duas colunas
+de cada um que interessa. À direita, no $\beta$ alto, todas as barras do painel
+da direita estão no topo: toda temporada produz uma grande epidemia, qualquer
+que seja a curva, e o critério não distingue nada. À esquerda, no $\beta$
+baixo, as mesmas quatro curvas se separam, e a diferença entre elas deixa de
+ser de grau.
+
+```{r conta-beta, results='asis'}
+if (tem(fim_tudo, c("beta", "grande_epidemia", "tipo_selecao")) &&
+    length(unique(fim_tudo$beta)) > 1) {
+  tb <- fim_tudo %>%
+    filter(h_I == 0) %>%
+    group_by(tipo_selecao, beta) %>%
+    summarise(gr = md(grande_epidemia), inc = md(incid_acum), .groups = "drop") %>%
+    mutate(cel = sprintf("%.0f%% (incid. %.1f%%)", 100 * gr, 100 * inc),
+           rot = paste0("β = ", format(beta))) %>%
+    select(tipo_selecao, rot, cel) %>%
+    pivot_wider(names_from = rot, values_from = cel) %>%
+    mutate(Curva = labels_4[tipo_selecao]) %>%
+    select(-tipo_selecao) %>%
+    relocate(Curva) %>%
+    arrange(match(Curva, labels_4[CURVAS]))
+  print(kable(tb, caption = "Fração das temporadas que passam o critério de grande epidemia, com a incidência acumulada média entre parênteses. Braço de referência, hI = 0."))
+  cat("\n\n")
+
+  baixo <- fim_tudo %>% filter(h_I == 0, beta == min(beta)) %>%
+    group_by(tipo_selecao) %>% summarise(gr = md(grande_epidemia), .groups = "drop")
+  if (nrow(baixo) > 1 && diff(range(baixo$gr)) > 0.1)
+    cat(sprintf(paste0("No nível baixo de transmissão, a fração de temporadas ",
+                       "com grande epidemia vai de %s sob a curva %s a %s sob ",
+                       "a %s. A diferença entre as curvas deixa de ser de ",
+                       "quanto e passa a ser de se.\n\n"),
+                pc(min(baixo$gr)), tolower(labels_4[baixo$tipo_selecao[which.min(baixo$gr)]]),
+                pc(max(baixo$gr)), tolower(labels_4[baixo$tipo_selecao[which.max(baixo$gr)]])))
+}
+```
+
+# Síntese
+
+```{r sintese, results='asis'}
+if (ok(fim)) {
+  cat("O que os dados mostram, em uma frase por resultado.\n\n")
+  linhas <- character(0)
+
+  if (tem(fim, c("tipo_selecao", "incid_acum", "copulas_acumuladas"))) {
+    r <- fim %>% filter(h_I == 0) %>% group_by(tipo_selecao) %>%
+      summarise(incid = md(incid_acum), cop = md(copulas_acumuladas),
+                .groups = "drop")
+    f_inc <- max(r$incid) / min(r$incid)
+    f_cop <- max(r$cop)   / min(r$cop)
+    # A conclusão é condicional aos números, e não afirmada de antemão: a frase
+    # muda se o volume de sexo passar a explicar a diferença.
+    fecho <- if (f_inc > 1.5 * f_cop)
+      paste0("A diferença entre as curvas não está no volume de sexo, que é ",
+             "praticamente o mesmo nas quatro.")
+    else if (f_cop > 1.5 * f_inc)
+      paste0("Aqui é o volume de sexo que varia mais do que a epidemia, e a ",
+             "leitura estrutural não se sustenta nestes dados.")
+    else
+      paste0("Os dois fatores são da mesma ordem, e a figura da seção 2 é o ",
+             "que separa a contribuição de cada um.")
+    linhas <- c(linhas, sprintf(paste0(
+      "A forma da curva de preferência muda a incidência acumulada por um ",
+      "fator de %s (de %s a %s), enquanto o volume de sexo varia por um ",
+      "fator de %s. %s"),
+      p2(f_inc), pc(min(r$incid)), pc(max(r$incid)), p2(f_cop), fecho))
+  }
+  if (tem(fim, c("I_s", "tipo_selecao"))) {
+    r <- fim %>% filter(h_I == 0) %>% group_by(tipo_selecao) %>%
+      summarise(Is = md(I_s), incid = md(incid_acum),
+                C = if ("conectancia" %in% names(fim)) md(conectancia) else NA_real_,
+                .groups = "drop")
+    txt <- sprintf(paste0("A oportunidade de seleção sexual varia de %s a %s ",
+                          "entre as curvas."), p2(min(r$Is)), p2(max(r$Is)))
+    if (nrow(r) > 2 && !all(is.na(r$C))) {
+      cor_is <- suppressWarnings(cor(r$Is, r$incid))
+      cor_c  <- suppressWarnings(cor(r$C,  r$incid))
+      txt <- paste0(txt, sprintf(paste0(
+        " Entre as médias por curva, ela correlaciona %s com a incidência, ",
+        "contra %s da conectância."), p2(cor_is), p2(cor_c)))
+    }
+    linhas <- c(linhas, txt)
+  }
+  if (tem(fim, c("grau_acum_infectados", "grau_acum_suscetiveis"))) {
+    r <- fim %>% filter(h_I == 0)
+    linhas <- c(linhas, sprintf(paste0(
+      "No braço de referência, em que a infecção não afeta a atratividade, os ",
+      "machos infectados ao fim da temporada acumularam %s parceiras contra ",
+      "%s dos suscetíveis. A infecção é consequência do sucesso, e é por isso ",
+      "que o efeito de hI tem de ser medido semana a semana."),
+      p1(md(r$grau_acum_infectados)), p1(md(r$grau_acum_suscetiveis))))
+  }
+  if (tem(fim, c("modelo", "incid_acum"))) {
+    r <- fim %>% filter(h_I == 0) %>% group_by(modelo) %>%
+      summarise(incid = md(incid_acum), .groups = "drop")
+    if (nrow(r) == 2)
+      linhas <- c(linhas, sprintf(paste0(
+        "A imunidade importa mas não decide: a incidência acumulada é %s no ",
+        "%s e %s no %s."),
+        pc(r$incid[1]), r$modelo[1], pc(r$incid[2]), r$modelo[2]))
+  }
+  if (tem(fim_tudo, c("beta", "grande_epidemia")) &&
+      length(unique(fim_tudo$beta)) > 1) {
+    b <- fim_tudo %>% filter(h_I == 0, beta == min(beta)) %>%
+      group_by(tipo_selecao) %>%
+      summarise(gr = md(grande_epidemia), .groups = "drop")
+    linhas <- c(linhas, sprintf(paste0(
+      "No nível baixo de transmissão a diferença deixa de ser de grau: a ",
+      "fração de temporadas com grande epidemia vai de %s sob a curva %s a %s ",
+      "sob a %s. Com tudo o mais igual, a forma da curva de preferência decide ",
+      "se a epidemia acontece."),
+      pc(min(b$gr)), tolower(labels_4[b$tipo_selecao[which.min(b$gr)]]),
+      pc(max(b$gr)), tolower(labels_4[b$tipo_selecao[which.max(b$gr)]])))
+  }
+  if (tem(fim, c("i_traco", "h_I", "tipo_selecao"))) {
+    a <- fim %>% group_by(tipo_selecao, h_I) %>%
+      summarise(i = md(i_traco), .groups = "drop") %>%
+      group_by(tipo_selecao) %>%
+      summarise(amp = diff(range(i)), .groups = "drop") %>%
+      arrange(desc(amp))
+    linhas <- c(linhas, sprintf(paste0(
+      "O efeito da doença sobre a seleção não é maior onde a epidemia é maior. ",
+      "A amplitude de i entre os extremos de hI é de %s sob a curva %s e de ",
+      "apenas %s sob a %s."),
+      p2(a$amp[1]), tolower(labels_4[a$tipo_selecao[1]]),
+      p2(a$amp[nrow(a)]), tolower(labels_4[a$tipo_selecao[nrow(a)]])))
+  }
+  cat(paste0("- ", linhas, collapse = "\n"), "\n\n")
+}
+```
+
+O Estudo 5 fecha o percurso do projeto no sentido em que ele foi desenhado. Os
+Estudos 1 a 4 mostraram que a regra de escolha de parceiro determina a
+estrutura da rede de acasalamentos. O Estudo 5 mostra que essa estrutura tem
+consequências fora da seleção sexual, porque ela é também a rede por onde um
+patógeno anda, e que a doença volta a agir sobre a seleção quando altera os
+sinais que a escolha avalia. As duas literaturas, a da seleção sexual e a da
+epidemiologia de redes, descrevem a mesma quantidade a partir de motivações
+diferentes, e o modelo permite passar de uma à outra sem trocar de ferramenta.
+
+# Referências
+
+Almeida-Neto, M., Guimarães, P., Guimarães Jr., P.R., Loyola, R.D. & Ulrich, W.
+(2008) A consistent metric for nestedness analysis in ecological systems:
+reconciling concept and measurement. *Oikos*, 117, 1227-1239.
+
+Blondel, V.D., Guillaume, J.-L., Lambiotte, R. & Lefebvre, E. (2008) Fast
+unfolding of communities in large networks. *Journal of Statistical Mechanics:
+Theory and Experiment*, 2008, P10008.
+
+Eames, K.T.D. & Keeling, M.J. (2004) Monogamous networks and the spread of
+sexually transmitted diseases. *Mathematical Biosciences*, 189, 115-130.
+
+Janetos, A.C. (1980) Strategies of female mate choice: a theoretical analysis.
+*Behavioral Ecology and Sociobiology*, 7, 107-112.
+
+Kretzschmar, M. (2000) Sexual network structure and sexually transmitted
+disease prevention: a modeling perspective. *Sexually Transmitted Diseases*,
+27, 627-635.
+
+Lande, R. & Arnold, S.J. (1983) The measurement of selection on correlated
+characters. *Evolution*, 37, 1210-1226.
+
+Lloyd-Smith, J.O., Schreiber, S.J., Kopp, P.E. & Getz, W.M. (2005)
+Superspreading and the effect of individual variation on disease emergence.
+*Nature*, 438, 355-359.
+
+May, R.M. & Anderson, R.M. (1987) Transmission dynamics of HIV infection.
+*Nature*, 326, 137-142.
+
+Morris, M. & Kretzschmar, M. (1997) Concurrent partnerships and the spread of
+HIV. *AIDS*, 11, 641-648.
+
+Potterat, J.J., Zimmerman-Rogers, H., Muth, S.Q., Rothenberg, R.B., Green,
+D.L., Taylor, J.E., Bonney, M.S. & White, H.A. (2000) Evidence undermining the
+adequacy of the HIV reproduction number formula. *Sexually Transmitted
+Diseases*, 27, 644-645.
+
+Wade, M.J. & Arnold, S.J. (1980) The intensity of sexual selection in relation
+to male sexual behaviour, female choice, and sperm precedence. *Animal
+Behaviour*, 28, 446-461.

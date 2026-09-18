@@ -145,7 +145,7 @@ apenas do que de fato muda no desenho, e não de implementações distintas.
 
 ## Material suplementar
 
-Dois anexos acompanham este relatório, ambos gerados diretamente a partir dos
+Três anexos acompanham este relatório, todos gerados diretamente a partir dos
 resultados das simulações:
 
 - *Material suplementar: metodologia*, com o modelo, o ciclo de vida passo a
@@ -154,6 +154,8 @@ resultados das simulações:
 - *Material suplementar*, com o conjunto completo de painéis de resultados, em
   todas as combinações de parâmetros, incluindo as que não caberiam num texto
   impresso.
+- *Material suplementar: o estudo epidemiológico*, com o modelo de temporada,
+  o desenho e os resultados do Objetivo 2.
 
 O corpo deste relatório apresenta apenas os resultados principais de cada
 estudo.
@@ -575,16 +577,22 @@ Este objetivo, previsto para o segundo ano, está em desenvolvimento. A pergunta
 atratividade do sexo escolhido impacta a formação das redes sexuais e a seleção
 sobre a característica escolhida.
 
-*Esta seção precisa ser completada com o estado atual do desenvolvimento e com
-os primeiros resultados. O que está abaixo é o desenho, para revisão.*
+O motor deste objetivo está implementado e calibrado, e a produção dos
+resultados está em curso. O desenho completo e os resultados estão no
+*Material suplementar: o estudo epidemiológico*.
+
+## O que o desenho acrescenta
 
 O desenho acrescenta ao motor existente uma estrutura temporal dentro da
-estação reprodutiva. A estação é dividida em semanas, e em cada semana as
-fêmeas encontram machos, aplicam a mesma regra de decisão dos estudos
+estação reprodutiva. A estação é dividida em 20 semanas com a mesma população
+do começo ao fim, sem reprodução nem substituição de indivíduos, e em cada
+semana as fêmeas encontram machos, aplicam a mesma regra de decisão dos estudos
 anteriores e podem copular. A transmissão ocorre nas cópulas daquela semana,
-com probabilidade por cópula, e a infecção altera o traço percebido do macho,
-com uma magnitude que é o parâmetro central do estudo. A estrutura de estados é
-do tipo suscetível-infectado, com recuperação.
+com probabilidade por cópula e nos dois sentidos, e a infecção altera o traço
+percebido do macho, com uma magnitude que é o parâmetro central do estudo. A
+estrutura de estados é suscetível-infectado, com recuperação que devolve à
+suscetibilidade (SIS) ou dá imunidade (SIR), e o contraste entre as duas entra
+no desenho.
 
 A parte de escolha de parceiro não muda: continua sendo a mesma função, com as
 mesmas quatro curvas de preferência. O que se acrescenta é a persistência das
@@ -592,11 +600,50 @@ parcerias ao longo das semanas, que é a parte epidemiológica, porque é ela qu
 gera cópulas repetidas com o mesmo parceiro, concorrência entre parcerias
 simultâneas e rotação de parceiros ao longo da estação.
 
-Três decisões estão em aberto e serão fixadas a partir da literatura: a duração
-média de uma parceria, a frequência de cópula de um casal estabelecido, e se a
-doença modelada é aguda, com recuperação rápida e estação curta, ou crônica.
-Essa última escolha é uma afirmação sobre que doença estamos modelando e será
-declarada nos Métodos.
+## A persistência das parcerias, e por que ela foi necessária
+
+A primeira versão do estudo não representava parcerias: cada semana as fêmeas
+escolhiam do zero e por isso quase nunca voltavam ao mesmo macho. Medido sobre
+essa versão, cada parceiro rendia cerca de 1,4 cópulas na temporada inteira, o
+que equivale a dizer que quase toda cópula era com alguém novo, e com uma razão
+dessas a infecção se extinguia antes de encontrar o próximo hospedeiro. Baixar
+o número máximo de parceiros não corrigia o problema, porque a razão de cópulas
+por parceiro permanecia em torno de 1,4 qualquer que fosse o limite: o que
+faltava não era restringir a escolha, era um mecanismo que fizesse a fêmea
+voltar ao mesmo macho.
+
+A representação explícita de parcerias resolve isso pela via biológica. Um par
+que se forma permanece junto por algumas semanas e pode copular em cada uma
+delas, e a razão de cópulas por parceria sobe para cerca de quatro. O parâmetro
+que limita a fêmea deixa de ser o número de parceiros da temporada e passa a ser
+o número de parcerias que ela mantém simultaneamente, quantidade que na
+epidemiologia se chama concorrência e que é um dos conceitos centrais da área.
+
+## As decisões que o desenho exigiu
+
+Três decisões que o relatório anterior deixava em aberto estão agora fixadas: a
+concorrência, em duas parcerias simultâneas; a duração média de uma parceria,
+em cinco semanas; e a frequência de cópula de um casal estabelecido, em 0,7 por
+semana. Esses valores foram escolhidos por calibração sobre o próprio modelo, e
+não retirados de um sistema empírico específico, de modo que produzam uma
+epidemia mensurável sem saturar a população. Trata-se, portanto, de uma
+parametrização de referência e não de uma reconstrução de um caso natural, e
+será declarada como tal nos Métodos. A escolha entre doença aguda e crônica
+deixou de ser uma decisão prévia: o período infeccioso e o contraste SIS contra
+SIR entram no desenho como fatores.
+
+A taxa de transmissão também entrou como fator, com dois níveis, por uma razão
+metodológica que vale registrar. O critério de grande epidemia adotado no plano
+de trabalho, 15% da população infectada em algum momento, só carrega informação
+numa faixa estreita de transmissão: acima dela toda temporada o cumpre e o
+critério não distingue nada; abaixo dela nenhuma o cumpre. Como as duas
+perguntas do objetivo não vivem na mesma faixa, uma que exige epidemia
+estabelecida para medir os contrastes secundários e outra que exige o limiar
+para que a curva de preferência decida se há epidemia, os dois regimes são
+simulados.
+
+*Os resultados desta seção serão incorporados quando a rodada completa
+terminar. O anexo epidemiológico já traz o desenho e as figuras.*
 
 # Gestão e disponibilização dos códigos
 
