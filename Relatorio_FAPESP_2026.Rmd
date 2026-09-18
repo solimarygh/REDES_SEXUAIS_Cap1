@@ -206,10 +206,15 @@ anexo de metodologia:
 4. **A regulação populacional foi declarada explicitamente.** Os 200 machos
    adultos são a capacidade de suporte do ambiente, e a viabilidade decide quais
    machos ocupam as vagas e nunca quantas vagas existem. Na terminologia de
-   Wallace (1975), é seleção branda, com regulação por densidade (Bell et al.
-   2021; Reznick 2016). A alternativa, seleção dura com mortalidade em termos
-   absolutos, foi implementada e comparada de forma pareada; a seção final deste
-   relatório resume o que essa comparação mostrou.
+   Wallace (1975), é seleção branda, com regulação por densidade; a formulação
+   teórica da fronteira entre seleção branda e dura está em Débarre & Gandon
+   (2011), e as suas consequências ecológicas e evolutivas foram revistas por
+   Bell et al. (2021) e Reznick (2016). É a suposição adotada em todos os
+   estudos deste relatório, e a consequência que importa para as análises é que
+   o censo adulto é constante
+   por construção, de modo que as métricas de topologia são sempre comparáveis
+   entre combinações do desenho: nenhuma diferença entre elas pode vir de as
+   redes terem tamanhos diferentes.
 
 Além disso, a variância de segregação passou a seguir o modelo infinitesimal,
 em que o desvio do filhote em relação à média dos pais tem variância
@@ -290,7 +295,7 @@ leitura possível, ainda não testada, é que quando todas as fêmeas querem a m
 coisa a geometria da curva se traduz sem ruído em quem acasala com quem, e
 quando elas discordam entre si a variação individual borra a assinatura.
 
-### Não todas as métricas de rede são igualmente informativas
+### Nem todas as métricas de rede são igualmente informativas
 
 O desenho faz a densidade da rede variar por um fator de doze, porque o número
 de parceiros por fêmea vai de 5 a 20. Medindo quanto disso contamina cada
@@ -539,47 +544,6 @@ do conjunto. Ele sugere que a assinatura da seleção sexual na estrutura da red
 pode ser transitória, e que uma população amostrada num único momento pode
 apresentar uma rede indistinguível do acasalamento ao acaso apesar de ter
 passado por seleção sexual intensa.
-
-# Uma decisão metodológica com conteúdo biológico
-
-Ao longo deste ano, uma consequência não prevista da regra de decisão mais
-forte expôs uma ambiguidade real no modelo, que vale registrar porque a sua
-resolução é um resultado em si.
-
-O número de 200 machos adultos admite duas leituras. Pode ser um teto, em que
-cada juvenil sobrevive de forma independente e o censo é quem sobrou, de modo
-que a viabilidade é mortalidade em termos absolutos e o tamanho da população é
-um resultado do modelo. Ou pode ser uma cota, em que 200 é a capacidade de
-suporte e a viabilidade decide quais machos ocupam as vagas, nunca quantas
-vagas existem. São, respectivamente, seleção dura e seleção branda, na
-distinção de Wallace (1975); a formulação teórica da fronteira entre as duas
-está em Débarre & Gandon (2011), e uma revisão recente das suas consequências
-ecológicas e evolutivas, em Bell et al. (2021) e Reznick (2016).
-
-As duas versões foram rodadas nas mesmas combinações e com as mesmas sementes,
-o que permite uma comparação pareada. Três consequências:
-
-1. Sob o teto, nas combinações em que o traço se afasta muito do ótimo, a
-   viabilidade colapsa para todos os machos ao mesmo tempo e o censo cai a
-   poucas dezenas. Como todas as métricas de topologia dependem do tamanho e da
-   densidade da rede, essas combinações deixam de ser comparáveis com as
-   demais. O modelo passou a usar a cota por essa razão.
-
-2. A centralização e a oportunidade de seleção sexual respondem em direções
-   opostas à mudança de censo. Com poucos machos e muitas fêmeas todos os
-   machos acasalam muito, de modo que a desigualdade entre eles é baixa, mas a
-   centralização, que se normaliza pelo máximo possível para aquele tamanho de
-   rede, sai alta. A conclusão metodológica é que a centralização não é
-   comparável entre redes de tamanhos diferentes e o Is é, e isso precisa ir
-   para os Métodos do artigo.
-
-3. Contra a nossa expectativa, sob a cota o traço se afasta mais do ótimo, e
-   não menos. Como as vagas se preenchem sempre com os melhores juvenis que
-   existirem, não há mortalidade em termos absolutos contendo o deslocamento. A
-   explicação que nos parece mais provável é que o freio do teto não seja mais
-   seleção natural, e sim menos seleção sexual: quando o pool de machos
-   colapsa, a fêmea não consegue ser seletiva, e a seleção sexual se apaga a si
-   mesma. Essa cadeia causal ainda é inferência e está em verificação.
 
 # Objetivo 2: doença na rede sexual
 
