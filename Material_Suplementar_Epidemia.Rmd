@@ -1149,13 +1149,24 @@ if (ok(fim)) {
     linhas <- c(linhas, txt)
   }
   if (tem(fim, c("grau_acum_infectados", "grau_acum_suscetiveis"))) {
-    r <- fim %>% filter(h_I == 0)
+    # Por curva, e não no conjunto: a diferença entre infectados e suscetíveis
+    # depende muito da curva, e uma média sobre as quatro esconderia que na
+    # aleatória ela quase não existe.
+    r <- fim %>% filter(h_I == 0) %>%
+      group_by(tipo_selecao) %>%
+      summarise(inf = md(grau_acum_infectados),
+                sus = md(grau_acum_suscetiveis), .groups = "drop") %>%
+      mutate(raz = inf / sus) %>% arrange(desc(raz))
     linhas <- c(linhas, sprintf(paste0(
       "No braço de referência, em que a infecção não afeta a atratividade, os ",
-      "machos infectados ao fim da temporada acumularam %s parceiras contra ",
-      "%s dos suscetíveis. A infecção é consequência do sucesso, e é por isso ",
-      "que o efeito de hI tem de ser medido semana a semana."),
-      p1(md(r$grau_acum_infectados)), p1(md(r$grau_acum_suscetiveis))))
+      "machos infectados ao fim da temporada já tinham acumulado mais ",
+      "parceiras do que os suscetíveis, e por uma margem que depende da curva: ",
+      "%s contra %s sob a %s, e %s contra %s sob a %s. A infecção é ",
+      "consequência do sucesso, e é por isso que o efeito de hI tem de ser ",
+      "medido semana a semana."),
+      p1(r$inf[1]), p1(r$sus[1]), tolower(labels_4[r$tipo_selecao[1]]),
+      p1(r$inf[nrow(r)]), p1(r$sus[nrow(r)]),
+      tolower(labels_4[r$tipo_selecao[nrow(r)]])))
   }
   if (tem(fim, c("modelo", "incid_acum"))) {
     r <- fim %>% filter(h_I == 0) %>% group_by(modelo) %>%
