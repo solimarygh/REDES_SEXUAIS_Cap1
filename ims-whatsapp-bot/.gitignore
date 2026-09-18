@@ -1,0 +1,28 @@
+# ---------------------------------------------------------------------------
+# NUNCA comitar: sessao do WhatsApp (equivale a credencial da conta)
+# ---------------------------------------------------------------------------
+auth_info/
+auth_info*/
+*.auth_info
+creds.json
+
+# Segredos e configuracao local
+.env
+.env.*
+!.env.example
+
+# Banco de dados / logs
+data/
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.db
+logs/
+*.log
+
+# Build e dependencias
+node_modules/
+dist/
+coverage/
+.DS_Store

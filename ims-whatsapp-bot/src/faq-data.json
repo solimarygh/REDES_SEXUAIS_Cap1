@@ -1,0 +1,158 @@
+{
+  "version": "0.1.0-PLACEHOLDER",
+  "updatedAt": "2026-09-18",
+  "_nota": "ARQUIVO DE EXEMPLO. Substitua pelo FAQ real de 38 entradas mantendo exatamente este formato. Toda resposta que ainda contiver o marcador [SUBSTITUIR] faz o bot avisar no startup.",
+  "categories": {
+    "A": {
+      "name": "Sobre o Instituto",
+      "description": "Quem somos, proposito, como participar, valores, equipe."
+    },
+    "B": {
+      "name": "Legalidade",
+      "description": "Status legal, riscos juridicos. NUNCA auto-respondida."
+    },
+    "C": {
+      "name": "Ciencia",
+      "description": "Evidencia, estudos clinicos, farmacologia, neurociencia."
+    },
+    "D": {
+      "name": "Uso, preparacao e seguranca",
+      "description": "Dose, contraindicacoes, interacoes, manejo. NUNCA auto-respondida."
+    },
+    "E": {
+      "name": "Integracao, cerimonia e comunidade",
+      "description": "Integracao, encontros, combinados do grupo, acolhimento."
+    }
+  },
+  "entries": [
+    {
+      "id": "A01",
+      "category": "A",
+      "question": "O que e o Instituto Micelio Sagrado?",
+      "variants": [
+        "O que e o IMS?",
+        "Me explica o que e esse instituto",
+        "Qual e a proposta do Micelio Sagrado?",
+        "O instituto faz o que exatamente?"
+      ],
+      "answer": "[SUBSTITUIR] Texto oficial descrevendo o Instituto Micelio Sagrado.",
+      "tags": ["institucional", "apresentacao"]
+    },
+    {
+      "id": "A02",
+      "category": "A",
+      "question": "Como faco para participar das atividades do instituto?",
+      "variants": [
+        "Como entro no instituto?",
+        "Quais sao os requisitos para participar?",
+        "Como me inscrevo nas atividades?",
+        "Tem como participar mesmo morando longe?"
+      ],
+      "answer": "[SUBSTITUIR] Texto oficial sobre como participar.",
+      "tags": ["institucional", "inscricao"]
+    },
+    {
+      "id": "B01",
+      "category": "B",
+      "question": "Psilocibina e legal no Brasil?",
+      "variants": [
+        "E crime ter cogumelo?",
+        "Posso ser preso por isso?",
+        "Qual a situacao legal dos cogumelos?",
+        "A lei brasileira permite psilocibina?"
+      ],
+      "answer": "[SUBSTITUIR] Resposta sobre legalidade — NUNCA enviada automaticamente, apenas usada por um moderador humano.",
+      "tags": ["legalidade"]
+    },
+    {
+      "id": "B02",
+      "category": "B",
+      "question": "Posso viajar levando cogumelos?",
+      "variants": [
+        "E seguro transportar?",
+        "O que acontece se a policia encontrar?",
+        "Da problema levar no aviao?"
+      ],
+      "answer": "[SUBSTITUIR] Resposta sobre transporte e risco juridico — NUNCA enviada automaticamente.",
+      "tags": ["legalidade", "transporte"]
+    },
+    {
+      "id": "C01",
+      "category": "C",
+      "question": "O que a ciencia ja mostrou sobre psilocibina e depressao?",
+      "variants": [
+        "Tem estudo sobre psilocibina para depressao?",
+        "Funciona mesmo para depressao segundo a pesquisa?",
+        "Quais evidencias cientificas existem?",
+        "O que dizem os ensaios clinicos?"
+      ],
+      "answer": "[SUBSTITUIR] Sintese da evidencia cientifica, com referencias.",
+      "tags": ["ciencia", "depressao", "evidencia"]
+    },
+    {
+      "id": "C02",
+      "category": "C",
+      "question": "Como a psilocibina age no cerebro?",
+      "variants": [
+        "Qual o mecanismo de acao?",
+        "O que acontece no cerebro durante a experiencia?",
+        "Psilocibina mexe com serotonina?",
+        "Explica a neurociencia disso"
+      ],
+      "answer": "[SUBSTITUIR] Explicacao do mecanismo de acao em linguagem acessivel.",
+      "tags": ["ciencia", "neurociencia"]
+    },
+    {
+      "id": "D01",
+      "category": "D",
+      "question": "Qual a dose recomendada?",
+      "variants": [
+        "Quantos gramas devo tomar?",
+        "Qual dose para iniciante?",
+        "Quanto e uma microdose?",
+        "Como calculo a quantidade?"
+      ],
+      "answer": "[SUBSTITUIR] Resposta sobre dose — NUNCA enviada automaticamente, apenas usada por um moderador humano.",
+      "tags": ["uso", "dose"]
+    },
+    {
+      "id": "D02",
+      "category": "D",
+      "question": "Quem nao deve usar psilocibina?",
+      "variants": [
+        "Quais sao as contraindicacoes?",
+        "Tem interacao com antidepressivo?",
+        "Posso usar tomando remedio controlado?",
+        "E perigoso para quem tem historico psiquiatrico?"
+      ],
+      "answer": "[SUBSTITUIR] Resposta sobre contraindicacoes e interacoes — NUNCA enviada automaticamente.",
+      "tags": ["uso", "seguranca", "contraindicacao"]
+    },
+    {
+      "id": "E01",
+      "category": "E",
+      "question": "O que e integracao e por que ela importa?",
+      "variants": [
+        "Para que serve a integracao?",
+        "O que fazer depois da experiencia?",
+        "Como funciona o processo de integracao?",
+        "Preciso mesmo fazer integracao?"
+      ],
+      "answer": "[SUBSTITUIR] Texto sobre integracao.",
+      "tags": ["integracao"]
+    },
+    {
+      "id": "E02",
+      "category": "E",
+      "question": "Quais sao os combinados do grupo?",
+      "variants": [
+        "Quais as regras aqui do grupo?",
+        "O que pode e o que nao pode falar no grupo?",
+        "Tem codigo de conduta?",
+        "Como funciona a moderacao?"
+      ],
+      "answer": "[SUBSTITUIR] Combinados e codigo de conduta do grupo.",
+      "tags": ["comunidade", "moderacao"]
+    }
+  ]
+}

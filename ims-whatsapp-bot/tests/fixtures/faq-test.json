@@ -1,0 +1,115 @@
+{
+  "version": "test-1.0",
+  "updatedAt": "2026-09-18",
+  "categories": {
+    "A": { "name": "Sobre o Instituto" },
+    "B": { "name": "Legalidade" },
+    "C": { "name": "Ciencia" },
+    "D": { "name": "Uso, preparacao e seguranca" },
+    "E": { "name": "Integracao, cerimonia e comunidade" }
+  },
+  "entries": [
+    {
+      "id": "A01",
+      "category": "A",
+      "question": "O que e o Instituto Micelio Sagrado?",
+      "variants": [
+        "O que e o IMS?",
+        "Me explica o que e esse instituto",
+        "Qual e a proposta do Micelio Sagrado?",
+        "O instituto faz o que exatamente?"
+      ],
+      "answer": "RESPOSTA_A01"
+    },
+    {
+      "id": "A02",
+      "category": "A",
+      "question": "Como faco para participar das atividades do instituto?",
+      "variants": [
+        "Como entro no instituto?",
+        "Como me inscrevo nas atividades do instituto?",
+        "Quais os requisitos para participar do instituto?"
+      ],
+      "answer": "RESPOSTA_A02"
+    },
+    {
+      "id": "B01",
+      "category": "B",
+      "question": "Psilocibina e legal no Brasil?",
+      "variants": [
+        "E crime ter cogumelo?",
+        "Posso ser preso por causa de cogumelo?",
+        "Qual a situacao legal dos cogumelos no Brasil?",
+        "A lei brasileira permite psilocibina?"
+      ],
+      "answer": "RESPOSTA_B01"
+    },
+    {
+      "id": "C01",
+      "category": "C",
+      "question": "O que a ciencia ja mostrou sobre psilocibina e depressao?",
+      "variants": [
+        "Tem estudo cientifico sobre psilocibina para depressao?",
+        "Psilocibina funciona para depressao segundo as pesquisas?",
+        "Quais evidencias cientificas existem sobre depressao?"
+      ],
+      "answer": "RESPOSTA_C01"
+    },
+    {
+      "id": "C02",
+      "category": "C",
+      "question": "Como a psilocibina age no cerebro?",
+      "variants": [
+        "Qual o mecanismo de acao da psilocibina no cerebro?",
+        "O que acontece no cerebro durante a experiencia?",
+        "Psilocibina mexe com a serotonina do cerebro?"
+      ],
+      "answer": "RESPOSTA_C02"
+    },
+    {
+      "id": "D01",
+      "category": "D",
+      "question": "Qual a dose recomendada de cogumelo?",
+      "variants": [
+        "Quantos gramas de cogumelo devo tomar?",
+        "Qual a dose de cogumelo para iniciante?",
+        "Quanto e uma microdose de cogumelo?",
+        "Como calculo a quantidade de cogumelo?"
+      ],
+      "answer": "RESPOSTA_D01"
+    },
+    {
+      "id": "D02",
+      "category": "D",
+      "question": "Quem nao deve usar psilocibina?",
+      "variants": [
+        "Quais sao as contraindicacoes da psilocibina?",
+        "Psilocibina tem interacao com antidepressivo?",
+        "Posso usar psilocibina tomando remedio controlado?"
+      ],
+      "answer": "RESPOSTA_D02"
+    },
+    {
+      "id": "E01",
+      "category": "E",
+      "question": "O que e integracao e por que ela importa?",
+      "variants": [
+        "Para que serve a integracao?",
+        "Como funciona o processo de integracao?",
+        "Preciso mesmo fazer integracao depois?"
+      ],
+      "answer": "RESPOSTA_E01"
+    },
+    {
+      "id": "E02",
+      "category": "E",
+      "question": "Quais sao os combinados do grupo?",
+      "variants": [
+        "Quais as regras aqui do grupo?",
+        "Tem codigo de conduta no grupo?",
+        "Como funciona a moderacao do grupo?"
+      ],
+      "answer": "RESPOSTA_E02"
+    }
+  ]
+}
