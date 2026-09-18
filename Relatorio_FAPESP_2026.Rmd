@@ -193,8 +193,9 @@ anexo de metodologia:
 2. **A regra de decisão da fêmea foi explicitada.** A fêmea avalia um número
    determinado de machos, A_max, e só então escolhe entre os que aceitou. É a
    regra de comparação em pool, ou *best-of-n*, suposição habitual para leks e
-   agregações. A alternativa, em que ela decide de um em um e para ao atingir o
-   número desejado de parceiros, foi implementada e descartada porque tornava o
+   agregações (Janetos 1980; Real 1990). A alternativa, em que ela decide de um
+   em um e para ao atingir o número desejado de parceiros, que é a regra de
+   limiar fixo de Janetos (1980), foi implementada e descartada porque tornava o
    gradiente de A_max inoperante.
 
 3. **Dois fatores ecológicos foram acrescentados ao desenho.** A_max representa
@@ -205,14 +206,15 @@ anexo de metodologia:
 4. **A regulação populacional foi declarada explicitamente.** Os 200 machos
    adultos são a capacidade de suporte do ambiente, e a viabilidade decide quais
    machos ocupam as vagas e nunca quantas vagas existem. Na terminologia de
-   Wallace, é seleção branda, com regulação por densidade. A alternativa, seleção
-   dura com mortalidade em termos absolutos, foi implementada e comparada de
-   forma pareada; a seção final deste relatório resume o que essa comparação
-   mostrou.
+   Wallace (1975), é seleção branda, com regulação por densidade (Bell et al.
+   2021; Reznick 2016). A alternativa, seleção dura com mortalidade em termos
+   absolutos, foi implementada e comparada de forma pareada; a seção final deste
+   relatório resume o que essa comparação mostrou.
 
 Além disso, a variância de segregação passou a seguir o modelo infinitesimal,
 em que o desvio do filhote em relação à média dos pais tem variância
-proporcional à variância parental, e não um ruído de tamanho fixo arbitrado.
+proporcional à variância parental, e não um ruído de tamanho fixo arbitrado
+(Fisher 1918; Roff & Fairbairn 2014).
 Essa mudança é o que torna respondível a pergunta sobre manutenção de variação
 genética: com um ruído fixo, a variância genética convergiria sempre para o
 mesmo piso em todos os cenários, e a resposta viria embutida no modelo.
@@ -307,7 +309,11 @@ Três das quatro métricas resistem ao controle. O aninhamento não: a curva de
 preferência explica 2% da variação dele, e a densidade explica 45%. A
 consequência metodológica é que o aninhamento, que era a métrica central no
 relatório de 2025, precisa ser reportado em relação a um modelo nulo que
-preserve a sequência de graus, e não em valor cru.
+preserve a sequência de graus, e não em valor cru. O índice usado é o NODF de
+Almeida-Neto et al. (2008), calculado com o pacote bipartite (Dormann et al.
+2008). A modularidade vem do algoritmo de Louvain (Blondel et al. 2008)
+aplicado sobre a rede, e ela e a centralização são calculadas com o igraph
+(Csardi & Nepusz 2006).
 
 # Estudo 2: a evolução do traço masculino
 
@@ -457,7 +463,9 @@ A grandeza central deixa de ser a média de cada característica e passa a ser a
 covariância genética entre elas. O acasalamento não aleatório constrói essa
 associação, e uma vez que ela existe a seleção que age sobre o traço arrasta a
 preferência consigo, mesmo sem nenhuma seleção agindo diretamente sobre ela. É
-o mecanismo de Fisher.
+o mecanismo de Fisher (Fisher 1930), na formulação genética quantitativa de
+Lande (1981) e Kirkpatrick (1982), e as condições em que ele opera foram
+unificadas por Seger (1985).
 
 ## Resultados principais
 
@@ -481,7 +489,7 @@ if (ok(co)) {
 
 A curva gaussiana é a única em que acasalamento assortativo, desequilíbrio de
 ligamento e covariância genética aparecem juntos, como a teoria de Fisher
-prevê. A sigmoide produz o mesmo desequilíbrio que a aleatória, ou seja nenhum,
+prevê (Lande 1981; Kirkpatrick 1982). A sigmoide produz o mesmo desequilíbrio que a aleatória, ou seja nenhum,
 apesar de ser a curva em que o traço mais se desloca: sob ela todas as fêmeas
 preferem o mesmo, independentemente do seu próprio pico, de modo que o
 acasalamento é direcional mas não assortativo. O resultado é deslocamento do
@@ -543,7 +551,10 @@ cada juvenil sobrevive de forma independente e o censo é quem sobrou, de modo
 que a viabilidade é mortalidade em termos absolutos e o tamanho da população é
 um resultado do modelo. Ou pode ser uma cota, em que 200 é a capacidade de
 suporte e a viabilidade decide quais machos ocupam as vagas, nunca quantas
-vagas existem. São, respectivamente, seleção dura e seleção branda.
+vagas existem. São, respectivamente, seleção dura e seleção branda, na
+distinção de Wallace (1975); a formulação teórica da fronteira entre as duas
+está em Débarre & Gandon (2011), e uma revisão recente das suas consequências
+ecológicas e evolutivas, em Bell et al. (2021) e Reznick (2016).
 
 As duas versões foram rodadas nas mesmas combinações e com as mesmas sementes,
 o que permite uma comparação pareada. Três consequências:
@@ -660,7 +671,9 @@ colaborações, orientações e participação em outros projetos.*
 
 # Referências
 
-*Lista preliminar, a conferir e completar antes da entrega.*
+*Todas as obras desta lista são citadas no texto, e todas as citações do texto
+têm entrada aqui. Os dados bibliográficos de cada entrada (volume, páginas,
+ano) ainda precisam ser conferidos contra a fonte antes da entrega.*
 
 Almeida-Neto, M., Guimarães, P., Guimarães Jr., P.R., Loyola, R.D. & Ulrich, W.
 (2008) A consistent metric for nestedness analysis in ecological systems:
@@ -683,6 +696,13 @@ between soft and hard selection. *The American Naturalist*, 177, E84-E97.
 Dormann, C.F., Gruber, B. & Fründ, J. (2008) Introducing the bipartite package:
 analysing ecological networks. *R News*, 8, 8-11.
 
+Fisher, R.A. (1918) The correlation between relatives on the supposition of
+Mendelian inheritance. *Transactions of the Royal Society of Edinburgh*, 52,
+399-433.
+
+Fisher, R.A. (1930) *The Genetical Theory of Natural Selection*. Clarendon
+Press, Oxford.
+
 Janetos, A.C. (1980) Strategies of female mate choice: a theoretical analysis.
 *Behavioral Ecology and Sociobiology*, 7, 107-112.
 
@@ -703,3 +723,6 @@ parameters under preferential mating. *Ecology and Evolution*, 4, 2759-2776.
 
 Seger, J. (1985) Unifying genetic models for the evolution of female choice.
 *Evolution*, 39, 1185-1193.
+
+Wallace, B. (1975) Hard and soft selection revisited. *Evolution*, 29,
+465-473.
