@@ -142,6 +142,17 @@ atratividade do sexo escolhido impacta essas redes e a seleção sobre as
 características, estava previsto para o segundo ano e é a frente em
 desenvolvimento no momento.
 
+O período aqui relatado vai de agosto de 2025 a agosto de 2026. O relatório
+final do projeto está previsto para o final de janeiro de 2027, e incorporará os
+resultados do Objetivo 2 em sua forma completa.
+
+O relatório anterior registrava que a integração de um módulo epidemiológico
+dependeria de parceria com a Dra. Erika M. Santana, por ter sido essa etapa
+originalmente concebida para ser desenvolvida por ela. A parceria se
+concretizou. O Objetivo 2 vem sendo desenvolvido em colaboração com a Dra.
+Santana, que é coautora dos materiais suplementares que acompanham este
+relatório, e a ressalva feita em 2025 está portanto superada.
+
 ## O que mudou desde o relatório anterior
 
 O relatório de 2025 organizava o trabalho em duas fases, uma em tempo ecológico
@@ -682,7 +693,33 @@ colaborações, orientações e participação em outros projetos.*
 
 # Projeção e recomendações
 
-*Seção a completar.*
+O primeiro objetivo do projeto está concluído, e com um alcance maior do que o
+previsto: os dois estudos do plano original foram ampliados e acompanhados de
+dois estudos adicionais que o desenvolvimento do motor tornou possíveis. O
+trabalho do período que resta, até o relatório final previsto para o final de
+janeiro de 2027, se organiza em três frentes.
+
+A primeira é concluir o Objetivo 2. A rodada completa do estudo epidemiológico
+está em produção, e a análise dos resultados é o passo imediatamente seguinte. É
+o que falta para que o projeto tenha respondido aos dois objetivos do plano.
+
+A segunda é a redação dos manuscritos. O conjunto de resultados comporta mais
+de um artigo, e a divisão entre eles é uma decisão a tomar com os coautores. Os
+resultados que nos parecem mais promissores para publicação são a conversão de
+seleção estabilizadora em diversificadora pela heterogeneidade de preferência,
+o caráter transitório da assinatura da seleção sexual na estrutura da rede, e o
+efeito da forma da curva de preferência sobre a propagação de uma infecção.
+
+A terceira é a divulgação dos resultados em congresso e o estabelecimento de
+colaborações que permitam confrontar as predições do modelo com dados
+empíricos. A incorporação de dados empíricos, apontada no relatório anterior
+como alternativa ao Objetivo 2, deixa de ser alternativa e passa a ser o
+desdobramento natural do projeto, uma vez que o modelo agora gera predições
+sobre estrutura de rede que são mensuráveis em populações naturais.
+
+*Esta seção precisa ser completada com os eventos e prazos concretos: congressos
+previstos para 2027, cronograma dos manuscritos e eventual recomendação sobre a
+continuidade do trabalho.*
 
 # Referências
 
