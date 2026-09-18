@@ -1,10 +1,14 @@
 ---
+# O bloco do título não leva comandos LaTeX (\vspace, \large e afins) de
+# propósito: eles funcionam no PDF mas saem como texto literal no Word. Os
+# blocos com "|" são line blocks do pandoc, e esses sim funcionam nos dois.
 title: |
   | Relatório de Atividades
-  | \vspace{0.4cm} \large Projeto de Pesquisa - Regular No. 2024/02198-7
-  | \large Processo da bolsa de pós-doutorado No. 2024/18754-6
-  | \vspace{0.3cm} \normalsize Acordos de Cooperação / CNPq - Conselho Nacional de Desenvolvimento Científico e Tecnológico / Fixação de Jovens Doutores
-  | \vspace{0.8cm} \Large Papel das redes de interações sexuais na evolução de traços indicadores de qualidade sexualmente selecionados
+  | Papel das redes de interações sexuais na evolução de traços indicadores de qualidade sexualmente selecionados
+subtitle: |
+  | Projeto de Pesquisa - Regular No. 2024/02198-7
+  | Processo da bolsa de pós-doutorado No. 2024/18754-6
+  | Acordos de Cooperação / CNPq - Conselho Nacional de Desenvolvimento Científico e Tecnológico / Fixação de Jovens Doutores
 author: |
   | Supervisor: Prof. Dr. Paulo Roberto Guimarães Jr.
   | Pós-doutoranda: Dra. Solimary García Hernández
@@ -17,6 +21,10 @@ output:
     fig_caption: true
     latex_engine: xelatex
     keep_tex: false
+  word_document:
+    toc: true
+    toc_depth: 2
+    fig_caption: true
   html_document:
     theme: flatly
     toc: true
@@ -301,17 +309,126 @@ figura_desenho()
 
 ## Resultados principais
 
-*Esta seção precisa dos números finais. O texto abaixo resume o que as análises
-atuais mostram, e cada afirmação está marcada com a sua origem para conferência
-antes da entrega.*
+```{r est1-analise}
+# ---------------------------------------------------------------------
+# As quantidades citadas no texto desta seção são calculadas aqui, sobre os
+# dados do Controle, e interpoladas nas frases. Nenhuma delas é escrita à mão:
+# se a rodada mudar, o texto muda com ela.
+# ---------------------------------------------------------------------
+est1 <- NULL
+if (ok(ct)) {
+  METS  <- intersect(c("Modularity", "Nestedness", "Centralization", "I_s"),
+                     names(ct))
+  CHAVE <- intersect(c("sigma_p", "sigma_z", "encounters_n", "k_fixo",
+                       "selecao_natural"), names(ct))
+
+  # --- a divergência entre as quatro curvas, célula a célula ---------
+  # Mesma definição usada no material suplementar: padronizam-se as quatro
+  # métricas sobre a tabela inteira, para que todas entrem na mesma unidade, e
+  # mede-se a distância média das quatro curvas ao centroide delas naquela
+  # célula do desenho.
+  padr <- ct %>%
+    filter(if_all(all_of(METS), ~ !is.na(.x))) %>%
+    mutate(across(all_of(METS), ~ as.numeric(scale(.x))))
+
+  cel <- padr %>%
+    group_by(across(all_of(c(CHAVE, "tipo_selecao")))) %>%
+    summarise(across(all_of(METS), ~ mean(.x, na.rm = TRUE)), .groups = "drop") %>%
+    pivot_longer(all_of(METS), names_to = "met", values_to = "v")
+
+  centro <- cel %>%
+    group_by(across(all_of(c(CHAVE, "met")))) %>%
+    summarise(centro = mean(v, na.rm = TRUE), .groups = "drop")
+
+  div <- cel %>%
+    left_join(centro, by = c(CHAVE, "met")) %>%
+    group_by(across(all_of(c(CHAVE, "tipo_selecao")))) %>%
+    summarise(dist = sqrt(sum((v - centro)^2)), .groups = "drop") %>%
+    group_by(across(all_of(CHAVE))) %>%
+    summarise(divergencia = mean(dist), .groups = "drop") %>%
+    mutate(assimetria   = log(sigma_z / sigma_p),
+           variabilidade = sqrt(sigma_p^2 + sigma_z^2))
+
+  r2 <- function(formula, dados) {
+    s <- suppressWarnings(summary(stats::lm(formula, data = dados)))
+    if (is.null(s$r.squared) || !is.finite(s$r.squared)) NA_real_ else s$r.squared
+  }
+
+  # --- quanto o regime de busca explica da divergência ---------------
+  r2_busca <- r2(divergencia ~ factor(encounters_n) * factor(k_fixo), div)
+
+  # --- e, no que sobra, assimetria contra variabilidade total --------
+  # Os dois preditores entram sobre o RESÍDUO do regime de busca, que é o que
+  # a frase afirma: "dentro do que sobra".
+  div$resid <- stats::residuals(
+    stats::lm(divergencia ~ factor(encounters_n) * factor(k_fixo), data = div))
+  r2_assim <- r2(resid ~ assimetria,    div)
+  r2_varia <- r2(resid ~ variabilidade, div)
+
+  # --- a variação de densidade que o desenho produz ------------------
+  faixa_dens <- if ("conectancia" %in% names(ct)) {
+    cc <- ct$conectancia[is.finite(ct$conectancia) & ct$conectancia > 0]
+    if (length(cc)) max(cc) / min(cc) else NA_real_
+  } else NA_real_
+
+  # --- R² da curva de preferência por métrica, cru e parcial ---------
+  # O R² parcial responde: do que a curva ainda poderia explicar DEPOIS de
+  # descontar tamanho e densidade, quanto ela explica. É
+  # (R²_completo - R²_controles) / (1 - R²_controles).
+  controles <- intersect(c("n_machos_surv", "conectancia"), names(ct))
+  # n_machos_surv é constante quando o censo é constante, e nesse caso não
+  # entra como controle: um preditor sem variação não controla nada.
+  controles <- controles[vapply(controles,
+                                function(v) length(unique(ct[[v]])) > 1,
+                                logical(1))]
+
+  tab_r2 <- lapply(METS, function(m) {
+    dd <- ct %>% filter(is.finite(.data[[m]]))
+    f_curva <- stats::as.formula(paste(m, "~ tipo_selecao"))
+    if (!length(controles)) {
+      return(data.frame(met = m, r2_curva = r2(f_curva, dd),
+                        r2_parcial = NA_real_, r2_controles = NA_real_))
+    }
+    f_ctrl  <- stats::as.formula(paste(m, "~", paste(controles, collapse = " + ")))
+    f_full  <- stats::as.formula(paste(m, "~", paste(controles, collapse = " + "),
+                                       "+ tipo_selecao"))
+    rc <- r2(f_ctrl, dd); rf <- r2(f_full, dd)
+    data.frame(met = m, r2_curva = r2(f_curva, dd),
+               r2_parcial = if (is.finite(rc) && rc < 1) (rf - rc) / (1 - rc) else NA_real_,
+               r2_controles = rc)
+  }) %>% bind_rows()
+
+  NOMES_MET <- c(Modularity = "modularidade", Centralization = "centralização",
+                 I_s = "oportunidade de seleção sexual (Is)",
+                 Nestedness = "aninhamento (NODF)")
+  tab_r2$rotulo <- NOMES_MET[tab_r2$met]
+  tab_r2 <- tab_r2 %>% arrange(desc(r2_curva))
+
+  est1 <- list(n_redes = nrow(ct), r2_busca = r2_busca,
+               r2_assim = r2_assim, r2_varia = r2_varia,
+               razao = if (is.finite(r2_varia) && r2_varia > 0) r2_assim / r2_varia else NA_real_,
+               faixa_dens = faixa_dens, tab = tab_r2)
+}
+
+# Formatação defensiva: sem dados, o texto mostra um traço em vez de quebrar.
+q1 <- function(expr, fmt = "%.2f") {
+  if (is.null(est1)) return("--")
+  v <- tryCatch(eval(expr, est1), error = function(e) NA_real_)
+  if (!is.finite(v)) "--" else sprintf(fmt, v)
+}
+pct1 <- function(expr) q1(expr, "%.0f%%")
+```
 
 ### O nível ecológico domina a estrutura da rede
 
 O resultado mais robusto do Estudo 1 é que o regime de busca, ou seja quantos
-machos a fêmea consegue avaliar e quantos pode aceitar, explica mais de dois
-terços da divergência de topologia entre as quatro curvas de preferência.
-Dentro do que sobra, a assimetria entre os sexos, `log(σz/σp)`, explica cerca de
-vinte vezes mais que a variabilidade total, `sqrt(σp² + σz²)`.
+machos a fêmea consegue avaliar e quantos pode aceitar, explica
+`r q1(quote(100 * r2_busca), "%.0f%%")` da divergência de topologia entre as
+quatro curvas de preferência. Dentro do que sobra, a assimetria entre os sexos,
+`log(σz/σp)`, explica `r q1(quote(razao), "%.0f")` vezes mais que a
+variabilidade total, `sqrt(σp² + σz²)`, com
+`r q1(quote(100 * r2_assim), "%.1f%%")` contra
+`r q1(quote(100 * r2_varia), "%.1f%%")` da variação residual.
 
 Isso reorienta a pergunta original do projeto. Não é quanta variação existe na
 preferência o que determina a estrutura da rede, e sim de que lado da interação
@@ -328,24 +445,47 @@ quando elas discordam entre si a variação individual borra a assinatura.
 
 ### Nem todas as métricas de rede são igualmente informativas
 
-O desenho faz a densidade da rede variar por um fator de doze, porque o número
-de parceiros por fêmea vai de 5 a 20. Medindo quanto disso contamina cada
-métrica:
+O desenho faz a densidade da rede variar por um fator de
+`r q1(quote(faixa_dens), "%.0f")`, porque o número de parceiros por fêmea vai
+de 5 a 20 e nem toda fêmea atinge o seu teto. Medindo quanto disso contamina
+cada métrica:
 
 ```{r r2-metricas}
-tibble(
-  `métrica` = c("modularidade", "centralização",
-                "oportunidade de seleção sexual (Is)", "aninhamento (NODF)"),
-  `R² da curva de preferência` = c(0.443, 0.247, 0.177, 0.019),
-  `R² parcial, controlando tamanho e densidade` = c(0.464, 0.259, 0.181, 0.039)
-) %>% kable(caption = "Quanto a curva de preferência explica de cada métrica de topologia, antes e depois de controlar por tamanho e densidade da rede. Estudo 1, 70.560 redes de uma geração.")
+if (is.null(est1)) {
+  cat("*Sem dados do Controle: a tabela aparece quando o .rds estiver presente.*")
+} else {
+  est1$tab %>%
+    transmute(`métrica` = rotulo,
+              `R² da curva de preferência` = round(r2_curva, 3),
+              `R² parcial, controlando tamanho e densidade` = round(r2_parcial, 3)) %>%
+    kable(caption = sprintf(paste0("Quanto a curva de preferência explica de ",
+                                   "cada métrica de topologia, antes e depois ",
+                                   "de controlar por tamanho e densidade da ",
+                                   "rede. Estudo 1, %s redes de uma geração."),
+                            format(est1$n_redes, big.mark = ".",
+                                   decimal.mark = ",")))
+}
 ```
 
-Três das quatro métricas resistem ao controle. O aninhamento não: a curva de
-preferência explica 2% da variação dele, e a densidade explica 45%. A
-consequência metodológica é que o aninhamento, que era a métrica central no
-relatório de 2025, precisa ser reportado em relação a um modelo nulo que
-preserve a sequência de graus, e não em valor cru. O índice usado é o NODF de
+```{r texto-aninhamento, results='asis'}
+if (!is.null(est1)) {
+  tb  <- est1$tab
+  pior <- tb[which.min(tb$r2_curva), ]
+  resistem <- sum(tb$r2_curva > 3 * min(tb$r2_curva), na.rm = TRUE)
+  cat(sprintf(paste0(
+    "%s das %d métricas resistem ao controle. O %s não: a curva de preferência ",
+    "explica %.0f%% da variação dele, e o tamanho e a densidade da rede juntos ",
+    "explicam %.0f%%. A consequência metodológica é que o aninhamento, que era ",
+    "a métrica central no relatório de 2025, precisa ser reportado em relação a ",
+    "um modelo nulo que preserve a sequência de graus, e não em valor cru.\n\n"),
+    c("Nenhuma","Uma","Duas","Três","Quatro")[resistem + 1], nrow(tb),
+    pior$rotulo, 100 * pior$r2_curva, 100 * pior$r2_controles))
+} else {
+  cat(paste0("O aninhamento, que era a métrica central no relatório de 2025, ",
+             "precisa ser reportado em relação a um modelo nulo que preserve a ",
+             "sequência de graus, e não em valor cru.\n\n"))
+}
+``` O índice usado é o NODF de
 Almeida-Neto et al. (2008), calculado com o pacote bipartite (Dormann et al.
 2008). A modularidade vem do algoritmo de Louvain (Blondel et al. 2008)
 aplicado sobre a rede, e ela e a centralização são calculadas com o igraph
