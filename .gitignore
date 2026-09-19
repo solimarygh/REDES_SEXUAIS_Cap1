@@ -29,6 +29,9 @@ Resultados_Artigo/**/Dados/*.csv
 # Cache do knitr
 *_cache/
 *_files/figure-latex/
+# knit() sem render() grava as figuras aqui, na raiz. Sao subproduto de teste:
+# o que se publica sai do render(), na pasta _files do documento.
+figure/
 
 # Rascunhos
 prueba.png
