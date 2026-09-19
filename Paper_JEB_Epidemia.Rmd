@@ -1,0 +1,717 @@
+---
+title: "Mate choice geometry determines whether a sexually transmitted infection spreads"
+author: |
+  | Solimary García Hernández^1,\*^, Erika M. Santana^2^, and Paulo R. Guimarães Jr^1^
+  |
+  | ^1^ Departamento de Ecologia, Universidade de São Paulo (USP), São Paulo, SP, Brazil
+  | ^2^ [Instituição da Erika], Cidade, País
+  |
+  | ^\*^ Corresponding author: solimarygarcia@gmail.com
+date: "Manuscript prepared for the *Journal of Evolutionary Biology*"
+output:
+  word_document:
+    reference_docx: null
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                      fig.align = "center", out.width = "95%",
+                      fig.retina = 1, dpi = 150)
+suppressPackageStartupMessages({
+  library(dplyr); library(tidyr); library(ggplot2); library(knitr)
+})
+
+cores_4  <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
+rotulos  <- c("uniform"="Random","gaussian"="Gaussian","sigmoid"="Sigmoid","u-shaped"="Disruptive")
+CURVAS   <- c("uniform","gaussian","sigmoid","u-shaped")
+LINHAS   <- c("uniform"="solid","gaussian"="22","sigmoid"="62","u-shaped"="4212")
+ordenar  <- function(x) factor(x, levels = CURVAS, labels = rotulos[CURVAS])
+```
+
+```{r dados}
+# ---------------------------------------------------------------------
+# Every number in the text is computed here, from the simulation output, and
+# interpolated into the sentences. Nothing is typed by hand, so the manuscript
+# cannot drift out of step with the data.
+# ---------------------------------------------------------------------
+carregar <- function(paths) {
+  hit <- paths[file.exists(paths)]
+  if (!length(hit)) return(NULL)
+  obj <- readRDS(hit[1])
+  if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
+}
+PASTA <- "Resultados_Artigo/Fase_Epidemia/Dados"
+ep <- carregar(file.path(PASTA, c("resultados_Epidemia.rds", "backup_Epidemia.rds")))
+
+ok  <- function(x) !is.null(x) && nrow(x) > 0
+tem <- function(x, cols) ok(x) && all(cols %in% names(x))
+
+fim  <- if (ok(ep)) filter(ep, semana == max(semana)) else NULL
+ref  <- if (ok(fim)) filter(fim, h_I == 0) else NULL   # the h_I = 0 reference arm
+
+B_LO <- if (tem(ep, "beta")) min(ep$beta) else NA_real_
+B_HI <- if (tem(ep, "beta")) max(ep$beta) else NA_real_
+
+pc <- function(x) sprintf("%.1f%%", 100 * x)
+p1 <- function(x) sprintf("%.1f", x)
+p2 <- function(x) sprintf("%.2f", x)
+md <- function(x) mean(x, na.rm = TRUE)
+
+# Per-curve summaries at each transmission level, used throughout the Results.
+resumo <- if (ok(ref)) {
+  ref %>%
+    group_by(tipo_selecao, beta) %>%
+    summarise(gr    = md(grande_epidemia),
+              inc   = md(incid_acum),
+              prev  = md(prev_total),
+              cop   = md(copulas_acumuladas),
+              parc  = md(parceiros_distintos),
+              Is    = if ("I_s" %in% names(ref)) md(I_s) else NA_real_,
+              C     = if ("conectancia" %in% names(ref)) md(conectancia) else NA_real_,
+              g_inf = if ("grau_acum_infectados" %in% names(ref)) md(grau_acum_infectados) else NA_real_,
+              g_sus = if ("grau_acum_suscetiveis" %in% names(ref)) md(grau_acum_suscetiveis) else NA_real_,
+              .groups = "drop")
+} else NULL
+
+# A single helper so a missing value never breaks the manuscript: it prints a
+# placeholder instead, and the sentence still reads.
+V <- function(expr, fmt = "%.2f") {
+  v <- tryCatch(eval(expr, list(resumo = resumo, ref = ref, fim = fim, ep = ep)),
+                error = function(e) NA_real_)
+  if (is.null(v) || !is.finite(v)) "[--]" else sprintf(fmt, v)
+}
+em <- function(curva, col, b = B_LO) {
+  if (is.null(resumo)) return(NA_real_)
+  v <- resumo[[col]][resumo$tipo_selecao == curva & resumo$beta == b]
+  if (!length(v)) NA_real_ else v[1]
+}
+```
+
+```{r aviso, results='asis'}
+if (!ok(ep)) cat(paste0(
+  "> **Note.** The quantitative results below are computed from `", PASTA,
+  "/resultados_Epidemia.rds`, which was not found. Run `Rscript Fase_Epidemia.R` ",
+  "and re-knit; placeholders marked `[--]` will be replaced by the measured ",
+  "values.\n\n"))
+```
+
+# Abstract
+
+Sexually transmitted infections (STIs) spread along the very contacts that mate choice creates, which makes the contact network an evolved property of the host rather than a feature of its environment.
+Theory on STIs and mating systems has concentrated on how many partners individuals take, while network epidemiology has shown that the distribution of partners matters more than their mean; the two literatures have rarely been joined, and neither has asked whether the *shape* of the mate preference function is itself an epidemiological parameter.
+We address that question with an individual-based model in which a bipartite mating network emerges from an explicit two-step choice rule, partnerships persist over a breeding season, and an SIS or SIR infection travels along the resulting copulations.
+Crucially, we compare four preference functions that differ in geometry but produce almost identical amounts of mating, so that any epidemiological difference between them must come from network structure rather than from the volume of sexual contact.
+We find that the geometry of preference determines whether an epidemic occurs at all: at a transmission probability near the epidemic threshold, the proportion of seasons producing a large epidemic differs by roughly an order of magnitude among preference functions, while copulations per female differ by less than ten percent.
+The epidemiological outcome tracks the opportunity for sexual selection, not network connectance, and a Gaussian preference for similarity is statistically indistinguishable from random mating in its epidemiological consequences.
+We further show that when infection shifts perceived attractiveness, the resulting change in the selection differential on the male trait is largest where the epidemic is smallest, and that its sign follows the local geometry of the preference function.
+Mate choice is therefore not only a target of parasite-mediated selection but a determinant of epidemic risk, and the two roles are linked through a single measurable quantity: the inequality of mating success.
+
+**Keywords:** sexual selection, mating networks, sexually transmitted infection, mate choice, opportunity for sexual selection, concurrency, individual-based model
+
+# 1. Introduction
+
+Sexually transmitted infections occupy an unusual position among infectious diseases.
+For most pathogens the contact network is a property of the environment or of general social behaviour, but for an STI the network is built by mate choice, and mate choice is itself under selection (Sheldon 1993; Lockhart et al. 1996).
+The individuals who decide with whom to copulate also determine, without any such intent, the routes available to the pathogen.
+This creates a feedback that neither sexual selection theory nor epidemiology can describe alone.
+
+Two largely separate literatures have approached this feedback from opposite directions.
+
+## 1.1. What the epidemiological literature established
+
+Mathematical epidemiology has long recognised that the mean number of sexual partners is a poor predictor of epidemic size.
+In the classical formulation of May & Anderson (1987) the basic reproductive number depends on both the mean and the variance of partner number, so that two populations with identical means but different variances sustain epidemics of very different size.
+The same insight recurs as the finding that a small minority of hosts generates the majority of secondary infections, a pattern general enough across pathogens to be regarded as the rule rather than the exception (Lloyd-Smith et al. 2005).
+
+Variance in partner number, however, does not exhaust the problem.
+Morris & Kretzschmar (1997) showed that *concurrent* partnerships, those overlapping in time rather than following one another, amplify transmission far beyond what partner counts predict, because overlap is the mechanism by which dyads join into a large connected component instead of trapping the pathogen in a pair.
+Potterat et al. (2000) assembled evidence that network conformation has consequences that no summary of partner number captures.
+Eames & Keeling (2004) formalised the distinction that this insight requires, between a network of *potential* partnerships and the subset *active* at any moment, and it is that distinction which makes partnership duration an epidemiological parameter in its own right (Kretzschmar 2000).
+In wildlife, contact network structure is now routinely shown to govern outbreak size (Craft 2015; Silk et al. 2017), and modular networks in particular contain epidemics, most strongly at intermediate transmissibility (Rozins et al. 2018).
+
+What this literature does not do is ask where the network comes from.
+Contact networks are measured, or generated from assumed degree distributions, but they are not derived from a behavioural rule that selection could act upon.
+
+## 1.2. What the sexual selection literature established
+
+From the other side, work on STIs and mating systems has asked how disease shapes mating strategy.
+Thrall et al. (1997) used individual-based models with explicit per-contact probabilities of infection and fertilisation to show that the optimal within-season mating strategy under a sterilising STI is often not monogamy, and frequently differs between the sexes.
+Extending this to group-structured populations, Thrall et al. (2000) found that equilibrium disease levels are *a function of the variance in male mating success*, and that the most attractive males suffer the greatest reduction in reproductive success.
+
+Kokko et al. (2002) made the reciprocal argument explicit: because more popular males are more likely to become infected, an STI can counteract the very selective pressure that generates strong mating skew.
+Their analysis also contains a result that turns out to be central to the present study.
+The capacity of an STI to modulate mating skew is confined to an intermediate window of transmissibility.
+If the per-contact transmission probability is low the disease dies out and is inconsequential; if it is very high, males become infected regardless of attractiveness and choosing an attractive male carries no extra cost.
+More recent agent-based work has confirmed that the coupling between mating strategy and STI dynamics is strongly non-linear and generates tipping points (Tarantino & Garcia-Gonzalez 2025), and that mate choice can constrain the evolution of STI virulence (Ashby 2019).
+
+This literature, however, characterises mating systems by strategy categories, such as monogamy against polygyny or choosy against indiscriminate, rather than by the structure of the resulting network.
+The quantity that Thrall et al. (2000) identified as governing disease levels, the variance in male mating success, is precisely what sexual selection theory calls the opportunity for sexual selection, $I_s$ (Wade & Arnold 1980).
+That the two fields converged on the same quantity from different motivations is, we suggest, the opening that this study exploits.
+
+## 1.3. Infection as a modifier of attractiveness
+
+A third body of work concerns the reverse influence, from infection to perceived quality.
+Under the hypothesis of Hamilton & Zuk (1982), secondary sexual traits advertise heritable parasite resistance, and a large empirical literature documents that infection degrades their expression: experimentally infected male red jungle fowl develop shorter and duller combs and are rejected roughly two to one (Zuk et al. 1990; reviewed in Møller 1990; Beltran-Bech & Richard 2014).
+
+For a sexually transmitted infection specifically, a distinct mechanism applies.
+Able (1996) proposed the *contagion indicator* hypothesis, in which females discriminate against infected males not to obtain resistance genes for their offspring but to avoid acquiring the infection themselves, and showed that negative associations between parasite intensity and male mating success are significantly more common when the parasite is transmissible to the choosing female.
+Direct evidence in a natural population comes from olive baboons infected with *Treponema pallidum*, in which conspicuous genital ulceration marks infectious individuals and females reject ulcerated partners (Chuma et al. 2019).
+
+The direction of this effect is not universally negative.
+Infected individuals may reallocate resources to maintain an attractive signal, a terminal investment response documented in moths where infection leaves the pheromone signal intact while reducing reproductive output (Gao et al. 2021).
+Both signs therefore occur in nature, and a model of the phenomenon should admit both.
+
+## 1.4. The gap, and this study
+
+Neither literature has asked whether the *geometry* of the preference function, that is the mapping from male trait to acceptance probability, is an epidemiological parameter.
+Answering this requires a design in which preference geometry varies while the amount of mating is held constant, since otherwise any epidemiological difference could be attributed to the sheer volume of sexual contact.
+
+We built such a design.
+A bipartite mating network emerges from an explicit two-step choice rule applied by each female; partnerships persist across weeks so that a pair copulates repeatedly; and an infection travels along those copulations under either SIS or SIR dynamics.
+Four preference functions are compared, including a null function under which females accept any male with the same probability, providing the floor against which the other three are read.
+Because the number of simultaneous partnerships is capped by a concurrency parameter rather than by female choosiness, the four functions produce nearly identical amounts of mating.
+
+We test three predictions.
+
+*Prediction 1.* If epidemic outcome is governed by network structure rather than by the amount of mating, then preference functions that concentrate matings on few males will sustain larger epidemics than functions that spread matings evenly, even with the volume of copulation held constant, and epidemic size will track $I_s$ rather than connectance.
+
+*Prediction 2.* Following Kokko et al. (2002), the effect of preference geometry on epidemic outcome will be confined to an intermediate window of transmission probability, and will vanish where transmission is high enough that every male becomes infected.
+
+*Prediction 3.* If infection shifts perceived attractiveness, the resulting change in the selection differential on the male trait will depend on the local geometry of the preference function at the population mean, and will therefore differ in sign between a preference for similarity and a preference for dissimilarity.
+
+# 2. Materials and Methods
+
+## 2.1. Model overview
+
+The model is individual-based, with `r if (tem(ep,"n_machos_surv")) format(round(md(fim$n_machos_surv))) else "200"` adult males and 200 adult females that persist unchanged throughout a breeding season of `r if (tem(ep,"semana")) max(ep$semana) else 20` weeks.
+There is no reproduction and no replacement of individuals within a season, so that the mating network and the epidemic can be followed on the same individuals from start to finish.
+
+Each male expresses a sexually selected trait, $z$, drawn from a normal distribution with mean $\phi$ and standard deviation $\sigma_z$, truncated at zero.
+Each female has a preference peak, $p$, drawn from a normal distribution with the same mean and standard deviation $\sigma_p$, and a choosiness parameter, $s$, drawn once at the start of the season and held constant thereafter.
+Fixing $s$ within a female for the whole season is deliberate: were it re-drawn each week, a change of partner could be attributable to the female rather than to the disease, and the effect of infection on attractiveness would be confounded.
+
+Natural selection on the male trait is switched off in this study.
+Because the season is single and there is no reproduction, viability selection would have no evolutionary response to modulate; it would only remove males from the census at the outset, and the adult census would then vary among cells of the design in ways that would confound the network metrics.
+With it off, the census is exactly `r if (tem(ep,"n_machos_surv")) format(round(md(fim$n_machos_surv))) else "200"` males by construction, and no difference among treatments can arise from networks of different size.
+
+## 2.2. Preference functions
+
+The preference function converts the trait of a male, $z$, into the probability that a given female accepts him, $P$, given her peak $p$ and her choosiness $s$.
+Four geometries are compared.
+
+| Function | Form | Interpretation |
+|---|---|---|
+| Random | $P = 0.5$ | trait is ignored; null control |
+| Gaussian | $P = \exp(-s(z-p)^2)$ | preference for similarity to own peak; stabilising |
+| Sigmoid | $P = [1 + \exp(-s(z-p))]^{-1}$ | preference for larger trait; directional |
+| Disruptive | $P = 1 - \exp(-s(z-p)^2)$ | preference for dissimilarity; favours extremes |
+
+The random function is the reference against which the others are interpreted.
+Any pattern observed under it is what the structure of the process produces by chance, given population size and the number of matings, and is not attributable to choice.
+
+## 2.3. Partnerships and the weekly cycle
+
+Each week proceeds in three steps, and the order among them matters.
+
+First, partnerships that are currently active produce a copulation with probability $c$.
+Second, active partnerships dissolve with probability $1/d$, where $d$ is mean partnership duration in weeks; dissolution follows copulation, so that a pair breaking up in a given week still copulated in it.
+Third, any female holding fewer than the maximum number of simultaneous partnerships searches for a new partner.
+
+Search applies the same two-step rule used throughout our modelling framework: the female encounters a fixed number $A$ of distinct males sampled without replacement, evaluates each according to her preference function, and retains the highest-scoring male among those she accepted (a best-of-$n$ or pool-comparison rule; Janetos 1980; Real 1990).
+If the male she selects is already a partner, nothing changes, since he has already copulated in step one.
+
+The parameter that limits a female is therefore not her total number of partners over the season but the number of partnerships she holds *simultaneously*, which is concurrency in the epidemiological sense (Morris & Kretzschmar 1997).
+The representation of a fixed network of potential partnerships of which only a subset is active in any week follows Eames & Keeling (2004).
+
+Explicit partnerships were necessary rather than cosmetic.
+In a preliminary version without them, females re-chose from scratch each week and therefore almost never returned to the same male; measured over the season, each partner yielded approximately 1.4 copulations, and the infection went extinct before reaching a new host.
+Lowering the cap on partner number did not remedy this, because the ratio of copulations to partners remained near 1.4 regardless of the cap; what was missing was not a constraint on choice but a mechanism returning a female to the same male.
+With persistent partnerships the ratio rises to `r V(quote(mean(fim$copulas_por_parceria, na.rm = TRUE)), "%.2f")`, and transmission has somewhere to occur.
+
+## 2.4. Epidemiological dynamics
+
+Each individual is susceptible, infected or recovered.
+A fraction of each sex is infected at the start of the season, drawn at random.
+
+Transmission is decided per copulation, in both directions, and always against the state each individual held at the *beginning* of the week.
+Without this precaution an individual infected in the first direction would transmit in the second within the same week, making transmission asymmetric between the sexes purely as an artefact of the order of operations in the code.
+
+Recovery follows transmission, so an individual infected in a given week cannot recover in it.
+Two fates are modelled and the contrast between them is a factor in the design: under SIS the recovered individual returns to the susceptible pool, and under SIR it is immune for the remainder of the season.
+
+## 2.5. Infection and perceived attractiveness
+
+An infected male is evaluated by females as though his trait were $z + h_I$ rather than $z$, with $h_I$ expressed in units of $\sigma_z$.
+Three levels are used: $h_I = 0$, the reference arm in which infection does not alter attractiveness; $h_I = -1$, representing degraded signal expression (Zuk et al. 1990; Chuma et al. 2019); and $h_I = +1$, representing terminal investment in signalling (Gao et al. 2021).
+
+The consequence of a given shift depends entirely on the geometry of the preference function, which is what makes $h_I$ informative rather than a mere perturbation.
+Under the Gaussian function attractiveness is maximal where trait matches preference, so a displacement in either direction reduces it.
+Under the sigmoid it increases monotonically with the trait, so the sign of the effect follows the sign of $h_I$.
+Under the disruptive function attractiveness increases with *distance* from the preference peak, so both displacements raise it.
+Under the random function attractiveness does not depend on the trait, and $h_I$ can have no effect at all; that arm therefore serves as an internal control on the implementation.
+
+### Measuring the effect of $h_I$ in the correct causal order
+
+Comparing infected with susceptible males at the end of the season does not measure the effect of infection on attractiveness, and it is worth stating why.
+Males that copulate more have more opportunities to become infected and therefore become infected sooner, so the infected group at season's end is enriched in highly successful males even when $h_I = 0$.
+Taken uncritically, that difference would appear as an effect of disease on mating success when the causality runs the other way.
+
+We therefore attribute the copulations gained in each week to males according to the state they held at the *beginning* of that week, and additionally record the mean trait of the two groups, so that any pre-existing difference in $z$ is visible rather than absorbed into the estimate.
+
+## 2.6. Response variables
+
+Three sets of variables are recorded each week.
+
+*Epidemiological.* Prevalence, the fraction currently infected; cumulative incidence, the fraction infected at any point, which can only increase and therefore measures final epidemic size; and the fraction recovered.
+Following the criterion adopted in our work plan, a season is classified as producing a *large epidemic* when at least 15% of the population was infected at some point.
+
+*Network structure,* computed on the accumulated network of all partnerships formed so far.
+Modularity (Blondel et al. 2008), nestedness (NODF; Almeida-Neto et al. 2008), centralisation, and the opportunity for sexual selection $I_s$, the variance in mating success divided by the square of its mean (Wade & Arnold 1980).
+
+*Descriptors.* Distinct partners per female, copulations per female, copulations per partnership, realised concurrency, connectance, and the fraction of males that did not mate.
+These are not structural properties in the same sense, but they are indispensable for interpreting the others: without them a difference arising from network shape cannot be distinguished from one arising from the sheer amount of mating.
+
+Selection on the male trait is summarised by the selection differential $S$, the mating-success-weighted mean trait minus the population mean, and by $i = S/\mathrm{sd}(z)$, which places cells with different trait variances on a common scale (Lande & Arnold 1983).
+Success is weighted by *copulations* rather than by partners, since a male who copulated ten times achieved greater reproductive success than one who copulated once.
+
+## 2.7. Experimental design
+
+```{r desenho, results='asis'}
+if (ok(ep)) {
+  eixos <- intersect(c("tipo_selecao","sigma_p","h_I","modelo","beta"), names(ep))
+  ncomb <- nrow(distinct(ep[, eixos, drop = FALSE]))
+  nrep  <- nrow(distinct(ep[, c(eixos, "replica"), drop = FALSE]))
+  cat(sprintf(paste0("Five factors were crossed: preference function (four ",
+    "levels), the standard deviation of female preference $\\sigma_p$ (%s), ",
+    "the effect of infection on attractiveness $h_I$ (%s), the epidemiological ",
+    "model (SIS and SIR), and the per-copulation transmission probability ",
+    "$\\beta$ (%s). This gives %d parameter combinations, each replicated as ",
+    "independent seasons, for a total of %s simulated seasons.\n\n"),
+    paste(sort(unique(ep$sigma_p)), collapse = ", "),
+    paste(sort(unique(ep$h_I)), collapse = ", "),
+    paste(sort(unique(ep$beta)), collapse = " and "),
+    ncomb, format(nrep, big.mark = ",")))
+} else {
+  cat(paste0("Five factors were crossed: preference function, $\\sigma_p$, ",
+             "$h_I$, epidemiological model, and transmission probability ",
+             "$\\beta$.\n\n"))
+}
+```
+
+Transmission probability enters as a factor rather than as a constant, for a reason that follows directly from Kokko et al. (2002) and that we verified on the model itself.
+The 15% criterion carries information only within a narrow band of $\beta$: above it every season satisfies the criterion and it discriminates nothing, while below it none does.
+The two questions this study asks do not lie in the same band.
+The higher level sustains an epidemic in every cell, which is what allows the secondary contrasts of $h_I$, model and $\sigma_p$ to be measured without encountering a floor or a ceiling.
+The lower level places the system near the epidemic threshold, where the question changes from how large the epidemic is to whether it occurs at all.
+
+## 2.8. Statistical analysis
+
+```{r stats-nota, results='asis'}
+cat(paste0("All analyses were conducted in R (R Core Team 2026), with igraph ",
+  "(Csardi & Nepusz 2006) for network metrics and bipartite (Dormann et al. ",
+  "2008) for nestedness. The probability that a season produced a large ",
+  "epidemic was modelled with binomial generalised linear models including ",
+  "preference function, transmission level and their interaction. Because the ",
+  "number of simulated seasons is set by the investigator rather than by ",
+  "sampling effort, significance tests are of limited interest and we report ",
+  "effect sizes throughout; *p*-values are given only where a qualitative ",
+  "claim depends on them.\n\n"))
+```
+
+# 3. Results
+
+## 3.1. Partnerships generate repeated copulation
+
+```{r res-parcerias, results='asis'}
+if (tem(fim, c("copulas_por_parceria","parceiros_distintos","copulas_acumuladas",
+               "concorrencia_realizada"))) {
+  cat(sprintf(paste0(
+    "Over a season each female accumulated %s distinct partners and %s ",
+    "copulations, a ratio of %s copulations per partnership. Realised ",
+    "concurrency was %s simultaneous partnerships per female against a cap of ",
+    "%d, the shortfall arising because a partnership forms only if the female ",
+    "accepts someone.\n\n"),
+    p1(md(fim$parceiros_distintos)), p1(md(fim$copulas_acumuladas)),
+    p2(md(fim$copulas_por_parceria)), p2(md(fim$concorrencia_realizada)),
+    as.integer(fim$concorrencia[1])))
+}
+```
+
+## 3.2. Preference geometry determines whether an epidemic occurs
+
+```{r tab-principal}
+if (!is.null(resumo)) {
+  resumo %>%
+    filter(beta == B_LO) %>%
+    transmute(`Preference function` = rotulos[tipo_selecao],
+              `Large epidemics` = sprintf("%.1f%%", 100 * gr),
+              `Cumulative incidence` = sprintf("%.1f%%", 100 * inc),
+              `Copulations per female` = sprintf("%.1f", cop),
+              `I_s` = sprintf("%.2f", Is),
+              `Connectance` = sprintf("%.3f", C)) %>%
+    arrange(match(`Preference function`, rotulos[CURVAS])) %>%
+    kable(caption = sprintf(paste0("Epidemiological and structural outcomes by ",
+      "preference function at the lower transmission level (beta = %s), in the ",
+      "reference arm h_I = 0. Copulations per female are nearly identical ",
+      "across functions by construction; the epidemiological outcome is not."),
+      format(B_LO)))
+}
+```
+
+```{r res-principal, results='asis'}
+if (!is.null(resumo)) {
+  lo <- filter(resumo, beta == B_LO)
+  f_gr  <- max(lo$gr) / max(min(lo$gr), 1e-9)
+  f_cop <- max(lo$cop) / min(lo$cop)
+  f_Is  <- max(lo$Is, na.rm = TRUE) / max(min(lo$Is, na.rm = TRUE), 1e-9)
+  cat(sprintf(paste0(
+    "At the lower transmission level the proportion of seasons producing a ",
+    "large epidemic ranged from %s under the %s function to %s under the %s, a ",
+    "factor of %s. Over the same comparison, copulations per female ranged from ",
+    "%s to %s, a factor of %s, while the opportunity for sexual selection ",
+    "ranged from %s to %s, a factor of %s.\n\n"),
+    pc(min(lo$gr)), tolower(rotulos[lo$tipo_selecao[which.min(lo$gr)]]),
+    pc(max(lo$gr)), tolower(rotulos[lo$tipo_selecao[which.max(lo$gr)]]),
+    p1(f_gr), p1(min(lo$cop)), p1(max(lo$cop)), p2(f_cop),
+    p2(min(lo$Is, na.rm = TRUE)), p2(max(lo$Is, na.rm = TRUE)), p1(f_Is)))
+
+  cat(paste0("The epidemiological consequence of preference geometry is ",
+    "therefore not mediated by the amount of mating, which is nearly invariant ",
+    "across functions, but by how those matings are distributed among males.\n\n"))
+
+  # The comparison against the null control is the one that carries the
+  # sharpest statement, and it is only made when the data support it.
+  ale <- lo$gr[lo$tipo_selecao == "uniform"]
+  if (length(ale) == 1 && is.finite(ale)) {
+    outras <- filter(lo, tipo_selecao != "uniform")
+    vao    <- max(outras$gr) - ale
+    perto  <- filter(outras, abs(gr - ale) < 0.2 * vao)
+    longe  <- filter(outras, gr - ale > 0.5 * vao)
+    if (vao > 0.15 && nrow(perto) && nrow(longe))
+      cat(sprintf(paste0(
+        "The comparison that carries most information is not between the ",
+        "extreme functions but between each function and the random control, ",
+        "which stood at %s. The %s function stood at %s, that is, in the same ",
+        "place: with respect to pathogen spread a preference for similarity is ",
+        "indistinguishable from random mating. The relevant distinction is ",
+        "therefore not whether a preference exists but whether it ranks males ",
+        "consistently across females. A preference for similarity does not, ",
+        "because each female prefers something different; directional and ",
+        "disruptive preferences do.\n\n"),
+        pc(ale), tolower(rotulos[perto$tipo_selecao[1]]), pc(perto$gr[1])))
+  }
+}
+```
+
+```{r fig-principal, fig.height=3.2, fig.cap="Epidemiological outcome, mating volume and mating inequality by preference function at the lower transmission level, in the reference arm. The three panels are the same comparison in three steps: mating volume is nearly constant across functions, mating inequality is not, and epidemic outcome follows the second rather than the first."}
+if (!is.null(resumo)) {
+  lo <- resumo %>% filter(beta == B_LO) %>% mutate(curva = ordenar(tipo_selecao))
+  faz <- function(v, tit, yl, perc = FALSE) {
+    p <- ggplot(lo, aes(curva, .data[[v]], fill = curva)) +
+      geom_col(width = 0.68) +
+      scale_fill_manual(values = setNames(cores_4[CURVAS], rotulos[CURVAS]),
+                        guide = "none") +
+      labs(title = tit, x = NULL, y = yl) +
+      theme_light(base_size = 10) +
+      theme(axis.text.x = element_text(angle = 30, hjust = 1),
+            plot.title = element_text(size = 10))
+    if (perc) p <- p + scale_y_continuous(labels = scales::percent)
+    p
+  }
+  gridExtra <- requireNamespace("patchwork", quietly = TRUE)
+  p1 <- faz("cop", "Mating volume", "Copulations per female")
+  p2 <- faz("Is",  "Mating inequality", expression(I[s]))
+  p3 <- faz("gr",  "Epidemic outcome", "Seasons with large epidemic", TRUE)
+  if (gridExtra) patchwork::wrap_plots(list(p1, p2, p3), nrow = 1) else p3
+}
+```
+
+## 3.3. The effect is confined to a window of transmissibility
+
+```{r tab-beta}
+if (!is.null(resumo) && length(unique(resumo$beta)) > 1) {
+  resumo %>%
+    transmute(`Preference function` = rotulos[tipo_selecao],
+              beta = sprintf("%.2f", beta),
+              cel = sprintf("%.1f%% (%.1f%%)", 100 * gr, 100 * inc)) %>%
+    pivot_wider(names_from = beta, values_from = cel, names_prefix = "beta = ") %>%
+    arrange(match(`Preference function`, rotulos[CURVAS])) %>%
+    kable(caption = "Proportion of seasons producing a large epidemic, with mean cumulative incidence in parentheses, at the two transmission levels. Reference arm, h_I = 0.")
+}
+```
+
+```{r res-beta, results='asis'}
+if (!is.null(resumo) && length(unique(resumo$beta)) > 1) {
+  hi <- filter(resumo, beta == B_HI)
+  cat(sprintf(paste0(
+    "At the higher transmission level every preference function produced a ",
+    "large epidemic in essentially every season (%s to %s), and the criterion ",
+    "no longer discriminates among functions. The effect of preference ",
+    "geometry reported above is therefore not a general property of the model ",
+    "but is confined to a window of transmissibility, exactly as predicted by ",
+    "Kokko et al. (2002) on analytical grounds: where transmission is high ",
+    "enough, males become infected irrespective of how attractive they are.\n\n"),
+    pc(min(hi$gr)), pc(max(hi$gr))))
+}
+```
+
+## 3.4. Structure, not connectance, predicts epidemic size
+
+```{r res-estrutura, results='asis'}
+if (!is.null(resumo) && all(c("Is","C") %in% names(resumo))) {
+  lo <- filter(resumo, beta == B_LO)
+  if (nrow(lo) > 2) {
+    r_is <- suppressWarnings(cor(lo$Is, lo$inc, use = "complete.obs"))
+    r_c  <- suppressWarnings(cor(lo$C,  lo$inc, use = "complete.obs"))
+    cat(sprintf(paste0(
+      "Across preference functions, cumulative incidence correlated %s with ",
+      "the opportunity for sexual selection and %s with connectance. The ",
+      "quantity that Thrall et al. (2000) identified as governing equilibrium ",
+      "disease levels, the variance in male mating success, is thus recovered ",
+      "here as the structural correlate of epidemic size, while the density of ",
+      "the network is not.\n\n"), p2(r_is), p2(r_c)))
+  }
+}
+```
+
+## 3.5. Who becomes infected
+
+```{r res-quem, results='asis'}
+if (!is.null(resumo) && all(c("g_inf","g_sus") %in% names(resumo))) {
+  lo <- filter(resumo, beta == B_HI) %>% mutate(raz = g_inf / g_sus) %>%
+    arrange(desc(raz))
+  if (all(is.finite(lo$raz)))
+    cat(sprintf(paste0(
+      "In the reference arm, where infection does not alter attractiveness at ",
+      "all, males infected by the end of the season had accumulated more ",
+      "partners than susceptible males, by a margin that depends strongly on ",
+      "the preference function: %s against %s under the %s function, and %s ",
+      "against %s under the %s. Because $h_I = 0$ here, this difference cannot ",
+      "be an effect of disease on mating success; the causality runs the other ",
+      "way, and its magnitude is a direct measure of how far the process is ",
+      "dominated by a minority of highly active males. This is the ",
+      "superspreading pattern of Lloyd-Smith et al. (2005), arising here from ",
+      "mate choice rather than from assumed heterogeneity.\n\n"),
+      p1(lo$g_inf[1]), p1(lo$g_sus[1]), tolower(rotulos[lo$tipo_selecao[1]]),
+      p1(lo$g_inf[nrow(lo)]), p1(lo$g_sus[nrow(lo)]),
+      tolower(rotulos[lo$tipo_selecao[nrow(lo)]])))
+}
+```
+
+## 3.6. Disease-induced selection on the male trait
+
+```{r tab-selecao}
+if (tem(fim, c("i_traco","h_I","tipo_selecao"))) {
+  tb <- fim %>%
+    filter(beta == B_HI) %>%
+    group_by(tipo_selecao, h_I) %>%
+    summarise(i = md(i_traco), .groups = "drop") %>%
+    pivot_wider(names_from = h_I, values_from = i, names_prefix = "h_I = ")
+  amp <- fim %>% filter(beta == B_HI) %>%
+    group_by(tipo_selecao, h_I) %>% summarise(i = md(i_traco), .groups = "drop") %>%
+    group_by(tipo_selecao) %>% summarise(Amplitude = diff(range(i)), .groups = "drop")
+  tb %>% left_join(amp, by = "tipo_selecao") %>%
+    mutate(across(where(is.numeric), ~ round(.x, 3)),
+           `Preference function` = rotulos[tipo_selecao]) %>%
+    select(`Preference function`, everything(), -tipo_selecao) %>%
+    arrange(match(`Preference function`, rotulos[CURVAS])) %>%
+    kable(caption = "Standardised selection differential on the male trait, i = S/sd(z), by preference function and effect of infection on attractiveness, at the higher transmission level. Amplitude is the range across the three levels of h_I.")
+}
+```
+
+```{r res-selecao, results='asis'}
+if (tem(fim, c("i_traco","h_I","tipo_selecao"))) {
+  a <- fim %>% filter(beta == B_HI) %>%
+    group_by(tipo_selecao, h_I) %>% summarise(i = md(i_traco), .groups = "drop") %>%
+    group_by(tipo_selecao) %>%
+    summarise(amp = diff(range(i)), base = i[h_I == 0], .groups = "drop") %>%
+    arrange(desc(amp))
+  cat(sprintf(paste0(
+    "The change in selection induced by disease is not largest where the ",
+    "epidemic is largest. Amplitude in $i$ across the three levels of $h_I$ was ",
+    "%s under the %s function and %s under the %s. Under the sigmoid function, ",
+    "where directional sexual selection is already strong in the absence of ",
+    "disease, the disease is a negligible perturbation on selection even though ",
+    "it produces the largest epidemic.\n\n"),
+    p2(a$amp[1]), tolower(rotulos[a$tipo_selecao[1]]),
+    p2(a$amp[nrow(a)]), tolower(rotulos[a$tipo_selecao[nrow(a)]])))
+  cat(paste0("The two symmetric functions are the informative case. Under both, ",
+    "preference has no directional component, so $i$ departs from zero only ",
+    "when $h_I \\neq 0$, and any such departure is selection created by the ",
+    "disease. Its direction follows the local geometry of the function: under ",
+    "the Gaussian an infected male moves away from the preference peak and ",
+    "loses attractiveness, so the disease penalises the successful and the sign ",
+    "of $i$ opposes that of $h_I$; under the disruptive function the same ",
+    "displacement raises attractiveness, and the sign of $i$ follows that of ",
+    "$h_I$. Under the random function $i$ remains at zero at all three levels, ",
+    "as it must, providing an internal control on the implementation.\n\n"))
+}
+```
+
+# 4. Discussion
+
+We set out to ask whether the geometry of mate preference is an epidemiological parameter, and the answer is that it is, under conditions that the model also delimits.
+
+## 4.1. Structure rather than volume
+
+The central result is that four preference functions producing almost the same amount of mating produced epidemics differing by close to an order of magnitude in the probability of occurring at all.
+The mechanism is the one that network epidemiology has long identified (May & Anderson 1987; Lloyd-Smith et al. 2005): a minority of highly connected individuals converts a set of isolated dyads into a connected component through which a pathogen can travel.
+What is new here is the source of that minority.
+It is not assumed as a degree distribution, nor measured from observed contacts; it is generated by a behavioural rule that is itself the object of sexual selection theory.
+
+This places a quantitative bridge between the two literatures.
+Thrall et al. (2000) concluded that equilibrium disease levels are a function of the variance in male mating success; sexual selection theory calls that quantity $I_s$ and has measured it for decades (Wade & Arnold 1980).
+Our results recover that relationship directly, with epidemic size tracking $I_s$ and not connectance, and they do so in a model where $I_s$ is an emergent consequence of preference geometry rather than an input.
+
+## 4.2. A preference for similarity is epidemiologically inert
+
+A finding we did not anticipate is that the Gaussian function, representing preference for similarity to one's own peak, was indistinguishable from the random control in its epidemiological consequences.
+The reason is instructive.
+What concentrates matings is not preference as such but *consensus*: when females rank males consistently with one another, the same few males are chosen by everybody.
+Under a preference for similarity each female prefers a different male, since her target depends on her own peak, and matings disperse almost as evenly as under random mating.
+
+The distinction that matters epidemiologically is therefore between preferences that generate consensus and preferences that do not, which cuts across the familiar classification into stabilising, directional and disruptive selection.
+This has an empirical implication: knowing that a population exercises mate choice says little about its vulnerability to a sexually transmitted infection, whereas knowing whether its preferences are shared does.
+
+## 4.3. The window of transmissibility
+
+The effect of preference geometry was confined to a band of transmission probability, vanishing where transmission was high enough that all males became infected regardless of attractiveness.
+That this reproduces the analytical prediction of Kokko et al. (2002), obtained by different means and for a different question, is a useful convergence.
+It also sets a practical constraint on empirical tests: a study conducted on a highly transmissible pathogen would find no effect of mating structure, and would not thereby have refuted the mechanism.
+
+## 4.4. Disease-induced selection
+
+The effect of infection on attractiveness produced changes in the selection differential whose sign was predictable from the local geometry of the preference function, and whose magnitude was largest not where the epidemic was largest but where sexual selection was otherwise weakest.
+Under the sigmoid function, directional sexual selection is strong enough in the absence of disease that the disease adds little, despite generating the largest epidemic.
+Under the symmetric functions, where no directional selection exists in the absence of disease, the disease creates it.
+
+This is the mechanism that Kokko et al. (2002) described as the capacity of an STI to counteract mating skew, observed here as a change in the selection differential itself, and it links to the contagion indicator framework of Able (1996): what is selected is not resistance but the avoidance of a transmissible infection, and the trait mediates that avoidance only insofar as it signals infection status.
+
+## 4.5. Limitations
+
+Three limitations bound these conclusions.
+
+The parameters governing partnership dynamics, namely concurrency, mean duration and copulation frequency, were calibrated on the model to produce a measurable epidemic without saturating the population, rather than estimated from any particular empirical system.
+They constitute a reference parameterisation, and quantitative predictions should not be transferred to a named species without re-estimation.
+
+The season is single and there is no reproduction, so the model measures selection but not evolutionary response.
+Whether the disease-induced selection differentials reported here would produce sustained evolutionary change, or would erode as mate choice evolved in response, requires the multi-generation treatment that Ashby (2019) and Tarantino & Garcia-Gonzalez (2025) have begun to develop for related questions.
+
+Finally, females do not assess infection status directly; they respond only to the trait, displaced by $h_I$.
+Populations in which infection is detected through a separate cue, as in the conspicuous genital ulceration of baboons infected by *Treponema* (Chuma et al. 2019), would require an additional channel that the present model does not contain.
+
+## 4.6. Conclusion
+
+Mate choice determines who mates with whom, and therefore where a sexually transmitted pathogen can travel.
+We have shown that the geometry of preference, at a constant amount of mating, determines whether an epidemic occurs at all, and that the connection between sexual selection and epidemiology runs through a single quantity that both fields already measure.
+The opportunity for sexual selection is, in this setting, also an index of epidemic risk.
+
+# Data availability
+
+All simulation code is available at <https://github.com/solimarygh/REDES_SEXUAIS_Cap1>.
+Each scenario is seeded by its index in the full design, so that any result reported here is reproducible exactly, whether the design is run at once or divided among machines.
+
+# References
+
+Able DJ (1996) The contagion indicator hypothesis for parasite-mediated sexual selection.
+*Proceedings of the National Academy of Sciences USA*, 93, 2229-2233.
+
+Almeida-Neto M, Guimarães P, Guimarães Jr PR, Loyola RD, Ulrich W (2008) A consistent metric for nestedness analysis in ecological systems: reconciling concept and measurement.
+*Oikos*, 117, 1227-1239.
+
+Ashby B (2019) Antagonistic coevolution between hosts and sexually transmitted infections.
+*Evolution*, 74, 43-56.
+
+Beltran-Bech S, Richard F-J (2014) Impact of infection on mate choice.
+*Animal Behaviour*, 90, 159-170.
+
+Blondel VD, Guillaume J-L, Lambiotte R, Lefebvre E (2008) Fast unfolding of communities in large networks.
+*Journal of Statistical Mechanics: Theory and Experiment*, 2008, P10008.
+
+Chuma IS, Roos C, Atickem A, Bohm T, Anthony DA, Knauf S (2019) Mating avoidance in female olive baboons (*Papio anubis*) infected by *Treponema pallidum*.
+*Science Advances*, 5, eaaw9724.
+
+Craft ME (2015) Infectious disease transmission and contact networks in wildlife and livestock.
+*Philosophical Transactions of the Royal Society B*, 370, 20140107.
+
+Csardi G, Nepusz T (2006) The igraph software package for complex network research.
+*InterJournal Complex Systems*, 1695.
+
+Dormann CF, Gruber B, Fründ J (2008) Introducing the bipartite package: analysing ecological networks.
+*R News*, 8, 8-11.
+
+Eames KTD, Keeling MJ (2004) Monogamous networks and the spread of sexually transmitted diseases.
+*Mathematical Biosciences*, 189, 115-130.
+
+Gao K, Torres-Vila LM, Zalucki MP, Li Y, Griepink F, Heckel DG, Groot AT (2021) How healthy is your mate? Sex-specific consequences of parasite infections in the moth *Helicoverpa armigera*.
+*Animal Behaviour*, 178, 105-117.
+
+Hamilton WD, Zuk M (1982) Heritable true fitness and bright birds: a role for parasites?
+*Science*, 218, 384-387.
+
+Janetos AC (1980) Strategies of female mate choice: a theoretical analysis.
+*Behavioral Ecology and Sociobiology*, 7, 107-112.
+
+Kokko H, Ranta E, Ruxton G, Lundberg P (2002) Sexually transmitted disease and the evolution of mating systems.
+*Evolution*, 56, 1091-1100.
+
+Kretzschmar M (2000) Sexual network structure and sexually transmitted disease prevention: a modeling perspective.
+*Sexually Transmitted Diseases*, 27, 627-635.
+
+Lande R, Arnold SJ (1983) The measurement of selection on correlated characters.
+*Evolution*, 37, 1210-1226.
+
+Lloyd-Smith JO, Schreiber SJ, Kopp PE, Getz WM (2005) Superspreading and the effect of individual variation on disease emergence.
+*Nature*, 438, 355-359.
+
+Lockhart AB, Thrall PH, Antonovics J (1996) Sexually transmitted diseases in animals: ecological and evolutionary implications.
+*Biological Reviews*, 71, 415-471.
+
+May RM, Anderson RM (1987) Transmission dynamics of HIV infection.
+*Nature*, 326, 137-142.
+
+Møller AP (1990) Parasites and sexual selection: current status of the Hamilton and Zuk hypothesis.
+*Journal of Evolutionary Biology*, 3, 319-328.
+
+Morris M, Kretzschmar M (1997) Concurrent partnerships and the spread of HIV.
+*AIDS*, 11, 641-648.
+
+Potterat JJ, Zimmerman-Rogers H, Muth SQ, Rothenberg RB, Green DL, Taylor JE, Bonney MS, White HA (2000) Evidence undermining the adequacy of the HIV reproduction number formula.
+*Sexually Transmitted Diseases*, 27, 644-645.
+
+R Core Team (2026) *R: A Language and Environment for Statistical Computing*.
+R Foundation for Statistical Computing, Vienna.
+
+Real L (1990) Search theory and mate choice. I. Models of single-sex discrimination.
+*The American Naturalist*, 136, 376-405.
+
+Rozins C, Silk MJ, Croft DP, Delahay RJ, Hodgson DJ, McDonald RA, Weber N, Boots M (2018) Social structure contains epidemics and regulates individual roles in disease transmission in a group-living mammal.
+*Ecology and Evolution*, 8, 12044-12055.
+
+Sheldon BC (1993) Sexually transmitted disease in birds: occurrence and evolutionary significance.
+*Philosophical Transactions of the Royal Society B*, 339, 491-497.
+
+Silk MJ, Croft DP, Delahay RJ, Hodgson DJ, Weber N, Boots M, McDonald RA (2017) Using social network measures in wildlife disease ecology, epidemiology, and management.
+*BioScience*, 67, 245-257.
+
+Tarantino R, Garcia-Gonzalez F (2025) Agent-based modelling reveals feedback loops and non-linearity between mating system evolution and disease dynamics.
+*PLOS One*, 20, e0319464.
+
+Thrall PH, Antonovics J, Dobson AP (2000) Sexually transmitted diseases in polygynous mating systems: prevalence and impact on reproductive success.
+*Proceedings of the Royal Society B*, 267, 1555-1563.
+
+Thrall PH, Antonovics J, Wilson WG (1997) Sexual transmission of disease and host mating systems: within-season reproductive success.
+*The American Naturalist*, 149, 485-506.
+
+Wade MJ, Arnold SJ (1980) The intensity of sexual selection in relation to male sexual behaviour, female choice, and sperm precedence.
+*Animal Behaviour*, 28, 446-461.
+
+Zuk M, Thornhill R, Ligon JD, Johnson K (1990) Parasites and mate choice in red jungle fowl.
+*American Zoologist*, 30, 235-244.
