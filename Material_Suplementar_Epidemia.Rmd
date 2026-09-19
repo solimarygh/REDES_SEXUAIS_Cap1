@@ -584,8 +584,7 @@ if (tem(ep, c("semana", "prev_total", "incid_acum", "tipo_selecao", "modelo"))) 
   }
   (faz("prev", "Prevalência", "Infectados na população") |
    faz("incid", "Incidência acumulada", "Já infectados em algum momento")) +
-    plot_layout(guides = "collect") &
-    theme(legend.position = "bottom")
+    plot_layout(guides = "collect")
 }
 ```
 
@@ -718,8 +717,7 @@ if (ok(fim) && length(estr)) {
       labs(x = rotulos[[v]], y = "Incidência acumulada") +
       tema_base
   })
-  wrap_plots(ps, nrow = 1) + plot_layout(guides = "collect") &
-    theme(legend.position = "bottom")
+  wrap_plots(ps, nrow = 1) + plot_layout(guides = "collect")
 }
 ```
 
@@ -800,8 +798,7 @@ if (tem(fim, c("h_I", "incid_acum", "tipo_selecao"))) {
       labs(title = "A desigualdade entre os machos", x = expression(h[I]),
            y = "Oportunidade de seleção sexual (Is)") +
       tema_base
-    (p1g | p2g) + plot_layout(guides = "collect") &
-      theme(legend.position = "bottom")
+    (p1g | p2g) + plot_layout(guides = "collect")
   } else p1g
 }
 ```
@@ -844,7 +841,7 @@ if (tem(ep, c("copulas_semana_infectados", "copulas_semana_suscetiveis",
   faz("dif_z",
       "O confundidor, à vista: a característica média dos dois grupos",
       "Diferença em z") +
-    plot_layout(guides = "collect") & theme(legend.position = "right")
+    plot_layout(guides = "collect")
 }
 ```
 
@@ -1012,8 +1009,7 @@ if (tem(fim, c("sigma_p", "incid_acum", "tipo_selecao"))) {
   if (!all(is.na(r$sem)))
     ps <- c(ps, list(faz("sem", "Fêmeas sem parceria na semana",
                          "Fração das fêmeas", TRUE)))
-  wrap_plots(ps, nrow = 1) + plot_layout(guides = "collect") &
-    theme(legend.position = "bottom")
+  wrap_plots(ps, nrow = 1) + plot_layout(guides = "collect")
 }
 ```
 
@@ -1099,6 +1095,36 @@ if (tem(fim_tudo, c("beta", "grande_epidemia", "tipo_selecao")) &&
                        "quanto e passa a ser de se.\n\n"),
                 pc(min(baixo$gr)), tolower(labels_4[baixo$tipo_selecao[which.min(baixo$gr)]]),
                 pc(max(baixo$gr)), tolower(labels_4[baixo$tipo_selecao[which.max(baixo$gr)]])))
+
+  # A comparação que mais informa não é entre a maior e a menor, e sim entre
+  # cada curva e a ALEATÓRIA, que é o controle nulo. Uma curva que não se
+  # distingue dela não está fazendo nada, por mais que seja uma preferência.
+  ale <- baixo$gr[baixo$tipo_selecao == "uniform"]
+  if (length(ale) == 1 && is.finite(ale)) {
+    outras <- baixo %>% filter(tipo_selecao != "uniform")
+    # "Colada no controle" é definido em relação ao tamanho do efeito, e não por
+    # um número fixo de pontos percentuais: com 100 réplicas o erro padrão da
+    # diferença entre duas proporções destas é de uns 4 pontos, de modo que um
+    # limiar fixo de 5 pontos seria quase um sorteio.
+    vao   <- max(outras$gr, na.rm = TRUE) - ale
+    perto <- outras %>% filter(abs(gr - ale) < 0.2 * vao)
+    # A frase só faz sentido se houver as duas coisas: alguma curva colada no
+    # controle nulo E alguma bem longe dele. Se todas coincidirem, dizer que a
+    # direcional e a disruptiva "fazem" seria falso.
+    longe <- outras %>% filter(gr - ale > 0.5 * vao)
+    if (is.finite(vao) && vao > 0.15 && nrow(perto) && nrow(longe))
+      cat(sprintf(paste0("Vale comparar cada curva com a aleatória, que é o ",
+                         "controle nulo e fica em %s. A curva %s fica em %s, ",
+                         "praticamente no mesmo lugar: quanto à propagação da ",
+                         "infecção ela é indistinguível do acasalamento ao ",
+                         "acaso. O efeito não é, portanto, o de haver ou não ",
+                         "preferência, e sim o de a preferência ordenar os ",
+                         "machos de forma consistente entre as fêmeas. A ",
+                         "preferência por semelhança não faz isso; a ",
+                         "direcional e a disruptiva fazem.\n\n"),
+                  pc(ale), tolower(labels_4[perto$tipo_selecao[1]]),
+                  pc(perto$gr[1])))
+  }
 }
 ```
 
