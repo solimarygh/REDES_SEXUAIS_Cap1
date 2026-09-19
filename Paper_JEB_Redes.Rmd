@@ -169,13 +169,17 @@ We also show that nestedness, widely used to characterise mating networks, is la
 # 1. Introduction
 
 Sexual selection is among the most powerful forces shaping phenotypic diversity (Darwin 1871; Andersson 1994), and at its core lies mate choice.
-Classical models typically treat female preference as a single population-level parameter, a shared optimum towards which all females converge, yet empirical evidence consistently reveals substantial within-population variation in mating preferences across taxa (Widemo & Sæther 1999; Jennions & Petrie 1997; Kelly 2018).
+Classical models typically treat female preference as a single population-level parameter, a shared optimum towards which all females converge, yet empirical evidence consistently reveals substantial within-population variation in mating preferences across taxa (Jennions & Petrie 1997; Widemo & Sæther 1999; Brooks & Endler 2001).
 How individual-level variation in preference propagates to shape population-level evolutionary dynamics remains poorly understood.
 
 A female's mating preference can be decomposed into at least two independent components: the preference threshold, $p$, the trait value she finds optimal, and the preference strength, $s$, the steepness with which she rejects deviations from it (Lande 1981; Kilmer et al. 2017).
 Using individual-based models, Millan et al. (2020) provided the first formal investigation of how within-population variation in these components influences the opportunity for sexual selection, $I_s$, and the evolutionary trajectory of a sexually selected male trait.
 Their results showed that the consequences of preference variation are far from intuitive: they depend critically on whether the preference function is open-ended or closed, and on the magnitude of preference variation relative to male trait variation.
 Under a closed preference function with high preference variation, the selection regime acting on males shifted from stabilising to disruptive, rescuing genetic variance from erosion.
+
+Empirical work has since gone further than that premise requires.
+Stratman et al. (2024) measured individual preference functions in a treefrog and found substantial within-population variation not only in preference peaks but in the *shape* of the function itself, open, closed or flat, with at most 62% of females sharing the shape of the population-level curve.
+Preference geometry is therefore not a property of a population that can be estimated once; it varies among the females that compose it, and population-level curves can misstate both the strength of selection and the predicted variance in male mating success.
 
 That work established preference function shape and preference heterogeneity as co-architects of sexual selection.
 It considered two preference geometries, assumed effectively unlimited male sampling, and did not treat the mating network as the structure through which individual preferences become population-level selection.
@@ -205,6 +209,13 @@ Both are ecological quantities, independent of her preference, and both must con
 *H1: Preference geometry leaves a topological signature.*
 Preference functions that rank males consistently across females will concentrate matings on few males, producing centralised networks with high $I_s$; functions in which each female's target depends on her own threshold will distribute matings, producing modular networks with low $I_s$.
 We predict that the four functions will separate along these axes, and that the separation will be greatest where females agree with one another and males vary, since that is where the geometry translates into mating decisions with least noise.
+
+### The lek paradox
+
+The question of whether mate choice depletes or maintains genetic variance is the lek paradox, and it has a long history (Pomiankowski & Møller 1995; Rowe & Houle 1996; Kotiaho & Puurtinen 2008).
+Using infinitesimal models and individual-based simulations, Xu et al. (2026) recently showed that variance in male traits and variance in female preferences can mutually exaggerate one another, so that sexual selection may *increase* equilibrium genetic variance relative to random mating, provided that preference variance is not too small relative to trait variance.
+Their conclusion is reached analytically and ours by simulation, and the ratio they identify as decisive, preference variance relative to trait variance, is the same asymmetry that emerges from our design.
+What their treatment does not contain, and what we add, is the network: the structure through which that mutual exaggeration is realised, and which we show predicts how much variance is maintained.
 
 *H2: Network topology mediates the maintenance of genetic variance.*
 If preference heterogeneity converts stabilising individual-level selection into population-level diversifying selection, the mechanism should be visible in the network: a population whose matings partition into modules is one in which different male phenotypes succeed in different modules.
@@ -560,6 +571,10 @@ The mechanism is intelligible.
 When females disagree, different male phenotypes succeed with different females, the network partitions into modules, and within each module a different phenotype is favoured.
 The population-level outcome is the sum of locally stabilising processes with different local optima, which is diversifying.
 
+Ours is not the only proposed route to maintaining variation in both traits and preferences.
+DuVal et al. (2023) show that preferences acquired by observing the choices of others can produce repeated population-level switches in preference and sustain male trait variation, without any genetic inheritance of preference.
+Our mechanism requires no social learning, but the two are not exclusive, and both point to the same conclusion: mechanisms that keep females from agreeing with one another maintain variance.
+
 ## 4.3. Transient signatures and the limits of single-time sampling
 
 Two of our results share a structure: selection that erases the conditions for its own operation.
@@ -573,7 +588,7 @@ For network studies in particular, this is a caution about inferring mating rule
 
 Nestedness is among the most frequently reported descriptors of mating networks, and in this design it is largely determined by network density rather than by the rule that generated the network.
 Preference function explains a small fraction of its variation, while size and density explain a large one.
-We therefore recommend that nestedness in mating networks be reported against a null model preserving the degree sequence.
+We therefore recommend that nestedness in mating networks be reported against a null model preserving the degree sequence, in line with broader concerns about how sexual selection metrics are estimated and compared (Anthes et al. 2017) and with the use of randomised null models to separate structural from chance effects in sexual networks (McDonald et al. 2025).
 Modularity, centralisation and $I_s$ survived the same control and can be interpreted more directly.
 
 ## 4.5. Limitations
@@ -623,11 +638,20 @@ Princeton University Press, Princeton.
 Bell DA, Kovach RP, Robinson ZL, Whiteley AR, Reed TE (2021) The ecological causes and consequences of hard and soft selection.
 *Ecology Letters*, 24, 1505-1521.
 
+Anthes N, Häderer IK, Michiels NK, Janicke T (2017) Measuring and interpreting sexual selection metrics: evaluation and guidelines.
+*Methods in Ecology and Evolution*, 8, 918-931.
+
+Brooks R, Endler JA (2001) Female guppies agree to differ: phenotypic and genetic variation in mate-choice behavior and the consequences for sexual selection.
+*Evolution*, 55, 1644-1655.
+
 Blondel VD, Guillaume J-L, Lambiotte R, Lefebvre E (2008) Fast unfolding of communities in large networks.
 *Journal of Statistical Mechanics: Theory and Experiment*, 2008, P10008.
 
 Csardi G, Nepusz T (2006) The igraph software package for complex network research.
 *InterJournal Complex Systems*, 1695.
+
+DuVal EH, Fitzpatrick CL, Hobson EA, Servedio MR (2023) Inferred Attractiveness: a generalized mechanism for sexual selection that can maintain variation in traits and preferences over time.
+*PLOS Biology*, 21, e3002269.
 
 Darwin C (1871) *The Descent of Man, and Selection in Relation to Sex*.
 John Murray, London.
@@ -653,14 +677,14 @@ Janetos AC (1980) Strategies of female mate choice: a theoretical analysis.
 Jennions MD, Petrie M (1997) Variation in mate choice and mating preferences: a review of causes and consequences.
 *Biological Reviews*, 72, 283-327.
 
-Kelly MW (2018) Adaptation to climate change through genetic accommodation and assimilation of plastic phenotypes.
-*Philosophical Transactions of the Royal Society B*, 374, 20180176.
-
 Kilmer JT, Fowler-Finn KD, Gray DA, Höbel G, Rebar D, Reichert MS, Rodríguez RL (2017) Describing mate preference functions and other function-valued traits.
 *Journal of Evolutionary Biology*, 30, 1658-1673.
 
 Kirkpatrick M (1982) Sexual selection and the evolution of female choice.
 *Evolution*, 36, 1-12.
+
+Kotiaho JS, Puurtinen M (2008) On the resolution of the lek paradox.
+*Trends in Ecology & Evolution*, 23, 60-61.
 
 Lande R (1981) Models of speciation by sexual selection on polygenic traits.
 *Proceedings of the National Academy of Sciences USA*, 78, 3721-3725.
@@ -668,8 +692,14 @@ Lande R (1981) Models of speciation by sexual selection on polygenic traits.
 McDonald GC, Pizzari T (2018) Structure of sexual networks determines the operation of sexual selection.
 *Proceedings of the National Academy of Sciences USA*, 115, E53-E61.
 
+McDonald GC, Garcia-Gonzalez F, Pizzari T (2025) A male-biased sex ratio increases the opportunity for precopulatory sexual selection but does not change the Bateman gradient.
+*Evolution Letters*, 9, 1-13.
+
 Millan CH, Machado G, Muniz DG (2020) Within-population variation in female mating preference affects the opportunity for sexual selection and the evolution of male traits, but things are not as simple as expected.
 *Journal of Evolutionary Biology*, 33, 1579-1592.
+
+Pomiankowski A, Møller AP (1995) A resolution of the lek paradox.
+*Proceedings of the Royal Society B*, 260, 21-29.
 
 R Core Team (2026) *R: A Language and Environment for Statistical Computing*.
 R Foundation for Statistical Computing, Vienna.
@@ -683,11 +713,20 @@ Reznick D (2016) Hard and soft selection revisited: how evolution by natural sel
 Roff DA, Fairbairn DJ (2014) The evolution of phenotypes and genetic parameters under preferential mating.
 *Ecology and Evolution*, 4, 2759-2776.
 
+Rowe L, Houle D (1996) The lek paradox and the capture of genetic variance by condition dependent traits.
+*Proceedings of the Royal Society B*, 263, 1415-1421.
+
+Stratman KD, Bortolotti GN, Höbel G (2024) Within-population variation in preference functions reveals substantial among-female disagreement in mate assessment.
+*Journal of Evolutionary Biology*, 37, 1223-1233.
+
 Wade MJ, Arnold SJ (1980) The intensity of sexual selection in relation to male sexual behaviour, female choice, and sperm precedence.
 *Animal Behaviour*, 28, 446-461.
 
 Wallace B (1975) Hard and soft selection revisited.
 *Evolution*, 29, 465-473.
+
+Xu K, Otto SP, Servedio MR (2026) When sexual selection through mate choice depletes versus exaggerates genetic variation: unraveling the lek paradox.
+*Proceedings of the National Academy of Sciences USA*, in press.
 
 Widemo F, Sæther SA (1999) Beauty is in the eye of the beholder: causes and consequences of variation in mating preferences.
 *Trends in Ecology & Evolution*, 14, 26-31.
