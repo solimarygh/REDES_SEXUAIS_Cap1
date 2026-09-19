@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Solimary García Hernández, Erika M. Santana, Paulo Guimarães Jr." />
+
+
+<title>Material suplementar</title>
+
+<script src="Material_Suplementar_Epidemia_files/header-attrs-2.30/header-attrs.js"></script>
+<script src="Material_Suplementar_Epidemia_files/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="Material_Suplementar_Epidemia_files/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="Material_Suplementar_Epidemia_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="Material_Suplementar_Epidemia_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="Material_Suplementar_Epidemia_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="Material_Suplementar_Epidemia_files/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="Material_Suplementar_Epidemia_files/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="Material_Suplementar_Epidemia_files/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="Material_Suplementar_Epidemia_files/navigation-1.1/tabsets.js"></script>
+<link href="Material_Suplementar_Epidemia_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="Material_Suplementar_Epidemia_files/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Material suplementar</h1>
+<h3 class="subtitle">Uma infecção sexualmente transmissível na rede de
+acasalamentos: o estudo epidemiológico</h3>
+<h4 class="author">Solimary García Hernández, Erika M. Santana, Paulo
+Guimarães Jr.</h4>
+<h4 class="date">19 de September de 2026</h4>
+
+</div>
+
+
+<style type="text/css">
+.main-container { max-width: 96% !important; width: 96% !important;
+                  margin-left: auto; margin-right: auto; }
+.tocify { max-height: 90% !important; }
+
+/* Mesma convenção do outro material suplementar: os blocos de resultado são os
+   cabeçalhos de nível 1, e é por eles que se navega. Sem text-transform, que
+   transformaria σp em ΣP na barra lateral. */
+.tocify-header > .tocify-item {
+  font-weight: 700; font-size: 0.97em;
+  border-top: 1px solid #d5dbe0; margin-top: 0.45em; padding-top: 0.45em;
+}
+.tocify-header > .tocify-subheader > .tocify-item { font-weight: 400; }
+
+h1 {
+  border-top: 3px solid #2C3E50; padding-top: 0.7em; margin-top: 2.2em;
+}
+h1:first-of-type { border-top: none; padding-top: 0; margin-top: 0.6em; }
+</style>
+<p>Este documento acompanha o relatório científico apresentado à FAPESP
+e traz o material do segundo objetivo do projeto: entender se, e como,
+uma infecção que se transmite por contato sexual e altera a atratividade
+do sexo escolhido muda a estrutura da rede de acasalamentos e a seleção
+sobre a característica sob escolha.</p>
+<p>Os quatro estudos anteriores estão descritos num material suplementar
+próprio, e a formulação completa do modelo, noutro. Aqui o foco é o
+estudo epidemiológico, que chamamos de Estudo 5. Ele usa o mesmo motor
+de escolha de parceiro dos estudos anteriores, com uma diferença de
+escala de tempo que é o ponto de partida de tudo o que vem a seguir.</p>
+<div id="introdução" class="section level1">
+<h1>Introdução</h1>
+<p>Uma infecção sexualmente transmissível se propaga pelos mesmos
+contatos que a escolha de parceiro produz. Isso faz dela um caso
+particular entre as doenças infecciosas: a rede de contatos não é um
+dado do ambiente, é o resultado de um comportamento que está, ele mesmo,
+sob seleção. Quem decide com quem copular decide também, sem saber, por
+onde o patógeno pode andar.</p>
+<p>A epidemiologia matemática reconhece há décadas que não é a média do
+número de parceiros que governa o tamanho de uma epidemia sexual. Na
+formulação clássica de May e Anderson (1987), o número reprodutivo
+básico depende da média <em>e</em> da variância do número de parceiros,
+de modo que duas populações com a mesma média e variâncias diferentes
+têm epidemias de tamanhos diferentes. Uma população em que todos têm
+dois parceiros e uma em que a maioria tem um e uns poucos têm trinta
+podem ter exatamente a mesma média. Os poucos indivíduos de muitos
+parceiros funcionam como pontes que ligam partes da população que de
+outro modo não se tocariam, e essa concentração da transmissão em poucos
+indivíduos é um padrão geral das doenças infecciosas (Lloyd-Smith et
+al. 2005).</p>
+<p>A literatura também mostra que a variância não esgota o problema.
+Morris e Kretzschmar (1997) mostraram que parcerias
+<em>concorrentes</em>, isto é, sobrepostas no tempo, amplificam a
+epidemia muito além do que o número de parceiros prediz, porque é a
+sobreposição que liga as parcerias num componente conectado grande em
+vez de deixar o patógeno preso num par. E Potterat et al. (2000)
+reuniram evidência de que a conformação da rede tem efeitos que nenhum
+resumo do número de parceiros captura. Esse é precisamente o terreno em
+que este estudo se coloca: os quatro cenários que comparamos têm o mesmo
+volume de sexo por construção, e diferem apenas em como as parcerias se
+arranjam.</p>
+<p>Do lado da seleção sexual, essa distribuição desigual tem outro nome.
+Ela é justamente o que medimos como <em>oportunidade de seleção
+sexual</em>, e é consequência direta da regra de escolha: uma
+preferência que ordena os machos de forma consistente concentra os
+acasalamentos em poucos deles, e uma preferência que não os ordena
+espalha os acasalamentos por todos. As duas literaturas descrevem a
+mesma quantidade a partir de motivações diferentes, e é esse encontro
+que o Estudo 5 explora.</p>
+<p>A segunda parte do objetivo inverte a direção da pergunta. Muitas
+infecções alteram a aparência ou o comportamento do hospedeiro, e
+algumas alteram exatamente os sinais que o sexo escolhedor avalia. Se a
+infecção muda a atratividade, então a doença deixa de ser apenas
+passageira da rede e passa a agir sobre a seleção: ela redistribui os
+acasalamentos, e ao redistribuí-los muda o diferencial de seleção sobre
+a característica. Chamamos esse efeito de <span
+class="math inline">\(h_I\)</span>, e ele é um dos fatores cruzados do
+desenho.</p>
+<p>As duas perguntas, portanto, são estas. Primeira: dada a mesma
+quantidade de cópulas, a forma da curva de preferência muda o tamanho da
+epidemia? Segunda: quando a infecção altera a atratividade do macho
+infectado, isso muda a seleção sobre a característica dele?</p>
+<div id="a-rede-de-acasalamentos" class="section level2">
+<h2>A rede de acasalamentos</h2>
+<p>A rede de que falamos tem dois conjuntos de indivíduos, machos e
+fêmeas, e uma ligação entre um macho e uma fêmea sempre que os dois
+copularam. Não há ligações dentro de um mesmo sexo. Uma rede com essa
+forma se chama <em>bipartida</em>, e as ligações aqui não têm direção
+nem peso: registram que o par existiu.</p>
+<p>Duas descrições dessa rede aparecem em todo o documento. A rede
+<em>acumulada</em> é o registro de todas as parcerias que já se formaram
+desde o início da temporada, e é sobre ela que se medem as propriedades
+estruturais. As parcerias <em>vigentes</em> são as que estão ativas numa
+determinada semana, e são elas que produzem as cópulas daquela semana. A
+distinção é o que permite que a doença tenha tempo: uma parceria dura
+várias semanas, e em cada uma delas o par pode copular outra vez.</p>
+</div>
+</div>
+<div id="o-modelo-de-uma-temporada" class="section level1">
+<h1>O modelo de uma temporada</h1>
+<p>Os Estudos 1 a 4 simulam gerações: uma população acasala, produz
+filhotes, e os filhotes substituem os pais. O tempo ali se conta em
+gerações, e cada geração é um único episódio de acasalamento. Uma
+epidemia não caberia nessa escala, porque a transmissão precisa de
+repetição dentro da vida dos mesmos indivíduos.</p>
+<p>O Estudo 5 muda a escala. Ele simula uma temporada reprodutiva de 20
+semanas com os mesmos 200 machos e 200 fêmeas do começo ao fim. Não há
+reprodução nem substituição de indivíduos: a temporada é um período de
+acasalamento contínuo, e o que se acompanha ao longo dela é a rede que
+vai se formando e a infecção que vai circulando por ela.</p>
+<div id="a-semana" class="section level2">
+<h2>A semana</h2>
+<p>Cada uma das 20 semanas tem três passos, e a ordem entre eles
+importa.</p>
+<ul>
+<li><em>As parcerias vigentes copulam</em>: cada par que está junto
+naquela semana copula com probabilidade <code>c</code>, a frequência de
+cópula por semana. Uma cópula registra uma ligação na rede daquela
+semana, e é sobre essas ligações que a transmissão acontece.</li>
+<li><em>As parcerias vigentes se dissolvem</em>: cada par ativo se
+separa com probabilidade <code>1/d</code>, onde <code>d</code> é a
+duração média de uma parceria em semanas. Um par que se desfaz nesta
+semana ainda copulou nela, e não antes, e é por isso que a dissolução
+vem depois da cópula.</li>
+<li><em>Quem tem espaço procura um parceiro novo</em>: uma fêmea que
+está com menos parcerias simultâneas do que o teto de concorrência sai à
+procura. A procura é exatamente a regra de decisão dos Estudos 1 a 4,
+aplicada com teto um: a fêmea encontra um número fixo de machos, avalia
+cada um segundo a sua curva de preferência, e fica com o melhor entre os
+que aceitou. Se o macho escolhido já for parceiro dela, nada muda,
+porque ele já copulou no primeiro passo.</li>
+</ul>
+<p>O parâmetro que limita a fêmea aqui não é o número de parceiros da
+temporada, é o número de parcerias que ela mantém <em>ao mesmo
+tempo</em>. Essa quantidade tem nome na epidemiologia,
+<em>concorrência</em>, e é um dos conceitos centrais da área: duas
+parcerias sobrepostas no tempo abrem um caminho para o patógeno que duas
+parcerias em sequência não abrem (Morris &amp; Kretzschmar 1997).</p>
+<p>A forma como o modelo representa isso, com uma rede de parcerias
+potenciais das quais apenas algumas estão ativas em cada semana, é a de
+Eames e Keeling (2004), e a distinção entre a rede acumulada e as
+parcerias vigentes vem daí.</p>
+</div>
+<div id="por-que-as-parcerias-precisam-ser-explícitas"
+class="section level2">
+<h2>Por que as parcerias precisam ser explícitas</h2>
+<p>A primeira versão deste estudo não tinha parcerias. Cada semana as
+fêmeas escolhiam do zero, e por isso quase nunca voltavam ao mesmo
+macho. Medindo o resultado, cada parceiro rendia cerca de 1,4 cópulas ao
+longo de toda a temporada, o que equivale a dizer que praticamente toda
+cópula era com alguém novo.</p>
+<p>Com uma razão dessas a doença não circula. A transmissão por cópula é
+um evento de probabilidade baixa, e um patógeno que tem uma única
+oportunidade por parceiro se extingue antes de encontrar a próxima
+pessoa. Baixar o teto de parceiros não resolvia o problema: a razão de
+cópulas por parceiro ficava plana em torno de 1,4 qualquer que fosse o
+teto, porque o que faltava não era oportunidade de escolher menos gente,
+era um mecanismo que fizesse a fêmea voltar ao mesmo macho. O que
+mudava, ao baixar o teto, era só o número de semanas em que a fêmea não
+copulava com ninguém.</p>
+<p>As parcerias explícitas resolvem isso pela via biológica em vez da
+via do parâmetro. Um par que se forma continua junto por algumas
+semanas, e em cada uma delas pode copular outra vez. A razão de cópulas
+por parceria sobe para a faixa de quatro, e a transmissão passa a ter
+onde acontecer.</p>
+<p>Nos dados, ao fim da temporada, cada fêmea acumulou 8.3 parceiros
+distintos e 33.4 cópulas, ou seja 4.01 cópulas por parceria. As
+parcerias vigentes numa semana qualquer são 1.91 por fêmea, contra um
+teto de concorrência de 2.</p>
+</div>
+<div id="a-doença" class="section level2">
+<h2>A doença</h2>
+<p>A infecção tem três estados possíveis por indivíduo: suscetível,
+infectado e recuperado. A temporada começa com uma fração pequena da
+população já infectada, sorteada ao acaso em cada sexo, e a partir daí a
+doença anda pelas cópulas.</p>
+<p>A transmissão se decide por cópula, nos dois sentidos, e sempre
+contra o estado que os dois indivíduos tinham no <em>início</em> da
+semana. Sem essa precaução, quem se infectasse no primeiro sentido já
+contagiaria no segundo dentro da mesma semana, e a transmissão ficaria
+assimétrica entre os sexos apenas por causa da ordem em que o código
+está escrito.</p>
+<p>A recuperação vem depois da transmissão, de modo que quem se infectou
+numa semana ainda não pode se curar nela. Dois destinos são possíveis, e
+é o contraste entre eles que define os dois modelos do desenho. No
+<em>SIS</em> o indivíduo recuperado volta a ser suscetível, e pode se
+reinfectar; é o caso das infecções bacterianas, que não deixam
+imunidade. No <em>SIR</em> ele fica imune pelo resto da temporada, e sai
+efetivamente da população de contatos infectáveis.</p>
+</div>
+<div id="o-efeito-da-infecção-na-atratividade" class="section level2">
+<h2>O efeito da infecção na atratividade</h2>
+<p>O parâmetro <span class="math inline">\(h_I\)</span> é o deslocamento
+que a infecção causa no sinal do macho. Um macho infectado é avaliado
+pelas fêmeas como se a sua característica fosse <span
+class="math inline">\(z + h_I\)</span> em vez de <span
+class="math inline">\(z\)</span>, e <span
+class="math inline">\(h_I\)</span> está em unidades do desvio-padrão da
+característica na população, que é 1,0.</p>
+<p>Três valores entram no desenho. Com <span class="math inline">\(h_I =
+0\)</span> a infecção não muda nada na avaliação, e este é o braço de
+referência. Com <span class="math inline">\(h_I = -1\)</span> ela
+desloca o sinal para baixo, o caso de uma infecção que deixa o
+hospedeiro em pior condição. Com <span class="math inline">\(h_I =
++1\)</span> ela o desloca para cima, que parece estranho mas é um caso
+documentado: há infecções que aumentam o esforço reprodutivo do
+hospedeiro, e há patógenos cuja transmissão depende de o hospedeiro
+continuar acasalando.</p>
+<p>O efeito de um deslocamento no sinal depende inteiramente da forma da
+curva de preferência, e é isso que faz de <span
+class="math inline">\(h_I\)</span> um fator interessante em vez de uma
+mera perturbação. Sob a curva gaussiana a atratividade é máxima quando o
+sinal coincide com a preferência, de modo que qualquer deslocamento,
+para cima ou para baixo, <em>reduz</em> a atratividade. Sob a sigmoide a
+atratividade cresce com o sinal, e então o sinal dos efeitos segue o
+sinal de <span class="math inline">\(h_I\)</span>. Sob a disruptiva a
+atratividade cresce com a <em>distância</em> à preferência, e os dois
+deslocamentos a aumentam. Sob a curva aleatória a atratividade não
+depende do sinal, e <span class="math inline">\(h_I\)</span> não pode
+ter efeito nenhum: esse braço funciona como um controle interno do
+próprio código.</p>
+</div>
+<div id="medir-o-efeito-de-h_i-na-ordem-causal-certa"
+class="section level2">
+<h2>Medir o efeito de <span class="math inline">\(h_I\)</span> na ordem
+causal certa</h2>
+<p>Comparar machos infectados com machos suscetíveis ao fim da temporada
+não mede o efeito da infecção na atratividade, e é importante dizer por
+quê.</p>
+<p>Os machos que copulam mais são os que têm mais oportunidades de se
+infectar, e portanto se infectam primeiro. Ao fim da temporada, o grupo
+dos infectados é um grupo enriquecido em machos de muito sucesso, e essa
+diferença existiria mesmo com <span class="math inline">\(h_I =
+0\)</span>, quando a infecção não afeta a atratividade em nada. Tomada
+sem cuidado, ela apareceria como um efeito da doença sobre o sucesso,
+quando é o contrário: o sucesso é a causa da infecção.</p>
+<p>O registro separa as duas coisas. As cópulas ganhas em cada semana
+são atribuídas aos machos segundo o estado que eles tinham no
+<em>início</em> daquela semana, o que é a ordem causal correta para o
+efeito de <span class="math inline">\(h_I\)</span>. E o confundidor fica
+à vista, porque também se registra a média da característica nos dois
+grupos: se os infectados já tinham <span
+class="math inline">\(z\)</span> maior, parte da diferença é do traço e
+não da doença. A comparação sobre a rede acumulada é registrada também,
+mas serve a outra pergunta, que é a de mostrar que quem mais acasala é
+quem mais se infecta.</p>
+</div>
+</div>
+<div id="os-parâmetros" class="section level1">
+<h1>Os parâmetros</h1>
+<table>
+<caption>Os parâmetros do Estudo 5. Os cinco fatores cruzados são a
+curva de preferência, σp, hI, o modelo epidemiológico e β; os demais
+ficam fixos.</caption>
+<colgroup>
+<col width="16%" />
+<col width="4%" />
+<col width="9%" />
+<col width="69%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Parâmetro</th>
+<th align="left">Símbolo</th>
+<th align="left">Valor</th>
+<th align="left">O que é</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Censo</td>
+<td align="left">N</td>
+<td align="left">200 + 200</td>
+<td align="left">Machos e fêmeas adultos, fixos do início ao fim da
+temporada</td>
+</tr>
+<tr class="even">
+<td align="left">Duração da temporada</td>
+<td align="left"></td>
+<td align="left">20 semanas</td>
+<td align="left">Uma estação reprodutiva, contada em semanas</td>
+</tr>
+<tr class="odd">
+<td align="left">Variação da característica</td>
+<td align="left">σz</td>
+<td align="left">1.0</td>
+<td align="left">Desvio-padrão da característica do macho na
+população</td>
+</tr>
+<tr class="even">
+<td align="left">Variação da preferência</td>
+<td align="left">σp</td>
+<td align="left">0.5 / 1.0 / 1.5</td>
+<td align="left">Desvio-padrão da preferência da fêmea, um dos fatores
+cruzados</td>
+</tr>
+<tr class="odd">
+<td align="left">Valor central</td>
+<td align="left">φ</td>
+<td align="left">5</td>
+<td align="left">Média das distribuições da característica e da
+preferência; é também o ótimo da viabilidade, que aqui fica
+desligada</td>
+</tr>
+<tr class="even">
+<td align="left">Exigência</td>
+<td align="left">s</td>
+<td align="left">média 2, dp 0.2</td>
+<td align="left">Inclinação da curva de preferência de cada fêmea,
+sorteada uma vez e válida por toda a temporada</td>
+</tr>
+<tr class="odd">
+<td align="left">Encontros por semana</td>
+<td align="left">A</td>
+<td align="left">10</td>
+<td align="left">Machos distintos que a fêmea avalia quando sai à
+procura</td>
+</tr>
+<tr class="even">
+<td align="left">Concorrência</td>
+<td align="left"></td>
+<td align="left">2</td>
+<td align="left">Teto de parcerias simultâneas por fêmea</td>
+</tr>
+<tr class="odd">
+<td align="left">Duração da parceria</td>
+<td align="left">d</td>
+<td align="left">5 semanas</td>
+<td align="left">Duração média de uma parceria; a dissolução tem
+probabilidade 1/d por semana</td>
+</tr>
+<tr class="even">
+<td align="left">Cópula por semana</td>
+<td align="left">c</td>
+<td align="left">0.7</td>
+<td align="left">Probabilidade de um par vigente copular numa
+semana</td>
+</tr>
+<tr class="odd">
+<td align="left">Transmissão</td>
+<td align="left">β</td>
+<td align="left">0.06 / 0.15</td>
+<td align="left">Probabilidade de transmissão por cópula, em cada
+sentido; um dos fatores cruzados</td>
+</tr>
+<tr class="even">
+<td align="left">Recuperação</td>
+<td align="left">γrec</td>
+<td align="left">0.10</td>
+<td align="left">Probabilidade de recuperação por semana; um período
+infeccioso de 10 semanas</td>
+</tr>
+<tr class="odd">
+<td align="left">Prevalência inicial</td>
+<td align="left"></td>
+<td align="left">0.05</td>
+<td align="left">Fração da população já infectada no início da
+temporada</td>
+</tr>
+<tr class="even">
+<td align="left">Efeito na atratividade</td>
+<td align="left">hI</td>
+<td align="left">-1 / 0 / +1</td>
+<td align="left">Deslocamento do sinal do macho infectado, em unidades
+de σz</td>
+</tr>
+<tr class="odd">
+<td align="left">Curva de preferência</td>
+<td align="left"></td>
+<td align="left">quatro formas</td>
+<td align="left">Aleatória, gaussiana, sigmoide e disruptiva</td>
+</tr>
+<tr class="even">
+<td align="left">Modelo epidemiológico</td>
+<td align="left"></td>
+<td align="left">SIS / SIR</td>
+<td align="left">Se a recuperação devolve à suscetibilidade ou dá
+imunidade</td>
+</tr>
+<tr class="odd">
+<td align="left">Réplicas</td>
+<td align="left"></td>
+<td align="left">100</td>
+<td align="left">Temporadas independentes por combinação de
+parâmetros</td>
+</tr>
+</tbody>
+</table>
+<div id="as-quatro-curvas-de-preferência" class="section level2">
+<h2>As quatro curvas de preferência</h2>
+<p>A curva de preferência é a regra que traduz a característica de um
+macho, <span class="math inline">\(z\)</span>, na probabilidade de
+aquela fêmea aceitá-lo, <span class="math inline">\(P\)</span>. Cada
+fêmea tem a sua preferência <span class="math inline">\(p\)</span> e a
+sua exigência <span class="math inline">\(s\)</span>, e as quatro formas
+são as mesmas dos estudos anteriores.</p>
+<p><span class="math display">\[P = 0.5 \qquad
+\text{(aleatória)}\]</span></p>
+<p><span class="math display">\[P = \exp\!\left(-s\,(z-p)^2\right)
+\qquad \text{(gaussiana)}\]</span></p>
+<p><span class="math display">\[P = \frac{1}{1 +
+\exp\!\left(-s\,(z-p)\right)} \qquad \text{(sigmoide)}\]</span></p>
+<p><span class="math display">\[P = 1 - \exp\!\left(-s\,(z-p)^2\right)
+\qquad \text{(disruptiva)}\]</span></p>
+<p>A aleatória não olha a característica, e serve de controle: qualquer
+padrão que apareça nela vem da estrutura do processo e não da escolha. A
+gaussiana prefere o macho parecido com a preferência da fêmea, e é
+estabilizadora. A sigmoide prefere o macho de característica maior, e é
+direcional. A disruptiva prefere o macho <em>diferente</em> da
+preferência, nos dois sentidos, e favorece os extremos.</p>
+</div>
+<div id="a-viabilidade-e-por-que-ela-fica-desligada-aqui"
+class="section level2">
+<h2>A viabilidade e por que ela fica desligada aqui</h2>
+<p>Nos Estudos 1 a 4 a seleção natural age sobre a característica do
+macho por meio de uma viabilidade, <span class="math inline">\(V =
+\exp(-\gamma (z - \phi)^2)\)</span>, em que <span
+class="math inline">\(\phi\)</span> é o valor da característica com
+melhor sobrevivência e <span class="math inline">\(\gamma\)</span> mede
+quão rapidamente a sobrevivência cai quando a característica se afasta
+dele. Com <span class="math inline">\(\gamma = 0.2\)</span> e <span
+class="math inline">\(\phi = 5\)</span>, um macho com a característica
+no ótimo sobrevive com probabilidade 1 e um macho a dois desvios do
+ótimo, com probabilidade próxima de 0.45.</p>
+<p>No Estudo 5 essa parte fica desligada por padrão, e a razão é a
+escala de tempo. A temporada é única e não há reprodução, de modo que
+não existe resposta evolutiva para a seleção natural modular: ela apenas
+retiraria machos do censo no início, sem que nada dependesse disso mais
+adiante. Deixando-a de fora, o censo é exatamente 200 machos por
+construção, e as diferenças entre células do desenho não se confundem
+com diferenças no tamanho da população.</p>
+</div>
+</div>
+<div id="o-desenho-do-estudo" class="section level1">
+<h1>O desenho do estudo</h1>
+<p>Cinco fatores se cruzam: a curva de preferência com quatro níveis, a
+variação da preferência feminina com três, o efeito da infecção na
+atratividade com três, o modelo epidemiológico com dois e a taxa de
+transmissão com dois. São 144 combinações, cada uma com 100 temporadas
+independentes, e cada temporada registra as suas 20 semanas.</p>
+<p>Os dados deste documento têm 288.000 linhas, que são 144 combinações
+de parâmetros, 14.400 temporadas e 20 semanas por temporada.</p>
+<div id="por-que-a-transmissão-é-um-fator-e-não-uma-constante"
+class="section level2">
+<h2>Por que a transmissão é um fator e não uma constante</h2>
+<p>O critério de grande epidemia do plano de trabalho, 15% da população
+infectada em algum momento, só carrega informação numa faixa estreita de
+<span class="math inline">\(\beta\)</span>. Acima dela toda temporada o
+cumpre, e o critério deixa de distinguir qualquer coisa; abaixo dela
+nenhuma o cumpre. E as duas perguntas do estudo não vivem na mesma
+faixa.</p>
+<p>Com <span class="math inline">\(\beta = 0.15\)</span> a epidemia
+acontece em todas as células do desenho, e é isso que dá espaço para os
+contrastes secundários. A incidência é uma resposta contínua, com
+variação para os dois lados, e os efeitos de <span
+class="math inline">\(h_I\)</span>, do modelo epidemiológico e de <span
+class="math inline">\(\sigma_p\)</span> podem ser medidos sem esbarrar
+num piso ou num teto.</p>
+<p>Com <span class="math inline">\(\beta = 0.06\)</span> a epidemia fica
+no limiar, e a pergunta muda de natureza: deixa de ser quanto a curva de
+preferência muda o tamanho da epidemia e passa a ser se ela decide que a
+epidemia aconteça. Os contrastes secundários, aí, ficam dominados por
+extinção estocástica e têm pouco sinal, mas o efeito principal aparece
+na sua forma mais forte.</p>
+<p>Rodar os dois níveis custa o dobro e responde às duas perguntas. As
+seções 1 a 7 abaixo ficam em <span class="math inline">\(\beta =
+0.15\)</span>, e a seção 8 compara os dois.</p>
+</div>
+<div id="as-variáveis-resposta" class="section level2">
+<h2>As variáveis resposta</h2>
+<p>Três conjuntos de variáveis saem de cada temporada, e vale separá-los
+porque respondem a perguntas diferentes.</p>
+<p>As da epidemia:</p>
+<ul>
+<li><em>Prevalência</em>: a fração da população infectada num dado
+momento. Sobe e desce ao longo da temporada, porque os indivíduos se
+recuperam.</li>
+<li><em>Incidência acumulada</em>: a fração que se infectou em algum
+momento. Só pode crescer, e é ela que diz o tamanho final da
+epidemia.</li>
+<li><em>Recuperados</em>: a fração que passou pela infecção e se curou.
+Só existe no modelo SIR, porque no SIS a cura devolve o indivíduo à
+suscetibilidade.</li>
+<li><em>Grande epidemia</em>: seguindo o critério do plano de trabalho,
+uma temporada em que ao menos 15% da população se infectou.</li>
+</ul>
+<p>As da estrutura da rede, que são as mesmas dos Estudos 1 a 4:</p>
+<ul>
+<li><em>Modularidade</em>: o quanto a rede se divide em grupos que
+acasalam mais entre si do que com o resto da população.</li>
+<li><em>Aninhamento</em> (índice NODF): o quanto os parceiros dos
+indivíduos menos conectados são um subconjunto dos parceiros dos mais
+conectados.</li>
+<li><em>Centralização</em>: o quanto a rede depende de poucos indivíduos
+muito conectados.</li>
+<li><em>Oportunidade de seleção sexual</em> (Is): a variância do sucesso
+de acasalamento dividida pelo quadrado da sua média, que mede quão
+desigualmente os acasalamentos se distribuem entre os machos.</li>
+</ul>
+<p>E os descritores, que dizem quanto sexo houve e sobre quantos
+indivíduos ele se repartiu:</p>
+<ul>
+<li><em>Parceiros distintos por fêmea</em> e <em>cópulas por fêmea</em>
+na temporada.</li>
+<li><em>Cópulas por parceria</em>: a razão entre as duas anteriores, e a
+quantidade que motivou a mudança do modelo descrita acima.</li>
+<li><em>Concorrência realizada</em>: quantas parcerias simultâneas uma
+fêmea de fato mantém, que é menor do que o teto porque uma parceria só
+se forma se ela aceitar alguém.</li>
+<li><em>Conectância</em>: a fração dos pares possíveis que de fato
+acasalaram.</li>
+<li><em>Proporção de machos que não acasalou</em> e <em>de fêmeas sem
+parceria na semana</em>.</li>
+</ul>
+<p>Os descritores não são propriedades estruturais no mesmo sentido, mas
+são indispensáveis para interpretar as outras: sem eles não se distingue
+uma diferença que vem da forma da rede de uma diferença que vem apenas
+do volume de sexo.</p>
+<p>E, à parte, o diferencial de seleção sobre a característica do macho.
+<span class="math inline">\(S\)</span> é a média de <span
+class="math inline">\(z\)</span> pesada pelo sucesso menos a média de
+<span class="math inline">\(z\)</span> na população, e <span
+class="math inline">\(i = S /
+\mathrm{sd}(z)\)</span> é a mesma quantidade em unidades de
+desvio-padrão, o que permite comparar células com variâncias diferentes.
+O sucesso aqui é pesado pelas <em>cópulas</em> e não pelos parceiros,
+porque é o número de cópulas que conta como sucesso reprodutivo: um
+macho que copulou dez vezes teve mais sucesso do que um que copulou uma
+vez.</p>
+</div>
+</div>
+<div id="cobertura-dos-dados" class="section level1">
+<h1>Cobertura dos dados</h1>
+<table>
+<caption>Temporadas simuladas por curva de preferência, modelo
+epidemiológico e taxa de transmissão. Cada temporada inclui os três
+níveis de σp e os três de hI.</caption>
+<thead>
+<tr class="header">
+<th align="left">Curva</th>
+<th align="left">Modelo</th>
+<th align="right">β</th>
+<th align="right">Temporadas</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Aleatória</td>
+<td align="left">SIR</td>
+<td align="right">0.06</td>
+<td align="right">900</td>
+</tr>
+<tr class="even">
+<td align="left">Aleatória</td>
+<td align="left">SIR</td>
+<td align="right">0.15</td>
+<td align="right">900</td>
+</tr>
+<tr class="odd">
+<td align="left">Aleatória</td>
+<td align="left">SIS</td>
+<td align="right">0.06</td>
+<td align="right">900</td>
+</tr>
+<tr class="even">
+<td align="left">Aleatória</td>
+<td align="left">SIS</td>
+<td align="right">0.15</td>
+<td align="right">900</td>
+</tr>
+<tr class="odd">
+<td align="left">Disruptiva</td>
+<td align="left">SIR</td>
+<td align="right">0.06</td>
+<td align="right">900</td>
+</tr>
+<tr class="even">
+<td align="left">Disruptiva</td>
+<td align="left">SIR</td>
+<td align="right">0.15</td>
+<td align="right">900</td>
+</tr>
+<tr class="odd">
+<td align="left">Disruptiva</td>
+<td align="left">SIS</td>
+<td align="right">0.06</td>
+<td align="right">900</td>
+</tr>
+<tr class="even">
+<td align="left">Disruptiva</td>
+<td align="left">SIS</td>
+<td align="right">0.15</td>
+<td align="right">900</td>
+</tr>
+<tr class="odd">
+<td align="left">Gaussiana</td>
+<td align="left">SIR</td>
+<td align="right">0.06</td>
+<td align="right">900</td>
+</tr>
+<tr class="even">
+<td align="left">Gaussiana</td>
+<td align="left">SIR</td>
+<td align="right">0.15</td>
+<td align="right">900</td>
+</tr>
+<tr class="odd">
+<td align="left">Gaussiana</td>
+<td align="left">SIS</td>
+<td align="right">0.06</td>
+<td align="right">900</td>
+</tr>
+<tr class="even">
+<td align="left">Gaussiana</td>
+<td align="left">SIS</td>
+<td align="right">0.15</td>
+<td align="right">900</td>
+</tr>
+<tr class="odd">
+<td align="left">Sigmoide</td>
+<td align="left">SIR</td>
+<td align="right">0.06</td>
+<td align="right">900</td>
+</tr>
+<tr class="even">
+<td align="left">Sigmoide</td>
+<td align="left">SIR</td>
+<td align="right">0.15</td>
+<td align="right">900</td>
+</tr>
+<tr class="odd">
+<td align="left">Sigmoide</td>
+<td align="left">SIS</td>
+<td align="right">0.06</td>
+<td align="right">900</td>
+</tr>
+<tr class="even">
+<td align="left">Sigmoide</td>
+<td align="left">SIS</td>
+<td align="right">0.15</td>
+<td align="right">900</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="a-epidemia-ao-longo-da-temporada" class="section level1">
+<h1>1. A epidemia ao longo da temporada</h1>
+<p>A primeira coisa a olhar é se a epidemia acontece, e com que forma. A
+figura mostra a prevalência e a incidência acumulada semana a semana,
+uma linha por curva de preferência.</p>
+<p><img src="Material_Suplementar_Epidemia_files/figure-html/fig-curva-epidemica-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>Na leitura, a prevalência pode subir e depois cair, porque os
+indivíduos se recuperam; a incidência acumulada nunca cai, porque
+registra quem já passou pela infecção. No modelo SIS os recuperados
+voltam a ser suscetíveis e a prevalência tende a um patamar; no SIR eles
+saem da população infectável e a prevalência decai depois do pico.</p>
+<p>No modelo SIR, ao fim da temporada e no braço de referência, a
+incidência acumulada média é 40.3% e a prevalência 14.7%; 99.8% das
+temporadas passam o critério de grande epidemia.</p>
+<p>No modelo SIS, ao fim da temporada e no braço de referência, a
+incidência acumulada média é 47.8% e a prevalência 28.5%; 100.0% das
+temporadas passam o critério de grande epidemia.</p>
+</div>
+<div id="a-curva-de-preferência-e-o-tamanho-da-epidemia"
+class="section level1">
+<h1>2. A curva de preferência e o tamanho da epidemia</h1>
+<p>Esta é a primeira das duas perguntas do objetivo. As quatro curvas
+produzem aproximadamente o mesmo <em>volume</em> de sexo, porque o que
+limita a fêmea é a concorrência e não a sua exigência: com dois
+parceiros simultâneos e cinco semanas de duração média, quase toda fêmea
+mantém as suas duas parcerias em quase toda semana, qualquer que seja a
+curva. A pergunta é se, mantido o volume, a forma da rede muda a
+epidemia.</p>
+<p><img src="Material_Suplementar_Epidemia_files/figure-html/fig-curva-vs-epidemia-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>Os três painéis são a mesma pergunta em três passos. O primeiro
+mostra que o volume de sexo é praticamente o mesmo nas quatro curvas. O
+segundo mostra que a desigualdade na distribuição dos acasalamentos
+entre os machos, ao contrário, difere muito. O terceiro mostra o tamanho
+da epidemia. Se os painéis primeiro e terceiro discordam e o segundo e o
+terceiro concordam, então o que governa a epidemia é a estrutura e não o
+volume.</p>
+<p>Entre as quatro curvas, a incidência acumulada vai de 33.6% sob a
+curva gaussiana a 53.9% sob a sigmoide, um fator de 1.60. As cópulas por
+fêmea, no mesmo intervalo, vão de 32.2 a 32.9, um fator de 1.06.</p>
+<p>A oportunidade de seleção sexual, no mesmo intervalo, vai de 0.11 a
+3.90.</p>
+<div id="o-mesmo-contra-a-estrutura-da-rede" class="section level2">
+<h2>O mesmo, contra a estrutura da rede</h2>
+<p>Se a explicação é estrutural, então a incidência deve seguir as
+medidas de estrutura mesmo quando se olham todas as células do desenho
+juntas, e não apenas as médias por curva.</p>
+<p><img src="Material_Suplementar_Epidemia_files/figure-html/fig-incid-vs-estrutura-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>Cada ponto é uma combinação de parâmetros, com as suas 100 temporadas
+já promediadas. Os pontos cheios são o modelo SIS e os vazios o SIR. Uma
+nuvem inclinada indica que aquela medida de estrutura acompanha o
+tamanho da epidemia; uma nuvem sem inclinação indica que não.</p>
+</div>
+</div>
+<div id="quem-se-infecta" class="section level1">
+<h1>3. Quem se infecta</h1>
+<p>A explicação estrutural tem uma consequência verificável no nível do
+indivíduo. Se a epidemia é grande porque poucos machos concentram muitos
+acasalamentos, então são esses machos que devem se infectar primeiro e
+com mais frequência.</p>
+<p><img src="Material_Suplementar_Epidemia_files/figure-html/fig-quem-se-infecta-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>Esta figura é do braço <span class="math inline">\(h_I = 0\)</span>,
+em que a infecção não muda a atratividade. Qualquer diferença entre as
+duas barras, portanto, não pode ser efeito da doença sobre o sucesso: é
+o contrário, o sucesso é que levou à infecção. A altura da diferença
+mede quanto o processo é dominado por poucos machos muito ativos.</p>
+</div>
+<div id="o-efeito-da-infecção-na-atratividade-1" class="section level1">
+<h1>4. O efeito da infecção na atratividade</h1>
+<p>Esta é a segunda pergunta do objetivo. Aqui os três níveis de <span
+class="math inline">\(h_I\)</span> entram, e a leitura tem de ser feita
+curva por curva, porque o efeito de deslocar o sinal depende da forma da
+curva.</p>
+<p><img src="Material_Suplementar_Epidemia_files/figure-html/fig-hI-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>A curva aleatória é o controle interno: como ela não olha a
+característica, as três barras dela têm de ser iguais, e qualquer
+diferença apontaria um problema no código e não um resultado. Sob a
+gaussiana espera-se um padrão simétrico, com <span
+class="math inline">\(h_I = 0\)</span> no extremo, porque ali a
+atratividade é máxima quando o sinal coincide com a preferência e
+qualquer deslocamento a reduz. Sob a sigmoide espera-se um padrão
+monótono, porque a atratividade cresce com o sinal. Sob a disruptiva
+espera-se o padrão inverso ao da gaussiana, porque ali a atratividade
+cresce com a distância à preferência.</p>
+<div id="o-efeito-medido-semana-a-semana" class="section level2">
+<h2>O efeito medido semana a semana</h2>
+<p><img src="Material_Suplementar_Epidemia_files/figure-html/fig-hI-semanal-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>No painel de cima, os machos são separados pelo estado que tinham no
+<em>início</em> da semana, que é a ordem causal certa para o efeito de
+<span class="math inline">\(h_I\)</span>. No painel de baixo está o
+confundidor: se a linha se afasta de zero, os infectados já tinham
+característica diferente dos suscetíveis, e parte da diferença de
+cópulas é do traço e não da doença. As duas linhas têm de ser lidas
+juntas, e é a comparação entre os três níveis de <span
+class="math inline">\(h_I\)</span> dentro de cada curva que isola o
+efeito da infecção.</p>
+</div>
+</div>
+<div id="a-doença-e-a-seleção-sobre-o-traço" class="section level1">
+<h1>5. A doença e a seleção sobre o traço</h1>
+<p>Uma temporada já diz algo sobre evolução, sem simular gerações. O
+diferencial de seleção <span class="math inline">\(S\)</span> é a
+diferença entre a característica média dos machos pesada pelo sucesso e
+a característica média na população, e a equação do criador o transforma
+em resposta esperada. Se a doença redistribui os acasalamentos, então
+ela muda <span class="math inline">\(S\)</span>, e isso é seleção.</p>
+<p><img src="Material_Suplementar_Epidemia_files/figure-html/fig-selecao-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>O eixo y tem escala livre por curva, e isso é deliberado: as
+magnitudes diferem por mais de uma ordem entre a sigmoide e as outras
+três, e com escala comum as três ficariam achatadas numa linha. O que
+interessa em cada painel é se <span class="math inline">\(i\)</span> se
+afasta de zero e em que direção quando <span
+class="math inline">\(h_I\)</span> muda.</p>
+<p>Sob a curva aleatória <span class="math inline">\(i\)</span> deve
+ficar em zero nos três níveis, porque não há seleção sobre a
+característica. Sob a sigmoide <span class="math inline">\(i\)</span> é
+grande já no braço de referência, porque a preferência é direcional e
+seleciona a característica independentemente de qualquer doença. As duas
+curvas simétricas, gaussiana e disruptiva, são o caso a observar com
+mais atenção: nelas a preferência não tem componente direcional, de modo
+que <span class="math inline">\(i\)</span> parte de perto de zero, e um
+afastamento de zero que apareça só quando <span
+class="math inline">\(h_I \neq 0\)</span> seria seleção produzida pela
+doença.</p>
+<p>A geometria do modelo dá uma expectativa para a direção desse
+afastamento, e ela é oposta nas duas curvas. Sob a gaussiana o macho
+infectado se afasta do pico de preferência nos dois sentidos e perde
+atratividade; como os machos infectados são, em média, os que mais
+copularam, a doença penalizaria quem tem sucesso, e o sinal de <span
+class="math inline">\(i\)</span> ficaria contrário ao de <span
+class="math inline">\(h_I\)</span>. Sob a disruptiva o mesmo afastamento
+<em>aumenta</em> a atratividade, e o sinal de <span
+class="math inline">\(i\)</span> acompanharia o de <span
+class="math inline">\(h_I\)</span>. A tabela abaixo é o que permite
+conferir se os dados seguem essa expectativa e qual das curvas tem a
+maior amplitude entre os dois extremos.</p>
+<p>Amplitude de i entre os dois extremos de hI, por curva:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Curva</th>
+<th align="right">i em hI = -1</th>
+<th align="right">i em hI = 0</th>
+<th align="right">i em hI = +1</th>
+<th align="right">Amplitude</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Disruptiva</td>
+<td align="right">-0.227</td>
+<td align="right">-0.006</td>
+<td align="right">0.229</td>
+<td align="right">0.456</td>
+</tr>
+<tr class="even">
+<td align="left">Gaussiana</td>
+<td align="right">0.043</td>
+<td align="right">0.000</td>
+<td align="right">-0.041</td>
+<td align="right">0.083</td>
+</tr>
+<tr class="odd">
+<td align="left">Sigmoide</td>
+<td align="right">1.417</td>
+<td align="right">1.497</td>
+<td align="right">1.447</td>
+<td align="right">0.030</td>
+</tr>
+<tr class="even">
+<td align="left">Aleatória</td>
+<td align="right">-0.001</td>
+<td align="right">0.003</td>
+<td align="right">0.000</td>
+<td align="right">0.000</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="sis-contra-sir" class="section level1">
+<h1>6. SIS contra SIR</h1>
+<p>Os dois modelos diferem apenas no destino de quem se recupera, e a
+comparação diz quanto a imunidade importa numa temporada curta. No SIS o
+recuperado volta ao estoque de suscetíveis e a epidemia se sustenta; no
+SIR ele sai da população infectável, o que reduz progressivamente o
+número de contatos capazes de propagar a doença.</p>
+<p><img src="Material_Suplementar_Epidemia_files/figure-html/fig-sis-sir-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>A linha cheia é o SIS e a tracejada o SIR. O painel dos recuperados é
+zero por construção no SIS, e cresce no SIR: é a fração da população que
+a doença já atravessou e que não pode mais se reinfectar. A diferença
+entre os dois modelos no painel da incidência mede quanto a imunidade
+freou a epidemia ao longo das 20 semanas.</p>
+</div>
+<div id="a-variação-da-preferência-feminina" class="section level1">
+<h1>7. A variação da preferência feminina</h1>
+<p>O terceiro fator do desenho, <span
+class="math inline">\(\sigma_p\)</span>, é o mesmo que organiza os
+Estudos 1 a 4: quanto as fêmeas diferem umas das outras naquilo que
+preferem. Ele entra aqui porque muda a estrutura da rede pela mesma via
+dos outros estudos. Quando todas as fêmeas preferem a mesma coisa, elas
+competem pelos mesmos machos e os acasalamentos se concentram; quando
+cada uma prefere algo diferente, os acasalamentos se espalham.</p>
+<p><img src="Material_Suplementar_Epidemia_files/figure-html/fig-sigmap-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>Os três painéis separam dois efeitos que <span
+class="math inline">\(\sigma_p\)</span> tem ao mesmo tempo, e é por isso
+que o painel da esquerda não se lê sozinho. Quando as preferências se
+espalham, algumas fêmeas passam a preferir machos que quase não existem
+na população e ficam mais semanas sem parceria, o que reduz o volume de
+sexo; e ao mesmo tempo os acasalamentos das demais se distribuem por
+mais machos, o que reduz a concentração. Os dois efeitos podem empurrar
+a epidemia no mesmo sentido ou em sentidos opostos, e a comparação entre
+os painéis é o que diz qual dos dois pesa mais em cada curva.</p>
+</div>
+<div id="a-taxa-de-transmissão-e-a-curva-que-decide-se-há-epidemia"
+class="section level1">
+<h1>8. A taxa de transmissão, e a curva que decide se há epidemia</h1>
+<p>As seções anteriores ficaram num regime em que a epidemia acontece
+sempre, e ali a curva de preferência muda o <em>tamanho</em> dela. Esta
+seção acrescenta o outro nível de <span
+class="math inline">\(\beta\)</span>, em que a epidemia fica no limiar,
+e a pergunta passa a ser outra: com todo o resto igual, a forma da curva
+de preferência decide se a epidemia acontece?</p>
+<p>O critério é o do plano de trabalho. Uma temporada conta como grande
+epidemia quando ao menos 15% da população se infectou em algum
+momento.</p>
+<p><img src="Material_Suplementar_Epidemia_files/figure-html/fig-beta-1.png" alt="" width="100%" style="display: block; margin: auto;" /></p>
+<p>Os dois painéis dizem coisas diferentes, e é a comparação entre as
+duas colunas de cada um que interessa. À direita, no <span
+class="math inline">\(\beta\)</span> alto, todas as barras do painel da
+direita estão no topo: toda temporada produz uma grande epidemia,
+qualquer que seja a curva, e o critério não distingue nada. À esquerda,
+no <span class="math inline">\(\beta\)</span> baixo, as mesmas quatro
+curvas se separam, e a diferença entre elas deixa de ser de grau.</p>
+<table>
+<caption>Fração das temporadas que passam o critério de grande epidemia,
+com a incidência acumulada média entre parênteses. Braço de referência,
+hI = 0.</caption>
+<thead>
+<tr class="header">
+<th align="left">Curva</th>
+<th align="left">β = 0.06</th>
+<th align="left">β = 0.15</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Aleatória</td>
+<td align="left">8% (incid. 11.7%)</td>
+<td align="left">100% (incid. 35.5%)</td>
+</tr>
+<tr class="even">
+<td align="left">Gaussiana</td>
+<td align="left">8% (incid. 11.3%)</td>
+<td align="left">100% (incid. 33.6%)</td>
+</tr>
+<tr class="odd">
+<td align="left">Sigmoide</td>
+<td align="left">72% (incid. 18.6%)</td>
+<td align="left">100% (incid. 53.9%)</td>
+</tr>
+<tr class="even">
+<td align="left">Disruptiva</td>
+<td align="left">60% (incid. 16.5%)</td>
+<td align="left">100% (incid. 53.1%)</td>
+</tr>
+</tbody>
+</table>
+<p>No nível baixo de transmissão, a fração de temporadas com grande
+epidemia vai de 7.7% sob a curva aleatória a 71.7% sob a sigmoide. A
+diferença entre as curvas deixa de ser de quanto e passa a ser de
+se.</p>
+<p>Vale comparar cada curva com a aleatória, que é o controle nulo e
+fica em 7.7%. A curva gaussiana fica em 8.3%, praticamente no mesmo
+lugar: quanto à propagação da infecção ela é indistinguível do
+acasalamento ao acaso. O efeito não é, portanto, o de haver ou não
+preferência, e sim o de a preferência ordenar os machos de forma
+consistente entre as fêmeas. A preferência por semelhança não faz isso;
+a direcional e a disruptiva fazem.</p>
+</div>
+<div id="síntese" class="section level1">
+<h1>Síntese</h1>
+<p>O que os dados mostram, em uma frase por resultado.</p>
+<ul>
+<li>A forma da curva de preferência muda a incidência acumulada por um
+fator de 1.60 (de 33.6% a 53.9%), enquanto o volume de sexo varia por um
+fator de 1.06. A diferença entre as curvas não está no volume de sexo,
+que é praticamente o mesmo nas quatro.</li>
+<li>A oportunidade de seleção sexual varia de 0.11 a 3.90 entre as
+curvas. Entre as médias por curva, ela correlaciona 0.95 com a
+incidência, contra -0.22 da conectância.</li>
+<li>No braço de referência, em que a infecção não afeta a atratividade,
+os machos infectados ao fim da temporada já tinham acumulado mais
+parceiras do que os suscetíveis, e por uma margem que depende da curva:
+25.2 contra 2.2 sob a sigmoide, e 9.7 contra 8.7 sob a aleatória. A
+infecção é consequência do sucesso, e é por isso que o efeito de hI tem
+de ser medido semana a semana.</li>
+<li>A imunidade importa mas não decide: a incidência acumulada é 40.3%
+no SIR e 47.8% no SIS.</li>
+<li>No nível baixo de transmissão a diferença deixa de ser de grau: a
+fração de temporadas com grande epidemia vai de 7.7% sob a curva
+aleatória a 71.7% sob a sigmoide. Com tudo o mais igual, a forma da
+curva de preferência decide se a epidemia acontece.</li>
+<li>O efeito da doença sobre a seleção não é maior onde a epidemia é
+maior. A amplitude de i entre os extremos de hI é de 0.46 sob a curva
+disruptiva e de apenas 0.00 sob a aleatória.</li>
+</ul>
+<p>O Estudo 5 fecha o percurso do projeto no sentido em que ele foi
+desenhado. Os Estudos 1 a 4 mostraram que a regra de escolha de parceiro
+determina a estrutura da rede de acasalamentos. O Estudo 5 mostra que
+essa estrutura tem consequências fora da seleção sexual, porque ela é
+também a rede por onde um patógeno anda, e que a doença volta a agir
+sobre a seleção quando altera os sinais que a escolha avalia. As duas
+literaturas, a da seleção sexual e a da epidemiologia de redes,
+descrevem a mesma quantidade a partir de motivações diferentes, e o
+modelo permite passar de uma à outra sem trocar de ferramenta.</p>
+</div>
+<div id="referências" class="section level1">
+<h1>Referências</h1>
+<p>Almeida-Neto, M., Guimarães, P., Guimarães Jr., P.R., Loyola, R.D.
+&amp; Ulrich, W. (2008) A consistent metric for nestedness analysis in
+ecological systems: reconciling concept and measurement. <em>Oikos</em>,
+117, 1227-1239.</p>
+<p>Blondel, V.D., Guillaume, J.-L., Lambiotte, R. &amp; Lefebvre, E.
+(2008) Fast unfolding of communities in large networks. <em>Journal of
+Statistical Mechanics: Theory and Experiment</em>, 2008, P10008.</p>
+<p>Eames, K.T.D. &amp; Keeling, M.J. (2004) Monogamous networks and the
+spread of sexually transmitted diseases. <em>Mathematical
+Biosciences</em>, 189, 115-130.</p>
+<p>Janetos, A.C. (1980) Strategies of female mate choice: a theoretical
+analysis. <em>Behavioral Ecology and Sociobiology</em>, 7, 107-112.</p>
+<p>Kretzschmar, M. (2000) Sexual network structure and sexually
+transmitted disease prevention: a modeling perspective. <em>Sexually
+Transmitted Diseases</em>, 27, 627-635.</p>
+<p>Lande, R. &amp; Arnold, S.J. (1983) The measurement of selection on
+correlated characters. <em>Evolution</em>, 37, 1210-1226.</p>
+<p>Lloyd-Smith, J.O., Schreiber, S.J., Kopp, P.E. &amp; Getz, W.M.
+(2005) Superspreading and the effect of individual variation on disease
+emergence. <em>Nature</em>, 438, 355-359.</p>
+<p>May, R.M. &amp; Anderson, R.M. (1987) Transmission dynamics of HIV
+infection. <em>Nature</em>, 326, 137-142.</p>
+<p>Morris, M. &amp; Kretzschmar, M. (1997) Concurrent partnerships and
+the spread of HIV. <em>AIDS</em>, 11, 641-648.</p>
+<p>Potterat, J.J., Zimmerman-Rogers, H., Muth, S.Q., Rothenberg, R.B.,
+Green, D.L., Taylor, J.E., Bonney, M.S. &amp; White, H.A. (2000)
+Evidence undermining the adequacy of the HIV reproduction number
+formula. <em>Sexually Transmitted Diseases</em>, 27, 644-645.</p>
+<p>Wade, M.J. &amp; Arnold, S.J. (1980) The intensity of sexual
+selection in relation to male sexual behaviour, female choice, and sperm
+precedence. <em>Animal Behaviour</em>, 28, 446-461.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
