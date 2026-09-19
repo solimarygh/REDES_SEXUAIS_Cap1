@@ -102,6 +102,11 @@ co <- local({
   partes <- list(sem, com); partes <- partes[!vapply(partes, is.null, logical(1))]
   if (!length(partes)) NULL else distinct(bind_rows(partes))
 })
+# Estudo 5. Grava num arquivo unico, sem o esquema de sufixos dos outros, e o
+# backup serve de reserva para o documento se ler enquanto a rodada corre.
+epi <- carregar(file.path("Resultados_Artigo/Fase_Epidemia/Dados",
+                          c("resultados_Epidemia.rds", "backup_Epidemia.rds")))
+
 ok <- function(x) !is.null(x) && nrow(x) > 0
 
 # Quantos cenários existem, para o relatório citar o número medido e não um
@@ -147,8 +152,8 @@ escolhe influencia a estrutura da rede sexual e a evolução das característica
 sexualmente selecionadas, está concluído e ocupa a maior parte deste relatório.
 O segundo, o de avaliar como uma doença transmitida por contato que afeta a
 atratividade do sexo escolhido impacta essas redes e a seleção sobre as
-características, estava previsto para o segundo ano e é a frente em
-desenvolvimento no momento.
+características, estava previsto para o segundo ano e teve as suas simulações
+concluídas dentro deste período; a análise dos resultados prossegue.
 
 O período aqui relatado vai de agosto de 2025 a agosto de 2026. O relatório
 final do projeto está previsto para o final de janeiro de 2027, e incorporará os
@@ -176,7 +181,7 @@ diferem apenas em quais características são herdáveis:
 | Segunda fase, tempo evolutivo | Estudo 2, Fêmeas variando | concluído |
 | não previsto | Estudo 3, Machos variando | concluído |
 | não previsto | Estudo 4, Co-evolução | concluído |
-| Objetivo 2, doença na rede | Objetivo 2 | em desenvolvimento |
+| Objetivo 2, doença na rede | Objetivo 2, Estudo 5 | simulações concluídas, análise em curso |
 
 A razão de os quatro compartilharem o motor é metodológica: descrever o ciclo
 de vida uma vez só torna explícito que as diferenças entre os estudos vêm
@@ -742,14 +747,16 @@ passado por seleção sexual intensa.
 
 # Objetivo 2: doença na rede sexual
 
-Este objetivo, previsto para o segundo ano, está em desenvolvimento. A pergunta
-é se e como uma doença que se espalha por contato sexual e altera a
-atratividade do sexo escolhido impacta a formação das redes sexuais e a seleção
-sobre a característica escolhida.
+Este objetivo, previsto para o segundo ano, teve o seu motor desenvolvido e as
+suas simulações concluídas dentro do período relatado. A pergunta é se e como
+uma doença que se espalha por contato sexual e altera a atratividade do sexo
+escolhido impacta a formação das redes sexuais e a seleção sobre a
+característica escolhida.
 
-O motor deste objetivo está implementado e calibrado, e a produção dos
-resultados está em curso. O desenho completo e os resultados estão no
-*Material suplementar: o estudo epidemiológico*.
+O motor está implementado e calibrado, e a rodada completa do desenho está
+concluída. Os resultados principais aparecem adiante nesta seção; o desenho
+completo, as figuras e todas as combinações de parâmetros estão no *Material
+suplementar: o estudo epidemiológico*.
 
 ## O que o desenho acrescenta
 
@@ -812,8 +819,210 @@ estabelecida para medir os contrastes secundários e outra que exige o limiar
 para que a curva de preferência decida se há epidemia, os dois regimes são
 simulados.
 
-*Os resultados desta seção serão incorporados quando a rodada completa
-terminar. O anexo epidemiológico já traz o desenho e as figuras.*
+```{r epi-analise}
+# Os números desta seção saem dos dados, como nos demais estudos.
+e5 <- NULL
+if (ok(epi) && all(c("semana","h_I","tipo_selecao","beta") %in% names(epi))) {
+  fim5 <- filter(epi, semana == max(semana))
+  ref5 <- filter(fim5, h_I == 0)
+  b_lo <- min(epi$beta); b_hi <- max(epi$beta)
+  res5 <- ref5 %>%
+    group_by(tipo_selecao, beta) %>%
+    summarise(gr  = mean(grande_epidemia, na.rm = TRUE),
+              inc = mean(incid_acum, na.rm = TRUE),
+              cop = mean(copulas_acumuladas, na.rm = TRUE),
+              Is  = if ("I_s" %in% names(ref5)) mean(I_s, na.rm = TRUE) else NA_real_,
+              C   = if ("conectancia" %in% names(ref5)) mean(conectancia, na.rm = TRUE) else NA_real_,
+              g_i = if ("grau_acum_infectados" %in% names(ref5)) mean(grau_acum_infectados, na.rm = TRUE) else NA_real_,
+              g_s = if ("grau_acum_suscetiveis" %in% names(ref5)) mean(grau_acum_suscetiveis, na.rm = TRUE) else NA_real_,
+              .groups = "drop")
+  sel5 <- if ("i_traco" %in% names(fim5)) {
+    fim5 %>% filter(beta == b_hi) %>%
+      group_by(tipo_selecao, h_I) %>%
+      summarise(i = mean(i_traco, na.rm = TRUE), .groups = "drop")
+  } else NULL
+  e5 <- list(fim = fim5, res = res5, sel = sel5, b_lo = b_lo, b_hi = b_hi,
+             n_temp = nrow(distinct(epi[, c("tipo_selecao","sigma_p","h_I",
+                                            "modelo","beta","replica")])))
+}
+pc5 <- function(x) sprintf("%.1f%%", 100 * x)
+```
+
+```{r epi-sem-dados, results='asis'}
+if (is.null(e5)) cat(paste0(
+  "*Os resultados desta seção são calculados a partir de ",
+  "`Resultados_Artigo/Fase_Epidemia/Dados/resultados_Epidemia.rds`, que não foi ",
+  "encontrado. O anexo epidemiológico traz o desenho e as figuras.*\n\n"))
+```
+
+## Resultados
+
+```{r epi-res-intro, results='asis'}
+if (!is.null(e5)) {
+  f <- e5$fim
+  cat(sprintf(paste0("A rodada completa está concluída: %s temporadas ",
+    "simuladas. Ao fim da temporada cada fêmea acumulou %.1f parceiros ",
+    "distintos e %.1f cópulas, ou seja %.2f cópulas por parceria, contra a ",
+    "razão de cerca de 1,4 da versão sem parcerias explícitas. O mecanismo que ",
+    "faltava está, portanto, funcionando.\n\n"),
+    format(e5$n_temp, big.mark = "."),
+    mean(f$parceiros_distintos, na.rm = TRUE),
+    mean(f$copulas_acumuladas, na.rm = TRUE),
+    mean(f$copulas_por_parceria, na.rm = TRUE)))
+}
+```
+
+### A forma da curva de preferência decide se a epidemia acontece
+
+```{r epi-tab-beta}
+if (!is.null(e5)) {
+  e5$res %>%
+    mutate(cel = sprintf("%.0f%% (%.1f%%)", 100 * gr, 100 * inc),
+           rot = paste0("β = ", format(beta))) %>%
+    select(tipo_selecao, rot, cel) %>%
+    tidyr::pivot_wider(names_from = rot, values_from = cel) %>%
+    mutate(Curva = labels_4[tipo_selecao]) %>%
+    select(Curva, everything(), -tipo_selecao) %>%
+    arrange(match(Curva, labels_4[ORDEM_CURVAS])) %>%
+    kable(caption = "Fração das temporadas que produzem uma grande epidemia, pelo critério de 15% do plano de trabalho, com a incidência acumulada média entre parênteses. Braço de referência, em que a infecção não altera a atratividade.")
+}
+```
+
+```{r epi-res-principal, results='asis'}
+if (!is.null(e5)) {
+  lo <- filter(e5$res, beta == e5$b_lo)
+  hi <- filter(e5$res, beta == e5$b_hi)
+  cat(sprintf(paste0("No nível alto de transmissão todas as curvas produzem ",
+    "uma grande epidemia em praticamente todas as temporadas, e o critério do ",
+    "plano não distingue nada. É no nível baixo que o resultado aparece: a ",
+    "fração de temporadas com grande epidemia vai de %s sob a curva %s a %s ",
+    "sob a %s.\n\n"),
+    pc5(min(lo$gr)), tolower(labels_4[lo$tipo_selecao[which.min(lo$gr)]]),
+    pc5(max(lo$gr)), tolower(labels_4[lo$tipo_selecao[which.max(lo$gr)]])))
+
+  cat(sprintf(paste0("O ponto que dá sentido a essa diferença é que o volume ",
+    "de sexo é praticamente o mesmo nas quatro curvas: as cópulas por fêmea ",
+    "variam por um fator de %.2f, enquanto a oportunidade de seleção sexual ",
+    "varia de %.2f a %.2f. Com a mesma quantidade de cópulas, portanto, é a ",
+    "forma da curva de preferência que decide se a epidemia acontece, e o que ",
+    "a explica é como os acasalamentos se repartem entre os machos, não ",
+    "quantos existem.\n\n"),
+    max(lo$cop)/min(lo$cop), min(lo$Is, na.rm = TRUE), max(lo$Is, na.rm = TRUE)))
+
+  if (nrow(lo) > 2 && !all(is.na(lo$C))) {
+    cat(sprintf(paste0("Entre as médias por curva, a incidência correlaciona ",
+      "%.2f com a oportunidade de seleção sexual e %.2f com a conectância. A ",
+      "quantidade que prediz a epidemia é a desigualdade entre os machos, e ",
+      "não a densidade da rede.\n\n"),
+      cor(lo$Is, lo$inc, use = "complete.obs"),
+      cor(lo$C,  lo$inc, use = "complete.obs")))
+  }
+
+  # A comparação com o controle nulo, que é a que melhor descreve o resultado.
+  ale <- lo$gr[lo$tipo_selecao == "uniform"]
+  if (length(ale) == 1 && is.finite(ale)) {
+    outras <- filter(lo, tipo_selecao != "uniform")
+    vao <- max(outras$gr) - ale
+    perto <- filter(outras, abs(gr - ale) < 0.2 * vao)
+    longe <- filter(outras, gr - ale > 0.5 * vao)
+    if (vao > 0.15 && nrow(perto) && nrow(longe))
+      cat(sprintf(paste0("Há uma leitura mais precisa, e é a comparação de ",
+        "cada curva com a aleatória, que é o controle nulo e fica em %s. A ",
+        "curva %s fica em %s, praticamente no mesmo lugar: quanto à propagação ",
+        "da infecção, a preferência por semelhança é indistinguível do ",
+        "acasalamento ao acaso. O que importa não é haver preferência, e sim a ",
+        "preferência ordenar os machos de forma consistente entre as fêmeas. ",
+        "Quando cada fêmea prefere algo diferente, os acasalamentos se ",
+        "espalham e a rede não concentra a transmissão.\n\n"),
+        pc5(ale), tolower(labels_4[perto$tipo_selecao[1]]), pc5(perto$gr[1])))
+  }
+}
+```
+
+### Quem se infecta é quem mais acasala
+
+```{r epi-res-quem, results='asis'}
+if (!is.null(e5) && !all(is.na(e5$res$g_i))) {
+  r <- filter(e5$res, beta == e5$b_hi) %>% mutate(raz = g_i/g_s) %>% arrange(desc(raz))
+  cat(sprintf(paste0("No braço de referência, em que a infecção não altera a ",
+    "atratividade em nada, os machos infectados ao fim da temporada já tinham ",
+    "acumulado mais parceiras do que os suscetíveis, por uma margem que depende ",
+    "fortemente da curva: %.1f contra %.1f sob a %s, e %.1f contra %.1f sob a ",
+    "%s. Como aqui a doença não afeta a escolha, essa diferença não pode ser ",
+    "efeito da doença sobre o sucesso: a causalidade corre ao contrário, e a ",
+    "sua magnitude mede quanto o processo é dominado por poucos machos muito ",
+    "ativos. É por isso que o efeito da infecção na atratividade precisa ser ",
+    "medido semana a semana, e não comparando os dois grupos ao fim da ",
+    "temporada.\n\n"),
+    r$g_i[1], r$g_s[1], tolower(labels_4[r$tipo_selecao[1]]),
+    r$g_i[nrow(r)], r$g_s[nrow(r)], tolower(labels_4[r$tipo_selecao[nrow(r)]])))
+}
+```
+
+### A doença altera a seleção onde a epidemia é menor
+
+```{r epi-tab-selecao}
+if (!is.null(e5) && !is.null(e5$sel)) {
+  amp <- e5$sel %>% group_by(tipo_selecao) %>%
+    summarise(Amplitude = diff(range(i)), .groups = "drop")
+  e5$sel %>%
+    tidyr::pivot_wider(names_from = h_I, values_from = i, names_prefix = "hI = ") %>%
+    left_join(amp, by = "tipo_selecao") %>%
+    mutate(across(where(is.numeric), ~ round(.x, 3)),
+           Curva = labels_4[tipo_selecao]) %>%
+    select(Curva, everything(), -tipo_selecao) %>%
+    arrange(desc(Amplitude)) %>%
+    kable(caption = "Diferencial de seleção padronizado sobre a característica do macho, i = S/sd(z), por curva de preferência e efeito da infecção na atratividade. Amplitude é a variação entre os dois extremos de hI.")
+}
+```
+
+```{r epi-res-selecao, results='asis'}
+if (!is.null(e5) && !is.null(e5$sel)) {
+  a <- e5$sel %>% group_by(tipo_selecao) %>%
+    summarise(amp = diff(range(i)), base = i[h_I == 0], .groups = "drop") %>%
+    arrange(desc(amp))
+  cat(sprintf(paste0("O efeito da doença sobre a seleção não é maior onde a ",
+    "epidemia é maior. A amplitude de i entre os extremos de hI é de %.2f sob ",
+    "a curva %s e de apenas %.2f sob a %s, que é a curva de maior epidemia e ",
+    "onde a seleção sexual já é forte (i = %.2f) sem doença nenhuma.\n\n"),
+    a$amp[1], tolower(labels_4[a$tipo_selecao[1]]),
+    a$amp[a$tipo_selecao == "sigmoid"][1], tolower(labels_4["sigmoid"]),
+    a$base[a$tipo_selecao == "sigmoid"][1]))
+
+  ale <- a$amp[a$tipo_selecao == "uniform"]
+  if (length(ale) == 1)
+    cat(sprintf(paste0("A curva aleatória serve de controle interno do código: ",
+      "como ela não olha a característica, hI não pode ter efeito nenhum sobre ",
+      "ela, e a amplitude medida é de %.2f. As duas curvas simétricas são o ",
+      "caso informativo. Nelas a preferência não tem componente direcional, de ",
+      "modo que i parte de perto de zero e qualquer afastamento que apareça só ",
+      "com hI diferente de zero é seleção produzida pela doença. A direção ",
+      "desse afastamento segue a geometria da curva, e é oposta entre as duas: ",
+      "sob a gaussiana o macho infectado se afasta do pico de preferência e ",
+      "perde atratividade, de modo que a doença penaliza quem tem sucesso; sob ",
+      "a disruptiva o mesmo afastamento aumenta a atratividade.\n\n"), ale))
+}
+```
+
+### O que este objetivo acrescenta ao projeto
+
+Os Estudos 1 a 4 mostraram que a regra de escolha de parceiro determina a
+estrutura da rede de acasalamentos.
+O Objetivo 2 mostra que essa estrutura tem consequências fora da seleção sexual,
+porque a rede de acasalamentos é também a rede por onde um patógeno anda, e que
+a doença volta a agir sobre a seleção quando altera os sinais que a escolha
+avalia.
+
+A ponte entre as duas coisas é uma quantidade só.
+A epidemiologia de redes sabe há décadas que não é a média do número de
+parceiros que governa o tamanho de uma epidemia, e sim a sua distribuição entre
+os indivíduos; a seleção sexual mede essa mesma distribuição e a chama de
+oportunidade de seleção sexual. As duas literaturas chegaram à mesma medida por
+motivos diferentes, e o modelo permite passar de uma à outra sem trocar de
+ferramenta.
+
+Os resultados completos, com as figuras e todas as combinações de parâmetros,
+estão no *Material suplementar: o estudo epidemiológico*.
 
 # Gestão e disponibilização dos códigos
 
@@ -863,9 +1072,12 @@ dois estudos adicionais que o desenvolvimento do motor tornou possíveis. O
 trabalho do período que resta, até o relatório final previsto para o final de
 janeiro de 2027, se organiza em três frentes.
 
-A primeira é concluir o Objetivo 2. A rodada completa do estudo epidemiológico
-está em produção, e a análise dos resultados é o passo imediatamente seguinte. É
-o que falta para que o projeto tenha respondido aos dois objetivos do plano.
+A primeira é aprofundar a análise do Objetivo 2. A rodada completa está
+concluída e os resultados principais já estão neste relatório, mas duas frentes
+de análise continuam abertas: o papel de $\sigma_p$, que interage com a forma da
+curva de preferência de maneira que ainda não descrevemos por completo, e o
+contraste entre os modelos SIS e SIR ao longo da temporada. Com isso o projeto
+terá respondido aos dois objetivos do plano.
 
 A segunda é a redação dos manuscritos. O conjunto de resultados comporta mais
 de um artigo, e a divisão entre eles é uma decisão a tomar com os coautores. Os
