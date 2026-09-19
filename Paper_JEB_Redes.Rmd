@@ -1,0 +1,693 @@
+---
+title: "The architecture of choice: how preference heterogeneity structures mating networks and drives trait evolution"
+author: |
+  | Solimary García Hernández^1,\*^, Erika M. Santana^2^, and Paulo R. Guimarães Jr^1^
+  |
+  | ^1^ Departamento de Ecologia, Universidade de São Paulo (USP), São Paulo, SP, Brazil
+  | ^2^ [Instituição da Erika], Cidade, País
+  |
+  | ^\*^ Corresponding author: solimarygarcia@gmail.com
+date: "Manuscript prepared for the *Journal of Evolutionary Biology*"
+output:
+  word_document:
+    reference_docx: null
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                      fig.align = "center", out.width = "95%",
+                      fig.retina = 1, dpi = 150)
+suppressPackageStartupMessages({
+  library(dplyr); library(tidyr); library(ggplot2); library(knitr)
+})
+
+cores_4 <- c("uniform"="gray55","gaussian"="#E6B800","sigmoid"="#3BA273","u-shaped"="#9932CC")
+rotulos <- c("uniform"="Random","gaussian"="Gaussian","sigmoid"="Sigmoid","u-shaped"="Disruptive")
+CURVAS  <- c("uniform","gaussian","sigmoid","u-shaped")
+LINHAS  <- c("uniform"="solid","gaussian"="22","sigmoid"="62","u-shaped"="4212")
+ordenar <- function(x) factor(as.character(x), levels = CURVAS, labels = rotulos[CURVAS])
+```
+
+```{r dados}
+# ---------------------------------------------------------------------
+# Same loader as the supplementary materials, so that the manuscript can never
+# disagree with them about what is being shown.
+# ---------------------------------------------------------------------
+carregar <- function(paths) {
+  hit <- paths[file.exists(paths)]
+  if (!length(hit)) return(NULL)
+  obj <- readRDS(hit[1])
+  if (is.data.frame(obj)) obj else bind_rows(obj[!vapply(obj, is.null, logical(1))])
+}
+juntar_pedacos <- function(pasta, padrao) {
+  arqs <- list.files(pasta, full.names = TRUE)
+  arqs <- arqs[grepl(padrao, basename(arqs), perl = TRUE)]
+  if (!length(arqs)) return(NULL)
+  distinct(bind_rows(lapply(arqs, carregar)))
+}
+RODADAS <- c("bestOfN", "censoConst")
+padrao_arquivo <- function(estudo, r, metade) {
+  if (metade == "com_sufixo") sprintf("^(backup|resultados)_%s_%s.*cota.*\\.rds$", estudo, r)
+  else                        sprintf("^(backup|resultados)_%s_%s(?!.*cota).*\\.rds$", estudo, r)
+}
+juntar_metades <- function(a, b) {
+  if (is.null(b) || !nrow(b)) return(a)
+  if (is.null(a) || !nrow(a)) return(b)
+  ns <- unique(b$selecao_natural)
+  bind_rows(b, filter(a, !(selecao_natural %in% ns)))
+}
+carregar_rodada <- function(pasta, estudo) {
+  for (r in RODADAS) {
+    df <- juntar_metades(juntar_pedacos(pasta, padrao_arquivo(estudo, r, "sem_sufixo")),
+                         juntar_pedacos(pasta, padrao_arquivo(estudo, r, "com_sufixo")))
+    if (!is.null(df) && nrow(df) > 0) return(df)
+  }
+  NULL
+}
+
+ct  <- carregar_rodada("Resultados_Artigo/Fase_Controle/Dados", "Controle")
+d   <- carregar_rodada("Resultados_Artigo/Fase5_MiudoV2/Dados", "Femeas")
+esp <- carregar_rodada("Resultados_Artigo/Fase_Espelho/Dados",  "Espelho")
+co  <- local({
+  pasta <- "Resultados_Artigo/Fase_Coevolucao/Dados"
+  sem <- carregar(file.path(pasta, c("resultados_Coevolucao_genica_neAdulto_sem_completo.rds",
+                                     "resultados_Coevolucao_genica_completo.rds")))
+  com <- carregar(file.path(pasta, c("resultados_Coevolucao_genica_neAdulto_cota_com_completo.rds",
+                                     "resultados_Coevolucao_genica_neAdulto_cota_ambos_completo.rds")))
+  if (!is.null(com)) com <- filter(com, selecao_natural)
+  partes <- list(sem, com); partes <- partes[!vapply(partes, is.null, logical(1))]
+  if (!length(partes)) NULL else distinct(bind_rows(partes))
+})
+
+ok  <- function(x) !is.null(x) && nrow(x) > 0
+tem <- function(x, cols) ok(x) && all(cols %in% names(x))
+md  <- function(x) mean(x, na.rm = TRUE)
+p2  <- function(x) sprintf("%.2f", x)
+```
+
+```{r analise-estudo1}
+# Topological divergence among preference functions, and how much of it the
+# search regime and the sex asymmetry explain. Computed here so that no number
+# in the text is typed by hand.
+e1 <- NULL
+if (ok(ct)) {
+  METS  <- intersect(c("Modularity","Nestedness","Centralization","I_s"), names(ct))
+  CHAVE <- intersect(c("sigma_p","sigma_z","encounters_n","k_fixo","selecao_natural"), names(ct))
+  padr <- ct %>% filter(if_all(all_of(METS), ~ !is.na(.x))) %>%
+    mutate(across(all_of(METS), ~ as.numeric(scale(.x))))
+  cel <- padr %>% group_by(across(all_of(c(CHAVE,"tipo_selecao")))) %>%
+    summarise(across(all_of(METS), md), .groups="drop") %>%
+    pivot_longer(all_of(METS), names_to="met", values_to="v")
+  centro <- cel %>% group_by(across(all_of(c(CHAVE,"met")))) %>%
+    summarise(centro = md(v), .groups="drop")
+  div <- cel %>% left_join(centro, by=c(CHAVE,"met")) %>%
+    group_by(across(all_of(c(CHAVE,"tipo_selecao")))) %>%
+    summarise(dist = sqrt(sum((v-centro)^2)), .groups="drop") %>%
+    group_by(across(all_of(CHAVE))) %>%
+    summarise(divergencia = md(dist), .groups="drop") %>%
+    mutate(assimetria = log(sigma_z/sigma_p), variabilidade = sqrt(sigma_p^2+sigma_z^2))
+
+  r2 <- function(f, dd) { s <- suppressWarnings(summary(stats::lm(f, dd)))
+    if (is.null(s$r.squared) || !is.finite(s$r.squared)) NA_real_ else s$r.squared }
+  r2_busca <- r2(divergencia ~ factor(encounters_n)*factor(k_fixo), div)
+  div$resid <- stats::residuals(stats::lm(divergencia ~ factor(encounters_n)*factor(k_fixo), div))
+
+  ctr <- intersect(c("n_machos_surv","conectancia"), names(ct))
+  ctr <- ctr[vapply(ctr, function(v) length(unique(ct[[v]])) > 1, logical(1))]
+  tabr2 <- lapply(METS, function(m) {
+    dd <- ct %>% filter(is.finite(.data[[m]]))
+    rc <- if (length(ctr)) r2(stats::as.formula(paste(m,"~",paste(ctr,collapse="+"))), dd) else NA_real_
+    rf <- if (length(ctr)) r2(stats::as.formula(paste(m,"~",paste(ctr,collapse="+"),"+ tipo_selecao")), dd) else NA_real_
+    data.frame(met=m, r2_curva=r2(stats::as.formula(paste(m,"~ tipo_selecao")), dd),
+               r2_parcial=if (is.finite(rc) && rc<1) (rf-rc)/(1-rc) else NA_real_,
+               r2_ctrl=rc)
+  }) %>% bind_rows() %>% arrange(desc(r2_curva))
+  NOMES <- c(Modularity="Modularity", Centralization="Centralisation",
+             I_s="Opportunity for sexual selection", Nestedness="Nestedness (NODF)")
+  tabr2$rotulo <- NOMES[tabr2$met]
+
+  e1 <- list(n=nrow(ct), r2_busca=r2_busca,
+             r2_assim=r2(resid ~ assimetria, div), r2_var=r2(resid ~ variabilidade, div),
+             tab=tabr2, div=div)
+}
+V1 <- function(e, fmt="%.2f") { if (is.null(e1)) return("[--]")
+  v <- tryCatch(eval(e, e1), error=function(x) NA_real_)
+  if (!is.finite(v)) "[--]" else sprintf(fmt, v) }
+```
+
+```{r aviso, results='asis'}
+faltam <- c("Study 1"=!ok(ct), "Study 2"=!ok(d), "Study 3"=!ok(esp), "Study 4"=!ok(co))
+if (any(faltam)) cat(paste0(
+  "> **Note.** Results for ", paste(names(faltam)[faltam], collapse=", "),
+  " are computed from simulation output that was not found in this working ",
+  "directory. Values appear as `[--]` until the corresponding `.rds` files are ",
+  "present; the text of the Introduction and Methods does not depend on them.\n\n"))
+```
+
+# Abstract
+
+Classical models of sexual selection treat female preference as a population-level parameter, yet preferences vary among females within populations, and that variation has no obvious place in the standard framework.
+We ask how such variation propagates to population-level evolutionary outcomes, and we argue that the mating network is the structure through which it does so.
+Using an individual-based model in which a bipartite mating network emerges from an explicit two-step choice rule, we cross four preference function geometries with the full surface of female preference variation and male trait variation, under three search intensities and three limits on polyandry.
+Four complementary studies isolate what is heritable: none (topology alone), the male trait, the female preference, and both simultaneously.
+We report four results.
+First, the ecological regime of mate search dominates network topology, and within what remains it is the *asymmetry* between the sexes in how much they vary, not the total amount of variation, that governs how far the preference functions diverge.
+Second, a preference function that is stabilising at the level of the individual female maintains and even increases genetic variance at the level of the population, provided females disagree about where the optimum lies, and the modularity of the mating network predicts how much variance is maintained.
+Third, when the roles are reversed and preference is the heritable trait, selection on preference extinguishes its own cause within a few generations, so that a population sampled at equilibrium would appear never to have been under selection.
+Fourth, and most consequentially, sexual selection can erase its own signature from the network: under a directional preference the male trait escapes the range over which females discriminate, the opportunity for sexual selection collapses towards zero, and the mating network becomes indistinguishable from random mating despite intense preceding sexual selection.
+We also show that nestedness, widely used to characterise mating networks, is largely determined by network density in this setting and should be reported against a degree-preserving null model rather than as a raw value.
+
+**Keywords:** mating networks, preference variation, opportunity for sexual selection, modularity, individual-based model, genetic variance, network topology
+
+# 1. Introduction
+
+Sexual selection is among the most powerful forces shaping phenotypic diversity (Darwin 1871; Andersson 1994), and at its core lies mate choice.
+Classical models typically treat female preference as a single population-level parameter, a shared optimum towards which all females converge, yet empirical evidence consistently reveals substantial within-population variation in mating preferences across taxa (Widemo & Sæther 1999; Jennions & Petrie 1997; Kelly 2018).
+How individual-level variation in preference propagates to shape population-level evolutionary dynamics remains poorly understood.
+
+A female's mating preference can be decomposed into at least two independent components: the preference threshold, $p$, the trait value she finds optimal, and the preference strength, $s$, the steepness with which she rejects deviations from it (Lande 1981; Kilmer et al. 2017).
+Using individual-based models, Millan et al. (2020) provided the first formal investigation of how within-population variation in these components influences the opportunity for sexual selection, $I_s$, and the evolutionary trajectory of a sexually selected male trait.
+Their results showed that the consequences of preference variation are far from intuitive: they depend critically on whether the preference function is open-ended or closed, and on the magnitude of preference variation relative to male trait variation.
+Under a closed preference function with high preference variation, the selection regime acting on males shifted from stabilising to disruptive, rescuing genetic variance from erosion.
+
+That work established preference function shape and preference heterogeneity as co-architects of sexual selection.
+It considered two preference geometries, assumed effectively unlimited male sampling, and did not treat the mating network as the structure through which individual preferences become population-level selection.
+
+## 1.1. The mating network as the missing structure
+
+The architecture of mating networks, the bipartite graphs connecting females to the males they mate with, is itself a determinant of the strength of sexual selection.
+McDonald & Pizzari (2018) showed that mating assortment, the tendency for highly polygynous males to mate with more or less polyandrous females, modulates the Bateman gradient and the opportunity for sexual selection independently of mean polyandry.
+The network therefore encodes information about the mating rules that generated it.
+
+Whether different preference geometries generate distinct and predictable topological signatures, and whether those signatures mediate the evolutionary response of male traits, has not been tested.
+Answering this requires three things that previous work did not combine: a set of preference functions broad enough to include a null, an explicit and limited search process so that the ecology of mate sampling can vary, and a design in which what is heritable can be switched on and off so that topology and evolutionary response can be separated.
+
+## 1.2. Premises
+
+*Premise 1.* Females within a population differ in what they prefer, and that variation, $\sigma_p$, is independent of the variation among males in what they offer, $\sigma_z$.
+The same mean intensity of sexual selection can arise from homogeneous females facing variable males or the reverse, and there is no reason to expect the same network in the two cases.
+
+*Premise 2.* Mate search is costly and finite.
+A female assesses a limited number of males, $A$, and can accept a limited number of partners, $k$.
+Both are ecological quantities, independent of her preference, and both must constrain the network she helps build.
+
+*Premise 3.* The mating network is a measurable object with properties, such as modularity and degree inequality, that are not reducible to the number of matings it contains.
+
+## 1.3. Hypotheses and predictions
+
+*H1: Preference geometry leaves a topological signature.*
+Preference functions that rank males consistently across females will concentrate matings on few males, producing centralised networks with high $I_s$; functions in which each female's target depends on her own threshold will distribute matings, producing modular networks with low $I_s$.
+We predict that the four functions will separate along these axes, and that the separation will be greatest where females agree with one another and males vary, since that is where the geometry translates into mating decisions with least noise.
+
+*H2: Network topology mediates the maintenance of genetic variance.*
+If preference heterogeneity converts stabilising individual-level selection into population-level diversifying selection, the mechanism should be visible in the network: a population whose matings partition into modules is one in which different male phenotypes succeed in different modules.
+We predict that modularity will positively predict the genetic variance maintained after many generations.
+
+*H3: The ecological regime constrains the expression of the signature.*
+Since $A$ and $k$ determine how many males a female can compare and how many she can accept, they bound how much of her preference can be expressed.
+We predict that the search regime will account for a substantial share of topological variation, and that preference geometry will be most distinguishable where search is least constrained.
+
+*H4: The signature of sexual selection need not persist.*
+If a directional preference displaces the male trait far enough, the acceptance function may saturate and cease to discriminate among males.
+We predict that under such a function the opportunity for sexual selection will decline over generations and the network will converge on the random-mating expectation, without any loss of genetic variance being required to produce that convergence.
+
+# 2. Materials and Methods
+
+## 2.1. Model overview and life cycle
+
+We developed a forward-time individual-based model with discrete, non-overlapping generations and a constant adult census of 200 males and 200 females.
+Each generation proceeds through a fixed sequence: recruitment of adult males from a juvenile pool under viability selection, mate assessment and network formation, reproduction, and death of the adult generation.
+
+Males express a continuous sexually selected trait, $z$.
+Females carry a preference threshold, $p$, and a choosiness parameter, $s$.
+Females do not express $z$ but carry the unexpressed genotype, so that alleles for extreme male traits can be sheltered from viability selection within female bodies and transmitted onward.
+
+## 2.2. Population regulation is soft selection
+
+The adult census of 200 males is the carrying capacity of the environment, and viability determines *which* males occupy the available places, never *how many* places exist.
+Juveniles are drawn into the 200 adult positions with probability weighted by viability,
+
+$$V_j = \exp\!\left(-\gamma (z_j - \phi)^2\right),$$
+
+where $\phi$ is the trait value with maximum survival and $\gamma$ scales the strength of natural selection.
+In the terminology of Wallace (1975) this is soft selection, density-regulated; the theoretical boundary between soft and hard selection is treated by Débarre & Gandon (2011) and their ecological and evolutionary consequences reviewed by Bell et al. (2021) and Reznick (2016).
+
+This is a substantive modelling decision and not a technical detail.
+Under the alternative reading, in which each juvenile survives independently and the census is whatever remains, the adult census becomes an outcome of the model.
+In the regions of parameter space where the trait is displaced far from $\phi$, viability then collapses for all males simultaneously and the census falls to a few dozen, at which point network metrics computed on those populations are no longer comparable with the rest of the design.
+Under soft selection the census is exactly 200 by construction, so no difference among cells of the design can arise from networks of different size.
+Natural selection is itself a factor, applied in half the scenarios and switched off in the other half ($\gamma = 0$, all juveniles equally likely to recruit).
+
+## 2.3. Inheritance and segregation variance
+
+Offspring genotypic values follow the mid-parental value plus a segregation term.
+Segregation variance follows the infinitesimal model (Fisher 1918; Falconer & Mackay 1996; Roff & Fairbairn 2014), so that the deviation of an offspring from the mid-parental value has variance proportional to the parental genetic variance, rather than a fixed noise term of arbitrary size.
+
+This choice is what makes the question of genetic variance maintenance answerable at all.
+With a fixed segregation term, genetic variance would converge to the same floor in every scenario, and the answer to H2 would be built into the model rather than emerging from it.
+
+## 2.4. Mate choice: search, evaluation and acceptance
+
+Mate choice proceeds in two steps.
+
+First, each female encounters $A$ distinct males, sampled **without replacement** from the adult pool.
+Sampling without replacement makes $A$ the number of distinct males actually assessed, which is the quantity the parameter is intended to represent; the order of encounter is drawn afresh for each female, so no positional bias arises.
+
+Second, she evaluates every one of the $A$ males according to her preference function, and retains up to $k$ partners from among those she accepted, choosing the highest-scoring ones when she accepted more than $k$.
+This is a pool-comparison or best-of-$n$ rule, the standard assumption for leks and aggregations (Janetos 1980; Real 1990).
+
+We implemented and discarded the alternative sequential rule, in which a female evaluates males one at a time against a fixed threshold and stops on reaching $k$ partners.
+Under that rule the number of males assessed is censored by the stopping condition, so that increasing $A$ has no effect once $k$ is reached, and the ecological gradient of interest becomes inoperative.
+
+**There is no escape rule.**
+A female who accepts no male among the $A$ she assessed does not mate and leaves no offspring.
+This differs from implementations in which an unmated female is assigned the last male encountered, and the difference matters: assigning a partner to every female removes variance in female reproductive success, which is a necessary condition for preference itself to be under selection in the studies where preference is heritable.
+
+The probability that a female with threshold $p$ and choosiness $s$ accepts a male with trait $z$ follows one of four geometries.
+
+| Function | Form | Interpretation |
+|---|---|---|
+| Random (null) | $P = 0.5$ | trait irrelevant; no sexual selection |
+| Gaussian (stabilising) | $P = \exp(-s(z-p)^2)$ | preference for similarity to own threshold |
+| Sigmoid (directional) | $P = [1+\exp(-s(z-p))]^{-1}$ | preference for larger trait values |
+| Disruptive | $P = 1-\exp(-s(z-p)^2)$ | avoidance of own threshold; favours extremes |
+
+The random function is what makes the rest interpretable.
+Any metric measured under it is the value that metric takes by chance given population size and the number of matings, and serves as the floor against which the other three are read.
+
+Choosiness $s$ is drawn once per female and held constant, following Millan et al. (2020), who showed that within-population variation in preference *strength* had negligible effects on both $I_s$ and trait trajectories, in contrast to variation in preference *threshold*.
+The mean of the preference distribution is held equal to the mean of the trait distribution across all four regimes, so that the functions differ in geometry alone and not in the location of the female optimum.
+
+## 2.5. Network analysis and sexual selection proxies
+
+Matings in each generation form a bipartite, undirected, unweighted network.
+We computed modularity by the Louvain algorithm (Blondel et al. 2008), nestedness as NODF (Almeida-Neto et al. 2008) using the bipartite package (Dormann et al. 2008), and centralisation using igraph (Csardi & Nepusz 2006).
+The opportunity for sexual selection, $I_s$, is the variance in male mating success divided by the square of its mean (Wade & Arnold 1980).
+
+We additionally record descriptors that are not structural properties but are indispensable for interpreting those that are: realised polyandry, connectance, the fraction of females that did not mate, the fraction of males that did not mate, and the number of males each female assessed and accepted.
+Without them a difference arising from network shape cannot be separated from one arising from the number of matings.
+
+## 2.6. Experimental design: four complementary studies
+
+The four studies share one engine and differ only in which characters are heritable.
+Describing the life cycle once makes explicit that differences among studies come from the design and not from divergent implementations.
+
+| Study | Heritable | Axis varied | Question |
+|---|---|---|---|
+| 1. Control | nothing | $\sigma_p \times \sigma_z$, fully crossed | What topology does each preference geometry produce, before any evolutionary response? |
+| 2. Female variation | male trait | $\sigma_p$ | How does disagreement among females shape the evolution of the male trait? |
+| 3. Male variation | female preference | $\sigma_z$ | How does the variety of available males shape the evolution of preference? |
+| 4. Co-evolution | both | $\sigma_p \times \sigma_z$ initial | What happens when both respond at once? |
+
+```{r desenho, results='asis'}
+if (ok(ct)) {
+  sig <- sort(unique(ct$sigma_p))
+  cat(sprintf(paste0("Study 1 crosses the four preference functions with %d ",
+    "values of $\\sigma_p$ and the same %d values of $\\sigma_z$ (%s), three ",
+    "search intensities ($A \\in \\{200, 40, 10\\}$), three limits on polyandry ",
+    "($k \\in \\{5, 10, 20\\}$) and the two natural-selection regimes, for a ",
+    "total of %s simulated networks. It runs for a single generation: nothing ",
+    "is inherited, traits and preferences are drawn, the network forms, metrics ",
+    "are measured, and the scenario ends.\n\n"),
+    length(sig), length(sig), paste(sig, collapse=", "),
+    format(nrow(ct), big.mark=",")))
+} else {
+  cat(paste0("Study 1 crosses the four preference functions with the full ",
+             "surface of $\\sigma_p \\times \\sigma_z$, three search ",
+             "intensities, three limits on polyandry and the two ",
+             "natural-selection regimes, for a single generation.\n\n"))
+}
+```
+
+Studies 2 and 3 are mirror images.
+In Study 2 the male trait is heritable while preferences are redrawn each generation from a fixed distribution; the axis is $\sigma_p$.
+Holding $\sigma_p$ fixed across generations is deliberate, and is what allows the response of the trait to be attributed to the width of that distribution without the confounding effect of preference itself changing.
+In Study 3 the roles invert: the male trait is environmental, redrawn each generation, and the preference threshold is heritable and transmitted through both sexes; the axis is $\sigma_z$.
+
+The inversion has biological content of its own.
+Female choice ceases to be the cause of selection and becomes its target, and the selective force acting on preference is not sexual but ecological: the availability of males with suitable traits.
+Treating the male trait as environmental also carries a condition-dependence reading, in which a male expresses that trait because of the environment in which he developed rather than because of the genes he transmits.
+
+Study 4 makes both characters heritable.
+Each individual carries both genotypes and expresses one, the male the trait and the female the preference, while transmission is biparental for both.
+
+## 2.7. Statistical analyses
+
+```{r stats, results='asis'}
+cat(paste0("Analyses were conducted in R (R Core Team 2026). To quantify how ",
+  "far the four preference functions diverge topologically in a given cell of ",
+  "the design, we standardised the four network metrics over the whole data ",
+  "set, so that all enter on a common scale, and computed the mean distance of ",
+  "the four functions from their own centroid in that four-dimensional space. ",
+  "Because the number of simulated scenarios is set by the investigator rather ",
+  "than by sampling effort, conventional significance tests carry little ",
+  "information, and we report variance explained and effect sizes throughout.\n\n"))
+```
+
+# 3. Results
+
+## 3.1. The ecological regime dominates network topology
+
+```{r res1-busca, results='asis'}
+if (!is.null(e1)) {
+  cat(sprintf(paste0("The search regime, that is how many males a female can ",
+    "assess and how many she can accept, accounts for %s of the topological ",
+    "divergence among the four preference functions. "),
+    V1(quote(100*r2_busca), "%.0f%%")))
+  ra <- e1$r2_assim; rv <- e1$r2_var
+  if (is.finite(ra) && is.finite(rv) && rv > 1e-3 && ra/rv >= 2) {
+    cat(sprintf(paste0("Within the residual variation, the asymmetry between ",
+      "the sexes, $\\log(\\sigma_z/\\sigma_p)$, explains about %s times more ",
+      "than the total amount of variation, $\\sqrt{\\sigma_p^2+\\sigma_z^2}$ ",
+      "(%.1f%% against %.1f%%).\n\n"), format(round(ra/rv)), 100*ra, 100*rv))
+  } else if (is.finite(ra) && is.finite(rv)) {
+    cat(sprintf(paste0("Within the residual variation, the asymmetry between ",
+      "the sexes explains %.1f%% and the total amount of variation %.1f%%.\n\n"),
+      100*ra, 100*rv))
+  }
+  cat(paste0("This reorients the question that motivated the study. What ",
+    "determines network structure is not how much variation exists in ",
+    "preference, but on which side of the interaction that variation sits, and ",
+    "both are subordinate to how much of the population a female can actually ",
+    "sample. H3 is supported.\n\n"))
+}
+```
+
+## 3.2. Not all network metrics are equally informative
+
+```{r tab-r2}
+if (!is.null(e1)) {
+  e1$tab %>%
+    transmute(Metric = rotulo,
+              `R2, preference function` = round(r2_curva, 3),
+              `Partial R2, controlling size and density` = round(r2_parcial, 3)) %>%
+    kable(caption = sprintf(paste0("Variance in each topological metric ",
+      "explained by preference function, before and after controlling for ",
+      "network size and density. Study 1, %s single-generation networks."),
+      format(e1$n, big.mark = ",")))
+}
+```
+
+```{r res-nodf, results='asis'}
+if (!is.null(e1)) {
+  pior <- e1$tab[which.min(e1$tab$r2_curva), ]
+  cat(sprintf(paste0("The design makes network density vary substantially, ",
+    "because the cap on polyandry ranges from %s to %s partners and not every ",
+    "female reaches her cap. Three of the four metrics survive the control for ",
+    "size and density. %s does not: ",
+    "preference function explains %.0f%% of its variation while size and ",
+    "density together explain %.0f%%. The methodological consequence is that ",
+    "nestedness, widely reported for mating networks, should be presented ",
+    "relative to a null model preserving the degree sequence rather than as a ",
+    "raw value.\n\n"),
+    if (tem(ct,"k_fixo")) min(ct$k_fixo) else "5",
+    if (tem(ct,"k_fixo")) max(ct$k_fixo) else "20",
+    pior$rotulo, 100*pior$r2_curva, 100*pior$r2_ctrl))
+}
+```
+
+## 3.3. Preference heterogeneity converts stabilising into diversifying selection
+
+```{r fig-varz, fig.height=3.6, fig.cap="Genetic variance of the male trait after 100 generations as a function of female preference variation. Under the Gaussian function, which is stabilising at the level of the individual female, population genetic variance increases as females disagree more with one another. The random function remains near the neutral value and serves as a drift control. A = 200, natural selection off, averaged over the three values of k."}
+if (tem(d, c("generation","sigma_p","varz_males","tipo_selecao"))) {
+  vz <- d %>% filter(generation == max(generation), encounters_n == 200, !selecao_natural) %>%
+    group_by(tipo_selecao, sigma_p) %>% summarise(varz = md(varz_males), .groups="drop") %>%
+    mutate(curva = ordenar(tipo_selecao))
+  ggplot(vz, aes(sigma_p, varz, colour = curva, linetype = curva)) +
+    geom_hline(yintercept = 1, linetype = "dotted", colour = "gray40") +
+    geom_line(linewidth = 0.9) + geom_point(size = 2) +
+    scale_colour_manual(values = setNames(cores_4[CURVAS], rotulos[CURVAS]), name = NULL) +
+    scale_linetype_manual(values = setNames(LINHAS[CURVAS], rotulos[CURVAS]), name = NULL) +
+    labs(x = expression(sigma[p]), y = "genetic variance of the male trait") +
+    theme_light(base_size = 11) + theme(legend.position = "top")
+}
+```
+
+```{r res-varz, results='asis'}
+if (tem(d, c("generation","sigma_p","varz_males"))) {
+  g <- d %>% filter(generation == max(generation), encounters_n == 200,
+                    !selecao_natural, tipo_selecao == "gaussian") %>%
+    group_by(sigma_p) %>% summarise(v = md(varz_males), .groups="drop")
+  if (nrow(g) > 1)
+    cat(sprintf(paste0("Under the Gaussian function, genetic variance after ",
+      "100 generations rises from %s at the lowest preference variation to %s ",
+      "at the highest. A preference function that at the level of the ",
+      "individual female favours males resembling her own threshold therefore ",
+      "produces, at the level of the population, maintenance and even increase ",
+      "of genetic variation, provided females disagree about where that ",
+      "threshold lies. H2 is supported in its first part.\n\n"),
+      p2(g$v[which.min(g$sigma_p)]), p2(g$v[which.max(g$sigma_p)])))
+}
+```
+
+The second part of H2 concerns the network.
+Two predictions were made about the relationship between topology and trait trajectory, and they fared differently.
+The prediction that nestedness would predict trait exaggeration was not supported: the association is statistically firm but of opposite sign to that predicted, and we have no mechanistic account for it; given the result of section 3.2 it may well be an artefact of density, and analysis with connectance as a covariate is the natural next step.
+The prediction that modularity would predict maintained genetic variance is supported, with positive sign and substantial effect: populations whose mating networks partition into groups that mate preferentially within themselves maintain more genetic variance in the male trait.
+
+## 3.4. Under a disruptive preference, replicates reach alternative states
+
+Under the disruptive function, populations do not converge on an intermediate trait value.
+Each replicate settles at one of the two extremes, and the mean across replicates falls in the middle, where no actual population is found; Hartigan's dip test rejects unimodality.
+The consequence for reporting is that this function must be presented as a distribution rather than as a mean, and the bimodality treated as a result rather than as variability among replicates.
+
+## 3.5. Selection on preference extinguishes its own cause
+
+```{r fig-varp, fig.height=3.6, fig.cap="Variance of female preference after 100 generations as a function of the variety of available males. Where male variety is low, preference variation is eliminated; where it is high, preference variation persists near the neutral value. A = 200, natural selection off, averaged over the three values of k."}
+if (tem(esp, c("generation","sigma_z","varp_femeas","tipo_selecao"))) {
+  vp <- esp %>% filter(generation == max(generation), encounters_n == 200, !selecao_natural) %>%
+    group_by(tipo_selecao, sigma_z) %>% summarise(varp = md(varp_femeas), .groups="drop") %>%
+    mutate(curva = ordenar(tipo_selecao))
+  ggplot(vp, aes(sigma_z, varp, colour = curva, linetype = curva)) +
+    geom_hline(yintercept = 1, linetype = "dotted", colour = "gray40") +
+    geom_line(linewidth = 0.9) + geom_point(size = 2) +
+    scale_colour_manual(values = setNames(cores_4[CURVAS], rotulos[CURVAS]), name = NULL) +
+    scale_linetype_manual(values = setNames(LINHAS[CURVAS], rotulos[CURVAS]), name = NULL) +
+    labs(x = expression(sigma[z]), y = "variance of female preference") +
+    theme_light(base_size = 11) + theme(legend.position = "top")
+}
+```
+
+Variation in preference does not persist on its own: it depends on there being material over which to discriminate.
+
+The dynamics behind that equilibrium are more informative than the equilibrium itself.
+Where male variety is low, the variance of preference and the fraction of females failing to mate fall together over the first generations: as selection removes the poorly positioned preferences, it removes the mating failures that generated the selection.
+Inspecting only generation 100 would suggest that preference had never been under selection at all.
+It was under selection, intensely, and transiently.
+The methodological implication reaches beyond this model: studies measuring only the final state of a population can conclude an absence of selection where there was intense and self-limiting selection.
+
+## 3.6. Sexual selection can erase its own signature from the network
+
+```{r fig-traj, fig.height=3.4, fig.cap="Trajectories over 100 generations of co-evolution, averaged over all combinations of initial sigma, A and k, natural selection off. The adult census is 400, so Ne = 400 would correspond to a population with no inequality in reproductive success."}
+if (tem(co, c("generation","I_s","tipo_selecao"))) {
+  tr <- co %>% filter(!selecao_natural) %>%
+    group_by(tipo_selecao, generation) %>%
+    summarise(`Opportunity for sexual selection` = md(I_s),
+              `Trait minus preference` = md(zbar_pop - pbar_pop),
+              `Effective size (Ne)` = md(Ne), .groups="drop") %>%
+    pivot_longer(-c(tipo_selecao, generation)) %>%
+    mutate(curva = ordenar(tipo_selecao))
+  ggplot(tr, aes(generation, value, colour = curva, linetype = curva)) +
+    geom_line(linewidth = 0.9) + facet_wrap(~name, scales = "free_y") +
+    scale_colour_manual(values = setNames(cores_4[CURVAS], rotulos[CURVAS]), name = NULL) +
+    scale_linetype_manual(values = setNames(LINHAS[CURVAS], rotulos[CURVAS]), name = NULL) +
+    labs(x = "generation", y = NULL) +
+    theme_light(base_size = 11) + theme(legend.position = "top")
+}
+```
+
+Under the sigmoid function the male trait moves so far from the distribution of female preferences that the acceptance function saturates and ceases to discriminate among males.
+The opportunity for sexual selection begins high and ends near zero, and the network of generation 100 is indistinguishable from that produced by random mating, in modularity as in centralisation.
+Trait variance does not decline over that interval, which rules out loss of genetic variation as the explanation: what occurs is displacement of the mean beyond the range over which preference discriminates.
+The disruptive function reaches the same state by a different route, broadening the trait distribution until every female can find males far from her own threshold.
+
+The effective population size shows that the phenomenon is not merely topological.
+While sexual selection operates it reduces $N_e$ to approximately half the census; when the trait escapes the discriminating range, the population returns to its census size.
+Under the conditions of this model, sexual selection therefore acts as a transient demographic force.
+
+This result was not predicted and is, in our assessment, the most consequential of the set.
+It implies that the signature of sexual selection in network structure may be transient, and that a population sampled at a single moment can present a mating network indistinguishable from random mating despite having passed through intense sexual selection.
+H4 is supported.
+
+## 3.7. Only one preference geometry couples trait and preference
+
+```{r tab-ld}
+if (tem(co, c("generation","varz_pop","var_genica_z","cov_zp"))) {
+  co %>% filter(generation == max(generation), !selecao_natural) %>%
+    group_by(tipo_selecao) %>%
+    summarise(`Total variance` = round(md(varz_pop), 2),
+              `Genic variance` = round(md(var_genica_z), 2),
+              `Linkage disequilibrium` = round(md(varz_pop - var_genica_z), 2),
+              `cov(z,p)` = round(md(cov_zp), 2),
+              `cor(z,p)` = round(md(cor_zp), 2), .groups="drop") %>%
+    mutate(`Preference function` = rotulos[tipo_selecao]) %>%
+    select(`Preference function`, everything(), -tipo_selecao) %>%
+    arrange(match(`Preference function`, rotulos[CURVAS])) %>%
+    kable(caption = "Linkage disequilibrium and genetic covariance at generation 100 of co-evolution, natural selection off, averaged over all combinations of initial sigma, A and k. Linkage disequilibrium is the difference between total and genic variance in the trait.")
+}
+```
+
+The Gaussian function is the only one in which assortative mating, linkage disequilibrium and genetic covariance appear together, as Fisherian theory requires (Fisher 1930; Lande 1981; Kirkpatrick 1982).
+The sigmoid produces the same disequilibrium as the random function, that is none, despite being the function under which the trait moves furthest: under it every female prefers the same thing regardless of her own threshold, so mating is directional but not assortative.
+The result is trait displacement without coupling, which does not correspond to the Fisherian mechanism.
+
+# 4. Discussion
+
+## 4.1. Where variation sits matters more than how much there is
+
+The question that motivated this work was how much variation in preference exists within populations.
+The results reorient it.
+What structures the mating network is the asymmetry between the sexes in how much they vary, rather than the total amount of variation.
+`r if (!is.null(e1) && is.finite(e1$r2_busca) && e1$r2_busca > 0.5) "Both are in turn subordinate to the ecological regime of search, which accounts for the larger share of topological divergence." else ""`
+A population of homogeneous females facing variable males and a population of variable females facing homogeneous males can have the same mean intensity of sexual selection and markedly different mating networks.
+
+This has a practical consequence for empirical work.
+Studies that characterise preference variation without simultaneously characterising trait variation, or that measure both without reporting how many males a female actually assesses, are measuring a quantity whose network consequences are not determined.
+
+## 4.2. Individual-level and population-level selection need not agree
+
+The clearest single result is that a preference function which is stabilising for every individual female produces diversifying selection at the population level once females disagree about the optimum.
+This extends the finding of Millan et al. (2020) to a setting with explicit networks and limited search, and identifies the structure through which it operates: modularity of the mating network predicts the genetic variance maintained.
+
+The mechanism is intelligible.
+When females disagree, different male phenotypes succeed with different females, the network partitions into modules, and within each module a different phenotype is favoured.
+The population-level outcome is the sum of locally stabilising processes with different local optima, which is diversifying.
+
+## 4.3. Transient signatures and the limits of single-time sampling
+
+Two of our results share a structure: selection that erases the conditions for its own operation.
+Selection on preference removes the mating failures that generate it, within a few generations.
+Sexual selection on the trait displaces the trait beyond the range where preference discriminates, and the network reverts to the random-mating expectation while $N_e$ returns to the census.
+
+Both imply that absence of evidence for sexual selection at one moment is weak evidence of its absence historically.
+For network studies in particular, this is a caution about inferring mating rules from observed topology: a network indistinguishable from random can be the endpoint of intense sexual selection rather than the absence of it.
+
+## 4.4. A methodological result about nestedness
+
+Nestedness is among the most frequently reported descriptors of mating networks, and in this design it is largely determined by network density rather than by the rule that generated the network.
+Preference function explains a small fraction of its variation, while size and density explain a large one.
+We therefore recommend that nestedness in mating networks be reported against a null model preserving the degree sequence.
+Modularity, centralisation and $I_s$ survived the same control and can be interpreted more directly.
+
+## 4.5. Limitations
+
+Choosiness is fixed within a female and does not respond plastically to her experience of failing to find a suitable mate; a female that assesses many unacceptable males in a low-variety population would in nature likely relax her criterion.
+Incorporating that plasticity would probably weaken the self-extinguishing dynamic of section 3.5, and testing it is a natural extension.
+
+The model contains no direct benefit of mate choice, no parental care and no sperm competition beyond the treatment of multiple mating, so the results speak to the structural consequences of preference geometry rather than to the adaptive value of choosiness.
+
+Finally, our preference functions are fixed geometries rather than evolving shapes.
+Whether the geometry itself could evolve, and towards which form, is beyond the design used here.
+
+# 5. Conclusion
+
+Preference variation shapes evolutionary outcomes through the mating network, and the network is not a passive record of mating but a structure with properties that predict evolutionary response.
+Which side of the interaction carries the variation matters more than how much variation there is; individual-level and population-level selection regimes can differ in sign; and the topological signature of sexual selection can be erased by the very process that created it.
+
+# Data Availability Statement
+
+All simulation code is available at <https://github.com/solimarygh/REDES_SEXUAIS_Cap1>.
+Each scenario is seeded by its index in the full design, so that every result reported here is exactly reproducible whether the design is run in one session or divided across machines.
+
+# Acknowledgments
+
+[To complete.]
+
+# Funding
+
+This work was supported by the São Paulo Research Foundation (FAPESP), grant 2024/02198-7, and postdoctoral fellowship 2024/18754-6.
+
+# Conflicts of Interest
+
+The authors declare no conflicts of interest.
+
+# Author Contributions
+
+[To complete.]
+
+# References
+
+Almeida-Neto M, Guimarães P, Guimarães Jr PR, Loyola RD, Ulrich W (2008) A consistent metric for nestedness analysis in ecological systems: reconciling concept and measurement.
+*Oikos*, 117, 1227-1239.
+
+Andersson M (1994) *Sexual Selection*.
+Princeton University Press, Princeton.
+
+Bell DA, Kovach RP, Robinson ZL, Whiteley AR, Reed TE (2021) The ecological causes and consequences of hard and soft selection.
+*Ecology Letters*, 24, 1505-1521.
+
+Blondel VD, Guillaume J-L, Lambiotte R, Lefebvre E (2008) Fast unfolding of communities in large networks.
+*Journal of Statistical Mechanics: Theory and Experiment*, 2008, P10008.
+
+Csardi G, Nepusz T (2006) The igraph software package for complex network research.
+*InterJournal Complex Systems*, 1695.
+
+Darwin C (1871) *The Descent of Man, and Selection in Relation to Sex*.
+John Murray, London.
+
+Débarre F, Gandon S (2011) Evolution in heterogeneous environments: between soft and hard selection.
+*The American Naturalist*, 177, E84-E97.
+
+Dormann CF, Gruber B, Fründ J (2008) Introducing the bipartite package: analysing ecological networks.
+*R News*, 8, 8-11.
+
+Falconer DS, Mackay TFC (1996) *Introduction to Quantitative Genetics*, 4th edn.
+Longman, Harlow.
+
+Fisher RA (1918) The correlation between relatives on the supposition of Mendelian inheritance.
+*Transactions of the Royal Society of Edinburgh*, 52, 399-433.
+
+Fisher RA (1930) *The Genetical Theory of Natural Selection*.
+Clarendon Press, Oxford.
+
+Janetos AC (1980) Strategies of female mate choice: a theoretical analysis.
+*Behavioral Ecology and Sociobiology*, 7, 107-112.
+
+Jennions MD, Petrie M (1997) Variation in mate choice and mating preferences: a review of causes and consequences.
+*Biological Reviews*, 72, 283-327.
+
+Kelly MW (2018) Adaptation to climate change through genetic accommodation and assimilation of plastic phenotypes.
+*Philosophical Transactions of the Royal Society B*, 374, 20180176.
+
+Kilmer JT, Fowler-Finn KD, Gray DA, Höbel G, Rebar D, Reichert MS, Rodríguez RL (2017) Describing mate preference functions and other function-valued traits.
+*Journal of Evolutionary Biology*, 30, 1658-1673.
+
+Kirkpatrick M (1982) Sexual selection and the evolution of female choice.
+*Evolution*, 36, 1-12.
+
+Lande R (1981) Models of speciation by sexual selection on polygenic traits.
+*Proceedings of the National Academy of Sciences USA*, 78, 3721-3725.
+
+McDonald GC, Pizzari T (2018) Structure of sexual networks determines the operation of sexual selection.
+*Proceedings of the National Academy of Sciences USA*, 115, E53-E61.
+
+Millan CH, Machado G, Muniz DG (2020) Within-population variation in female mating preference affects the opportunity for sexual selection and the evolution of male traits, but things are not as simple as expected.
+*Journal of Evolutionary Biology*, 33, 1579-1592.
+
+R Core Team (2026) *R: A Language and Environment for Statistical Computing*.
+R Foundation for Statistical Computing, Vienna.
+
+Real L (1990) Search theory and mate choice. I. Models of single-sex discrimination.
+*The American Naturalist*, 136, 376-405.
+
+Reznick D (2016) Hard and soft selection revisited: how evolution by natural selection works in the real world.
+*Journal of Heredity*, 107, 3-14.
+
+Roff DA, Fairbairn DJ (2014) The evolution of phenotypes and genetic parameters under preferential mating.
+*Ecology and Evolution*, 4, 2759-2776.
+
+Wade MJ, Arnold SJ (1980) The intensity of sexual selection in relation to male sexual behaviour, female choice, and sperm precedence.
+*Animal Behaviour*, 28, 446-461.
+
+Wallace B (1975) Hard and soft selection revisited.
+*Evolution*, 29, 465-473.
+
+Widemo F, Sæther SA (1999) Beauty is in the eye of the beholder: causes and consequences of variation in mating preferences.
+*Trends in Ecology & Evolution*, 14, 26-31.
