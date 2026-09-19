@@ -83,9 +83,13 @@ resumo <- if (ok(ref)) {
 # A single helper so a missing value never breaks the manuscript: it prints a
 # placeholder instead, and the sentence still reads.
 V <- function(expr, fmt = "%.2f") {
-  v <- tryCatch(eval(expr, list(resumo = resumo, ref = ref, fim = fim, ep = ep)),
-                error = function(e) NA_real_)
-  if (is.null(v) || !is.finite(v)) "[--]" else sprintf(fmt, v)
+  # suppressWarnings porque, sem dados, expressoes como mean(fim$coluna) sobre um
+  # NULL avisam em vez de falhar, e o aviso poluiria o render sem informar nada:
+  # o resultado ja e tratado logo abaixo.
+  v <- suppressWarnings(tryCatch(
+    eval(expr, list(resumo = resumo, ref = ref, fim = fim, ep = ep)),
+    error = function(e) NA_real_))
+  if (is.null(v) || !length(v) || !is.finite(v)) "[--]" else sprintf(fmt, v)
 }
 em <- function(curva, col, b = B_LO) {
   if (is.null(resumo)) return(NA_real_)
@@ -603,6 +607,12 @@ They constitute a reference parameterisation, and quantitative predictions shoul
 
 The season is single and there is no reproduction, so the model measures selection but not evolutionary response.
 Whether the disease-induced selection differentials reported here would produce sustained evolutionary change, or would erode as mate choice evolved in response, requires the multi-generation treatment that Ashby (2019) and Tarantino & Garcia-Gonzalez (2025) have begun to develop for related questions.
+
+A third limitation concerns the design rather than the parameters, and it follows from our own earlier work.
+In the companion study of mating network topology, what governs how far preference geometries diverge, after the search regime, is not variation in preference or variation in the trait taken separately but the *asymmetry* between them.
+The present design varies $\sigma_p$ with $\sigma_z$ held at unity, and therefore samples a single line through the $(\sigma_p, \sigma_z)$ plane.
+It cannot establish whether the same asymmetry governs epidemic size, and crossing both axes is the natural extension.
+We note this explicitly because the mechanism we propose, that consensus among females concentrates matings and thereby transmission, predicts that it should: consensus is a property of the two variances jointly, not of either alone.
 
 Finally, females do not assess infection status directly; they respond only to the trait, displaced by $h_I$.
 Populations in which infection is detected through a separate cue, as in the conspicuous genital ulceration of baboons infected by *Treponema* (Chuma et al. 2019), would require an additional channel that the present model does not contain.

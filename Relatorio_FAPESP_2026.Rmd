@@ -1073,11 +1073,23 @@ trabalho do período que resta, até o relatório final previsto para o final de
 janeiro de 2027, se organiza em três frentes.
 
 A primeira é aprofundar a análise do Objetivo 2. A rodada completa está
-concluída e os resultados principais já estão neste relatório, mas duas frentes
-de análise continuam abertas: o papel de $\sigma_p$, que interage com a forma da
-curva de preferência de maneira que ainda não descrevemos por completo, e o
-contraste entre os modelos SIS e SIR ao longo da temporada. Com isso o projeto
-terá respondido aos dois objetivos do plano.
+concluída e os resultados principais já estão neste relatório, mas três frentes
+continuam abertas.
+
+Duas são de análise: o papel de $\sigma_p$, que interage com a forma da curva de
+preferência de maneira que ainda não descrevemos por completo, e o contraste
+entre os modelos SIS e SIR ao longo da temporada.
+
+A terceira é de desenho, e vale registrá-la porque decorre diretamente do
+resultado principal do Estudo 1. Naquele estudo, o que mais pesa sobre a
+topologia da rede, depois do regime de busca, não é a variação da preferência
+nem a do traço tomadas isoladamente, e sim a *assimetria* entre as duas. O
+Estudo 5, como está, varia $\sigma_p$ com $\sigma_z$ fixo em 1,0, de modo que
+percorre uma única reta do plano $(\sigma_p, \sigma_z)$ e não pode testar se é
+a assimetria que governa também o tamanho da epidemia. Cruzar os dois eixos no
+estudo epidemiológico, como já se faz no Controle, é a extensão natural, e é o
+que permitiria verificar se a ponte entre seleção sexual e epidemiologia se
+sustenta em todo o plano ou apenas na reta que amostramos.
 
 A segunda é a redação dos manuscritos. O conjunto de resultados comporta mais
 de um artigo, e a divisão entre eles é uma decisão a tomar com os coautores. Os
