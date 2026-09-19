@@ -421,14 +421,36 @@ pct1 <- function(expr) q1(expr, "%.0f%%")
 
 ### O nível ecológico domina a estrutura da rede
 
-O resultado mais robusto do Estudo 1 é que o regime de busca, ou seja quantos
-machos a fêmea consegue avaliar e quantos pode aceitar, explica
-`r q1(quote(100 * r2_busca), "%.0f%%")` da divergência de topologia entre as
-quatro curvas de preferência. Dentro do que sobra, a assimetria entre os sexos,
-`log(σz/σp)`, explica `r q1(quote(razao), "%.0f")` vezes mais que a
-variabilidade total, `sqrt(σp² + σz²)`, com
-`r q1(quote(100 * r2_assim), "%.1f%%")` contra
-`r q1(quote(100 * r2_varia), "%.1f%%")` da variação residual.
+```{r texto-busca, results='asis'}
+if (is.null(est1)) {
+  cat(paste0("O resultado mais robusto do Estudo 1 é que o regime de busca, ou ",
+             "seja quantos machos a fêmea consegue avaliar e quantos pode ",
+             "aceitar, domina a divergência de topologia entre as quatro curvas ",
+             "de preferência.\n\n"))
+} else {
+  cat(sprintf(paste0(
+    "O resultado mais robusto do Estudo 1 é que o regime de busca, ou seja ",
+    "quantos machos a fêmea consegue avaliar e quantos pode aceitar, explica ",
+    "%.0f%% da divergência de topologia entre as quatro curvas de preferência. "),
+    100 * est1$r2_busca))
+  # A razão entre os dois só é informativa se o denominador tiver tamanho. Com
+  # um denominador próximo de zero ela dispara, e um número como "trezentas
+  # vezes" diria mais sobre a instabilidade do quociente do que sobre os dados.
+  ra <- est1$r2_assim; rv <- est1$r2_varia
+  if (is.finite(ra) && is.finite(rv) && rv > 1e-3 && ra / rv >= 2) {
+    cat(sprintf(paste0(
+      "Dentro do que sobra, a assimetria entre os sexos, log(σz/σp), explica ",
+      "cerca de %s vezes mais que a variabilidade total, sqrt(σp² + σz²): ",
+      "%.1f%% contra %.1f%% da variação residual.\n\n"),
+      format(round(ra / rv)), 100 * ra, 100 * rv))
+  } else if (is.finite(ra) && is.finite(rv)) {
+    cat(sprintf(paste0(
+      "Dentro do que sobra, a assimetria entre os sexos, log(σz/σp), explica ",
+      "%.1f%% da variação residual, e a variabilidade total, sqrt(σp² + σz²), ",
+      "%.1f%%.\n\n"), 100 * ra, 100 * rv))
+  }
+}
+```
 
 Isso reorienta a pergunta original do projeto. Não é quanta variação existe na
 preferência o que determina a estrutura da rede, e sim de que lado da interação
@@ -472,24 +494,26 @@ if (!is.null(est1)) {
   tb  <- est1$tab
   pior <- tb[which.min(tb$r2_curva), ]
   resistem <- sum(tb$r2_curva > 3 * min(tb$r2_curva), na.rm = TRUE)
+  NUM <- c("Nenhuma", "uma", "duas", "três", "quatro", "cinco")
   cat(sprintf(paste0(
-    "%s das %d métricas resistem ao controle. O %s não: a curva de preferência ",
+    "%s das %s métricas resistem ao controle. O %s não: a curva de preferência ",
     "explica %.0f%% da variação dele, e o tamanho e a densidade da rede juntos ",
     "explicam %.0f%%. A consequência metodológica é que o aninhamento, que era ",
     "a métrica central no relatório de 2025, precisa ser reportado em relação a ",
     "um modelo nulo que preserve a sequência de graus, e não em valor cru.\n\n"),
-    c("Nenhuma","Uma","Duas","Três","Quatro")[resistem + 1], nrow(tb),
+    sub("^(.)", "\\U\\1", NUM[resistem + 1], perl = TRUE), NUM[nrow(tb) + 1],
     pior$rotulo, 100 * pior$r2_curva, 100 * pior$r2_controles))
 } else {
   cat(paste0("O aninhamento, que era a métrica central no relatório de 2025, ",
              "precisa ser reportado em relação a um modelo nulo que preserve a ",
              "sequência de graus, e não em valor cru.\n\n"))
 }
-``` O índice usado é o NODF de
-Almeida-Neto et al. (2008), calculado com o pacote bipartite (Dormann et al.
-2008). A modularidade vem do algoritmo de Louvain (Blondel et al. 2008)
-aplicado sobre a rede, e ela e a centralização são calculadas com o igraph
-(Csardi & Nepusz 2006).
+```
+
+O índice usado é o NODF de Almeida-Neto et al. (2008), calculado com o pacote
+bipartite (Dormann et al. 2008). A modularidade vem do algoritmo de Louvain
+(Blondel et al. 2008) aplicado sobre a rede, e ela e a centralização são
+calculadas com o igraph (Csardi & Nepusz 2006).
 
 # Estudo 2: a evolução do traço masculino
 
