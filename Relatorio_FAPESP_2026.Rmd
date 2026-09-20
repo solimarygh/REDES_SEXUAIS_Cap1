@@ -41,6 +41,15 @@ lang: pt-BR
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
                       fig.align = "center", out.width = "95%",
                       fig.retina = 1, dpi = 150)
+
+# As figuras deste relatório levam σp e σz nos rótulos. O dispositivo pdf()
+# padrão não converte caracteres fora do conjunto de um byte e avisa
+# "conversion failure ... mbcsToSbcs", deixando o σ errado ou ausente na figura.
+# O cairo_pdf trata UTF-8 corretamente, e é usado quando a saída é LaTeX e o R
+# foi compilado com cairo. Nas saídas Word e HTML as figuras já saem em PNG,
+# que não tem esse problema.
+if (knitr::is_latex_output() &&
+    isTRUE(capabilities("cairo"))) knitr::opts_chunk$set(dev = "cairo_pdf")
 suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(ggplot2); library(knitr)
 })
