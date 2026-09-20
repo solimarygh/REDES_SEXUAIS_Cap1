@@ -47,14 +47,19 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
                       fig.align = "center", out.width = "95%",
                       fig.retina = 1, dpi = 150)
 
-# As figuras deste relatório levam σp e σz nos rótulos. O dispositivo pdf()
-# padrão não converte caracteres fora do conjunto de um byte e avisa
-# "conversion failure ... mbcsToSbcs", deixando o σ errado ou ausente na figura.
-# O cairo_pdf trata UTF-8 corretamente, e é usado quando a saída é LaTeX e o R
-# foi compilado com cairo. Nas saídas Word e HTML as figuras já saem em PNG,
-# que não tem esse problema.
-if (knitr::is_latex_output() &&
-    isTRUE(capabilities("cairo"))) knitr::opts_chunk$set(dev = "cairo_pdf")
+# As figuras deste relatório levam σp e σz nos rótulos, e o dispositivo pdf()
+# padrão não converte caracteres fora do conjunto de um byte: avisa
+# "conversion failure ... mbcsToSbcs" e o σ sai errado ou ausente.
+#
+# O ragg resolve e, ao contrário do cairo, não depende do X11, que no macOS
+# exige o XQuartz instalado à parte. Note-se que capabilities("cairo") pode
+# devolver TRUE numa máquina em que o cairo não carrega, de modo que ele não
+# serve como teste; requireNamespace() abaixo é um teste de verdade.
+#
+# Sem o ragg instalado o documento compila do mesmo jeito, com as figuras no
+# dispositivo padrão. Para tê-lo:  install.packages("ragg")
+if (requireNamespace("ragg", quietly = TRUE))
+  knitr::opts_chunk$set(dev = "ragg_png", dpi = 300)
 suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(ggplot2); library(knitr)
 })
