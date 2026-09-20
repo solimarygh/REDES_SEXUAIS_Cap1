@@ -33,8 +33,13 @@ output:
     toc_float: true
 geometry: margin=2.5cm
 fontsize: 11pt
-linestretch: 1.15
 lang: pt-BR
+# linestretch: 1.15
+#   Espaçamento entre linhas. Exige o pacote LaTeX setspace, e ficou comentado
+#   porque o TinyTeX instalado era do TeX Live 2025 enquanto o repositório já
+#   estava em 2026, o que impede instalar qualquer pacote novo. Depois de
+#   Rscript -e 'tinytex::reinstall_tinytex(repository = "illinois")'
+#   basta descomentar a linha acima.
 ---
 
 ```{r setup, include=FALSE}
