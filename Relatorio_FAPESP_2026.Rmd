@@ -1103,14 +1103,36 @@ Society*, 207(2), zlag061.
 ### Repercussão na divulgação científica
 
 O artigo teve repercussão internacional em veículos de divulgação científica ao
-longo de junho e julho de 2026:
+longo de 2026. A assessoria de imprensa partiu da *Linnean Society of London*,
+editora do periódico, e foi retomada por agregadores e pela instituição
+coautora:
 
-- Smithsonian Tropical Research Institute (STRI), matéria institucional:
-  <https://stri.si.edu/story/citizen-science>
-- *Phys.org*, junho de 2026:
+- *Devoted dads and citizen science: the evolution of parental care in
+  harvestmen spiders is uncovered.* Phys.org, 14 de junho de 2026.
   <https://phys.org/news/2026-06-devoted-dads-citizen-science-evolution.html>
-- *ScienceDaily*, julho de 2026:
+
+- *Spider-like creatures help uncover the surprising origins of fatherhood.*
+  ScienceDaily, 12 de julho de 2026.
   <https://www.sciencedaily.com/releases/2026/07/260712011737.htm>
+
+- *Scientists uncovered the possible evolution of egg-caring using iNaturalist
+  photos and scientific observations in a group of arachnids.* Smithsonian
+  Tropical Research Institute (STRI), 7 de agosto de 2026, por Rosannette
+  Quesada-Hidalgo. <https://stri.si.edu/story/citizen-science>
+
+O alcance do artigo extrapolou a imprensa científica. Em 13 de agosto de 2026 o
+*Institute for Creation Research*, organização criacionista norte-americana,
+publicou um texto que contesta a interpretação evolutiva do estudo, sob o
+argumento de que a reconstrução de estados ancestrais não constitui observação
+direta:
+
+- *Daddy longlegs: going to great lengths for fatherhood.* Institute for
+  Creation Research, 13 de agosto de 2026, por Jonathan K. Corrado.
+  <https://www.icr.org/article/daddy-longlegs-going-great-lengths>
+
+Registramos essa repercussão por transparência e por ser indicativa de alcance,
+deixando claro que se trata de uma contestação de fora do meio científico, e não
+de divulgação.
 
 A repercussão reforça um ponto do próprio artigo, que é o valor dos registros de
 ciência cidadã para responder a perguntas evolutivas: o trabalho que se apoiou
