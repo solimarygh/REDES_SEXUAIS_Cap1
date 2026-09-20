@@ -1,7 +1,7 @@
 ---
 title: "The Architecture of Choice: Network Topology Mediates the Eco-Evolutionary Dynamics of Sexual Selection"
 author: |
-  | Solimary García Hernández^1,\*^, Erika Marques dos Santos^2^, and Paulo Guimarães Rosa Jr^1^
+  | Solimary García Hernández^1,\*^, Erika M. Santana^2^, and Paulo Guimarães Rosa Jr^1^
   | 
   | ^1^ Departamento de Ecologia, Universidade de São Paulo (USP), São Paulo, SP, Brazil
   | ^2^ [Instituição da Erika], Cidade, País
