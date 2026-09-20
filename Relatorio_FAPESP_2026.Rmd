@@ -1066,17 +1066,18 @@ García Hernández no período relatado.
 
 ## Apresentação em congresso internacional
 
-Dois resumos de autoria da pós-doutoranda foram aceitos para apresentação em
-formato de pôster no *European Congress of Entomology 2026* (ECE2026), realizado
-em Tours, França, de 29 de junho a 3 de julho de 2026:
+A pós-doutoranda participou do *European Congress of Entomology 2026*
+(ECE2026), realizado em Tours, França, de 29 de junho a 3 de julho de 2026, onde
+apresentou dois pôsteres:
 
 - *The architecture of choice: network topology mediates the eco-evolutionary
   dynamics of sexual selection*, que apresenta os resultados deste projeto;
 - *What if they feel? Re-evaluating insect subjectivity and the frontiers of
   welfare science*.
 
-O primeiro leva ao público internacional o conjunto de resultados descrito neste
-relatório, e foi a primeira apresentação do desenho ampliado em quatro estudos.
+O primeiro levou ao público internacional o conjunto de resultados descrito
+neste relatório, e foi a primeira apresentação do desenho ampliado em quatro
+estudos.
 
 ## Visita de pesquisa ao Eawag, Zurique
 
@@ -1156,48 +1157,76 @@ discutidas na seção do Estudo 1 deste relatório, são comuns às duas áreas.
 
 # Projeção e recomendações
 
-O primeiro objetivo do projeto está concluído, e com um alcance maior do que o
+O primeiro objetivo do projeto está concluído, e com alcance maior do que o
 previsto: os dois estudos do plano original foram ampliados e acompanhados de
 dois estudos adicionais que o desenvolvimento do motor tornou possíveis. O
-trabalho do período que resta, até o relatório final previsto para o final de
-janeiro de 2027, se organiza em três frentes.
+segundo objetivo teve o seu motor construído e as suas simulações concluídas
+dentro deste período.
 
-A primeira é aprofundar a análise do Objetivo 2. A rodada completa está
-concluída e os resultados principais já estão neste relatório, mas três frentes
-continuam abertas.
+A bolsa de pós-doutorado da beneficiária se encerra em dezembro de 2026, e o
+relatório final do projeto está previsto para o final de janeiro de 2027. O
+período de trabalho efetivo que resta é, portanto, de cerca de três meses, e a
+projeção abaixo foi dimensionada para ele.
 
-Duas são de análise: o papel de $\sigma_p$, que interage com a forma da curva de
+## O que se pretende concluir até dezembro de 2026
+
+A prioridade é a redação dos manuscritos, e não a produção de novos resultados.
+O conjunto de simulações já realizado comporta mais de um artigo, e os dois que
+se destacam estão em estágios diferentes.
+
+O primeiro, em preparação, reúne os Estudos 1 a 4 e está sendo redigido para
+submissão ao *Journal of Evolutionary Biology*, sob o título provisório *The
+architecture of choice: how preference heterogeneity structures mating networks
+and drives trait evolution*. Os seus resultados centrais são a conversão de
+seleção estabilizadora em diversificadora pela heterogeneidade de preferência, o
+papel da modularidade da rede na manutenção de variância genética, e o caráter
+transitório da assinatura da seleção sexual na estrutura da rede.
+
+O segundo, sobre o Objetivo 2, tem os resultados prontos e a redação iniciada, e
+a expectativa é que seja submetido na sequência do primeiro. O seu resultado
+central é o de que a forma da curva de preferência decide se uma infecção
+sexualmente transmissível se propaga, mantida constante a quantidade de
+acasalamentos.
+
+Em paralelo, duas análises do Objetivo 2 continuam em curso e devem entrar no
+relatório final: o papel de $\sigma_p$, que interage com a forma da curva de
 preferência de maneira que ainda não descrevemos por completo, e o contraste
 entre os modelos SIS e SIR ao longo da temporada.
 
-A terceira é de desenho, e vale registrá-la porque decorre diretamente do
-resultado principal do Estudo 1. Naquele estudo, o que mais pesa sobre a
-topologia da rede, depois do regime de busca, não é a variação da preferência
-nem a do traço tomadas isoladamente, e sim a *assimetria* entre as duas. O
-Estudo 5, como está, varia $\sigma_p$ com $\sigma_z$ fixo em 1,0, de modo que
-percorre uma única reta do plano $(\sigma_p, \sigma_z)$ e não pode testar se é
-a assimetria que governa também o tamanho da epidemia. Cruzar os dois eixos no
-estudo epidemiológico, como já se faz no Controle, é a extensão natural, e é o
-que permitiria verificar se a ponte entre seleção sexual e epidemiologia se
-sustenta em todo o plano ou apenas na reta que amostramos.
+## O que fica encaminhado para além da bolsa
 
-A segunda é a redação dos manuscritos. O conjunto de resultados comporta mais
-de um artigo, e a divisão entre eles é uma decisão a tomar com os coautores. Os
-resultados que nos parecem mais promissores para publicação são a conversão de
-seleção estabilizadora em diversificadora pela heterogeneidade de preferência,
-o caráter transitório da assinatura da seleção sexual na estrutura da rede, e o
-efeito da forma da curva de preferência sobre a propagação de uma infecção.
+Duas frentes excedem o período que resta e ficam registradas como o
+desdobramento natural do trabalho.
 
-A terceira é a divulgação dos resultados e o estabelecimento de colaborações que
-permitam confrontar as predições do modelo com dados empíricos. A apresentação
-no ECE2026 e a visita ao Eawag, descritas na seção anterior, foram os primeiros
-passos nessa direção. A incorporação de dados empíricos, apontada no relatório
-anterior como alternativa ao Objetivo 2, deixa de ser alternativa e passa a ser
-o desdobramento natural do projeto, uma vez que o modelo agora gera predições
-sobre estrutura de rede que são mensuráveis em populações naturais.
+A primeira é de desenho, e decorre diretamente do resultado principal do Estudo
+1. Naquele estudo, o que mais pesa sobre a topologia da rede, depois do regime
+de busca, não é a variação da preferência nem a do traço tomadas isoladamente, e
+sim a *assimetria* entre as duas. O Estudo 5, como está, varia $\sigma_p$ com
+$\sigma_z$ fixo em 1,0, de modo que percorre uma única reta do plano
+$(\sigma_p, \sigma_z)$ e não pode testar se é a assimetria que governa também o
+tamanho da epidemia. Cruzar os dois eixos no estudo epidemiológico, como já se
+faz no Controle, é a extensão natural, e é o que permitiria verificar se a ponte
+entre seleção sexual e epidemiologia se sustenta em todo o plano ou apenas na
+reta que amostramos.
 
-*A completar: os congressos a que se pretende submeter em 2027, o cronograma
-dos manuscritos e a recomendação sobre a continuidade do trabalho.*
+A segunda é a confrontação das predições do modelo com dados empíricos. A
+incorporação de dados empíricos, apontada no relatório anterior como alternativa
+ao Objetivo 2, deixa de ser alternativa e passa a ser desdobramento, uma vez que
+o modelo agora gera predições sobre estrutura de rede que são mensuráveis em
+populações naturais. A apresentação no ECE2026 e a visita ao grupo do Dr. Carlos
+Melián no Eawag, descritas na seção anterior, foram os primeiros passos no
+sentido de estabelecer as colaborações que isso exigiria.
+
+## Recomendação
+
+O projeto entregou os dois objetivos do plano de trabalho, e o desenho foi
+ampliado ao longo da execução de duas para cinco frentes de simulação, todas
+concluídas. Recomenda-se que o período que resta da bolsa seja dedicado
+integralmente à redação e submissão dos dois manuscritos, de modo que o
+resultado científico do projeto chegue à literatura, e que as duas frentes
+listadas acima sejam retomadas em trabalho posterior, seja pela beneficiária em
+nova vinculação, seja pelo grupo do supervisor, ao qual o código permanece
+disponível e documentado.
 
 # Referências
 
