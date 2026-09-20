@@ -1061,8 +1061,82 @@ As simulações foram realizadas em R (R Core Team 2026), com os pacotes igraph
 
 # Atividades complementares
 
-*Seção a completar com as atividades do período: congressos, cursos,
-colaborações, orientações e participação em outros projetos.*
+A seguir, as atividades realizadas de forma complementar pela Dra. Solimary
+García Hernández no período relatado.
+
+## Apresentação em congresso internacional
+
+Dois resumos de autoria da pós-doutoranda foram aceitos para apresentação em
+formato de pôster no *European Congress of Entomology 2026* (ECE2026), realizado
+em Tours, França, de 29 de junho a 3 de julho de 2026:
+
+- *The architecture of choice: network topology mediates the eco-evolutionary
+  dynamics of sexual selection*, que apresenta os resultados deste projeto;
+- *What if they feel? Re-evaluating insect subjectivity and the frontiers of
+  welfare science*.
+
+O primeiro leva ao público internacional o conjunto de resultados descrito neste
+relatório, e foi a primeira apresentação do desenho ampliado em quatro estudos.
+
+## Visita de pesquisa ao Eawag, Zurique
+
+Logo após o congresso, de 5 a 7 de julho de 2026, a pós-doutoranda realizou uma
+visita de pesquisa ao grupo do Dr. Carlos J. Melián, no Swiss Federal Institute
+of Aquatic Science and Technology (Eawag), em Zurique, Suíça. O Dr. Melián
+mantém colaboração científica ativa com o supervisor deste projeto, e a visita
+integrou essa agenda comum, com discussão de projetos conjuntos e fortalecimento
+da rede de colaboração. Os custos de estadia foram cobertos pelo laboratório
+anfitrião.
+
+Vale notar que a visita foi encadeada ao congresso, de modo que uma única viagem
+atendeu aos dois compromissos.
+
+## Artigo publicado no período
+
+Machado, G., Buzatto, B.A., Caetano, D.S., Flores, E., García-Hernández, S.,
+Grob, O. *et al.* (2026) One small step for citizens, one giant leap for
+science: iNaturalist records boost our understanding of the evolution of
+parental care in a clade of arachnids. *Zoological Journal of the Linnean
+Society*, 207(2), zlag061.
+
+## Manuscritos em preparação
+
+Três manuscritos com participação da pós-doutoranda estavam em preparação ao
+final do período:
+
+1. *MetaDiv Builder: a modular post-metabarcoding framework for harmonizing
+   heterogeneous biodiversity datasets and functional ecological analysis.*
+   Águila, B., Roy, M., Romero-Gutiérrez, M.F., Santos, M., García-Hernández,
+   S., Schimann, H., Zinger, L., Neves, M.-A., Vasco-Palacios, A., Vázquez, D. &
+   Garibay-Orijel, R. Manuscrito metodológico desenvolvido no âmbito do projeto
+   NEFINEO.
+
+2. *Evolution of leg autotomy in harvestmen (Arachnida: Opiliones): broad
+   phylogenetic patterns revealed by citizen-science data.* Kinoshita, D.A.,
+   Solano-Brenes, D., Machado, G., Grossel, L.A., Holanda, L.P., Medrano, M.,
+   Macedo-Rego, R.C., García-Hernández, S. & Bezerra, W.C.A. Em preparação para
+   submissão ao *Journal of Zoological Systematics and Evolutionary Research*.
+
+3. *What are the drivers of ECM diversity at the Neotropical scale?* Aguila, B.,
+   Santos, M., García Hernández, S., Argüelles, A., Vázquez, D., Schimann, H.,
+   Zinger, L., Brearley, F., Neves, M.-A., Vasco-Palacios, A., González, M.,
+   Tulle, W., Guimarães Jr., P. & Roy, M. Em preparação para submissão ao *New
+   Phytologist*. Este manuscrito era o resultado esperado da colaboração com o
+   NEFINEO já anunciado no relatório anterior.
+
+## Participação no projeto NEFINEO
+
+A participação no projeto *NEFINEO -- Networks of fungal interactions in the
+neotropics*, Auxílio-Organização do Programa BIOTA/FAPESP coordenado pelo mesmo
+supervisor (Processo 2021/14381-2), teve continuidade no período e passou da
+fase de discussão conceitual para a de produção: dois dos três manuscritos
+listados acima decorrem diretamente dela.
+
+O intercâmbio metodológico entre redes mutualísticas e redes sexuais continua
+sendo produtivo nos dois sentidos. As ferramentas de análise de estrutura de
+rede usadas no NEFINEO são as mesmas empregadas neste projeto, e as questões de
+comparabilidade de métricas entre redes de tamanhos e densidades diferentes,
+discutidas na seção do Estudo 1 deste relatório, são comuns às duas áreas.
 
 # Projeção e recomendações
 
@@ -1098,16 +1172,16 @@ seleção estabilizadora em diversificadora pela heterogeneidade de preferência
 o caráter transitório da assinatura da seleção sexual na estrutura da rede, e o
 efeito da forma da curva de preferência sobre a propagação de uma infecção.
 
-A terceira é a divulgação dos resultados em congresso e o estabelecimento de
-colaborações que permitam confrontar as predições do modelo com dados
-empíricos. A incorporação de dados empíricos, apontada no relatório anterior
-como alternativa ao Objetivo 2, deixa de ser alternativa e passa a ser o
-desdobramento natural do projeto, uma vez que o modelo agora gera predições
+A terceira é a divulgação dos resultados e o estabelecimento de colaborações que
+permitam confrontar as predições do modelo com dados empíricos. A apresentação
+no ECE2026 e a visita ao Eawag, descritas na seção anterior, foram os primeiros
+passos nessa direção. A incorporação de dados empíricos, apontada no relatório
+anterior como alternativa ao Objetivo 2, deixa de ser alternativa e passa a ser
+o desdobramento natural do projeto, uma vez que o modelo agora gera predições
 sobre estrutura de rede que são mensuráveis em populações naturais.
 
-*Esta seção precisa ser completada com os eventos e prazos concretos: congressos
-previstos para 2027, cronograma dos manuscritos e eventual recomendação sobre a
-continuidade do trabalho.*
+*A completar: os congressos a que se pretende submeter em 2027, o cronograma
+dos manuscritos e a recomendação sobre a continuidade do trabalho.*
 
 # Referências
 
