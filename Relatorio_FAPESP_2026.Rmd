@@ -9,6 +9,10 @@ subtitle: |
   | Projeto de Pesquisa - Regular No. 2024/02198-7
   | Processo da bolsa de pós-doutorado No. 2024/18754-6
   | Acordos de Cooperação / CNPq - Conselho Nacional de Desenvolvimento Científico e Tecnológico / Fixação de Jovens Doutores
+  |
+  | Vigência do projeto: agosto de 2024 a agosto de 2026
+  | Vigência da bolsa: janeiro de 2025 a dezembro de 2026
+  | Período coberto por este Relatório Científico: agosto de 2025 a agosto de 2026
 author: |
   | Supervisor: Prof. Dr. Paulo Roberto Guimarães Jr.
   | Pós-doutoranda: Dra. Solimary García Hernández
@@ -16,20 +20,24 @@ date: "São Paulo, setembro de 2026"
 output:
   pdf_document:
     toc: true
-    toc_depth: 2
-    number_sections: true
+    toc_depth: 3
+    # number_sections fica DESLIGADO: a numeração das seções segue os itens do
+    # "Formato para os Relatórios Científicos anuais e final - Bolsas no País"
+    # da FAPESP, e é escrita nos próprios títulos. A numeração automática
+    # criaria uma segunda sequência, em conflito com aquela.
+    number_sections: false
     fig_caption: true
     latex_engine: xelatex
     keep_tex: false
   word_document:
     toc: true
-    toc_depth: 2
+    toc_depth: 3
     fig_caption: true
   html_document:
     theme: flatly
     toc: true
-    toc_depth: 2
-    number_sections: true
+    toc_depth: 3
+    number_sections: false
     toc_float: true
 geometry: margin=2.5cm
 fontsize: 11pt
@@ -138,15 +146,14 @@ n_cen <- function(x, eixos) {
 }
 ```
 
-# Introdução
+# 2.2 Resumo do projeto proposto
 
-Apresento neste relatório os avanços do projeto *Papel das redes de
-interações sexuais na evolução de traços indicadores de qualidade sexualmente
+Apresento neste relatório os avanços do projeto *Papel das redes de interações
+sexuais na evolução de traços indicadores de qualidade sexualmente
 selecionados*, financiado pela Fundação de Amparo à Pesquisa do Estado de São
-Paulo (FAPESP) e sob supervisão do Prof. Dr. Paulo Roberto Guimarães Jr. Cobre
-o período desde o relatório anterior, de agosto de 2025.
+Paulo (FAPESP) e sob supervisão do Prof. Dr. Paulo Roberto Guimarães Jr.
 
-O resumo original do projeto segue:
+O resumo do projeto proposto segue, tal como submetido:
 
 > A seleção intersexual é um mecanismo em que indivíduos de um sexo escolhem
 > parceiros do sexo oposto com base em características morfológicas, químicas ou
@@ -166,25 +173,28 @@ O resumo original do projeto segue:
 > potenciais aplicações práticas, especialmente no entendimento e mitigação de
 > impactos causados por doenças.
 
+
+# 2.3 Realizações no período
+
 O primeiro objetivo, o de investigar como a variação na preferência do sexo que
 escolhe influencia a estrutura da rede sexual e a evolução das características
-sexualmente selecionadas, está concluído e ocupa a maior parte deste relatório.
-O segundo, o de avaliar como uma doença transmitida por contato que afeta a
-atratividade do sexo escolhido impacta essas redes e a seleção sobre as
-características, estava previsto para o segundo ano e teve as suas simulações
-concluídas dentro deste período; a análise dos resultados prossegue.
-
-O período aqui relatado vai de agosto de 2025 a agosto de 2026. O relatório
-final do projeto está previsto para o final de janeiro de 2027, e incorporará os
-resultados do Objetivo 2 em sua forma completa.
+sexualmente selecionadas, está concluído. O segundo, o de avaliar como uma
+doença transmitida por contato que afeta a atratividade do sexo escolhido
+impacta essas redes e a seleção sobre as características, estava previsto para o
+segundo ano e teve as suas simulações concluídas dentro deste período; a análise
+dos resultados prossegue e será incorporada em sua forma completa ao relatório
+final, previsto para o final de janeiro de 2027.
 
 O relatório anterior registrava que a integração de um módulo epidemiológico
 dependeria de parceria com a Dra. Erika Marques de Santana, que assina os seus
 trabalhos como Erika M. Santana, por ter sido essa etapa originalmente concebida
-para ser desenvolvida por ela. A parceria se concretizou. O Objetivo 2 vem sendo
-desenvolvido em colaboração com a Dra. Santana, que é coautora dos materiais
-suplementares que acompanham este relatório, e a ressalva feita em 2025 está
-portanto superada.
+para ser desenvolvida por ela. A parceria se concretizou, e o Objetivo 2 vem
+sendo desenvolvido em colaboração com ela, que é coautora dos materiais
+suplementares que acompanham este relatório.
+
+As realizações estão organizadas a seguir pelos dois objetivos. O modelo de
+simulação é comum aos dois e é descrito primeiro. As publicações referidas ao
+longo desta seção constam do item 5.
 
 ## Alterações em relação ao relatório anterior
 
@@ -207,24 +217,7 @@ A razão de os quatro compartilharem o motor é metodológica: descrever o ciclo
 de vida uma vez só torna explícito que as diferenças entre os estudos vêm
 apenas do que de fato muda no desenho, e não de implementações distintas.
 
-## Material suplementar
-
-Três anexos acompanham este relatório, todos gerados diretamente a partir dos
-resultados das simulações:
-
-- *Material suplementar: metodologia*, com o modelo, o ciclo de vida passo a
-  passo, as variáveis resposta e o desenho dos quatro estudos, incluindo as
-  decisões que o desenho exigiu e a justificação de cada uma.
-- *Material suplementar*, com o conjunto completo de painéis de resultados, em
-  todas as combinações de parâmetros, incluindo as que não caberiam num texto
-  impresso.
-- *Material suplementar: o estudo epidemiológico*, com o modelo de temporada,
-  o desenho e os resultados do Objetivo 2.
-
-O corpo deste relatório apresenta apenas os resultados principais de cada
-estudo.
-
-# O modelo de simulação
+## O modelo de simulação
 
 O modelo é individual, com gerações discretas e não sobrepostas, e uma
 população constante de 200 machos e 200 fêmeas. Cada macho expressa uma
@@ -241,7 +234,7 @@ disponível para escolher é variado. A mesma intensidade média de seleção se
 pode resultar de fêmeas homogêneas diante de machos variados ou do contrário, e
 a estrutura da rede não é a mesma nos dois casos.
 
-## Avanços em relação ao modelo do relatório anterior
+### Avanços em relação ao modelo do relatório anterior
 
 O modelo descrito em 2025 foi estendido em quatro pontos, todos declarados no
 anexo de metodologia:
@@ -288,14 +281,14 @@ Essa mudança é o que torna respondível a pergunta sobre manutenção de varia
 genética: com um ruído fixo, a variância genética convergiria sempre para o
 mesmo piso em todos os cenários, e a resposta viria embutida no modelo.
 
-## Desenho experimental dos quatro estudos
+### Desenho experimental dos quatro estudos
 
 ```{r fig-desenho, fig.width=9, fig.height=7, fig.cap="Condições iniciais de cada estudo no plano σp × σz. A grade é a mesma nos quatro painéis, e em vermelho estão as condições iniciais que aquele estudo visita. O Controle cruza a grade inteira porque roda uma geração só; os dois estudos espelho percorrem uma coluna ou uma linha, com o outro eixo fixado em 1.0; a Co-evolução parte do cruzamento de três níveis em cada eixo."}
 source("10_Figuras_conceituais.R")
 figura_desenho()
 ```
 
-# Objetivo 1: preferência, estrutura da rede e evolução do traço
+## Objetivo 1: preferência, estrutura da rede e evolução do traço
 
 O primeiro objetivo do projeto é investigar como a variação na preferência do
 sexo que escolhe influencia a estrutura da rede sexual e a evolução de
@@ -307,7 +300,7 @@ relatório. Os Estudos 3 e 4 não estavam previstos: são extensões que o
 desenvolvimento do motor de simulação tornou possíveis, e que respondem a
 perguntas decorrentes dos dois primeiros.
 
-## Estudo 1: a estrutura da rede numa geração
+### Estudo 1: a estrutura da rede numa geração
 
 Este estudo corresponde à primeira fase do relatório anterior, e responde à
 pergunta mais básica do conjunto: que estrutura as curvas de preferência
@@ -315,7 +308,7 @@ produzem por si só, antes de qualquer resposta evolutiva? Nenhuma
 característica é herdada, os traços e as preferências são sorteados, a rede de
 acasalamentos se forma, as métricas são medidas, e o cenário termina.
 
-### Ampliação do desenho experimental
+#### Ampliação do desenho experimental
 
 O desenho de 2025 cruzava cinco valores de dispersão da preferência com dois
 tipos de seleção, com 100 réplicas por combinação, e mantinha a dispersão do
@@ -344,7 +337,7 @@ ser cruzados por inteiro, de modo que se observam combinações extremas, como
 fêmeas muito homogêneas diante de machos muito variados, que o desenho anterior
 nunca visitava.
 
-### Resultados principais
+#### Resultados principais
 
 ```{r est1-analise}
 # ---------------------------------------------------------------------
@@ -456,7 +449,7 @@ q1 <- function(expr, fmt = "%.2f") {
 pct1 <- function(expr) q1(expr, "%.0f%%")
 ```
 
-#### Contribuição do regime de busca para a topologia da rede
+##### Contribuição do regime de busca para a topologia da rede
 
 ```{r texto-busca, results='asis'}
 if (is.null(est1)) {
@@ -493,7 +486,7 @@ Isso reorienta a pergunta original do projeto. Não é quanta variação existe 
 preferência o que determina a estrutura da rede, e sim de que lado da interação
 essa variação está.
 
-#### Distribuição da divergência no plano σp × σz
+##### Distribuição da divergência no plano σp × σz
 
 A divergência entre as quatro curvas, ou seja o quanto elas produzem topologias
 distintas entre si, é máxima quando as fêmeas concordam e os machos variam, e
@@ -502,7 +495,7 @@ leitura possível, ainda não testada, é que quando todas as fêmeas querem a m
 coisa a geometria da curva se traduz sem ruído em quem acasala com quem, e
 quando elas discordam entre si a variação individual borra a assinatura.
 
-#### Sensibilidade das métricas ao tamanho e à densidade da rede
+##### Sensibilidade das métricas ao tamanho e à densidade da rede
 
 O desenho faz a densidade da rede variar por um fator de
 `r q1(quote(faixa_dens), "%.0f")`, porque o número de parceiros por fêmea vai
@@ -553,7 +546,7 @@ usado é o NODF de Almeida-Neto et al. (2008), calculado com o pacote bipartite
 al. 2008), e ela e a centralização são calculadas com o igraph (Csardi & Nepusz
 2006).
 
-## Estudo 2: a evolução do traço masculino
+### Estudo 2: a evolução do traço masculino
 
 Este estudo corresponde à segunda fase do relatório anterior, e está concluído.
 O eixo é σp, a dispersão do pico de preferência entre as fêmeas. A preferência é
@@ -566,9 +559,9 @@ a resposta do traço à largura dessa distribuição sem o confundimento de a
 preferência estar mudando ao mesmo tempo. A escolha da fêmea é aqui a causa da
 seleção, e o estudo mede a resposta evolutiva do traço masculino.
 
-### Resultados principais
+#### Resultados principais
 
-#### Efeito da heterogeneidade de preferência sobre a variância genética
+##### Efeito da heterogeneidade de preferência sobre a variância genética
 
 ```{r fig-varz, fig.width=8, fig.height=4, fig.cap="Variância genética do traço masculino na geração 100, em função da dispersão da preferência feminina. Sob a curva gaussiana, que é estabilizadora a nível individual, a variância genética da população cresce à medida que as fêmeas discordam mais entre si. A curva aleatória fica em torno do valor neutro e serve de controle de deriva. $A_{max}$ = 200, sem seleção natural, promediando os três valores de k."}
 if (ok(d)) {
@@ -594,7 +587,7 @@ genética, desde que as fêmeas discordem entre si sobre onde está esse pico. A
 linha pontilhada marca a variância inicial: acima dela, a população terminou as
 cem gerações com mais variação genética do que começou.
 
-#### Relação entre topologia da rede e variância genética mantida
+##### Relação entre topologia da rede e variância genética mantida
 
 Duas predições foram formuladas sobre a relação entre topologia e trajetória do
 traço. A primeira, de que o aninhamento prediria a exageração do traço, não se
@@ -609,7 +602,7 @@ acasalamentos se reparte em grupos que acasalam preferencialmente entre si
 mantêm mais variação genética no traço, e esse é o mecanismo de resgate de
 diversidade que o projeto propunha testar.
 
-#### Bimodalidade do traço sob a curva disruptiva
+##### Bimodalidade do traço sob a curva disruptiva
 
 Sob a curva disruptiva as populações não convergem para um valor intermediário
 do traço: cada réplica vai parar num dos dois extremos, e a média entre
@@ -618,7 +611,7 @@ Hartigan rejeita a unimodalidade. A consequência para o relato dos resultados �
 que essa curva precisa ser apresentada como distribuição, e a bimodalidade
 tratada como resultado e não como variabilidade.
 
-## Estudo 3: a evolução da preferência feminina
+### Estudo 3: a evolução da preferência feminina
 
 Este estudo não estava previsto no plano original, e foi possível porque o
 motor desenvolvido para o Estudo 2 permitia inverter os papéis com uma
@@ -637,9 +630,9 @@ também uma leitura de dependência de condição: o macho expressa aquele traç
 por causa do ambiente em que se desenvolveu, e não por causa dos genes que
 transmite.
 
-### Resultados principais
+#### Resultados principais
 
-#### Efeito da variedade de machos sobre a variância da preferência
+##### Efeito da variedade de machos sobre a variância da preferência
 
 ```{r fig-varp, fig.width=8, fig.height=4, fig.cap="Variância da preferência feminina na geração 100, em função da variedade de machos disponíveis. Quando há pouca variedade de machos, a variação de preferência acaba eliminada; quando há muita, ela se mantém perto do valor neutro. $A_{max}$ = 200, sem seleção natural, promediando os três valores de k."}
 if (ok(esp)) {
@@ -661,7 +654,7 @@ if (ok(esp)) {
 É a resposta direta à pergunta que motivou o estudo. A variação de preferência
 não se mantém por si só: depende de haver material sobre o qual discriminar.
 
-#### Dinâmica transitória da seleção sobre a preferência
+##### Dinâmica transitória da seleção sobre a preferência
 
 ```{r fig-dinamica, fig.width=8, fig.height=3.6, fig.cap="Dinâmica das primeiras cinquenta gerações sob pouca variedade de machos, com curva de preferência gaussiana. As duas quantidades caem juntas: conforme a seleção elimina as preferências mal posicionadas, a variância cai, e com ela desaparecem as falhas de acasalamento que geravam a seleção. $A_{max}$ = 200, σz = 0.2, sem seleção natural."}
 if (ok(esp)) {
@@ -689,7 +682,7 @@ sucesso reprodutivo que a alimentava. A consequência metodológica é que estud
 que meçam apenas o estado final de uma população podem concluir ausência de
 seleção onde houve seleção intensa e transitória.
 
-## Estudo 4: co-evolução de traço e preferência
+### Estudo 4: co-evolução de traço e preferência
 
 Este estudo também não estava previsto, e responde à pergunta que naturalmente
 segue os dois anteriores: o que acontece quando as duas características são
@@ -705,9 +698,9 @@ o mecanismo de Fisher (Fisher 1930), na formulação genética quantitativa de
 Lande (1981) e Kirkpatrick (1982), e as condições em que ele opera foram
 unificadas por Seger (1985).
 
-### Resultados principais
+#### Resultados principais
 
-#### Desequilíbrio de ligamento e covariância genética entre traço e preferência
+##### Desequilíbrio de ligamento e covariância genética entre traço e preferência
 
 ```{r tab-ld}
 if (ok(co)) {
@@ -733,7 +726,7 @@ preferem o mesmo, independentemente do seu próprio pico, de modo que o
 acasalamento é direcional mas não assortativo. O resultado é deslocamento do
 traço sem acoplamento, o que não corresponde ao mecanismo de Fisher.
 
-#### Perda da assinatura topológica da seleção sexual ao longo das gerações
+##### Perda da assinatura topológica da seleção sexual ao longo das gerações
 
 ```{r fig-trajetoria, fig.width=9, fig.height=3.6, fig.cap="Trajetórias ao longo das cem gerações, promediando todas as combinações de sigma inicial, $A_{max}$ e k, sem seleção natural. O censo é de 400 adultos, de modo que Ne = 400 corresponderia a uma população sem desigualdade de sucesso reprodutivo."}
 if (ok(co)) {
@@ -778,7 +771,7 @@ pode ser transitória, e que uma população amostrada num único momento pode
 apresentar uma rede indistinguível do acasalamento ao acaso apesar de ter
 passado por seleção sexual intensa.
 
-# Objetivo 2: doença na rede sexual
+## Objetivo 2: doença na rede sexual
 
 Este objetivo, previsto para o segundo ano, teve o seu motor desenvolvido e as
 suas simulações concluídas dentro do período relatado. A pergunta é se e como
@@ -791,7 +784,7 @@ concluída. Os resultados principais aparecem adiante nesta seção; o desenho
 completo, as figuras e todas as combinações de parâmetros estão no *Material
 suplementar: o estudo epidemiológico*.
 
-## Estrutura temporal e escala de tempo
+### Estrutura temporal e escala de tempo
 
 O desenho acrescenta ao motor existente uma estrutura temporal dentro da
 estação reprodutiva. A estação é dividida em 20 semanas com a mesma população
@@ -810,7 +803,7 @@ parcerias ao longo das semanas, que é a parte epidemiológica, porque é ela qu
 gera cópulas repetidas com o mesmo parceiro, concorrência entre parcerias
 simultâneas e rotação de parceiros ao longo da estação.
 
-## Formação e persistência das parcerias
+### Formação e persistência das parcerias
 
 A primeira versão do estudo não representava parcerias: cada semana as fêmeas
 escolhiam do zero e por isso quase nunca voltavam ao mesmo macho. Medido sobre
@@ -829,7 +822,7 @@ que limita a fêmea deixa de ser o número de parceiros da temporada e passa a s
 o número de parcerias que ela mantém simultaneamente, quantidade que na
 epidemiologia se chama concorrência e que é um dos conceitos centrais da área.
 
-## Parametrização do modelo epidemiológico
+### Parametrização do modelo epidemiológico
 
 Três decisões que o relatório anterior deixava em aberto estão agora fixadas: a
 concorrência, em duas parcerias simultâneas; a duração média de uma parceria,
@@ -888,7 +881,7 @@ if (is.null(e5)) cat(paste0(
   "encontrado. O anexo epidemiológico traz o desenho e as figuras.*\n\n"))
 ```
 
-## Resultados principais
+### Resultados principais
 
 ```{r epi-res-intro, results='asis'}
 if (!is.null(e5)) {
@@ -905,7 +898,7 @@ if (!is.null(e5)) {
 }
 ```
 
-### Efeito da curva de preferência sobre a ocorrência de epidemias
+#### Efeito da curva de preferência sobre a ocorrência de epidemias
 
 ```{r epi-tab-beta}
 if (!is.null(e5)) {
@@ -972,7 +965,7 @@ if (!is.null(e5)) {
 }
 ```
 
-### Associação entre sucesso de acasalamento e infecção
+#### Associação entre sucesso de acasalamento e infecção
 
 ```{r epi-res-quem, results='asis'}
 if (!is.null(e5) && !all(is.na(e5$res$g_i))) {
@@ -992,7 +985,7 @@ if (!is.null(e5) && !all(is.na(e5$res$g_i))) {
 }
 ```
 
-### Efeito da infecção sobre o diferencial de seleção
+#### Efeito da infecção sobre o diferencial de seleção
 
 ```{r epi-tab-selecao}
 if (!is.null(e5) && !is.null(e5$sel)) {
@@ -1037,7 +1030,7 @@ if (!is.null(e5) && !is.null(e5$sel)) {
 }
 ```
 
-### Contribuição do Objetivo 2 para o conjunto do projeto
+#### Contribuição do Objetivo 2 para o conjunto do projeto
 
 Os Estudos 1 a 4 mostraram que a regra de escolha de parceiro determina a
 estrutura da rede de acasalamentos.
@@ -1057,28 +1050,6 @@ ferramenta.
 Os resultados completos, com as figuras e todas as combinações de parâmetros,
 estão no *Material suplementar: o estudo epidemiológico*.
 
-# Gestão e disponibilização dos códigos
-
-Todos os códigos desenvolvidos no projeto estão organizados e documentados num
-repositório no GitHub (<https://github.com/solimarygh/REDES_SEXUAIS_Cap1>), que
-substitui o repositório citado no relatório anterior e reúne o motor de
-simulação, os scripts de cada estudo, as análises e os documentos que geram
-este relatório e os seus anexos. Após a publicação dos resultados o repositório
-será tornado público, garantindo a disponibilização transparente das análises.
-
-# Atividades complementares
-
-A seguir, as atividades que realizei de forma complementar no período relatado.
-
-## Apresentação em congresso internacional
-
-Participei do *European Congress of Entomology 2026* (ECE2026), realizado em
-Tours, França, de 29 de junho a 3 de julho de 2026, onde apresentei o pôster *The architecture of choice: network topology mediates the
-eco-evolutionary dynamics of sexual selection*, com os resultados deste projeto.
-
-Levei assim ao público internacional o conjunto de resultados descrito neste
-relatório, na primeira exposição do desenho ampliado em quatro estudos.
-
 ## Visita de pesquisa ao Eawag, Zurique
 
 Logo após o congresso, de 5 a 7 de julho de 2026, realizei uma visita de
@@ -1091,7 +1062,99 @@ de colaboração.
 Encadeei a visita ao congresso, de modo que uma única viagem atendeu aos dois
 compromissos.
 
-## Artigos publicados no período
+
+# 2.4 Plano de Gestão de Dados
+
+Todos os códigos desenvolvidos no projeto estão organizados e documentados num
+repositório no GitHub (<https://github.com/solimarygh/REDES_SEXUAIS_Cap1>), que
+substitui o repositório citado no relatório anterior e reúne o motor de
+simulação, os scripts de cada estudo, as análises e os documentos que geram
+este relatório e os seus anexos. Após a publicação dos resultados o repositório
+será tornado público, garantindo a disponibilização transparente das análises.
+
+
+Os dados que sustentam os resultados são os arquivos de saída das simulações,
+gerados pelos próprios scripts do repositório. Como cada cenário é semeado pelo
+seu índice no desenho completo, qualquer resultado apresentado aqui pode ser
+regenerado a partir do código, o que torna o repositório a forma primária de
+disponibilização: ele contém tanto os dados como o procedimento que os produz.
+
+Enquanto os resultados não são publicados, o acesso se dá pelos materiais
+suplementares que acompanham este relatório, descritos a seguir. Eles têm a
+mesma forma que os anexos que serão submetidos, em inglês, junto aos
+manuscritos listados no item 7, e apresentam o conjunto completo de resultados
+em todas as combinações de parâmetros.
+
+## Materiais suplementares
+
+Três anexos acompanham este relatório, todos gerados diretamente a partir dos
+resultados das simulações:
+
+- *Material suplementar: metodologia*, com o modelo, o ciclo de vida passo a
+  passo, as variáveis resposta e o desenho dos quatro estudos, incluindo as
+  decisões que o desenho exigiu e a justificação de cada uma.
+- *Material suplementar*, com o conjunto completo de painéis de resultados, em
+  todas as combinações de parâmetros, incluindo as que não caberiam num texto
+  impresso.
+- *Material suplementar: o estudo epidemiológico*, com o modelo de temporada,
+  o desenho e os resultados do Objetivo 2.
+
+O corpo deste relatório apresenta apenas os resultados principais de cada
+estudo.
+
+
+# 3 Plano de atividades para o próximo período
+
+Minha bolsa se encerra em dezembro de 2026 e o relatório científico final está
+previsto para o final de janeiro de 2027, de modo que o próximo período
+corresponde a cerca de três meses de trabalho efetivo. O plano para esse período
+é de redação e submissão, e não de produção de novos resultados: as simulações
+dos dois objetivos estão concluídas e o que falta é levar o resultado científico
+à literatura.
+
+A prioridade do período é o manuscrito do Objetivo 1, que reúne os Estudos 1 a 4
+e está em preparação para o *Journal of Evolutionary Biology*, com os resultados
+sobre a conversão de seleção estabilizadora em diversificadora pela
+heterogeneidade de preferência, o papel da modularidade da rede na manutenção de
+variância genética e o caráter transitório da assinatura da seleção sexual na
+estrutura da rede.
+
+Na sequência vem o manuscrito do Objetivo 2, cujos resultados estão prontos e a
+redação iniciada, e que trata do efeito da forma da curva de preferência sobre a
+propagação de uma infecção sexualmente transmissível, mantida constante a
+quantidade de acasalamentos.
+
+Em paralelo, duas análises do Objetivo 2 devem ser concluídas e incorporadas ao
+relatório final: o papel de $\sigma_p$, que interage com a forma da curva de
+preferência de maneira que ainda não descrevi por completo, e o contraste entre
+os modelos SIS e SIR ao longo da temporada.
+
+Duas frentes excedem esse prazo e ficam registradas como desdobramento natural
+do trabalho, para retomada posterior. Uma é de desenho: o estudo epidemiológico
+varia $\sigma_p$ com $\sigma_z$ fixo, percorrendo uma única reta do plano, e
+cruzar os dois eixos é o que permitiria testar se a assimetria entre os sexos,
+que no Estudo 1 governa a topologia da rede, governa também o tamanho da
+epidemia. A outra é a confrontação das predições do modelo com dados empíricos,
+que deixa de ser a alternativa ao Objetivo 2 apontada no relatório anterior e
+passa a ser continuação, uma vez que o modelo agora gera predições mensuráveis
+em populações naturais; a apresentação no ECE2026 e a visita ao Eawag foram os
+primeiros passos nessa direção.
+
+# 4 Participação em evento científico
+
+Participei do *European Congress of Entomology 2026* (ECE2026), realizado em
+Tours, França, de 29 de junho a 3 de julho de 2026, onde apresentei o pôster *The architecture of choice: network topology mediates the
+eco-evolutionary dynamics of sexual selection*, com os resultados deste projeto.
+
+Levei assim ao público internacional o conjunto de resultados descrito neste
+relatório, na primeira exposição do desenho ampliado em quatro estudos.
+
+
+# 5 Publicações resultantes da Bolsa no período
+
+*Em observância à Política para Acesso Aberto às Publicações Resultantes de
+Auxílios e Bolsas FAPESP, resta informar, para cada artigo abaixo, o link do
+repositório em que foi depositado.*
 
 Três artigos de que sou coautora foram publicados em 2026, em ordem
 cronológica:
@@ -1111,7 +1174,7 @@ science: iNaturalist records boost our understanding of the evolution of
 parental care in a clade of arachnids. *Zoological Journal of the Linnean
 Society*, 207(2), zlag061.
 
-### Repercussão na divulgação científica
+## Repercussão na divulgação científica
 
 O artigo de Machado et al. (2026), sobre a evolução do cuidado parental em
 opiliões, teve repercussão internacional ao longo de 2026. A assessoria de
@@ -1140,7 +1203,8 @@ A repercussão reforça um ponto do próprio artigo, que é o valor dos registro
 ciência cidadã para responder a perguntas evolutivas: o trabalho que se apoiou
 em observações feitas pelo público retornou ao público pela via da divulgação.
 
-## Manuscritos em preparação
+
+# 7 Trabalhos preparados ou submetidos para publicação
 
 Três manuscritos de que participo estavam em preparação ao final do período:
 
@@ -1166,40 +1230,6 @@ Três manuscritos de que participo estavam em preparação ao final do período:
    Phytologist*. Este manuscrito era o resultado esperado da colaboração com o
    NEFINEO já anunciado no relatório anterior.
 
-# Projeção e recomendações
-
-O projeto entregou os dois objetivos do plano de trabalho, e o desenho foi
-ampliado ao longo da execução de duas para cinco frentes de simulação, todas
-concluídas. Minha bolsa se encerra em dezembro de 2026 e o relatório final está
-previsto para o final de janeiro de 2027, de modo que restam cerca de três meses
-de trabalho efetivo.
-
-Recomendo dedicá-los integralmente à redação, e não à produção de novos
-resultados. Dois manuscritos se destacam. O primeiro reúne os Estudos 1 a 4 e
-está em preparação para o *Journal of Evolutionary Biology*, com os resultados
-sobre a conversão de seleção estabilizadora em diversificadora pela
-heterogeneidade de preferência, o papel da modularidade na manutenção de
-variância genética e o caráter transitório da assinatura da seleção sexual na
-rede. O segundo, sobre o Objetivo 2, tem os resultados prontos e a redação
-iniciada, e trata do efeito da forma da curva de preferência sobre a propagação
-de uma infecção sexualmente transmissível. Em paralelo, duas análises do Objetivo
-2 devem entrar no relatório final: o papel de $\sigma_p$ e o contraste entre os
-modelos SIS e SIR ao longo da temporada.
-
-Duas frentes excedem esse prazo e ficam registradas como desdobramento natural
-do trabalho. Uma é de desenho: o estudo epidemiológico varia $\sigma_p$ com
-$\sigma_z$ fixo,
-percorrendo uma única reta do plano, e cruzar os dois eixos é o que permitiria
-testar se a assimetria entre os sexos, que no Estudo 1 governa a topologia da
-rede, governa também o tamanho da epidemia. A outra é a confrontação das
-predições do modelo com dados empíricos, que deixa de ser a alternativa ao
-Objetivo 2 apontada no relatório anterior e passa a ser continuação, uma vez que
-o modelo agora gera predições mensuráveis em populações naturais; a apresentação
-no ECE2026 e a visita ao Eawag foram os primeiros passos nessa direção.
-
-Recomendo que essas duas frentes sejam retomadas em trabalho posterior, seja por
-mim em nova vinculação, seja pelo grupo do supervisor, ao qual o código
-permanece disponível e documentado.
 
 # Referências
 
