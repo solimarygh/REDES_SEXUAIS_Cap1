@@ -1214,12 +1214,12 @@ deslocamento internacional.
 
 # 5 Publicações resultantes da Bolsa no período
 
-*Em observância à Política para Acesso Aberto às Publicações Resultantes de
-Auxílios e Bolsas FAPESP, resta depositar cada um dos artigos abaixo na
-Biblioteca Digital da Produção Intelectual da USP (BDPI) e informar aqui o link
-correspondente. A política exige repositório institucional: redes acadêmicas
-como ResearchGate e Academia.edu não a atendem, por exigirem cadastro para o
-acesso completo.*
+Em observância à Política para Acesso Aberto às Publicações Resultantes de
+Auxílios e Bolsas FAPESP, o depósito dos três artigos na Biblioteca Digital da
+Produção Intelectual da USP (BDPI) está sendo providenciado junto à Agência de
+Bibliotecas e Coleções Digitais, e os links correspondentes serão informados
+assim que disponíveis. O prazo da política é de até doze meses a contar da data
+de publicação, e nenhum dos três o excedeu.
 
 Três artigos de que sou coautora foram publicados em 2026, em ordem
 cronológica:
@@ -1237,7 +1237,9 @@ Machado, G., Buzatto, B.A., Caetano, D.S., Flores, E., García-Hernández, S.,
 Grob, O. *et al.* (2026) One small step for citizens, one giant leap for
 science: iNaturalist records boost our understanding of the evolution of
 parental care in a clade of arachnids. *Zoological Journal of the Linnean
-Society*, 207(2), zlag061.
+Society*, 207(2), zlag061. Acesso provisório ao texto completo, enquanto o
+depósito institucional não se conclui:
+<https://g-spotlab.weebly.com/uploads/6/0/2/2/60226751/machado_et_al.__2026_.pdf>
 
 ## Repercussão na divulgação científica
 
