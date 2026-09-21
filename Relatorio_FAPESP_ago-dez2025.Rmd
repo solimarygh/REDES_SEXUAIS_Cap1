@@ -635,26 +635,39 @@ estudo.
 
 # 3 Plano de atividades para o próximo período
 
+O período seguinte é o ano de 2026, coberto pelo Relatório Científico Final.
+Descrevo abaixo o que estava planejado para ele, indicando entre parênteses a
+situação em que cada frente se encontra na data de entrega deste relatório.
+
 O Objetivo 1 tem os seus dois estudos concluídos, e o motor de simulação
-desenvolvido para eles abriu duas possibilidades que não estavam no plano de
-trabalho e que pretendo explorar no período seguinte.
+desenvolvido para eles abriu duas extensões que não estavam no plano de trabalho
+original e que respondem a perguntas decorrentes dos dois primeiros.
 
-A primeira é inverter os papéis do Estudo 2, tornando a preferência feminina
-herdável e a característica do macho ambiental, o que permite perguntar como a
-variedade de machos disponíveis molda a evolução da preferência. A segunda é
-tornar as duas características herdáveis ao mesmo tempo, em que a grandeza
-central deixa de ser a média de cada uma e passa a ser a covariância genética
-entre elas.
+A primeira, que designo Estudo 3, inverte os papéis do Estudo 2: a preferência
+feminina passa a ser herdável e a característica do macho, ambiental. A pergunta
+deixa de ser como a escolha molda o traço e passa a ser como a variedade de
+machos disponíveis molda a evolução da preferência, de modo que a escolha deixa
+de ser a causa da seleção e passa a ser o seu alvo. *(Concluído; os resultados
+constarão do Relatório Científico Final.)*
 
-Em paralelo, pretendo iniciar o Objetivo 2, que estava previsto para o segundo
-ano e trata do efeito de uma doença transmitida por contato sobre a formação das
-redes sexuais e sobre a seleção da característica escolhida. O motor
-desenvolvido no Objetivo 1 é o ponto de partida: a ele será acrescentada uma
-estrutura temporal dentro da estação reprodutiva, com parcerias que persistem ao
-longo das semanas, sem a qual a transmissão não tem onde acontecer.
+A segunda, o Estudo 4, torna as duas características herdáveis ao mesmo tempo.
+Cada indivíduo carrega os dois genótipos e expressa apenas um, e a grandeza
+central deixa de ser a média de cada característica e passa a ser a covariância
+genética entre elas, que é o que permite examinar o mecanismo de Fisher dentro
+do modelo. *(Concluído; os resultados constarão do Relatório Científico Final.)*
 
-Por fim, pretendo iniciar a redação dos manuscritos com os resultados do
-Objetivo 1 e apresentá-los em congresso internacional.
+O Objetivo 2, previsto para o segundo ano, trata do efeito de uma doença
+transmitida por contato sobre a formação das redes sexuais e sobre a seleção da
+característica escolhida. O motor desenvolvido no Objetivo 1 é o ponto de
+partida: a ele será acrescentada uma estrutura temporal dentro da estação
+reprodutiva, com parcerias que persistem ao longo das semanas, sem a qual a
+transmissão não tem onde acontecer, e um módulo epidemiológico em que a infecção
+altera a atratividade do macho. *(Executado; as simulações estão concluídas e os
+resultados constarão do Relatório Científico Final.)*
+
+Por fim, a redação dos manuscritos com os resultados do Objetivo 1 e a sua
+apresentação em congresso internacional. *(Em andamento e realizada,
+respectivamente; ver os itens 4 e 7 do Relatório Científico Final.)*
 
 # 4 Participação em evento científico
 
