@@ -288,6 +288,13 @@ Essa mudança é o que torna respondível a pergunta sobre manutenção de varia
 genética: com um ruído fixo, a variância genética convergiria sempre para o
 mesmo piso em todos os cenários, e a resposta viria embutida no modelo.
 
+## Desenho experimental dos quatro estudos
+
+```{r fig-desenho, fig.width=9, fig.height=7, fig.cap="Condições iniciais de cada estudo no plano σp × σz. A grade é a mesma nos quatro painéis, e em vermelho estão as condições iniciais que aquele estudo visita. O Controle cruza a grade inteira porque roda uma geração só; os dois estudos espelho percorrem uma coluna ou uma linha, com o outro eixo fixado em 1.0; a Co-evolução parte do cruzamento de três níveis em cada eixo."}
+source("10_Figuras_conceituais.R")
+figura_desenho()
+```
+
 # Estudo 1: a estrutura da rede numa geração
 
 Este estudo corresponde à primeira fase do relatório anterior, e responde à
@@ -324,13 +331,6 @@ parâmetros do que ao repetir a mesma combinação. O ganho é que σp e σz pas
 ser cruzados por inteiro, de modo que se observam combinações extremas, como
 fêmeas muito homogêneas diante de machos muito variados, que o desenho anterior
 nunca visitava.
-
-## O desenho experimental dos quatro estudos
-
-```{r fig-desenho, fig.width=9, fig.height=7, fig.cap="Condições iniciais de cada estudo no plano σp × σz. A grade é a mesma nos quatro painéis, e em vermelho estão as condições iniciais que aquele estudo visita. O Controle cruza a grade inteira porque roda uma geração só; os dois estudos espelho percorrem uma coluna ou uma linha, com o outro eixo fixado em 1.0; a Co-evolução parte do cruzamento de três níveis em cada eixo."}
-source("10_Figuras_conceituais.R")
-figura_desenho()
-```
 
 ## Resultados principais
 
