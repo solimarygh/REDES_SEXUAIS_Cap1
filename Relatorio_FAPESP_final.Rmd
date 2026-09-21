@@ -3,7 +3,7 @@
 # propósito: eles funcionam no PDF mas saem como texto literal no Word. Os
 # blocos com "|" são line blocks do pandoc, e esses sim funcionam nos dois.
 title: |
-  | Relatório de Atividades
+  | Relatório Científico Final
   | Papel das redes de interações sexuais na evolução de traços indicadores de qualidade sexualmente selecionados
 subtitle: |
   | Projeto de Pesquisa - Regular No. 2024/02198-7
@@ -12,11 +12,11 @@ subtitle: |
   |
   | Vigência do projeto: agosto de 2024 a agosto de 2026
   | Vigência da bolsa: janeiro de 2025 a dezembro de 2026
-  | Período coberto por este Relatório Científico: agosto de 2025 a agosto de 2026
+  | Período coberto por este Relatório Científico: 1 de janeiro a 31 de dezembro de 2026
 author: |
   | Supervisor: Prof. Dr. Paulo Roberto Guimarães Jr.
   | Pós-doutoranda: Dra. Solimary García Hernández
-date: "São Paulo, setembro de 2026"
+date: "São Paulo, janeiro de 2027"
 output:
   pdf_document:
     toc: true
@@ -176,14 +176,13 @@ O resumo do projeto proposto segue, tal como submetido:
 
 # 2.3 Realizações no período
 
-O primeiro objetivo, o de investigar como a variação na preferência do sexo que
-escolhe influencia a estrutura da rede sexual e a evolução das características
-sexualmente selecionadas, está concluído. O segundo, o de avaliar como uma
-doença transmitida por contato que afeta a atratividade do sexo escolhido
-impacta essas redes e a seleção sobre as características, estava previsto para o
-segundo ano e teve as suas simulações concluídas dentro deste período; a análise
-dos resultados prossegue e será incorporada em sua forma completa ao relatório
-final, previsto para o final de janeiro de 2027.
+Os dois objetivos do plano de trabalho estão concluídos. O primeiro, o de
+investigar como a variação na preferência do sexo que escolhe influencia a
+estrutura da rede sexual e a evolução das características sexualmente
+selecionadas, foi respondido por quatro estudos, dois a mais do que os previstos.
+O segundo, o de avaliar como uma doença transmitida por contato que afeta a
+atratividade do sexo escolhido impacta essas redes e a seleção sobre as
+características, estava previsto para o segundo ano e foi executado nele.
 
 O relatório anterior registrava que a integração de um módulo epidemiológico
 dependeria de parceria com a Dra. Erika Marques de Santana, que assina os seus
@@ -1090,42 +1089,34 @@ O corpo deste relatório apresenta apenas os resultados principais de cada
 estudo.
 
 
-# 3 Plano de atividades para o próximo período
+# Desdobramentos
 
-Minha bolsa se encerra em dezembro de 2026 e o relatório científico final está
-previsto para o final de janeiro de 2027, de modo que o próximo período
-corresponde a cerca de três meses de trabalho efetivo. O plano para esse período
-é de redação e submissão, e não de produção de novos resultados: as simulações
-dos dois objetivos estão concluídas e o que falta é levar o resultado científico
-à literatura.
+O item 3 do formato da FAPESP, o plano de atividades para o período seguinte,
+não se aplica ao Relatório Científico Final. Registro em seu lugar o que o
+trabalho deixa encaminhado.
 
-A prioridade do período é o manuscrito do Objetivo 1, que reúne os Estudos 1 a 4
-e está em preparação para o *Journal of Evolutionary Biology*, com os resultados
-sobre a conversão de seleção estabilizadora em diversificadora pela
-heterogeneidade de preferência, o papel da modularidade da rede na manutenção de
-variância genética e o caráter transitório da assinatura da seleção sexual na
-estrutura da rede.
+Dois manuscritos concentram os resultados do projeto. O primeiro reúne os
+Estudos 1 a 4 do Objetivo 1 e trata da conversão de seleção estabilizadora em
+diversificadora pela heterogeneidade de preferência, do papel da modularidade da
+rede na manutenção de variância genética e do caráter transitório da assinatura
+da seleção sexual na estrutura da rede. O segundo apresenta o Objetivo 2 e o
+efeito da forma da curva de preferência sobre a propagação de uma infecção
+sexualmente transmissível, mantida constante a quantidade de acasalamentos.
+Ambos constam do item 7.
 
-Na sequência vem o manuscrito do Objetivo 2, cujos resultados estão prontos e a
-redação iniciada, e que trata do efeito da forma da curva de preferência sobre a
-propagação de uma infecção sexualmente transmissível, mantida constante a
-quantidade de acasalamentos.
+Duas frentes ficam abertas como desdobramento natural do trabalho. Uma é de
+desenho: o estudo epidemiológico varia $\sigma_p$ com $\sigma_z$ fixo,
+percorrendo uma única reta do plano, e cruzar os dois eixos é o que permitiria
+testar se a assimetria entre os sexos, que no Estudo 1 governa a topologia da
+rede, governa também o tamanho da epidemia. A outra é a confrontação das
+predições do modelo com dados empíricos, que deixa de ser a alternativa ao
+Objetivo 2 apontada no relatório de 2025 e passa a ser continuação, uma vez que
+o modelo agora gera predições mensuráveis em populações naturais; a apresentação
+no ECE2026 e a visita ao Eawag foram os primeiros passos nessa direção.
 
-Em paralelo, duas análises do Objetivo 2 devem ser concluídas e incorporadas ao
-relatório final: o papel de $\sigma_p$, que interage com a forma da curva de
-preferência de maneira que ainda não descrevi por completo, e o contraste entre
-os modelos SIS e SIR ao longo da temporada.
-
-Duas frentes excedem esse prazo e ficam registradas como desdobramento natural
-do trabalho, para retomada posterior. Uma é de desenho: o estudo epidemiológico
-varia $\sigma_p$ com $\sigma_z$ fixo, percorrendo uma única reta do plano, e
-cruzar os dois eixos é o que permitiria testar se a assimetria entre os sexos,
-que no Estudo 1 governa a topologia da rede, governa também o tamanho da
-epidemia. A outra é a confrontação das predições do modelo com dados empíricos,
-que deixa de ser a alternativa ao Objetivo 2 apontada no relatório anterior e
-passa a ser continuação, uma vez que o modelo agora gera predições mensuráveis
-em populações naturais; a apresentação no ECE2026 e a visita ao Eawag foram os
-primeiros passos nessa direção.
+Recomendo que essas duas frentes sejam retomadas em trabalho posterior, seja por
+mim em nova vinculação, seja pelo grupo do supervisor, ao qual o código
+permanece disponível e documentado.
 
 # 4 Participação em evento científico
 
