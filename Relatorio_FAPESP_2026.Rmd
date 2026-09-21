@@ -186,7 +186,7 @@ desenvolvido em colaboração com a Dra. Santana, que é coautora dos materiais
 suplementares que acompanham este relatório, e a ressalva feita em 2025 está
 portanto superada.
 
-## O que mudou desde o relatório anterior
+## Alterações em relação ao relatório anterior
 
 O relatório de 2025 organizava o trabalho em duas fases, uma em tempo ecológico
 e outra em tempo evolutivo. Ao longo deste ano as duas foram concluídas, e o
@@ -296,7 +296,7 @@ produzem por si só, antes de qualquer resposta evolutiva? Nenhuma
 característica é herdada, os traços e as preferências são sorteados, a rede de
 acasalamentos se forma, as métricas são medidas, e o cenário termina.
 
-## O desenho foi ampliado em duas ordens de magnitude
+## Ampliação do desenho experimental
 
 O desenho de 2025 cruzava cinco valores de dispersão da preferência com dois
 tipos de seleção, com 100 réplicas por combinação, e mantinha a dispersão do
@@ -444,7 +444,7 @@ q1 <- function(expr, fmt = "%.2f") {
 pct1 <- function(expr) q1(expr, "%.0f%%")
 ```
 
-### O nível ecológico domina a estrutura da rede
+### Contribuição do regime de busca para a topologia da rede
 
 ```{r texto-busca, results='asis'}
 if (is.null(est1)) {
@@ -481,7 +481,7 @@ Isso reorienta a pergunta original do projeto. Não é quanta variação existe 
 preferência o que determina a estrutura da rede, e sim de que lado da interação
 essa variação está.
 
-### A divergência é máxima quando as fêmeas são homogêneas e os machos variados
+### Distribuição da divergência no plano σp × σz
 
 A divergência entre as quatro curvas, ou seja o quanto elas produzem topologias
 distintas entre si, é máxima quando as fêmeas concordam e os machos variam, e
@@ -490,7 +490,7 @@ leitura possível, ainda não testada, é que quando todas as fêmeas querem a m
 coisa a geometria da curva se traduz sem ruído em quem acasala com quem, e
 quando elas discordam entre si a variação individual borra a assinatura.
 
-### Nem todas as métricas de rede são igualmente informativas
+### Sensibilidade das métricas ao tamanho e à densidade da rede
 
 O desenho faz a densidade da rede variar por um fator de
 `r q1(quote(faixa_dens), "%.0f")`, porque o número de parceiros por fêmea vai
@@ -556,7 +556,7 @@ seleção, e o estudo mede a resposta evolutiva do traço masculino.
 
 ## Resultados principais
 
-### A heterogeneidade de preferência converte seleção estabilizadora em diversificadora
+### Efeito da heterogeneidade de preferência sobre a variância genética
 
 ```{r fig-varz, fig.width=8, fig.height=4, fig.cap="Variância genética do traço masculino na geração 100, em função da dispersão da preferência feminina. Sob a curva gaussiana, que é estabilizadora a nível individual, a variância genética da população cresce à medida que as fêmeas discordam mais entre si. A curva aleatória fica em torno do valor neutro e serve de controle de deriva. $A_{max}$ = 200, sem seleção natural, promediando os três valores de k."}
 if (ok(d)) {
@@ -582,7 +582,7 @@ genética, desde que as fêmeas discordem entre si sobre onde está esse pico. A
 linha pontilhada marca a variância inicial: acima dela, a população terminou as
 cem gerações com mais variação genética do que começou.
 
-### A topologia da rede prediz a variância genética mantida
+### Relação entre topologia da rede e variância genética mantida
 
 Duas predições foram formuladas sobre a relação entre topologia e trajetória do
 traço. A primeira, de que o aninhamento prediria a exageração do traço, não se
@@ -597,7 +597,7 @@ acasalamentos se reparte em grupos que acasalam preferencialmente entre si
 mantêm mais variação genética no traço, e esse é o mecanismo de resgate de
 diversidade que o projeto propunha testar.
 
-### A curva disruptiva produz estados alternativos
+### Bimodalidade do traço sob a curva disruptiva
 
 Sob a curva disruptiva as populações não convergem para um valor intermediário
 do traço: cada réplica vai parar num dos dois extremos, e a média entre
@@ -627,7 +627,7 @@ transmite.
 
 ## Resultados principais
 
-### A variedade de machos determina se a variação de preferência se mantém
+### Efeito da variedade de machos sobre a variância da preferência
 
 ```{r fig-varp, fig.width=8, fig.height=4, fig.cap="Variância da preferência feminina na geração 100, em função da variedade de machos disponíveis. Quando há pouca variedade de machos, a variação de preferência acaba eliminada; quando há muita, ela se mantém perto do valor neutro. $A_{max}$ = 200, sem seleção natural, promediando os três valores de k."}
 if (ok(esp)) {
@@ -649,7 +649,7 @@ if (ok(esp)) {
 É a resposta direta à pergunta que motivou o estudo. A variação de preferência
 não se mantém por si só: depende de haver material sobre o qual discriminar.
 
-### A seleção sobre a preferência apaga a própria causa
+### Dinâmica transitória da seleção sobre a preferência
 
 ```{r fig-dinamica, fig.width=8, fig.height=3.6, fig.cap="Dinâmica das primeiras cinquenta gerações sob pouca variedade de machos, com curva de preferência gaussiana. As duas quantidades caem juntas: conforme a seleção elimina as preferências mal posicionadas, a variância cai, e com ela desaparecem as falhas de acasalamento que geravam a seleção. $A_{max}$ = 200, σz = 0.2, sem seleção natural."}
 if (ok(esp)) {
@@ -695,7 +695,7 @@ unificadas por Seger (1985).
 
 ## Resultados principais
 
-### Só uma das quatro curvas acopla as duas características
+### Desequilíbrio de ligamento e covariância genética entre traço e preferência
 
 ```{r tab-ld}
 if (ok(co)) {
@@ -721,7 +721,7 @@ preferem o mesmo, independentemente do seu próprio pico, de modo que o
 acasalamento é direcional mas não assortativo. O resultado é deslocamento do
 traço sem acoplamento, o que não corresponde ao mecanismo de Fisher.
 
-### A seleção sexual pode apagar a própria assinatura na rede
+### Perda da assinatura topológica da seleção sexual ao longo das gerações
 
 ```{r fig-trajetoria, fig.width=9, fig.height=3.6, fig.cap="Trajetórias ao longo das cem gerações, promediando todas as combinações de sigma inicial, $A_{max}$ e k, sem seleção natural. O censo é de 400 adultos, de modo que Ne = 400 corresponderia a uma população sem desigualdade de sucesso reprodutivo."}
 if (ok(co)) {
@@ -779,7 +779,7 @@ concluída. Os resultados principais aparecem adiante nesta seção; o desenho
 completo, as figuras e todas as combinações de parâmetros estão no *Material
 suplementar: o estudo epidemiológico*.
 
-## O que o desenho acrescenta
+## Estrutura temporal e escala de tempo
 
 O desenho acrescenta ao motor existente uma estrutura temporal dentro da
 estação reprodutiva. A estação é dividida em 20 semanas com a mesma população
@@ -798,7 +798,7 @@ parcerias ao longo das semanas, que é a parte epidemiológica, porque é ela qu
 gera cópulas repetidas com o mesmo parceiro, concorrência entre parcerias
 simultâneas e rotação de parceiros ao longo da estação.
 
-## A persistência das parcerias, e por que ela foi necessária
+## Formação e persistência das parcerias
 
 A primeira versão do estudo não representava parcerias: cada semana as fêmeas
 escolhiam do zero e por isso quase nunca voltavam ao mesmo macho. Medido sobre
@@ -817,7 +817,7 @@ que limita a fêmea deixa de ser o número de parceiros da temporada e passa a s
 o número de parcerias que ela mantém simultaneamente, quantidade que na
 epidemiologia se chama concorrência e que é um dos conceitos centrais da área.
 
-## As decisões que o desenho exigiu
+## Parametrização do modelo epidemiológico
 
 Três decisões que o relatório anterior deixava em aberto estão agora fixadas: a
 concorrência, em duas parcerias simultâneas; a duração média de uma parceria,
@@ -893,7 +893,7 @@ if (!is.null(e5)) {
 }
 ```
 
-### A forma da curva de preferência decide se a epidemia acontece
+### Efeito da curva de preferência sobre a ocorrência de epidemias
 
 ```{r epi-tab-beta}
 if (!is.null(e5)) {
@@ -960,7 +960,7 @@ if (!is.null(e5)) {
 }
 ```
 
-### Quem se infecta é quem mais acasala
+### Associação entre sucesso de acasalamento e infecção
 
 ```{r epi-res-quem, results='asis'}
 if (!is.null(e5) && !all(is.na(e5$res$g_i))) {
@@ -980,7 +980,7 @@ if (!is.null(e5) && !all(is.na(e5$res$g_i))) {
 }
 ```
 
-### A doença altera a seleção onde a epidemia é menor
+### Efeito da infecção sobre o diferencial de seleção
 
 ```{r epi-tab-selecao}
 if (!is.null(e5) && !is.null(e5$sel)) {
@@ -1025,7 +1025,7 @@ if (!is.null(e5) && !is.null(e5$sel)) {
 }
 ```
 
-### O que este objetivo acrescenta ao projeto
+### Contribuição do Objetivo 2 para o conjunto do projeto
 
 Os Estudos 1 a 4 mostraram que a regra de escolha de parceiro determina a
 estrutura da rede de acasalamentos.
