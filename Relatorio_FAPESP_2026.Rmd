@@ -1141,7 +1141,12 @@ eco-evolutionary dynamics of sexual selection and sexual conflicts*.
 Levei assim ao público internacional o conjunto de resultados descrito neste
 relatório, na primeira exposição do desenho ampliado em quatro estudos.
 
-Conforme exigido, registro a anotação abaixo referente ao trabalho apresentado:
+A participação no congresso foi custeada com recursos do Auxílio à Pesquisa a
+que esta bolsa está vinculada (Processo 2024/02198-7), e não da Reserva Técnica.
+Os comprovantes de despesa integram a prestação de contas do supervisor.
+
+Registro a seguir, no formato previsto pela norma, a anotação referente ao
+trabalho apresentado:
 
 > Este trabalho foi apresentado em painéis no evento científico European
 > Congress of Entomology 2026 (ECE2026) ocorrido de 29 de junho a 3 de julho de
@@ -1210,8 +1215,11 @@ deslocamento internacional.
 # 5 Publicações resultantes da Bolsa no período
 
 *Em observância à Política para Acesso Aberto às Publicações Resultantes de
-Auxílios e Bolsas FAPESP, resta informar, para cada artigo abaixo, o link do
-repositório em que foi depositado.*
+Auxílios e Bolsas FAPESP, resta depositar cada um dos artigos abaixo na
+Biblioteca Digital da Produção Intelectual da USP (BDPI) e informar aqui o link
+correspondente. A política exige repositório institucional: redes acadêmicas
+como ResearchGate e Academia.edu não a atendem, por exigirem cadastro para o
+acesso completo.*
 
 Três artigos de que sou coautora foram publicados em 2026, em ordem
 cronológica:
