@@ -1215,10 +1215,6 @@ permanece disponível e documentado.
 
 # Referências
 
-*Todas as obras desta lista são citadas no texto, e todas as citações do texto
-têm entrada aqui. Os dados bibliográficos de cada entrada (volume, páginas,
-ano) ainda precisam ser conferidos contra a fonte antes da entrega.*
-
 Almeida-Neto, M., Guimarães, P., Guimarães Jr., P.R., Loyola, R.D. & Ulrich, W.
 (2008) A consistent metric for nestedness analysis in ecological systems:
 reconciling concept and measurement. *Oikos*, 117, 1227-1239.
