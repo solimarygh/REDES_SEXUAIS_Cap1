@@ -1149,6 +1149,9 @@ Conforme exigido, registro a anotação abaixo referente ao trabalho apresentado
 
 ## Resumo do trabalho apresentado
 
+Transcrito do livro de resumos do congresso (contribuição #16560, Poster Session
+2, 1 de julho de 2026, às 16h, na área de exposição).
+
 > Intersexual selection strongly shapes phenotypic evolution. Even though many
 > classical models treat female mate preferences as uniform, real populations
 > show variation in what females actually prefer. What we still don't fully
@@ -1159,14 +1162,33 @@ Conforme exigido, registro a anotação abaixo referente ao trabalho apresentado
 > variation in female preference (σp) across four classic preference functions:
 > uniform, Gaussian, sigmoid, and U-shaped. We also restricted how many males a
 > female could sample, simulating real-world ecological search costs. We found
-> that local mating rules create distinct sexual [*completar a partir do resumo
-> submetido*].
+> that local mating rules create distinct sexual network topologies, which
+> directly drive trait evolution. Under directional selection, populations form
+> highly nested networks. In this hierarchical structure, a few attractive "hub"
+> males secure matings with both choosy and generalist females, fueling extreme
+> trait exaggeration. In contrast, stabilizing selection reveals a clear tipping
+> point. When female preference varies more than the male trait (σp > σz), the
+> network fragments into isolated modules. This modularity essentially mirrors
+> strict assortative mating: females only mate with males matching their exact
+> preferences. This modular structure shields rare phenotypes from natural
+> selection and rescues the genetic variance of the population. Interestingly,
+> introducing strict ecological sampling costs reveals a fundamental asymmetry in
+> evolutionary resilience. While directional trait exaggeration remains highly
+> robust even when females sample very few males, the modular structures required
+> to rescue genetic variance are extremely fragile. When females cannot properly
+> sample the male pool, assortative mating breaks down, triggering a collapse of
+> genetic diversity back to null-model levels. Given their diversity in mating
+> strategies and ecological search costs, arthropods represent ideal empirical
+> systems to test these predictions. Our framework demonstrates that mating
+> topology is a link translating behavioral variation into long-term evolutionary
+> outcomes.
 
 ## Documentos comprobatórios anexos
 
 - Certificado de participação emitido pela organização do ECE2026 em 2 de julho
   de 2026, assinado pelo Dr. David Giron, presidente da conferência, e pela Dra.
   Elisabeth Herniou, copresidente.
+- Página do livro de resumos do congresso com o resumo transcrito acima.
 - Notificação de aceitação do resumo, com o título, a autoria, a data, o horário
   e a sala da apresentação.
 - Comprovante de inscrição no congresso (fatura ECE2026-1153, de 10 de junho de
