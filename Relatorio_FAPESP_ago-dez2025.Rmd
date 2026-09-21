@@ -41,6 +41,11 @@ output:
     toc_float: true
 geometry: margin=2.5cm
 fontsize: 11pt
+# titlepage: a norma pede a folha de rosto numa pagina so (item 2.1). Sem isto o
+# \maketitle da classe article poe o titulo no alto da primeira pagina e o
+# sumario logo abaixo, na mesma folha. Com titlepage o titulo ganha pagina
+# propria e o sumario comeca na seguinte.
+classoption: titlepage
 lang: pt-BR
 # linestretch: 1.15
 #   Espaçamento entre linhas. Exige o pacote LaTeX setspace, e ficou comentado
