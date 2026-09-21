@@ -1263,9 +1263,25 @@ em observações feitas pelo público retornou ao público pela via da divulgaç
 
 # 7 Trabalhos preparados ou submetidos para publicação
 
-Três manuscritos de que participo estavam em preparação ao final do período:
+Cinco manuscritos de que participo estavam em preparação ao final do período.
+Os dois primeiros decorrem diretamente desta bolsa e apresentam os resultados
+descritos no item 2.3; os três seguintes vêm de colaborações.
 
-1. *MetaDiv Builder: a modular post-metabarcoding framework for harmonizing
+Nenhum deles se encontra em versão estável para submissão, de modo que as cópias
+acompanharão o Relatório Científico Final, quando os manuscritos estiverem
+prontos ou submetidos.
+
+1. *The architecture of choice: how preference heterogeneity structures mating
+   networks and drives trait evolution.* García Hernández, S., Santana, E.M. &
+   Guimarães Jr., P.R. Reúne os Estudos 1 a 4 do Objetivo 1. Em preparação para
+   submissão ao *Journal of Evolutionary Biology*.
+
+2. *Mate choice geometry determines whether a sexually transmitted infection
+   spreads.* García Hernández, S., Santana, E.M. & Guimarães Jr., P.R.
+   Apresenta os resultados do Objetivo 2. Em preparação para submissão ao
+   *Journal of Evolutionary Biology*.
+
+3. *MetaDiv Builder: a modular post-metabarcoding framework for harmonizing
    heterogeneous biodiversity datasets and functional ecological analysis.*
    Águila, B., Roy, M., Romero-Gutiérrez, M.F., Santos, M., García-Hernández,
    S., Schimann, H., Zinger, L., Neves, M.-A., Vasco-Palacios, A., Vázquez, D. &
@@ -1274,13 +1290,13 @@ Três manuscritos de que participo estavam em preparação ao final do período:
    Auxílio-Organização do Programa BIOTA/FAPESP coordenado pelo mesmo supervisor
    (Processo 2021/14381-2).
 
-2. *Evolution of leg autotomy in harvestmen (Arachnida: Opiliones): broad
+4. *Evolution of leg autotomy in harvestmen (Arachnida: Opiliones): broad
    phylogenetic patterns revealed by citizen-science data.* Kinoshita, D.A.,
    Solano-Brenes, D., Machado, G., Grossel, L.A., Holanda, L.P., Medrano, M.,
    Macedo-Rego, R.C., García-Hernández, S. & Bezerra, W.C.A. Em preparação para
    submissão ao *Journal of Zoological Systematics and Evolutionary Research*.
 
-3. *What are the drivers of ECM diversity at the Neotropical scale?* Aguila, B.,
+5. *What are the drivers of ECM diversity at the Neotropical scale?* Aguila, B.,
    Santos, M., García Hernández, S., Argüelles, A., Vázquez, D., Schimann, H.,
    Zinger, L., Brearley, F., Neves, M.-A., Vasco-Palacios, A., González, M.,
    Tulle, W., Guimarães Jr., P. & Roy, M. Em preparação para submissão ao *New
