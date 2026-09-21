@@ -1050,19 +1050,6 @@ ferramenta.
 Os resultados completos, com as figuras e todas as combinações de parâmetros,
 estão no *Material suplementar: o estudo epidemiológico*.
 
-## Visita de pesquisa ao Eawag, Zurique
-
-Logo após o congresso, de 5 a 7 de julho de 2026, realizei uma visita de
-pesquisa ao grupo do Dr. Carlos J. Melián, no Swiss Federal Institute of Aquatic
-Science and Technology (Eawag), em Zurique, Suíça. O Dr. Melián mantém
-colaboração científica ativa com o supervisor deste projeto, e a visita integrou
-essa agenda comum, com discussão de projetos conjuntos e fortalecimento da rede
-de colaboração.
-
-Encadeei a visita ao congresso, de modo que uma única viagem atendeu aos dois
-compromissos.
-
-
 # 2.4 Plano de Gestão de Dados
 
 Todos os códigos desenvolvidos no projeto estão organizados e documentados num
@@ -1143,11 +1130,24 @@ primeiros passos nessa direção.
 # 4 Participação em evento científico
 
 Participei do *European Congress of Entomology 2026* (ECE2026), realizado em
-Tours, França, de 29 de junho a 3 de julho de 2026, onde apresentei o pôster *The architecture of choice: network topology mediates the
-eco-evolutionary dynamics of sexual selection*, com os resultados deste projeto.
+Tours, França, de 29 de junho a 3 de julho de 2026, onde apresentei o pôster
+*The architecture of choice: network topology mediates the eco-evolutionary
+dynamics of sexual selection*, com os resultados deste projeto. Levei assim ao
+público internacional o conjunto de resultados descrito neste relatório, na
+primeira exposição do desenho ampliado em quatro estudos.
 
-Levei assim ao público internacional o conjunto de resultados descrito neste
-relatório, na primeira exposição do desenho ampliado em quatro estudos.
+## Visita de pesquisa ao Eawag, Zurique, na mesma viagem
+
+Aproveitando o deslocamento para o congresso, realizei de 5 a 7 de julho de 2026
+uma visita de pesquisa ao grupo do Dr. Carlos J. Melián, no Swiss Federal
+Institute of Aquatic Science and Technology (Eawag), em Zurique, Suíça. O Dr.
+Melián mantém colaboração científica ativa com o supervisor deste projeto, e a
+visita integrou essa agenda comum, com discussão de projetos conjuntos e
+fortalecimento da rede de colaboração.
+
+O encadeamento das duas atividades numa única viagem, com o congresso terminando
+em 3 de julho e a visita começando em 5, permitiu atender a dois compromissos
+científicos com um só deslocamento internacional.
 
 
 # 5 Publicações resultantes da Bolsa no período
