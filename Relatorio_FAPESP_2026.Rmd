@@ -1130,11 +1130,47 @@ primeiros passos nessa direção.
 # 4 Participação em evento científico
 
 Participei do *European Congress of Entomology 2026* (ECE2026), realizado em
-Tours, França, de 29 de junho a 3 de julho de 2026, onde apresentei o pôster
-*The architecture of choice: network topology mediates the eco-evolutionary
-dynamics of sexual selection*, com os resultados deste projeto. Levei assim ao
-público internacional o conjunto de resultados descrito neste relatório, na
-primeira exposição do desenho ampliado em quatro estudos.
+Tours, França, de 29 de junho a 3 de julho de 2026, onde apresentei em painel o
+trabalho *The architecture of choice: network topology mediates the
+eco-evolutionary dynamics of sexual selection*, de minha autoria e do
+supervisor, Prof. Dr. Paulo R. Guimarães Jr., ambos vinculados à Universidade de
+São Paulo. A apresentação ocorreu em 1 de julho de 2026, às 16h, na Poster
+Session 2, sala Hall Bourdu, dentro do tópico *Evolutionary Genetics:
+eco-evolutionary dynamics of sexual selection and sexual conflicts*.
+
+Levei assim ao público internacional o conjunto de resultados descrito neste
+relatório, na primeira exposição do desenho ampliado em quatro estudos.
+
+Conforme exigido, registro a anotação abaixo referente ao trabalho apresentado:
+
+> Este trabalho foi apresentado em painéis no evento científico European
+> Congress of Entomology 2026 (ECE2026) ocorrido de 29 de junho a 3 de julho de
+> 2026 em Tours, França.
+
+## Resumo do trabalho apresentado
+
+> Intersexual selection strongly shapes phenotypic evolution. Even though many
+> classical models treat female mate preferences as uniform, real populations
+> show variation in what females actually prefer. What we still don't fully
+> understand is how this individual variation interacts with ecological
+> constraints to drive long-term evolutionary trends. To tackle this, we built an
+> individual-based model tracking populations across 100 generations by combining
+> quantitative genetics with bipartite network analysis. We tested a gradient of
+> variation in female preference (σp) across four classic preference functions:
+> uniform, Gaussian, sigmoid, and U-shaped. We also restricted how many males a
+> female could sample, simulating real-world ecological search costs. We found
+> that local mating rules create distinct sexual [*completar a partir do resumo
+> submetido*].
+
+## Documentos comprobatórios anexos
+
+- Certificado de participação emitido pela organização do ECE2026 em 2 de julho
+  de 2026, assinado pelo Dr. David Giron, presidente da conferência, e pela Dra.
+  Elisabeth Herniou, copresidente.
+- Notificação de aceitação do resumo, com o título, a autoria, a data, o horário
+  e a sala da apresentação.
+- Comprovante de inscrição no congresso (fatura ECE2026-1153, de 10 de junho de
+  2026).
 
 ## Visita de pesquisa ao Eawag, Zurique, na mesma viagem
 
@@ -1148,7 +1184,6 @@ fortalecimento da rede de colaboração.
 O encadeamento numa única viagem, com o congresso terminando em 3 de julho e a
 visita começando em 5, permitiu realizar duas atividades científicas com um só
 deslocamento internacional.
-
 
 # 5 Publicações resultantes da Bolsa no período
 
