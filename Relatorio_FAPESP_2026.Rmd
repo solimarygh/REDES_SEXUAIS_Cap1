@@ -876,7 +876,7 @@ if (is.null(e5)) cat(paste0(
   "encontrado. O anexo epidemiológico traz o desenho e as figuras.*\n\n"))
 ```
 
-## Resultados
+## Resultados principais
 
 ```{r epi-res-intro, results='asis'}
 if (!is.null(e5)) {
