@@ -201,7 +201,7 @@ diferem apenas em quais características são herdáveis:
 | Segunda fase, tempo evolutivo | Estudo 2, Fêmeas variando | concluído |
 | não previsto | Estudo 3, Machos variando | concluído |
 | não previsto | Estudo 4, Co-evolução | concluído |
-| Objetivo 2, doença na rede | Objetivo 2, Estudo 5 | simulações concluídas, análise em curso |
+| Objetivo 2, doença na rede | Objetivo 2 | simulações concluídas, análise em curso |
 
 A razão de os quatro compartilharem o motor é metodológica: descrever o ciclo
 de vida uma vez só torna explícito que as diferenças entre os estudos vêm
@@ -295,7 +295,19 @@ source("10_Figuras_conceituais.R")
 figura_desenho()
 ```
 
-# Estudo 1: a estrutura da rede numa geração
+# Objetivo 1: preferência, estrutura da rede e evolução do traço
+
+O primeiro objetivo do projeto é investigar como a variação na preferência do
+sexo que escolhe influencia a estrutura da rede sexual e a evolução de
+características sexualmente selecionadas.
+
+No plano de trabalho original ele se desdobrava em dois estudos, um em tempo
+ecológico e outro em tempo evolutivo, que correspondem aos Estudos 1 e 2 deste
+relatório. Os Estudos 3 e 4 não estavam previstos: são extensões que o
+desenvolvimento do motor de simulação tornou possíveis, e que respondem a
+perguntas decorrentes dos dois primeiros.
+
+## Estudo 1: a estrutura da rede numa geração
 
 Este estudo corresponde à primeira fase do relatório anterior, e responde à
 pergunta mais básica do conjunto: que estrutura as curvas de preferência
@@ -303,7 +315,7 @@ produzem por si só, antes de qualquer resposta evolutiva? Nenhuma
 característica é herdada, os traços e as preferências são sorteados, a rede de
 acasalamentos se forma, as métricas são medidas, e o cenário termina.
 
-## Ampliação do desenho experimental
+### Ampliação do desenho experimental
 
 O desenho de 2025 cruzava cinco valores de dispersão da preferência com dois
 tipos de seleção, com 100 réplicas por combinação, e mantinha a dispersão do
@@ -332,7 +344,7 @@ ser cruzados por inteiro, de modo que se observam combinações extremas, como
 fêmeas muito homogêneas diante de machos muito variados, que o desenho anterior
 nunca visitava.
 
-## Resultados principais
+### Resultados principais
 
 ```{r est1-analise}
 # ---------------------------------------------------------------------
@@ -444,7 +456,7 @@ q1 <- function(expr, fmt = "%.2f") {
 pct1 <- function(expr) q1(expr, "%.0f%%")
 ```
 
-### Contribuição do regime de busca para a topologia da rede
+#### Contribuição do regime de busca para a topologia da rede
 
 ```{r texto-busca, results='asis'}
 if (is.null(est1)) {
@@ -481,7 +493,7 @@ Isso reorienta a pergunta original do projeto. Não é quanta variação existe 
 preferência o que determina a estrutura da rede, e sim de que lado da interação
 essa variação está.
 
-### Distribuição da divergência no plano σp × σz
+#### Distribuição da divergência no plano σp × σz
 
 A divergência entre as quatro curvas, ou seja o quanto elas produzem topologias
 distintas entre si, é máxima quando as fêmeas concordam e os machos variam, e
@@ -490,7 +502,7 @@ leitura possível, ainda não testada, é que quando todas as fêmeas querem a m
 coisa a geometria da curva se traduz sem ruído em quem acasala com quem, e
 quando elas discordam entre si a variação individual borra a assinatura.
 
-### Sensibilidade das métricas ao tamanho e à densidade da rede
+#### Sensibilidade das métricas ao tamanho e à densidade da rede
 
 O desenho faz a densidade da rede variar por um fator de
 `r q1(quote(faixa_dens), "%.0f")`, porque o número de parceiros por fêmea vai
@@ -541,7 +553,7 @@ usado é o NODF de Almeida-Neto et al. (2008), calculado com o pacote bipartite
 al. 2008), e ela e a centralização são calculadas com o igraph (Csardi & Nepusz
 2006).
 
-# Estudo 2: a evolução do traço masculino
+## Estudo 2: a evolução do traço masculino
 
 Este estudo corresponde à segunda fase do relatório anterior, e está concluído.
 O eixo é σp, a dispersão do pico de preferência entre as fêmeas. A preferência é
@@ -554,9 +566,9 @@ a resposta do traço à largura dessa distribuição sem o confundimento de a
 preferência estar mudando ao mesmo tempo. A escolha da fêmea é aqui a causa da
 seleção, e o estudo mede a resposta evolutiva do traço masculino.
 
-## Resultados principais
+### Resultados principais
 
-### Efeito da heterogeneidade de preferência sobre a variância genética
+#### Efeito da heterogeneidade de preferência sobre a variância genética
 
 ```{r fig-varz, fig.width=8, fig.height=4, fig.cap="Variância genética do traço masculino na geração 100, em função da dispersão da preferência feminina. Sob a curva gaussiana, que é estabilizadora a nível individual, a variância genética da população cresce à medida que as fêmeas discordam mais entre si. A curva aleatória fica em torno do valor neutro e serve de controle de deriva. $A_{max}$ = 200, sem seleção natural, promediando os três valores de k."}
 if (ok(d)) {
@@ -582,7 +594,7 @@ genética, desde que as fêmeas discordem entre si sobre onde está esse pico. A
 linha pontilhada marca a variância inicial: acima dela, a população terminou as
 cem gerações com mais variação genética do que começou.
 
-### Relação entre topologia da rede e variância genética mantida
+#### Relação entre topologia da rede e variância genética mantida
 
 Duas predições foram formuladas sobre a relação entre topologia e trajetória do
 traço. A primeira, de que o aninhamento prediria a exageração do traço, não se
@@ -597,7 +609,7 @@ acasalamentos se reparte em grupos que acasalam preferencialmente entre si
 mantêm mais variação genética no traço, e esse é o mecanismo de resgate de
 diversidade que o projeto propunha testar.
 
-### Bimodalidade do traço sob a curva disruptiva
+#### Bimodalidade do traço sob a curva disruptiva
 
 Sob a curva disruptiva as populações não convergem para um valor intermediário
 do traço: cada réplica vai parar num dos dois extremos, e a média entre
@@ -606,7 +618,7 @@ Hartigan rejeita a unimodalidade. A consequência para o relato dos resultados �
 que essa curva precisa ser apresentada como distribuição, e a bimodalidade
 tratada como resultado e não como variabilidade.
 
-# Estudo 3: a evolução da preferência feminina
+## Estudo 3: a evolução da preferência feminina
 
 Este estudo não estava previsto no plano original, e foi possível porque o
 motor desenvolvido para o Estudo 2 permitia inverter os papéis com uma
@@ -625,9 +637,9 @@ também uma leitura de dependência de condição: o macho expressa aquele traç
 por causa do ambiente em que se desenvolveu, e não por causa dos genes que
 transmite.
 
-## Resultados principais
+### Resultados principais
 
-### Efeito da variedade de machos sobre a variância da preferência
+#### Efeito da variedade de machos sobre a variância da preferência
 
 ```{r fig-varp, fig.width=8, fig.height=4, fig.cap="Variância da preferência feminina na geração 100, em função da variedade de machos disponíveis. Quando há pouca variedade de machos, a variação de preferência acaba eliminada; quando há muita, ela se mantém perto do valor neutro. $A_{max}$ = 200, sem seleção natural, promediando os três valores de k."}
 if (ok(esp)) {
@@ -649,7 +661,7 @@ if (ok(esp)) {
 É a resposta direta à pergunta que motivou o estudo. A variação de preferência
 não se mantém por si só: depende de haver material sobre o qual discriminar.
 
-### Dinâmica transitória da seleção sobre a preferência
+#### Dinâmica transitória da seleção sobre a preferência
 
 ```{r fig-dinamica, fig.width=8, fig.height=3.6, fig.cap="Dinâmica das primeiras cinquenta gerações sob pouca variedade de machos, com curva de preferência gaussiana. As duas quantidades caem juntas: conforme a seleção elimina as preferências mal posicionadas, a variância cai, e com ela desaparecem as falhas de acasalamento que geravam a seleção. $A_{max}$ = 200, σz = 0.2, sem seleção natural."}
 if (ok(esp)) {
@@ -677,7 +689,7 @@ sucesso reprodutivo que a alimentava. A consequência metodológica é que estud
 que meçam apenas o estado final de uma população podem concluir ausência de
 seleção onde houve seleção intensa e transitória.
 
-# Estudo 4: co-evolução de traço e preferência
+## Estudo 4: co-evolução de traço e preferência
 
 Este estudo também não estava previsto, e responde à pergunta que naturalmente
 segue os dois anteriores: o que acontece quando as duas características são
@@ -693,9 +705,9 @@ o mecanismo de Fisher (Fisher 1930), na formulação genética quantitativa de
 Lande (1981) e Kirkpatrick (1982), e as condições em que ele opera foram
 unificadas por Seger (1985).
 
-## Resultados principais
+### Resultados principais
 
-### Desequilíbrio de ligamento e covariância genética entre traço e preferência
+#### Desequilíbrio de ligamento e covariância genética entre traço e preferência
 
 ```{r tab-ld}
 if (ok(co)) {
@@ -721,7 +733,7 @@ preferem o mesmo, independentemente do seu próprio pico, de modo que o
 acasalamento é direcional mas não assortativo. O resultado é deslocamento do
 traço sem acoplamento, o que não corresponde ao mecanismo de Fisher.
 
-### Perda da assinatura topológica da seleção sexual ao longo das gerações
+#### Perda da assinatura topológica da seleção sexual ao longo das gerações
 
 ```{r fig-trajetoria, fig.width=9, fig.height=3.6, fig.cap="Trajetórias ao longo das cem gerações, promediando todas as combinações de sigma inicial, $A_{max}$ e k, sem seleção natural. O censo é de 400 adultos, de modo que Ne = 400 corresponderia a uma população sem desigualdade de sucesso reprodutivo."}
 if (ok(co)) {
@@ -1175,7 +1187,8 @@ de uma infecção sexualmente transmissível. Em paralelo, duas análises do Obj
 modelos SIS e SIR ao longo da temporada.
 
 Duas frentes excedem esse prazo e ficam registradas como desdobramento natural
-do trabalho. Uma é de desenho: o Estudo 5 varia $\sigma_p$ com $\sigma_z$ fixo,
+do trabalho. Uma é de desenho: o estudo epidemiológico varia $\sigma_p$ com
+$\sigma_z$ fixo,
 percorrendo uma única reta do plano, e cruzar os dois eixos é o que permitiria
 testar se a assimetria entre os sexos, que no Estudo 1 governa a topologia da
 rede, governa também o tamanho da epidemia. A outra é a confrontação das
