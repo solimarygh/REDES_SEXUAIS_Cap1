@@ -1162,7 +1162,9 @@ Três manuscritos de que participo estavam em preparação ao final do período:
    Águila, B., Roy, M., Romero-Gutiérrez, M.F., Santos, M., García-Hernández,
    S., Schimann, H., Zinger, L., Neves, M.-A., Vasco-Palacios, A., Vázquez, D. &
    Garibay-Orijel, R. Manuscrito metodológico desenvolvido no âmbito do projeto
-   NEFINEO.
+   *NEFINEO -- Networks of fungal interactions in the neotropics*,
+   Auxílio-Organização do Programa BIOTA/FAPESP coordenado pelo mesmo supervisor
+   (Processo 2021/14381-2).
 
 2. *Evolution of leg autotomy in harvestmen (Arachnida: Opiliones): broad
    phylogenetic patterns revealed by citizen-science data.* Kinoshita, D.A.,
@@ -1176,20 +1178,6 @@ Três manuscritos de que participo estavam em preparação ao final do período:
    Tulle, W., Guimarães Jr., P. & Roy, M. Em preparação para submissão ao *New
    Phytologist*. Este manuscrito era o resultado esperado da colaboração com o
    NEFINEO já anunciado no relatório anterior.
-
-## Participação no projeto NEFINEO
-
-A participação no projeto *NEFINEO -- Networks of fungal interactions in the
-neotropics*, Auxílio-Organização do Programa BIOTA/FAPESP coordenado pelo mesmo
-supervisor (Processo 2021/14381-2), teve continuidade no período e passou da
-fase de discussão conceitual para a de produção: dois dos três manuscritos
-listados acima decorrem diretamente dela.
-
-O intercâmbio metodológico entre redes mutualísticas e redes sexuais continua
-sendo produtivo nos dois sentidos. As ferramentas de análise de estrutura de
-rede usadas no NEFINEO são as mesmas empregadas neste projeto, e as questões de
-comparabilidade de métricas entre redes de tamanhos e densidades diferentes,
-discutidas na seção do Estudo 1 deste relatório, são comuns às duas áreas.
 
 # Projeção e recomendações
 
