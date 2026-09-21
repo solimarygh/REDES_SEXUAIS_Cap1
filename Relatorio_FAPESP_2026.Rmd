@@ -535,10 +535,11 @@ if (!is.null(est1)) {
 }
 ```
 
-O índice usado é o NODF de Almeida-Neto et al. (2008), calculado com o pacote
-bipartite (Dormann et al. 2008). A modularidade vem do algoritmo de Louvain
-(Blondel et al. 2008) aplicado sobre a rede, e ela e a centralização são
-calculadas com o igraph (Csardi & Nepusz 2006).
+As simulações foram realizadas em R (R Core Team 2026). O índice de aninhamento
+usado é o NODF de Almeida-Neto et al. (2008), calculado com o pacote bipartite
+(Dormann et al. 2008); a modularidade vem do algoritmo de Louvain (Blondel et
+al. 2008), e ela e a centralização são calculadas com o igraph (Csardi & Nepusz
+2006).
 
 # Estudo 2: a evolução do traço masculino
 
@@ -1052,32 +1053,6 @@ substitui o repositório citado no relatório anterior e reúne o motor de
 simulação, os scripts de cada estudo, as análises e os documentos que geram
 este relatório e os seus anexos. Após a publicação dos resultados o repositório
 será tornado público, garantindo a disponibilização transparente das análises.
-
-A organização segue três princípios, adotados ao longo deste ano à medida que o
-desenho crescia.
-
-O primeiro é o motor único. Todas as funções compartilhadas, da regra de
-decisão da fêmea ao cálculo das métricas de rede, estão num só arquivo, e cada
-estudo é um script curto que define o seu desenho experimental e chama esse
-motor. Assim, uma correção no motor alcança os quatro estudos ao mesmo tempo, e
-nenhuma diferença entre eles pode vir de implementações divergentes.
-
-O segundo é a reprodutibilidade por semente. Cada cenário recebe uma semente
-determinada pelo seu índice no desenho completo, de modo que produz exatamente
-o mesmo resultado quer a rodada seja feita de uma vez, quer seja dividida entre
-máquinas ou retomada depois de uma interrupção. As rodadas longas gravam um
-backup a cada bloco, e o backup carrega uma assinatura do desenho: se a grade
-de parâmetros mudar, a retomada é recusada em vez de misturar dois desenhos.
-
-O terceiro é que os documentos são gerados a partir dos dados. Este relatório e
-os seus anexos leem os mesmos arquivos de resultados com o mesmo código de
-leitura, e as figuras e os números são calculados na hora da compilação. Não há
-valores transcritos à mão que possam divergir dos dados, e os três documentos
-não podem discordar entre si sobre o que estão mostrando.
-
-As simulações foram realizadas em R (R Core Team 2026), com os pacotes igraph
-(Csardi & Nepusz 2006) para as métricas de rede e bipartite (Dormann et al.
-2008) para o aninhamento.
 
 # Atividades complementares
 
