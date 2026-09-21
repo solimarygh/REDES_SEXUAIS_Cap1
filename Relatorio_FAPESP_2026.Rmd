@@ -140,7 +140,7 @@ n_cen <- function(x, eixos) {
 
 # Introdução
 
-O presente relatório apresenta os avanços do projeto *Papel das redes de
+Apresento neste relatório os avanços do projeto *Papel das redes de
 interações sexuais na evolução de traços indicadores de qualidade sexualmente
 selecionados*, financiado pela Fundação de Amparo à Pesquisa do Estado de São
 Paulo (FAPESP) e sob supervisão do Prof. Dr. Paulo Roberto Guimarães Jr. Cobre
@@ -259,8 +259,8 @@ anexo de metodologia:
    regra de comparação em pool, ou *best-of-n*, suposição habitual para leks e
    agregações (Janetos 1980; Real 1990). A alternativa, em que ela decide de um
    em um e para ao atingir o número desejado de parceiros, que é a regra de
-   limiar fixo de Janetos (1980), foi implementada e descartada porque tornava o
-   gradiente de $A_{max}$ inoperante.
+   limiar fixo de Janetos (1980), foi implementada e descartada por mim porque
+   tornava o gradiente de $A_{max}$ inoperante.
 
 3. **Dois fatores ecológicos foram acrescentados ao desenho.** $A_{max}$ representa
    o custo de procurar parceiro, e k é o número máximo de parceiros que cada
@@ -585,7 +585,7 @@ cem gerações com mais variação genética do que começou.
 
 Duas predições foram formuladas sobre a relação entre topologia e trajetória do
 traço. A primeira, de que o aninhamento prediria a exageração do traço, não se
-confirmou: o sinal é firme estatisticamente, mas invertido, e não temos
+confirmou: o sinal é firme estatisticamente, mas invertido, e não tenho
 explicação para ele. Fica registrado como questão aberta, e a análise com a
 conectância da rede como covariável é o próximo passo para determinar se é
 artefato de densidade.
@@ -759,7 +759,7 @@ censo; quando o traço escapa da faixa de discriminação, a população retorna
 seu tamanho de censo. Nas condições deste modelo, portanto, a seleção sexual
 atua como uma força demográfica transitória.
 
-Este resultado não estava previsto e é, na nossa avaliação, o mais interessante
+Este resultado não estava previsto e é, na minha avaliação, o mais interessante
 do conjunto. Ele sugere que a assinatura da seleção sexual na estrutura da rede
 pode ser transitória, e que uma população amostrada num único momento pode
 apresentar uma rede indistinguível do acasalamento ao acaso apesar de ter
@@ -1081,32 +1081,28 @@ As simulações foram realizadas em R (R Core Team 2026), com os pacotes igraph
 
 # Atividades complementares
 
-A seguir, as atividades realizadas de forma complementar pela Dra. Solimary
-García Hernández no período relatado.
+A seguir, as atividades que realizei de forma complementar no período relatado.
 
 ## Apresentação em congresso internacional
 
-A pós-doutoranda participou do *European Congress of Entomology 2026*
-(ECE2026), realizado em Tours, França, de 29 de junho a 3 de julho de 2026, onde
-apresentou o pôster *The architecture of choice: network topology mediates the
+Participei do *European Congress of Entomology 2026* (ECE2026), realizado em
+Tours, França, de 29 de junho a 3 de julho de 2026, onde apresentei o pôster *The architecture of choice: network topology mediates the
 eco-evolutionary dynamics of sexual selection*, com os resultados deste projeto.
 
-A apresentação levou ao público internacional o conjunto de resultados descrito
-neste relatório, e foi a primeira exposição do desenho ampliado em quatro
-estudos.
+Levei assim ao público internacional o conjunto de resultados descrito neste
+relatório, na primeira exposição do desenho ampliado em quatro estudos.
 
 ## Visita de pesquisa ao Eawag, Zurique
 
-Logo após o congresso, de 5 a 7 de julho de 2026, a pós-doutoranda realizou uma
-visita de pesquisa ao grupo do Dr. Carlos J. Melián, no Swiss Federal Institute
-of Aquatic Science and Technology (Eawag), em Zurique, Suíça. O Dr. Melián
-mantém colaboração científica ativa com o supervisor deste projeto, e a visita
-integrou essa agenda comum, com discussão de projetos conjuntos e fortalecimento
-da rede de colaboração. Os custos de estadia foram cobertos pelo laboratório
-anfitrião.
+Logo após o congresso, de 5 a 7 de julho de 2026, realizei uma visita de
+pesquisa ao grupo do Dr. Carlos J. Melián, no Swiss Federal Institute of Aquatic
+Science and Technology (Eawag), em Zurique, Suíça. O Dr. Melián mantém
+colaboração científica ativa com o supervisor deste projeto, e a visita integrou
+essa agenda comum, com discussão de projetos conjuntos e fortalecimento da rede
+de colaboração.
 
-Vale notar que a visita foi encadeada ao congresso, de modo que uma única viagem
-atendeu aos dois compromissos.
+Encadeei a visita ao congresso, de modo que uma única viagem atendeu aos dois
+compromissos.
 
 ## Artigo publicado no período
 
@@ -1146,8 +1142,7 @@ em observações feitas pelo público retornou ao público pela via da divulgaç
 
 ## Manuscritos em preparação
 
-Três manuscritos com participação da pós-doutoranda estavam em preparação ao
-final do período:
+Três manuscritos de que participo estavam em preparação ao final do período:
 
 1. *MetaDiv Builder: a modular post-metabarcoding framework for harmonizing
    heterogeneous biodiversity datasets and functional ecological analysis.*
@@ -1191,8 +1186,8 @@ dois estudos adicionais que o desenvolvimento do motor tornou possíveis. O
 segundo objetivo teve o seu motor construído e as suas simulações concluídas
 dentro deste período.
 
-A bolsa de pós-doutorado da beneficiária se encerra em dezembro de 2026, e o
-relatório final do projeto está previsto para o final de janeiro de 2027. O
+Minha bolsa de pós-doutorado se encerra em dezembro de 2026, e o relatório final
+do projeto está previsto para o final de janeiro de 2027. O
 período de trabalho efetivo que resta é, portanto, de cerca de três meses, e a
 projeção abaixo foi dimensionada para ele.
 
@@ -1218,7 +1213,7 @@ acasalamentos.
 
 Em paralelo, duas análises do Objetivo 2 continuam em curso e devem entrar no
 relatório final: o papel de $\sigma_p$, que interage com a forma da curva de
-preferência de maneira que ainda não descrevemos por completo, e o contraste
+preferência de maneira que ainda não descrevi por completo, e o contraste
 entre os modelos SIS e SIR ao longo da temporada.
 
 ## O que fica encaminhado para além da bolsa
@@ -1249,12 +1244,11 @@ sentido de estabelecer as colaborações que isso exigiria.
 
 O projeto entregou os dois objetivos do plano de trabalho, e o desenho foi
 ampliado ao longo da execução de duas para cinco frentes de simulação, todas
-concluídas. Recomenda-se que o período que resta da bolsa seja dedicado
-integralmente à redação e submissão dos dois manuscritos, de modo que o
-resultado científico do projeto chegue à literatura, e que as duas frentes
-listadas acima sejam retomadas em trabalho posterior, seja pela beneficiária em
-nova vinculação, seja pelo grupo do supervisor, ao qual o código permanece
-disponível e documentado.
+concluídas. Recomendo dedicar o período que resta da bolsa integralmente à
+redação e submissão dos dois manuscritos, de modo que o resultado científico do
+projeto chegue à literatura, e retomar as duas frentes listadas acima em
+trabalho posterior, seja por mim em nova vinculação, seja pelo grupo do
+supervisor, ao qual o código permanece disponível e documentado.
 
 # Referências
 
