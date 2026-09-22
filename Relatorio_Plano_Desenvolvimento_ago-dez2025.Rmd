@@ -178,8 +178,10 @@ pós-doutorado.
 iniciada: em quatro meses não houve ciclo letivo que o permitisse, e a frente
 permanece entre os compromissos do Plano. Houve, no entanto, uma primeira
 atividade de avaliação acadêmica formal, que é parte do mesmo percurso de
-formação: integrei a banca avaliadora de
-**[COMPLETAR: tipo de trabalho, nome do aluno, instituição e data]**.
+formação: integrei a banca examinadora do Trabalho de Conclusão de Curso da
+aluna Andressa Santana, defendido em 12 de dezembro de 2025 na Universidade
+Federal do Piauí, Campus Amílcar Ferreira Sobral (Floriano, PI), sob orientação
+do Prof. Dr. Leonardo Sousa Carvalho.
 
 # 7. Habilidades a serem Adquiridas e/ou Treinamentos
 
@@ -195,6 +197,14 @@ cada métrica, e a interpretação dessas medidas exigiu enfrentar questões
 metodológicas próprias da área, como a dependência entre aninhamento e densidade
 da rede. Mantive também a participação nas discussões do subprojeto 3 (WP3) do
 projeto NEFINEO, dedicado à análise de redes.
+
+Em dezembro de 2025 o laboratório recebeu a visita dos pesquisadores Dr. Carlos
+J. Melián e **[COMPLETAR: nome completo de Pryanga e instituição]**, e participei
+das reuniões de trabalho e das atividades de intercâmbio acadêmico programadas
+durante a Spark Week, iniciativa do projeto coordenado pelo supervisor. O
+intercâmbio com o Dr. Melián, cuja pesquisa trata de modelagem de redes
+eco-evolutivas, foi o que deu origem ao estágio de curta duração realizado em
+2026, que constará do Relatório Científico Final.
 
 **Planejado:** Aplicar essas ferramentas para entender como as interações entre
 indivíduos influenciam os padrões de seleção sexual em diferentes contextos
