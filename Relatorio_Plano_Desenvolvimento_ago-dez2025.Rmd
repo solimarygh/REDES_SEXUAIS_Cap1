@@ -1,0 +1,245 @@
+---
+# Este documento é o "Relatório do Plano de desenvolvimento do programa de
+# Pós-Doutorado" exigido entre os Documentos Previstos do compromisso. Ele
+# relata as etapas cumpridas do Plano de Desenvolvimento anexado ao processo
+# por ocasião do aceite da concessão (assinado em 19 e 21 de outubro de 2024),
+# e dá continuidade ao documento entregue para o período de janeiro a agosto de
+# 2025.
+#
+# A estrutura reproduz a do documento anterior de propósito: cada rubro do
+# Plano original aparece como "Planejado", seguido do "Status no período". Assim
+# a FAPESP consegue acompanhar cada compromisso de uma entrega para a outra sem
+# precisar comparar documentos de formatos diferentes.
+#
+# O limite do anexo é de 1 MB em PDF. Este documento não tem figuras, de modo
+# que fica muito abaixo dele.
+title: |
+  | Atividades do Plano de Desenvolvimento do Programa de Pós-Doutorado
+subtitle: |
+  | Processo da bolsa de pós-doutorado No. 2024/18754-6
+  | Projeto de Pesquisa - Regular No. 2024/02198-7
+  |
+  | Período coberto: 30 de agosto a 31 de dezembro de 2025
+author: |
+  | Pós-doutoranda: Dra. Solimary García Hernández
+  | Supervisor: Prof. Dr. Paulo Roberto Guimarães Jr.
+date: "São Paulo, setembro de 2026"
+output:
+  pdf_document:
+    toc: false
+    number_sections: false
+    latex_engine: xelatex
+    keep_tex: false
+  word_document:
+    toc: false
+  html_document:
+    theme: flatly
+    toc: true
+    toc_depth: 2
+    number_sections: false
+geometry: margin=2.5cm
+fontsize: 11pt
+lang: pt-BR
+---
+
+A seguir apresento a comparação entre as atividades previstas no Plano de
+Desenvolvimento do Programa de Pós-Doutorado e as atividades efetivamente
+realizadas entre 30 de agosto e 31 de dezembro de 2025, período coberto pelo
+Relatório Científico que acompanha esta entrega.
+
+O documento anterior cobriu os oito primeiros meses de execução da bolsa,
+de janeiro a agosto de 2025. O presente documento cobre os quatro meses
+seguintes: o calendário da bolsa e o do projeto ao qual ela está vinculada
+começaram em datas diferentes, e o compromisso atual fechou em 31 de dezembro
+de 2025, de modo que este período é mais curto do que um ano regular. Isso deve
+ser levado em conta na leitura dos rubros em que não houve atividade: em
+quatro meses, várias das frentes previstas no Plano não têm ciclo suficiente
+para se completar. As atividades de 2026 constarão do relatório final.
+
+# 1. Objetivos do Projeto de Pesquisa
+
+**Planejado:** Explorar como a variação de preferência do sexo que escolhe
+determina a estrutura da rede sexual e impacta a evolução de traços sexualmente
+selecionados.
+
+**Status no período:** Realizado. As duas fases relatadas como "em andamento" no
+documento anterior foram concluídas no período e passaram a ser designadas
+Estudo 1 (estrutura da rede numa geração) e Estudo 2 (evolução do traço
+masculino ao longo de gerações). A mudança de nome acompanhou uma mudança de
+conteúdo: o desenho experimental dos dois estudos foi ampliado em duas ordens de
+grandeza em relação ao que constava do relatório anterior, e ambos passaram a
+compartilhar um único motor de simulação, o que torna explícito que as
+diferenças entre eles vêm apenas do desenho e não de implementações distintas.
+Os resultados confirmam e qualificam a leitura preliminar do relatório anterior,
+e estão descritos no Relatório Científico e no material suplementar que o
+acompanha.
+
+**Planejado:** Explorar se e como uma doença que se espalha por contato e altera
+a atratividade do sexo escolhido impacta a formação das redes sexuais e a
+seleção sobre a característica do sexo escolhido.
+
+**Status no período:** Retomado. No documento anterior este objetivo constava
+como substituído ou adiado, por depender de uma parceria que ainda não estava
+formalizada. No período, as reuniões com a Dra. Erika Marques de Santana
+(UNIFESP, Campus Diadema) chegaram a uma proposta de escopo que integra ao
+modelo o conhecimento que ela desenvolveu durante o seu pós-doutorado com o
+mesmo supervisor, e o objetivo voltou ao plano de trabalho, programado para o
+segundo ano da bolsa. A execução ocorreu em 2026 e constará do Relatório
+Científico Final.
+
+# 2. Estratégias de Divulgação
+
+**Planejado:** Apresentação dos resultados em congresso internacional.
+
+**Status no período:** Não houve participação em evento científico entre 30 de
+agosto e 31 de dezembro de 2025. A apresentação no 62º Annual Conference of the
+Animal Behavior Society, em julho de 2025, consta do documento anterior.
+
+**Planejado:** Apresentação dos resultados do projeto como um todo em congresso
+internacional como o ISBE.
+
+**Status no período:** Reprogramado. O congresso escolhido para a apresentação
+dos resultados do projeto passou a ser o ECE2026, e a participação ocorreu em
+2026, constando do Relatório Científico Final.
+
+**Planejado:** Produção de artigos de divulgação para público leigo.
+
+**Status no período:** Não desenvolvida no período. A repercussão em divulgação
+científica de um dos artigos ocorreu em 2026 e constará do relatório final.
+
+**Planejado:** Produção e submissão de artigo(s) em periódicos científicos de
+alta visibilidade.
+
+**Status no período:** Realizado. Três artigos de que sou coautora foram
+submetidos durante o período, e todos foram posteriormente aceitos e publicados
+em 2026:
+
+1. *Early sex differences in sociosexual behavior of wild robust capuchin
+   monkeys: ontogenetic and evolutionary insights.* Delval, I.,
+   García-Hernández, S., Teles, N., Caixeta, J., Cezar, L., Valentova, J.V.
+   *et al.* (*Evolution and Human Behavior*, 47(2), 106834, março de 2026).
+
+2. *Regulatory ambiguity and governance challenges for psilocybin mushrooms in
+   Brazil.* Nogueira, M., García-Hernández, S., Roberto, G.S. & Rodrigues, D.C.
+   (*International Journal of Drug Policy*, 150, 105198, abril de 2026).
+
+3. *One small step for citizens, one giant leap for science: iNaturalist
+   records boost our understanding of the evolution of parental care in a clade
+   of arachnids.* Machado, G., Buzatto, B.A., Caetano, D.S., Flores, E.,
+   García-Hernández, S., Grob, O. *et al.* (*Zoological Journal of the Linnean
+   Society*, 207(2), zlag061, 2026).
+
+Quanto ao artigo principal do projeto, os resultados dos Estudos 1 e 2 foram
+consolidados no período em material metodológico e em figuras que são a base dos
+manuscritos em preparação, cuja redação e submissão foram programadas para 2026.
+A organização do código em repositório GitHub, mencionada no documento anterior
+como em andamento, avançou: o repositório reúne o motor de simulação, as rotinas
+de análise e os materiais suplementares reprodutíveis, e a sua abertura ao
+público está prevista para o momento da submissão dos manuscritos, conforme
+descrito no Plano de Gestão de Dados do Relatório Científico.
+
+# 3. Atividade de Treinamento em Ética e Integridade da Pesquisa
+
+**Planejado:** Acompanhar análises e referências gerais sobre boas práticas e
+ética na pesquisa, seguindo as diretrizes da FAPESP.
+
+**Status no período:** Realizado de forma contínua. Além do acompanhamento das
+referências, as boas práticas foram aplicadas de maneira concreta na condução do
+projeto: todo o código de simulação e de análise é versionado, os resultados
+relatados são gerados a partir dos dados de simulação no momento da compilação
+dos documentos, sem números transcritos à mão, e o Plano de Gestão de Dados foi
+detalhado no Relatório Científico do período, incluindo a forma de arquivamento
+e o momento de abertura dos dados e do código.
+
+# 4. Atividades de Ensino e/ou Palestras Planejadas
+
+**Planejado:** Colaborar com disciplinas ou cursos.
+
+**Status no período:** Não houve atividade de ensino ou palestra entre 30 de
+agosto e 31 de dezembro de 2025. A palestra na VII Escola de Inverno em
+Fisiopatologia e Toxicologia (FisioTox 2025) consta do documento anterior.
+
+# 5. Contribuição para Elaboração de Propostas a Agências de Fomento
+
+**Planejado:** Participar da redação de projetos de pesquisa para obtenção de
+financiamento.
+
+**Status no período:** Elaborei, no período, o Plano de Trabalho para o segundo
+ano da bolsa, submetido à FAPESP junto com o pedido de prorrogação, que define o
+escopo científico, os cenários a testar e o cronograma de execução do Objetivo 2.
+
+# 6. Outras Atividades Acadêmicas ou Profissionais Planejadas
+
+**Planejado:** Assumir a orientação de um ou dois projetos de alunos durante o
+pós-doutorado.
+
+**Status no período:** Ainda não realizada. Em quatro meses não houve ciclo
+letivo que permitisse iniciar uma orientação, e a frente permanece entre os
+compromissos do Plano.
+
+# 7. Habilidades a serem Adquiridas e/ou Treinamentos
+
+**Planejado:** Adquirir conhecimento na teoria e na análise de redes de
+interação, participar de cursos e workshops e colaborar com pesquisadores com
+experiência na área.
+
+**Status no período:** Realizado. A análise de redes deixou de ser uma
+ferramenta a aprender e passou a ser o instrumento central do projeto: as redes
+bipartidas macho–fêmea geradas pelas simulações são descritas por modularidade,
+aninhamento, centralização e conectância, com as implementações consagradas de
+cada métrica, e a interpretação dessas medidas exigiu enfrentar questões
+metodológicas próprias da área, como a dependência entre aninhamento e densidade
+da rede. Mantive também a participação nas discussões do subprojeto 3 (WP3) do
+projeto NEFINEO, dedicado à análise de redes.
+
+**Planejado:** Aplicar essas ferramentas para entender como as interações entre
+indivíduos influenciam os padrões de seleção sexual em diferentes contextos
+ecológicos.
+
+**Status no período:** Realizado. É exatamente o conteúdo dos Estudos 1 e 2: a
+estrutura da rede de acasalamento é medida sob diferentes regimes de variação da
+preferência feminina, e a consequência dessa estrutura sobre a seleção do traço
+masculino é acompanhada ao longo de gerações.
+
+# 8. Outras Habilidades Profissionais a serem Adquiridas ou Fortalecidas
+
+**Planejado:** Liderar projetos de pesquisa de forma autônoma.
+
+**Status no período:** Realizado. Conduzi de forma independente o desenho, a
+execução e a análise dos dois estudos concluídos no período, incluindo as
+decisões metodológicas que o modelo exigiu e a reformulação do motor de
+simulação que permitiu unificá-los.
+
+**Planejado:** Organizar ou ministrar workshops e cursos para disseminar
+conhecimento.
+
+**Status no período:** Não realizada no período.
+
+**Planejado:** Adquirir habilidades relacionadas à supervisão de estudantes.
+
+**Status no período:** Não realizada no período, como consta do item 6.
+
+**Planejado:** Fortalecer habilidades de comunicação, principalmente na escrita
+de artigos científicos de impacto e na apresentação de pesquisas em conferências
+internacionais.
+
+**Status no período:** Em andamento. A submissão dos três artigos em coautoria e
+a preparação do material que dá base aos manuscritos do projeto foram os
+exercícios de escrita do período.
+
+# Conclusão
+
+O período de 30 de agosto a 31 de dezembro de 2025 concentrou-se na conclusão do
+Objetivo 1 do projeto e na retomada do Objetivo 2, que o documento anterior
+registrava como adiado. Os dois estudos previstos foram concluídos com um
+desenho consideravelmente mais amplo do que o inicialmente projetado, a parceria
+necessária ao módulo epidemiológico foi estabelecida e o plano de trabalho para
+o segundo ano foi elaborado e aprovado. No plano formativo, a aquisição de
+competências em teoria e análise de redes de interação, que era o principal
+compromisso de treinamento do Plano de Desenvolvimento, pode ser considerada
+cumprida.
+
+As frentes de ensino, divulgação ao público leigo e orientação de alunos não
+avançaram nestes quatro meses. Elas permanecem entre os compromissos do Plano, e
+as atividades realizadas em 2026 nessas três frentes constarão do relatório
+final.
