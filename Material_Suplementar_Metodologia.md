@@ -367,10 +367,11 @@ que ficou descrito acima, no ciclo de vida e nos fatores comuns.
 Que topologia de rede as curvas de preferência produzem por si só,
 antes de qualquer resposta evolutiva?
 
-Nenhuma característica é herdada. O traço dos machos e o pico de
-preferência das fêmeas são sorteados, a seleção natural de viabilidade
-filtra os machos (quando está ligada), a rede de acasalamentos se forma,
-medem-se as métricas de topologia, e acabou. Não existe geração seguinte
+Neste estudo, nem o pico de preferência das fêmeas nem o traço dos
+machos, que é a característica sob seleção sexual, são herdáveis. Os dois
+são sorteados, a seleção natural de viabilidade filtra os machos (quando
+está ligada), a rede de acasalamentos se forma, medem-se as métricas de
+topologia, e o cenário termina. Não existe geração seguinte
 nem feedback. A seleção natural entra aqui como filtro puramente
 ecológico: ela muda quais machos estão disponíveis para as fêmeas, mas
 não tem consequência evolutiva nenhuma, porque não há geração seguinte

@@ -772,9 +772,10 @@ figura_desenho()
 Este estudo responde à pergunta mais básica do conjunto: que estrutura as
 curvas de preferência produzem por si só, antes de qualquer resposta evolutiva?
 
-Nenhuma característica é herdada. Os traços e as preferências são sorteados, a
-rede de acasalamentos se forma, as métricas são medidas, e o cenário termina. É
-o único estudo que cruza os dois eixos de variação por inteiro.
+Neste estudo, nem a preferência da fêmea nem a característica do macho que está
+sob seleção sexual são herdáveis. Os traços e as preferências são sorteados, a
+rede de acasalamentos se forma, as métricas são medidas, e o cenário termina.
+É o único dos quatro que cruza os dois eixos de variação por inteiro.
 
 Como não há geração seguinte, não existe trajetória: cada cenário é um ponto, e
 o que se explora é o plano (σp, σz). Os dois eixos percorrem sete níveis, de
