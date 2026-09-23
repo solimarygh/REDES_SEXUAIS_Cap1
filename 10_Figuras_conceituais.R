@@ -736,27 +736,55 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
                    "4" = list(sigma_p_init = 1.0, sigma_z_init = 1.0))
   for (nm in names(padrao)) if (is.null(celula[[nm]])) celula[[nm]] <- padrao[[nm]]
 
-  r <- do.call(rede_representativa,
-               c(list(estudo), celula,
-                 list(tipo_selecao = tipo, encounters_n = A_max, k_fixo = k,
-                      selecao_natural = selecao_natural,
-                      capturar = c(1L, as.integer(geracoes)), verboso = FALSE)))
-  if (is.null(r)) {
-    warning("Sem dados para esta célula do estudo ", estudo, ".")
+  # O eixo do estudo pode levar mais de um valor, e nesse caso a figura ganha
+  # uma coluna por combinação de valor e geração. Com um valor só, que é o
+  # default, saem as duas colunas de sempre.
+  #
+  # Serve para juntar numa figura o que antes eram duas: o contraste entre as
+  # duas pontas do gradiente e o contraste entre a geração 1 e a 100. Pedindo
+  # sigma_p = c(0.2, 2.0) saem quatro colunas, e as duas comparações se leem na
+  # mesma grade de eixos.
+  mult <- names(celula)[vapply(celula, length, integer(1)) > 1]
+  if (length(mult) > 1)
+    stop("figura_mecanismo_geracoes: só um eixo pode levar mais de um valor.")
+
+  celulas <- if (!length(mult)) list(celula) else
+    lapply(celula[[mult]], function(v) { cc <- celula; cc[[mult]] <- v; cc })
+
+  bonito <- c(sigma_p = "σp", sigma_z = "σz",
+              sigma_p_init = "σp inicial", sigma_z_init = "σz inicial")
+
+  rs <- lapply(celulas, function(cc)
+    do.call(rede_representativa,
+            c(list(estudo), cc,
+              list(tipo_selecao = tipo, encounters_n = A_max, k_fixo = k,
+                   selecao_natural = selecao_natural,
+                   capturar = c(1L, as.integer(geracoes)), verboso = FALSE))))
+  if (any(vapply(rs, is.null, logical(1)))) {
+    warning("Sem dados para alguma célula do estudo ", estudo, ".")
     return(invisible(NULL))
   }
 
   ger <- c(1L, as.integer(geracoes))
-  lados <- lapply(ger, function(g) r$redes[[paste0("gen", g)]])
-  names(lados) <- paste0("gen", ger)
-  if (any(vapply(lados, is.null, logical(1)))) {
-    warning("Falta uma das gerações.")
-    return(invisible(NULL))
-  }
-  if (is.null(lados[[1]]$female_s)) {
-    warning("Esta rede foi guardada antes de female_s entrar na captura. ",
-            "Apague o cache (", ARQUIVO_CACHE_REDES, ") e rode de novo.")
-    return(invisible(NULL))
+
+  # A ordem das colunas: geração por fora, valor do eixo por dentro. Assim as
+  # duas primeiras colunas são a geração 1 nas duas pontas do gradiente, e as
+  # duas seguintes a geração 100 nas mesmas duas pontas.
+  lados <- list()
+  for (g in ger) for (i in seq_along(rs)) {
+    d <- rs[[i]]$redes[[paste0("gen", g)]]
+    if (is.null(d)) { warning("Falta a geração ", g, "."); return(invisible(NULL)) }
+    if (is.null(d$female_s)) {
+      warning("Esta rede foi guardada antes de female_s entrar na captura. ",
+              "Apague o cache (", ARQUIVO_CACHE_REDES, ") e rode de novo.")
+      return(invisible(NULL))
+    }
+    # O rótulo da coluna traz o valor do eixo quando há mais de um, senão
+    # repetiria a mesma informação em todas as colunas.
+    d$rotulo_col <- if (length(celulas) > 1)
+      sprintf("%s = %s", bonito[[mult]],
+              format(celulas[[i]][[mult]], trim = TRUE)) else ""
+    lados[[length(lados) + 1]] <- d
   }
 
   # O eixo é o MESMO nas duas colunas, senão a fuga do traço não se vê: com
@@ -815,7 +843,9 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
     # painéis de baixo desenham.
     rede <- rede_ggplot(
       preparar_rede(d$M),
-      titulo    = sprintf("Geração %d", d$geracao),
+      titulo    = if (nzchar(d$rotulo_col))
+                    sprintf("Geração %d · %s", d$geracao, d$rotulo_col)
+                  else sprintf("Geração %d", d$geracao),
       subtitulo = sprintf("Is %.2f | modularidade %.2f | centralização %.3f\nmachos − fêmeas %.1f | var(z) dos machos %.2f",
                           d$metrics$I_s, d$metrics$Modularity,
                           d$metrics$Centralization,
@@ -843,27 +873,40 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
 
   # A célula tem de aparecer inteira no subtítulo. Sem o sigma, quem lê a figura
   # não sabe em que ponto do gradiente está, e o gradiente é o eixo do estudo.
-  bonito <- c(sigma_p = "σp", sigma_z = "σz",
-              sigma_p_init = "σp inicial", sigma_z_init = "σz inicial")
-  quais      <- intersect(names(celula), names(bonito))
-  sigmas_txt <- paste(sprintf("%s = %s", bonito[quais],
-                              format(unlist(celula[quais]), trim = TRUE)),
-                      collapse = " | ")
+  # No subtítulo entra apenas o que é comum a todas as colunas: o eixo que varia
+  # entre elas já aparece no título de cada uma.
+  quais <- setdiff(intersect(names(celula), names(bonito)), mult)
+  sigmas_txt <- if (!length(quais)) "" else
+    paste(sprintf("%s = %s", bonito[quais],
+                  format(unlist(celula[quais]), trim = TRUE)), collapse = " | ")
 
-  montagem <- if (deitada) bloco(lados[[1]]) / bloco(lados[[2]])
-              else         bloco(lados[[1]]) | bloco(lados[[2]])
+  blocos <- lapply(lados, bloco)
+  montagem <- Reduce(function(a, b) if (deitada) a / b else a | b, blocos)
+
+  # Uma linha por réplica usada. Com mais de uma célula são réplicas diferentes,
+  # de rodadas diferentes, e o rodapé tem de dizer qual é qual.
+  replicas_txt <- if (length(rs) == 1) rotulo_replica(rs[[1]]) else
+    paste(vapply(seq_along(rs), function(i)
+      sprintf("%s = %s: %s", bonito[[mult]],
+              format(celulas[[i]][[mult]], trim = TRUE),
+              rotulo_replica(rs[[i]])), character(1)), collapse = "  |  ")
+
+  linha_celula <- paste(c(sigmas_txt, sprintf("A_max = %d", A_max),
+                          sprintf("k = %d", k),
+                          if (selecao_natural) "com seleção natural" else "sem seleção natural")
+                        [nzchar(c(sigmas_txt, "x", "x", "x"))], collapse = " | ")
 
   montagem +
     plot_annotation(
-      title = sprintf("%s, preferência %s: a mesma população, cem gerações depois",
-                      nome_estudo, labels_curva(tipo)),
-      subtitle = sprintf("%s\n%s | A_max = %d | k = %d | %s\n%s",
-                         o_que_anda, sigmas_txt, A_max, k,
-                         if (selecao_natural) "com seleção natural" else "sem seleção natural",
-                         rotulo_replica(r)),
+      title = sprintf("%s, preferência %s: %s",
+                      nome_estudo, labels_curva(tipo),
+                      if (length(celulas) > 1)
+                        "as duas pontas do gradiente, na geração 1 e cem gerações depois"
+                      else "a mesma população, cem gerações depois"),
+      subtitle = sprintf("%s\n%s\n%s", o_que_anda, linha_celula, replicas_txt),
       caption = paste0(
         "Linha 1: a rede de acasalamentos. Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.\n",
-        "Nas outras três, o eixo de baixo é o traço do macho, e é O MESMO nas duas colunas: sem isso a fuga do traço não se veria.\n",
+        "Nas outras três, o eixo de baixo é o traço do macho, e é O MESMO em todas as colunas: sem isso a fuga do traço não se veria.\n",
         "Linha 2: a curva de aceite de ", n_curvas, " fêmeas sorteadas, e os machos disponíveis marcados no eixo.\n",
         "Linha 3: cada ponto é um casal, e a diagonal marca onde o macho é igual ao pico da fêmea.\n",
         "Linha 4: quantas parceiras cada macho teve."),

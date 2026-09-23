@@ -250,38 +250,27 @@ REMENDOS <- list(
   list(de = "As mesmas quatro variáveis de acesso ao acasalamento da seção 1.3, agora com",
        para = "As mesmas quatro variáveis de acesso ao acasalamento da seção 1.2, agora com"),
 
-  # --- no anexo, as figuras de mecanismo ficam numa combinacao ------
-  # No Material suplementar completo as duas figuras do topico 2.0 percorrem a
-  # hierarquia inteira de fatores: 36 figuras numa e 72 na outra. O anexo e o
-  # documento curto, e ali as duas sao ilustracao do mecanismo e nao
-  # levantamento do desenho, de modo que fica a combinacao de referencia -
-  # A_max = 200, k = 5, sem selecao natural - que o titulo da figura declara.
-  list(
-    de = paste0(
-      "render_tabs_curva(function(cv, kk, amax, ns)\n",
-      "  print(figura_sigma_p(tipo = cv, k = kk, A_max = amax)))\n"
-    ),
-    para = paste0(
-      "for (cv in CURVAS) {\n",
-      "  cat(\"\\n\\n#### \", labels_4[[cv]], \"\\n\\n\", sep = \"\")\n",
-      "  print(figura_sigma_p(tipo = cv))\n",
-      "  cat(\"\\n\\n\")\n",
-      "}\n"
-    )
-  ),
+  # --- no anexo, a figura de mecanismo fica numa combinacao ---------
+  # No Material suplementar completo a figura do topico 2.0 percorre a
+  # hierarquia inteira de fatores: 72 abas, e cada uma reconstroi duas replicas
+  # de cem geracoes. O anexo e o documento curto, e ali a figura e ilustracao do
+  # mecanismo e nao levantamento do desenho, de modo que fica a combinacao de
+  # referencia - A_max = 200, k = 5, sem selecao natural - que o subtitulo da
+  # figura declara. As quatro colunas, essas, ficam: sao o conteudo da figura.
   list(
     de = paste0(
       "# agrupar_ns_amax: esta figura aceita os quatro fatores, e seriam sete níveis de\n",
       "# cabeçalho. A seleção natural e o A_max dividem um nível.\n",
       "render_tabs_curva(function(cv, kk, amax, ns)\n",
       "  print(figura_mecanismo_geracoes(\"2\", tipo = cv, k = kk, A_max = amax,\n",
-      "                                  selecao_natural = ns)),\n",
+      "                                  selecao_natural = ns,\n",
+      "                                  sigma_p = c(0.2, 2.0))),\n",
       "  com_ns = TRUE, agrupar_ns_amax = TRUE)\n"
     ),
     para = paste0(
       "for (cv in CURVAS) {\n",
       "  cat(\"\\n\\n#### \", labels_4[[cv]], \"\\n\\n\", sep = \"\")\n",
-      "  print(figura_mecanismo_geracoes(\"2\", tipo = cv))\n",
+      "  print(figura_mecanismo_geracoes(\"2\", tipo = cv, sigma_p = c(0.2, 2.0)))\n",
       "  cat(\"\\n\\n\")\n",
       "}\n"
     )

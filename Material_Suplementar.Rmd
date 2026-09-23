@@ -1207,55 +1207,47 @@ preferência, com a mesma cor e o mesmo tipo de traço em todo o documento.
 
 ## 2.0 O efeito de σp sobre uma população
 
-O eixo deste estudo é simples de enunciar e difícil de visualizar. As duas
-colunas abaixo são as duas pontas do gradiente, com os *mesmos* machos nas
-duas, de modo que a única coisa que difere entre elas é a dispersão dos picos
-de preferência.
+O eixo deste estudo é simples de enunciar e difícil de visualizar. A figura
+abaixo tem quatro colunas: as duas primeiras são as duas pontas do gradiente na
+geração 1, σp = 0.2 e σp = 2.0, e as duas seguintes as mesmas duas pontas na
+geração 100, depois de o traço masculino ter evoluído. Ela se lê em duas
+direções: dentro de cada par, o efeito de σp; de um par para o outro, o efeito
+de cem gerações de seleção.
 
-Ao contrário das figuras de rede, a população desta figura não é uma réplica
-recuperada das rodadas: é gerada com uma semente fixa, para que as duas colunas
-partam do mesmo material. O acasalamento e as métricas saem das mesmas funções
-que os estudos usam, mas o que a figura mostra é a regra de acasalamento, e não
-um resultado.
+As quatro colunas vêm de réplicas reais das rodadas, e o rodapé identifica
+cada uma. As duas pontas do gradiente são rodadas distintas, de modo que os
+machos não são os mesmos indivíduos nas duas; na geração 1, porém, eles são
+sorteados da mesma distribuição em ambas, com σz fixado em 1.0, e é por isso que
+a comparação entre elas isola σp. Os eixos são comuns às quatro colunas, sem o
+que a fuga do traço não se veria.
 
-Em cima, a curva de aceite de catorze fêmeas sorteadas, com os machos
-disponíveis marcados no eixo: com σp pequeno as curvas se empilham umas sobre
-as outras, porque todas querem o mesmo macho. No meio, os casais que se
-formaram, com a diagonal marcando onde o macho é igual ao pico da fêmea.
-Embaixo, quantas parceiras cada macho teve, que é sobre quem a seleção sexual
-está agindo neste estudo.
+Em cima está a rede de acasalamentos. Abaixo dela, a curva de aceite de catorze
+fêmeas sorteadas, com os machos disponíveis marcados no eixo: com σp pequeno as
+curvas se empilham umas sobre as outras, porque todas as fêmeas querem o mesmo
+macho. Depois, os casais que se formaram, com a diagonal marcando onde o macho é
+igual ao pico da fêmea. Embaixo, quantas parceiras cada macho teve, que é sobre
+quem a seleção sexual está agindo neste estudo.
+
+Como neste estudo a preferência é re-sorteada a cada geração, as curvas de
+aceite ocupam a mesma posição na geração 1 e na geração 100, e o que se desloca
+são os machos. A comparação a fazer entre os dois pares de colunas é entre a
+posição dos tracinhos no eixo, que marcam os machos existentes, e a posição das
+curvas, que não se movem.
 
 ### Curva por curva {.tabset}
 
-```{r fem-mecanismo, results='asis', fig.width=11, fig.height=9}
-render_tabs_curva(function(cv, kk, amax, ns)
-  print(figura_sigma_p(tipo = cv, k = kk, A_max = amax)))
-```
-
-Na aba da curva aleatória as duas colunas são equivalentes, o que confirma o
-controle: com P = 0.5 para qualquer par, σp não tem por onde produzir efeito.
-
-### A mesma população na geração 1 e na geração 100 {.tabset}
-
-A figura anterior contrasta σp baixo com σp alto, ou seja, duas populações
-diferentes. Esta contrasta a mesma população em dois momentos, a geração 1 e a
-geração 100, depois de o traço masculino ter evoluído.
-
-Em cima está a rede de acasalamentos, e abaixo os três painéis que mostram os
-indivíduos que a formaram, todos da mesma réplica. Como neste estudo a
-preferência é re-sorteada a cada geração, as curvas de aceite ocupam a mesma
-posição nas duas colunas, e o que se desloca são os machos. A comparação a
-fazer é entre a posição dos tracinhos no eixo, que marcam os machos
-existentes, e a posição das curvas, que não se movem.
-
-```{r fem-rede-evolucao, results='asis', fig.width=10, fig.height=12}
+```{r fem-rede-evolucao, results='asis', fig.width=19, fig.height=12}
 # agrupar_ns_amax: esta figura aceita os quatro fatores, e seriam sete níveis de
 # cabeçalho. A seleção natural e o A_max dividem um nível.
 render_tabs_curva(function(cv, kk, amax, ns)
   print(figura_mecanismo_geracoes("2", tipo = cv, k = kk, A_max = amax,
-                                  selecao_natural = ns)),
+                                  selecao_natural = ns,
+                                  sigma_p = c(0.2, 2.0))),
   com_ns = TRUE, agrupar_ns_amax = TRUE)
 ```
+
+Na aba da curva aleatória as quatro colunas são equivalentes, o que confirma o
+controle: com P = 0.5 para qualquer par, σp não tem por onde produzir efeito.
 
 ## 2.1 Métricas de rede {.tabset}
 
