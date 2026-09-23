@@ -457,6 +457,51 @@ plot_evolucao <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo,
 # Os níveis começam em ### porque o cabeçalho da seção é ##, que é o que
 # aparece na barra lateral.
 # ---------------------------------------------------------------------
+# Como render_tabs(), mas para as figuras de mecanismo, que são desenhadas uma
+# por curva de preferência. A curva entra como primeiro nível de aba e os
+# fatores ecológicos a seguir, de modo que a hierarquia seja a mesma das seções
+# de resultados.
+#
+# A profundidade é o que limita a forma. O Markdown tem seis níveis de
+# cabeçalho e as abas são cabeçalhos: a seção é ## e a subseção ###, de modo que
+# sobram três níveis. Com quatro fatores a percorrer - curva, seleção natural,
+# A_max e k - faltaria um. Por isso `agrupar_ns_amax`: quando é TRUE, a seleção
+# natural e o A_max compartilham um nível de aba, com o rótulo dizendo os dois.
+#
+# `com_ns` diz se a seleção natural entra. Nas figuras geradas na hora, como a
+# de 2.0, ela não é parâmetro da função: filtraria juvenis, e ali não existe
+# geração anterior de onde vir. Oferecer a aba mostraria duas vezes a mesma
+# figura.
+render_tabs_curva <- function(f, com_ns = FALSE, agrupar_ns_amax = FALSE) {
+  for (cv in CURVAS) {
+    cat(sprintf("\n#### %s {.tabset}\n\n", labels_4[[cv]]))
+    combos <- if (!com_ns) {
+      lapply(c(200, 40, 10), function(a) list(ns = FALSE, amax = a,
+                                              rot = sprintf("A_max = %d", a)))
+    } else if (agrupar_ns_amax) {
+      unlist(lapply(c(FALSE, TRUE), function(n)
+        lapply(c(200, 40, 10), function(a)
+          list(ns = n, amax = a,
+               rot = sprintf("%s seleção natural · A_max = %d",
+                             if (n) "com" else "sem", a)))), recursive = FALSE)
+    } else {
+      unlist(lapply(c(FALSE, TRUE), function(n)
+        lapply(c(200, 40, 10), function(a)
+          list(ns = n, amax = a, rot = sprintf("A_max = %d", a)))), recursive = FALSE)
+    }
+    for (cc in combos) {
+      cat(sprintf("\n##### %s {.tabset}\n\n", cc$rot))
+      for (kk in c(5, 10, 20)) {
+        cat(sprintf("\n###### k = %d\n\n", kk))
+        ok_fig <- tryCatch({ f(cv, kk, cc$amax, cc$ns); TRUE },
+                           error = function(e) FALSE)
+        if (!ok_fig) cat("\n*Sem dados para esta combinação.*\n")
+        cat("\n\n")
+      }
+    }
+  }
+}
+
 render_tabs <- function(f) {
   for (ns in c(FALSE, TRUE)) {
     cat(sprintf("\n### %s {.tabset}\n\n",
@@ -1183,11 +1228,8 @@ está agindo neste estudo.
 ### Curva por curva {.tabset}
 
 ```{r fem-mecanismo, results='asis', fig.width=11, fig.height=9}
-for (cv in CURVAS) {
-  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
-  print(figura_sigma_p(tipo = cv))
-  cat("\n\n")
-}
+render_tabs_curva(function(cv, kk, amax, ns)
+  print(figura_sigma_p(tipo = cv, k = kk, A_max = amax)))
 ```
 
 Na aba da curva aleatória as duas colunas são equivalentes, o que confirma o
@@ -1207,11 +1249,12 @@ fazer é entre a posição dos tracinhos no eixo, que marcam os machos
 existentes, e a posição das curvas, que não se movem.
 
 ```{r fem-rede-evolucao, results='asis', fig.width=10, fig.height=12}
-for (cv in CURVAS) {
-  cat("\n\n#### ", labels_4[[cv]], "\n\n", sep = "")
-  print(figura_mecanismo_geracoes("2", tipo = cv))
-  cat("\n\n")
-}
+# agrupar_ns_amax: esta figura aceita os quatro fatores, e seriam sete níveis de
+# cabeçalho. A seleção natural e o A_max dividem um nível.
+render_tabs_curva(function(cv, kk, amax, ns)
+  print(figura_mecanismo_geracoes("2", tipo = cv, k = kk, A_max = amax,
+                                  selecao_natural = ns)),
+  com_ns = TRUE, agrupar_ns_amax = TRUE)
 ```
 
 ## 2.1 Métricas de rede {.tabset}

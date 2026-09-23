@@ -250,6 +250,43 @@ REMENDOS <- list(
   list(de = "As mesmas quatro variáveis de acesso ao acasalamento da seção 1.3, agora com",
        para = "As mesmas quatro variáveis de acesso ao acasalamento da seção 1.2, agora com"),
 
+  # --- no anexo, as figuras de mecanismo ficam numa combinacao ------
+  # No Material suplementar completo as duas figuras do topico 2.0 percorrem a
+  # hierarquia inteira de fatores: 36 figuras numa e 72 na outra. O anexo e o
+  # documento curto, e ali as duas sao ilustracao do mecanismo e nao
+  # levantamento do desenho, de modo que fica a combinacao de referencia -
+  # A_max = 200, k = 5, sem selecao natural - que o titulo da figura declara.
+  list(
+    de = paste0(
+      "render_tabs_curva(function(cv, kk, amax, ns)\n",
+      "  print(figura_sigma_p(tipo = cv, k = kk, A_max = amax)))\n"
+    ),
+    para = paste0(
+      "for (cv in CURVAS) {\n",
+      "  cat(\"\\n\\n#### \", labels_4[[cv]], \"\\n\\n\", sep = \"\")\n",
+      "  print(figura_sigma_p(tipo = cv))\n",
+      "  cat(\"\\n\\n\")\n",
+      "}\n"
+    )
+  ),
+  list(
+    de = paste0(
+      "# agrupar_ns_amax: esta figura aceita os quatro fatores, e seriam sete níveis de\n",
+      "# cabeçalho. A seleção natural e o A_max dividem um nível.\n",
+      "render_tabs_curva(function(cv, kk, amax, ns)\n",
+      "  print(figura_mecanismo_geracoes(\"2\", tipo = cv, k = kk, A_max = amax,\n",
+      "                                  selecao_natural = ns)),\n",
+      "  com_ns = TRUE, agrupar_ns_amax = TRUE)\n"
+    ),
+    para = paste0(
+      "for (cv in CURVAS) {\n",
+      "  cat(\"\\n\\n#### \", labels_4[[cv]], \"\\n\\n\", sep = \"\")\n",
+      "  print(figura_mecanismo_geracoes(\"2\", tipo = cv))\n",
+      "  cat(\"\\n\\n\")\n",
+      "}\n"
+    )
+  ),
+
   # --- o regime de busca sai do anexo -------------------------------
   # Decisao de escopo, nao de conteudo: a secao fica no Material suplementar
   # completo. Aqui sai o paragrafo que a apresenta, o cabecalho e o bloco que
