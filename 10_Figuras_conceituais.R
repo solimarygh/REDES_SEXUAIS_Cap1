@@ -301,7 +301,8 @@ figura_cantos <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
     facet_grid(lin ~ col, switch = "y") +
     coord_cartesian(ylim = c(-25, N), clip = "off") +
     labs(title = "Estudo 1: a matriz de acasalamentos nos quatro cantos do plano σp × σz",
-         subtitle = sprintf("Preferência gaussiana | %d machos e %d fêmeas | A_max = %d | k = %d | uma geração", N, N, A_max, k),
+         subtitle = sprintf("Preferência %s | %d machos e %d fêmeas | A_max = %d | k = %d | uma geração",
+                            tolower(labels_curva(tipo)), N, N, A_max, k),
          x = "fêmeas, ordenadas pelo seu pico de preferência",
          y = "machos, ordenados pelo seu traço",
          caption = "Cada ponto é um acasalamento. Faixa na diagonal: acasalamento assortativo, que gera módulos.\nListra horizontal: poucos machos levam quase tudo. Matriz cheia e sem forma: a preferência não discrimina.") +
@@ -420,7 +421,7 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
     list(sz = sigma_alto,  sp = sigma_alto,  tit = "machos variados, fêmeas discordam")
   )
 
-  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 6.5, 1.5), oma = c(3, 0, 3, 0))
+  op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 6.5, 1.5), oma = c(3, 0, 4.5, 0))
   on.exit(par(op), add = TRUE)
   for (cc in cantos) {
     r <- um_canto(cc$sz, cc$sp)
@@ -430,7 +431,13 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
                              r$n_comp, r$n_com, r$sem, r$fonte))
   }
   mtext("Estudo 1: a rede nos quatro cantos do plano σp × σz",
-        outer = TRUE, side = 3, line = 0.5, cex = 1.3, font = 2)
+        outer = TRUE, side = 3, line = 1.6, cex = 1.3, font = 2)
+  # Os quatro painéis variam σz e σp; todo o resto do desenho fica fixo, e sem
+  # esta linha o leitor não sabe em que combinação está olhando.
+  mtext(sprintf("preferência %s | %d machos e %d fêmeas | A_max = %d | k = %d | %s seleção natural | uma geração",
+                labels_curva(tipo), N, N, A_max, k,
+                if (selecao_natural) "com" else "sem"),
+        outer = TRUE, side = 3, line = 0.3, cex = 0.85, col = "gray30")
   mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain, que é o algoritmo da métrica de modularidade.  Cinza: sem acasalar.\nComponente é um pedaço sem ligação com o resto; comunidade é o que o Louvain separa dentro dele. As duas contagens ignoram quem não acasalou.",
         outer = TRUE, side = 1, line = 1, cex = 0.8, col = "gray30")
   invisible(NULL)
@@ -493,8 +500,9 @@ figura_busca <- function(amax = c(10L, 200L), ks = c(5L, 20L),
   }
   mtext("Estudo 1: a rede sob os quatro regimes de busca",
         outer = TRUE, side = 3, line = 1.5, cex = 1.3, font = 2)
-  mtext(sprintf("preferência %s | σz = %.1f e σp = %.1f nos quatro painéis | %d machos e %d fêmeas | uma geração",
-                tipo, sigma_z, sigma_p, N, N),
+  mtext(sprintf("preferência %s | σz = %.1f e σp = %.1f nos quatro painéis | %d machos e %d fêmeas | %s seleção natural | uma geração",
+                labels_curva(tipo), sigma_z, sigma_p, N, N,
+                if (selecao_natural) "com" else "sem"),
         outer = TRUE, side = 3, line = 0.2, cex = 0.85, col = "gray30")
   mtext("Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.\nComponente é um pedaço sem ligação com o resto; comunidade é o que o Louvain separa dentro dele. As duas ignoram quem não acasalou.",
         outer = TRUE, side = 1, line = 1.2, cex = 0.8, col = "gray30")
