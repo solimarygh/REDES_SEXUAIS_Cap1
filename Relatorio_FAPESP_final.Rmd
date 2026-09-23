@@ -246,10 +246,10 @@ anexo de metodologia:
 1. **Quatro curvas de preferência em vez de duas.** Além da direcional e da
    estabilizadora, o desenho passou a incluir uma curva nula, em que a fêmea
    aceita qualquer macho com a mesma probabilidade, e uma disruptiva, em que ela
-   prefere machos que diferem do seu próprio pico. A curva nula é o que torna o
-   resto interpretável: qualquer métrica medida sob ela é o valor que aquela
-   métrica assume por acaso, dado o tamanho da população e o número de
-   acasalamentos, e serve de piso contra o qual as outras três se leem.
+   prefere machos que diferem do seu próprio pico. A curva nula cumpre a função
+   de controle: qualquer métrica medida sob ela é o valor que aquela métrica
+   assume por acaso, dado o tamanho da população e o número de acasalamentos, e
+   serve de piso contra o qual as outras três se leem.
 
 2. **A regra de decisão da fêmea foi explicitada.** A fêmea avalia um número
    determinado de machos, $A_{max}$, e só então escolhe entre os que aceitou. É a
@@ -281,8 +281,8 @@ Além disso, a variância de segregação passou a seguir o modelo infinitesimal
 em que o desvio do filhote em relação à média dos pais tem variância
 proporcional à variância parental, e não um ruído de tamanho fixo arbitrado
 (Fisher 1918; Roff & Fairbairn 2014).
-Essa mudança é o que torna respondível a pergunta sobre manutenção de variação
-genética: com um ruído fixo, a variância genética convergiria sempre para o
+Sem essa mudança a pergunta sobre manutenção de variação genética não seria
+respondível: com um ruído fixo, a variância genética convergiria sempre para o
 mesmo piso em todos os cenários, e a resposta viria embutida no modelo.
 
 ### Desenho experimental dos quatro estudos
@@ -558,9 +558,9 @@ re-sorteada a cada geração da mesma distribuição e portanto não evolui; o t
 do macho é herdável e livre para responder à seleção. São cem gerações por
 réplica.
 
-Manter σp fixo durante as cem gerações é deliberado, e é o que permite atribuir
-a resposta do traço à largura dessa distribuição sem o confundimento de a
-preferência estar mudando ao mesmo tempo. A escolha da fêmea é aqui a causa da
+σp permanece fixo durante as cem gerações, o que permite atribuir a resposta do
+traço à largura dessa distribuição sem o confundimento de a preferência estar
+mudando ao mesmo tempo. A escolha da fêmea é aqui a causa da
 seleção, e o estudo mede a resposta evolutiva do traço masculino.
 
 #### Resultados principais
@@ -763,8 +763,8 @@ preferência discrimina. A curva disruptiva chega ao mesmo estado por outro
 caminho, alargando a distribuição do traço até que qualquer fêmea encontre
 machos distantes do seu próprio pico.
 
-O painel do tamanho efetivo mostra que o fenômeno não é apenas topológico.
-Enquanto a seleção sexual opera, ela reduz o Ne a aproximadamente metade do
+O painel do tamanho efetivo mostra que o fenômeno tem também consequência
+demográfica. Enquanto a seleção sexual opera, ela reduz o Ne a aproximadamente metade do
 censo; quando o traço escapa da faixa de discriminação, a população retorna ao
 seu tamanho de censo. Nas condições deste modelo, portanto, a seleção sexual
 atua como uma força demográfica transitória.
@@ -930,13 +930,12 @@ if (!is.null(e5)) {
     pc5(min(lo$gr)), tolower(labels_4[lo$tipo_selecao[which.min(lo$gr)]]),
     pc5(max(lo$gr)), tolower(labels_4[lo$tipo_selecao[which.max(lo$gr)]])))
 
-  cat(sprintf(paste0("O ponto que dá sentido a essa diferença é que o volume ",
-    "de sexo é praticamente o mesmo nas quatro curvas: as cópulas por fêmea ",
-    "variam por um fator de %.2f, enquanto a oportunidade de seleção sexual ",
-    "varia de %.2f a %.2f. Com a mesma quantidade de cópulas, portanto, é a ",
-    "forma da curva de preferência que decide se a epidemia acontece, e o que ",
-    "a explica é como os acasalamentos se repartem entre os machos, não ",
-    "quantos existem.\n\n"),
+  cat(sprintf(paste0("Essa diferença ocorre com um volume de sexo praticamente ",
+    "igual nas quatro curvas: as cópulas por fêmea variam por um fator de ",
+    "%.2f, enquanto a oportunidade de seleção sexual varia de %.2f a %.2f. ",
+    "Com a mesma quantidade de cópulas, a forma da curva de preferência ",
+    "decide se a epidemia acontece, e a explicação está em como os ",
+    "acasalamentos se repartem entre os machos, e não em quantos existem.\n\n"),
     max(lo$cop)/min(lo$cop), min(lo$Is, na.rm = TRUE), max(lo$Is, na.rm = TRUE)))
 
   if (nrow(lo) > 2 && !all(is.na(lo$C))) {
