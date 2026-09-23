@@ -713,9 +713,10 @@ tibble(
 ) %>% kable(caption = "O que está neste documento. Cenários inclui as 20 réplicas de cada combinação de parâmetros.")
 ```
 
-Um cenário é uma réplica de uma combinação de parâmetros. Os seis fatores já
-foram definidos acima, um a um; a tabela os reúne com os seus níveis, para
-consulta:
+Uma *combinação* é um ponto concreto do desenho, ou seja um valor fixado para
+cada um dos seis fatores, e um *cenário* é uma réplica dessa combinação. Os
+fatores já foram definidos acima, um a um; a tabela os reúne com os seus
+níveis, para consulta:
 
 | fator | níveis |
 |---|---|
@@ -778,13 +779,10 @@ curvas de preferência produzem por si só, antes de qualquer resposta evolutiva
 Neste estudo, nem a preferência da fêmea nem a característica do macho que está
 sob seleção sexual são herdáveis. Os traços e as preferências são sorteados, a
 rede de acasalamentos se forma, as métricas são medidas, e o cenário termina.
-É o único dos quatro que cruza os dois eixos de variação por inteiro.
 
 Como não há geração seguinte, não existe trajetória: cada cenário é um ponto, e
-o que se explora é o plano (σp, σz). Os dois eixos percorrem sete níveis, de
-0.2 a 2.0, e a diagonal σp = σz é o conjunto de casos em que os dois sexos são
-igualmente heterogêneos. Uma geração basta porque, sem herança, a segunda
-geração seria um sorteio independente da mesma distribuição.
+o que se explora é o plano (σp, σz) por inteiro. A diagonal σp = σz é o conjunto
+de casos em que os dois sexos são igualmente heterogêneos.
 
 A seleção natural entra aqui como filtro puramente ecológico: altera quais
 machos estão disponíveis para as fêmeas, mas não tem consequência evolutiva,
@@ -797,15 +795,8 @@ parâmetros. Antes de passar a elas, vale ver o objeto concreto que está por
 trás de cada valor: uma população de 400 indivíduos e a rede de acasalamentos
 que ela formou.
 
-Chamamos de *combinação* um ponto concreto do desenho, ou seja um valor
-fixado para cada um dos seis fatores, e de *réplica* cada uma das 20
-repetições daquela combinação com sementes diferentes.
-
-As redes desenhadas abaixo são réplicas reais: dentro de cada combinação o
-procedimento localiza a réplica cuja modularidade está mais próxima da média
-das 20, recupera a semente com que foi gerada, reconstrói a rede e confere que
-a métrica reproduzida coincide com a que havia sido registrada. O rodapé de
-cada painel identifica a réplica.
+Dentro de cada combinação, a réplica desenhada é aquela cuja modularidade está
+mais próxima da média das 20, e o rodapé de cada painel a identifica.
 
 A figura mostra os quatro cantos do plano (σp, σz). Os quadrados são machos, os
 círculos são fêmeas, e as cores vêm do mesmo algoritmo de Louvain que calcula a
@@ -1111,10 +1102,8 @@ traço do macho é herdável e livre para responder à seleção. σz é apenas
 condição inicial, fixada em 1.0.
 
 Aqui a escolha da fêmea é a *causa* da seleção: a distribuição de preferências
-não muda ao longo do tempo, e é ela que gera a pressão seletiva sobre os
-machos. Manter σp fixo durante as cem gerações é deliberado, e é o que permite
-atribuir a resposta do traço à largura dessa distribuição, sem o confundimento
-de a preferência estar mudando ao mesmo tempo.
+não muda ao longo do tempo e gera a pressão seletiva sobre os machos, cuja
+resposta evolutiva é o que o estudo mede.
 
 Todas as figuras das seções seguintes têm a mesma estrutura de três colunas, e
 vale entendê-la uma vez:

@@ -158,17 +158,18 @@ REMENDOS <- list(
   # --- a contagem de cenarios passa para a prosa --------------------
   list(
     de = paste0(
-      "Um cenário é uma réplica de uma combinação de parâmetros. Os seis fatores já\n",
-      "foram definidos acima, um a um; a tabela os reúne com os seus níveis, para\n",
-      "consulta:\n"
+      "Uma *combinação* é um ponto concreto do desenho, ou seja um valor fixado para\n",
+      "cada um dos seis fatores, e um *cenário* é uma réplica dessa combinação. Os\n",
+      "fatores já foram definidos acima, um a um; a tabela os reúne com os seus\n",
+      "níveis, para consulta:\n"
     ),
     para = paste0(
-      "Um cenário é uma réplica de uma combinação de parâmetros. São\n",
+      "Uma *combinação* é um ponto concreto do desenho, ou seja um valor fixado para\n",
+      "cada um dos seis fatores, e um *cenário* é uma réplica dessa combinação. São\n",
       "`r n_cen(ct, c(\"sigma_p\", \"sigma_z\"))` cenários no Estudo 1, de uma geração\n",
       "cada, e `r n_cen(d, \"sigma_p\")` no Estudo 2, de cem gerações cada, com as 20\n",
-      "réplicas já contadas dentro dos dois números. Os seis fatores já foram\n",
-      "definidos acima, um a um; a tabela os reúne com os seus níveis, para\n",
-      "consulta:\n"
+      "réplicas já contadas dentro dos dois números. Os fatores já foram definidos\n",
+      "acima, um a um; a tabela os reúne com os seus níveis, para consulta:\n"
     )
   ),
 
