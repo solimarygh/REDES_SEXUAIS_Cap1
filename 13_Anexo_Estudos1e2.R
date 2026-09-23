@@ -212,6 +212,44 @@ REMENDOS <- list(
     para = ""
   ),
 
+  # --- a seccao 1.2 sai do anexo ------------------------------------
+  # Decisao de escopo. Os cortes mostram a mesma informacao da 1.1 em linhas em
+  # vez de cores, e a secao fica no Material suplementar completo.
+  list(
+    de = paste0(
+      "## 1.2 Cortes ao longo de σz {.tabset}\n",
+      "\n",
+      "A mesma informação da seção anterior, agora em linhas em vez de cores, o que\n",
+      "facilita a leitura de valores. Cada linha corresponde a um nível de σp: as\n",
+      "escuras são populações de fêmeas homogêneas, as claras de fêmeas heterogêneas.\n",
+      "\n",
+      "A forma do conjunto de linhas responde a uma pergunta estatística direta. Se\n",
+      "forem paralelas, σp e σz agem de forma aditiva. Se se cruzarem ou abrirem em\n",
+      "leque, há interação entre os dois, ou seja, o efeito da variação entre machos\n",
+      "depende de quanta variação existe entre fêmeas.\n",
+      "\n",
+      "```{r ct-cortes, results='asis', fig.width=12, fig.height=10}\n",
+      "if (!ok(ct)) cat(\"\\n*Sem dados do Controle.*\\n\") else\n",
+      "render_tabs(function(kk, amax, ns)\n",
+      "  plot_cortes(ct, kk, amax, ns, quais_metricas,\n",
+      "              rotulo(\"CONTROLE — cortes ao longo de σz\", ns, amax, kk)))\n",
+      "```\n",
+      "\n"
+    ),
+    para = ""
+  ),
+
+  # --- renumeracao depois da saida da 1.2 ---------------------------
+  # Sem isto a barra lateral do anexo mostraria 1.1, 1.3, 1.4, com um buraco
+  # que so se explica olhando o documento completo. A referencia cruzada da
+  # seccao 2.3 acompanha.
+  list(de = "## 1.3 O acesso ao acasalamento, do lado das fêmeas {.tabset}",
+       para = "## 1.2 O acesso ao acasalamento, do lado das fêmeas {.tabset}"),
+  list(de = "## 1.4 O acesso ao acasalamento, do lado dos machos {.tabset}",
+       para = "## 1.3 O acesso ao acasalamento, do lado dos machos {.tabset}"),
+  list(de = "As mesmas quatro variáveis de acesso ao acasalamento da seção 1.3, agora com",
+       para = "As mesmas quatro variáveis de acesso ao acasalamento da seção 1.2, agora com"),
+
   # --- o regime de busca sai do anexo -------------------------------
   # Decisao de escopo, nao de conteudo: a secao fica no Material suplementar
   # completo. Aqui sai o paragrafo que a apresenta, o cabecalho e o bloco que
