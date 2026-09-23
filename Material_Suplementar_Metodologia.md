@@ -65,7 +65,8 @@ nunca recebe seleção natural.
 
 *Combinação, réplica e cenário:* combinação é um ponto concreto do desenho, ou
 seja um valor fixado para cada fator. Réplica é uma repetição da mesma
-combinação com outra semente, e são 20 por combinação. Cenário é uma réplica de
+combinação com outra semente, ou seja com outro valor inicial do gerador de
+números aleatórios, o que produz outra população; são 20 por combinação. Cenário é uma réplica de
 uma combinação, de modo que quando se diz "70.560 cenários" as réplicas já
 estão contadas dentro.
 

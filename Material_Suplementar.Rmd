@@ -678,8 +678,11 @@ re-sortear é o que impede a herança, e ali os dois sigmas são apenas condiç�
 inicial.
 
 Todos os cenários rodaram com *20 réplicas*, ou seja, 20 repetições com
-sementes diferentes. Vinte e não uma centena porque os efeitos em questão são
-grandes e sistemáticos, não questão de ruído amostral.
+sementes diferentes (a semente é o número que inicializa o gerador de números
+aleatórios: sementes diferentes produzem populações diferentes, e a mesma
+semente reproduz exatamente a mesma população). Vinte réplicas e não uma centena
+porque os efeitos em questão são grandes e sistemáticos, não questão de ruído
+amostral.
 
 # Organização do documento
 
