@@ -380,10 +380,10 @@ para receber o efeito.
 Uma única geração basta, e a razão é simples: sem herança, a geração 2
 seria um sorteio independente da geração 1, com exatamente a mesma
 distribuição. Rodar 100 gerações seria fazer 100 réplicas disfarçadas.
-Rodamos uma só e usamos as réplicas para estimar a variabilidade, o que
-torna cada cenário cerca de cem vezes mais barato que nos outros
-estudos. É justamente esse desconto que permite cruzar sigma_p com
-sigma_z por inteiro.
+Rodamos uma só e usamos as réplicas para estimar a variabilidade, de
+modo que cada cenário exige cerca de cem vezes menos tempo de
+computação do que nos outros estudos. É essa economia que permite
+cruzar sigma_p com sigma_z por inteiro.
 
 Ainda assim, ele precisa ser um estudo à parte. A geração 1 dos outros
 estudos já é um controle, porque na primeira geração nada evoluiu ainda,
@@ -408,8 +408,9 @@ geração daria a superfície completa de graça. O problema é que isso
 obrigaria Co-evolução a ter um desenho sete vezes maior por uma razão
 que não é dele, porque ali o que interessa é a dinâmica da covariância
 entre preferência e traço, e não quanta variância havia no ponto de
-partida. Como este controle é barato, sai mais em conta mantê-lo
-separado e deixar Co-evolução livre para responder à própria pergunta.
+partida. Como este controle exige pouco tempo de computação, compensa
+mantê-lo separado e deixar Co-evolução livre para responder à própria
+pergunta.
 
 Cruzamento completo de sigma_p (7 valores: 0.2, 0.5, 0.8, 1.0, 1.2, 1.5,
 2.0) por sigma_z (os mesmos 7 valores), somado aos mesmos fatores dos

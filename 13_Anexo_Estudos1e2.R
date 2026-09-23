@@ -78,15 +78,15 @@ REMENDOS <- list(
   list(
     de = paste0(
       "O Controle roda uma geração, porque sem herança a segunda geração seria um\n",
-      "sorteio independente com a mesma distribuição. Isso o torna cerca de cem vezes\n",
-      "mais barato que os outros, e é o que permite cruzar σp com σz por inteiro. Os\n",
-      "outros três rodam 100 gerações.\n"
+      "sorteio independente com a mesma distribuição. Cada cenário exige assim cerca de\n",
+      "cem vezes menos tempo de computação do que nos outros três, que rodam 100\n",
+      "gerações, e é essa economia que permite cruzar σp com σz por inteiro.\n"
     ),
     para = paste0(
       "O Controle roda uma geração, porque sem herança a segunda geração seria um\n",
-      "sorteio independente com a mesma distribuição. Isso o torna cerca de cem vezes\n",
-      "mais barato, e permite cruzar σp com σz por inteiro. O Estudo 2 roda 100\n",
-      "gerações.\n"
+      "sorteio independente com a mesma distribuição. Cada cenário exige assim cerca de\n",
+      "cem vezes menos tempo de computação do que no Estudo 2, que roda 100 gerações,\n",
+      "e é essa economia que permite cruzar σp com σz por inteiro.\n"
     )
   ),
   list(
@@ -174,13 +174,15 @@ REMENDOS <- list(
   ),
   list(
     de = paste0(
-      "O Controle mede a superfície inteira porque roda uma geração só, e por isso é\n",
-      "muito mais barato; os outros três rodam cem gerações e percorrem uma linha, uma\n",
-      "coluna ou um punhado de pontos de partida.\n"
+      "O Controle mede a superfície inteira porque roda uma geração só, e cada cenário\n",
+      "exige cerca de cem vezes menos tempo de computação; os outros três rodam cem\n",
+      "gerações e por isso percorrem uma linha, uma coluna ou um punhado de pontos de\n",
+      "partida.\n"
     ),
     para = paste0(
-      "O Controle mede a superfície inteira porque roda uma geração só, e por isso é\n",
-      "muito mais barato; o Estudo 2 roda cem gerações e percorre uma coluna do plano.\n"
+      "O Controle mede a superfície inteira porque roda uma geração só, e cada cenário\n",
+      "exige cerca de cem vezes menos tempo de computação; o Estudo 2 roda cem gerações\n",
+      "e por isso percorre uma coluna do plano.\n"
     )
   ),
 
@@ -235,8 +237,8 @@ for (r in REMENDOS) {
 if (length(faltando))
   stop("Estes trechos do documento fonte mudaram e os remendos não se aplicam:\n  - ",
        paste(faltando, collapse = "\n  - "),
-       "\n\nAtualize REMENDOS em ", basename(sys.frame(1)$ofile %||% "13_Anexo_Estudos1e2.R"),
-       " antes de gerar o anexo.")
+       "\n\nAtualize a lista REMENDOS em 13_Anexo_Estudos1e2.R antes de gerar o anexo.",
+       call. = FALSE)
 
 # 3. O aviso de arquivo gerado, logo abaixo do YAML
 marca <- paste0(

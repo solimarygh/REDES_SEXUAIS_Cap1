@@ -314,7 +314,7 @@ parâmetros, e os fatores cruzados, com os níveis de cada um, são estes:
 | réplica | repetição com outra semente | 20 por combinação |
 
 Os dois sigmas se cruzam por inteiro apenas no Estudo 1, que roda uma geração só
-e por isso é cerca de cem vezes mais barato que o outro. No Estudo 2, σp percorre
+e por isso exige cerca de cem vezes menos tempo de computação por cenário. No Estudo 2, σp percorre
 os sete níveis e σz fica fixado em 1.0, e cada combinação roda 100 gerações. São
 `r n_cen(ct, c("sigma_p", "sigma_z"))` cenários no Estudo 1 e
 `r n_cen(d, "sigma_p")` no Estudo 2.

@@ -666,9 +666,9 @@ seleção. Cada um isola uma peça do sistema.
 | 4. Co-evolução | os dois, só como condição inicial | herdável | herdável | o feedback entre as duas características |
 
 O Controle roda uma geração, porque sem herança a segunda geração seria um
-sorteio independente com a mesma distribuição. Isso o torna cerca de cem vezes
-mais barato que os outros, e é o que permite cruzar σp com σz por inteiro. Os
-outros três rodam 100 gerações.
+sorteio independente com a mesma distribuição. Cada cenário exige assim cerca de
+cem vezes menos tempo de computação do que nos outros três, que rodam 100
+gerações, e é essa economia que permite cruzar σp com σz por inteiro.
 
 Nos Estudos 2 e 3 a característica que não é herdada é re-sorteada a cada
 geração da mesma distribuição. O procedimento mantém a dispersão fixa no valor
@@ -757,9 +757,10 @@ Controle cruza a grade inteira, os dois espelhos percorrem uma coluna ou uma
 linha, com o outro eixo fixado em 1.0, e a co-evolução parte do cruzamento de
 três níveis em cada eixo.
 
-O Controle mede a superfície inteira porque roda uma geração só, e por isso é
-muito mais barato; os outros três rodam cem gerações e percorrem uma linha, uma
-coluna ou um punhado de pontos de partida.
+O Controle mede a superfície inteira porque roda uma geração só, e cada cenário
+exige cerca de cem vezes menos tempo de computação; os outros três rodam cem
+gerações e por isso percorrem uma linha, uma coluna ou um punhado de pontos de
+partida.
 
 A figura é um esquema do desenho, e não saída da simulação.
 
