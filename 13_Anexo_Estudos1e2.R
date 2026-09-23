@@ -126,33 +126,43 @@ REMENDOS <- list(
     )
   ),
 
-  # --- a tabela de cobertura -----------------------------------------
-  # Sai o que não está no anexo. As colunas que liam `esp` e `co` sairiam
-  # vazias de qualquer modo, já que os dois deixam de ser carregados.
+  # --- a tabela de cobertura sai do anexo ---------------------------
+  # Com dois estudos a tabela nao acrescenta nada: Estudo, Eixo e "O que evolui"
+  # repetem a tabela da secao anterior, Rodada e Geracoes ja estao ditas em
+  # prosa, e Situacao e "concluido" nas duas linhas. O unico dado novo e a
+  # contagem de cenarios, que passa para a frase seguinte, interpolada da mesma
+  # funcao n_cen() e portanto medida e nao escrita a mao.
+  #
+  # As duas funcoes auxiliares ficam: n_cen() e usada logo abaixo, e n_ger()
+  # nao custa nada. Por isso o remendo troca so o tibble, e nao o bloco inteiro.
   list(
     de = paste0(
+      "tibble(\n",
       '  Estudo     = c("Controle", "Fêmeas variando", "Machos variando", "Co-evolução"),\n',
       '  Eixo       = c("σp × σz (superfície)", "σp", "σz", "os dois, herdáveis"),\n',
       '  `O que evolui` = c("nada", "o traço do macho (z)", "a preferência da fêmea (p)", "os dois"),\n',
-      '  Rodada     = c(rodada_de(ct), rodada_de(d), rodada_de(esp),\n',
+      "  Rodada     = c(rodada_de(ct), rodada_de(d), rodada_de(esp),\n",
       '                 if (ok(co)) "bestOfN" else "-"),\n',
-      '  Gerações   = c(n_ger(ct), n_ger(d), n_ger(esp), n_ger(co)),\n',
+      "  Gerações   = c(n_ger(ct), n_ger(d), n_ger(esp), n_ger(co)),\n",
       '  Cenários   = c(n_cen(ct, c("sigma_p", "sigma_z")), n_cen(d, "sigma_p"),\n',
       '                 n_cen(esp, "sigma_z"), n_cen(co, c("sigma_p_init", "sigma_z_init"))),\n',
       '  Situação   = c(if (ok(ct)) "concluído" else "sem dados",\n',
       '                 if (ok(d))  "concluído" else "sem dados",\n',
       '                 if (ok(esp)) "concluído" else "sem dados",\n',
-      '                 if (ok(co)) "concluído" else "não rodado")\n'
+      '                 if (ok(co)) "concluído" else "não rodado")\n',
+      ') %>% kable(caption = "O que está neste documento. Cenários inclui as 20 réplicas de cada combinação de parâmetros.")\n'
     ),
+    para = ""
+  ),
+
+  # --- a contagem de cenarios passa para a prosa --------------------
+  list(
+    de = "Um cenário é uma réplica de uma combinação de parâmetros. Os fatores cruzados, e\n",
     para = paste0(
-      '  Estudo     = c("Controle", "Fêmeas variando"),\n',
-      '  Eixo       = c("σp × σz (superfície)", "σp"),\n',
-      '  `O que evolui` = c("nada", "o traço do macho (z)"),\n',
-      '  Rodada     = c(rodada_de(ct), rodada_de(d)),\n',
-      '  Gerações   = c(n_ger(ct), n_ger(d)),\n',
-      '  Cenários   = c(n_cen(ct, c("sigma_p", "sigma_z")), n_cen(d, "sigma_p")),\n',
-      '  Situação   = c(if (ok(ct)) "concluído" else "sem dados",\n',
-      '                 if (ok(d))  "concluído" else "sem dados")\n'
+      "Um cenário é uma réplica de uma combinação de parâmetros. São\n",
+      "`r n_cen(ct, c(\"sigma_p\", \"sigma_z\"))` cenários no Estudo 1, de uma geração\n",
+      "cada, e `r n_cen(d, \"sigma_p\")` no Estudo 2, de cem gerações cada, com as 20\n",
+      "réplicas já contadas dentro dos dois números. Os fatores cruzados, e\n"
     )
   ),
 
