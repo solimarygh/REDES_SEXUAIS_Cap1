@@ -666,9 +666,9 @@ de código não cumpre sozinho. A primeira é a preservação: o arquivo do Zeno
 permanece acessível mesmo que o repositório do GitHub seja movido ou removido,
 ao passo que uma URL do GitHub deixa de resolver. A segunda é a citabilidade: o
 DOI permite que os manuscritos citem o código e os dados como uma referência
-formal, com autoria e versão, e não como um endereço no corpo do texto. É esse
-DOI que será indicado nos manuscritos listados no item 7 e no Relatório
-Científico Final.
+formal, com autoria e versão, e não como um endereço no corpo do texto. Esse DOI
+será indicado nos manuscritos listados no item 7 e no Relatório Científico
+Final.
 
 
 Os dados que sustentam os resultados são os arquivos de saída das simulações,

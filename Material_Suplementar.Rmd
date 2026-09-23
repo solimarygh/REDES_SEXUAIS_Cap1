@@ -701,7 +701,8 @@ desenhada.
 Uma observação de leitura que vale para todos os painéis das quatro curvas de
 preferência. Em várias combinações elas produzem exatamente o mesmo valor, e
 então as linhas ficam uma sobre a outra e só se vê a última desenhada, o que
-pode parecer falta de dados. Não é: é resultado. O caso mais comum é o teto de
+pode parecer falta de dados. A sobreposição, no entanto, também é um resultado.
+O caso mais comum é o teto de
 parceiros. Com A_max = 200 e k = 5, por exemplo, mesmo a curva mais exigente
 aceita dezenas de machos entre os 200 que a fêmea avalia, de modo que as quatro
 chegam aos cinco parceiros e a poliandria realizada é idêntica nas quatro. Por
