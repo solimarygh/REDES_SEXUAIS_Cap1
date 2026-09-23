@@ -684,32 +684,7 @@ semente reproduz exatamente a mesma população). Vinte réplicas e não uma cen
 porque os efeitos em questão são grandes e sistemáticos, não questão de ruído
 amostral.
 
-# Organização do documento
-
-A barra lateral tem uma entrada por estudo, e dentro de cada uma as
-variáveis resposta que fazem sentido naquele estudo. A navegação por
-dentro de cada painel é por abas, sempre na mesma ordem: *seleção natural*
-(sem, com), depois *A_max* (200, 40, 10), depois *k* (5, 10, 20). São as 18
-combinações do desenho ecológico. A aba que abre por padrão é a menos
-restritiva, sem seleção natural e com A_max = 200.
-
-As figuras de rede deste documento não são esquemas: desenham réplicas que
-realmente rodaram, reconstruídas a partir da semente original, e o valor da
-métrica reproduzida é conferido contra o valor guardado antes de a figura ser
-desenhada.
-
-Uma observação de leitura que vale para todos os painéis das quatro curvas de
-preferência. Em várias combinações elas produzem exatamente o mesmo valor, e
-então as linhas ficam uma sobre a outra e só se vê a última desenhada, o que
-pode parecer falta de dados. A sobreposição, no entanto, também é um resultado.
-O caso mais comum é o teto de
-parceiros. Com A_max = 200 e k = 5, por exemplo, mesmo a curva mais exigente
-aceita dezenas de machos entre os 200 que a fêmea avalia, de modo que as quatro
-chegam aos cinco parceiros e a poliandria realizada é idêntica nas quatro. Por
-isso cada curva tem um tipo de traço próprio além da cor: onde os valores
-coincidem, a sobreposição fica visível em vez de esconder três das quatro.
-
-# Cobertura dos dados
+## Cobertura dos dados
 
 ```{r status}
 n_cen <- function(x, eixos) {
@@ -771,6 +746,31 @@ A figura é um esquema do desenho, e não saída da simulação.
 ```{r fig-desenho, fig.width=10, fig.height=8}
 figura_desenho()
 ```
+
+# Organização do documento
+
+A barra lateral tem uma entrada por estudo, e dentro de cada uma as
+variáveis resposta que fazem sentido naquele estudo. A navegação por
+dentro de cada painel é por abas, sempre na mesma ordem: *seleção natural*
+(sem, com), depois *A_max* (200, 40, 10), depois *k* (5, 10, 20). São as 18
+combinações do desenho ecológico. A aba que abre por padrão é a menos
+restritiva, sem seleção natural e com A_max = 200.
+
+As figuras de rede deste documento não são esquemas: desenham réplicas que
+realmente rodaram, reconstruídas a partir da semente original, e o valor da
+métrica reproduzida é conferido contra o valor guardado antes de a figura ser
+desenhada.
+
+Uma observação de leitura que vale para todos os painéis das quatro curvas de
+preferência. Em várias combinações elas produzem exatamente o mesmo valor, e
+então as linhas ficam uma sobre a outra e só se vê a última desenhada, o que
+pode parecer falta de dados. A sobreposição, no entanto, também é um resultado.
+O caso mais comum é o teto de
+parceiros. Com A_max = 200 e k = 5, por exemplo, mesmo a curva mais exigente
+aceita dezenas de machos entre os 200 que a fêmea avalia, de modo que as quatro
+chegam aos cinco parceiros e a poliandria realizada é idêntica nas quatro. Por
+isso cada curva tem um tipo de traço próprio além da cor: onde os valores
+coincidem, a sobreposição fica visível em vez de esconder três das quatro.
 
 # 1. Controle: a superfície σp × σz numa geração
 
