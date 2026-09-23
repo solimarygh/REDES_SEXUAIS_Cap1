@@ -15,14 +15,10 @@
 # que fica muito abaixo dele.
 title: |
   | Atividades do Plano de Desenvolvimento do Programa de Pós-Doutorado
-subtitle: |
-  | Processo da bolsa de pós-doutorado No. 2024/18754-6
-  | Projeto de Pesquisa - Regular No. 2024/02198-7
-  |
-  | Período coberto: 30 de agosto a 31 de dezembro de 2025
-author: |
-  | Pós-doutoranda: Dra. Solimary García Hernández
-  | Supervisor: Prof. Dr. Paulo Roberto Guimarães Jr.
+# Os dados do relatório saíram do subtítulo e passaram para a tabela que abre o
+# texto: numa folha só, uma tabela de duas colunas é mais fácil de conferir do
+# que cinco linhas de subtítulo, e é o mesmo conjunto de informações que a folha
+# de rosto do Relatório Científico apresenta.
 date: "São Paulo, setembro de 2026"
 output:
   pdf_document:
@@ -41,6 +37,16 @@ geometry: margin=2.5cm
 fontsize: 11pt
 lang: pt-BR
 ---
+
+| | |
+|:---|:---|
+| **Pós-doutoranda** | Dra. Solimary García Hernández |
+| **Supervisor** | Prof. Dr. Paulo Roberto Guimarães Jr. |
+| **Processo da bolsa de pós-doutorado** | No. 2024/18754-6 |
+| **Projeto de Pesquisa vinculado** | Regular No. 2024/02198-7 |
+| **Vigência do projeto** | agosto de 2024 a agosto de 2026 |
+| **Vigência da bolsa** | janeiro de 2025 a dezembro de 2026 |
+| **Período coberto por este relatório** | 30 de agosto a 31 de dezembro de 2025 |
 
 A seguir apresento a comparação entre as atividades previstas no Plano de
 Desenvolvimento do Programa de Pós-Doutorado e as atividades efetivamente
@@ -228,12 +234,6 @@ simulação que permitiu unificá-los.
 conhecimento.
 
 **Status no período:** Não realizada no período.
-
-**Planejado:** Adquirir habilidades relacionadas à supervisão de estudantes.
-
-**Status no período:** A supervisão de estudantes ainda não foi iniciada, como
-consta do item 6. A participação em banca avaliadora ali relatada é o primeiro
-passo nessa direção.
 
 **Planejado:** Fortalecer habilidades de comunicação, principalmente na escrita
 de artigos científicos de impacto e na apresentação de pesquisas em conferências
