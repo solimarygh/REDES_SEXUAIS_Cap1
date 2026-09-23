@@ -655,6 +655,19 @@ simulação, os scripts de cada estudo, as análises e os documentos que geram
 este relatório e os seus anexos. Após a publicação dos resultados o repositório
 será tornado público, garantindo a disponibilização transparente das análises.
 
+Nesse momento o repositório será também depositado no Zenodo, repositório de
+dados de pesquisa mantido pelo CERN no âmbito da infraestrutura OpenAIRE, por
+meio da integração que o Zenodo oferece com o GitHub: cada versão publicada é
+arquivada e recebe um DOI próprio, além de um DOI permanente que aponta sempre
+para a versão mais recente. O depósito cumpre duas funções que um repositório
+de código não cumpre sozinho. A primeira é a preservação: o arquivo do Zenodo
+permanece acessível mesmo que o repositório do GitHub seja movido ou removido,
+ao passo que uma URL do GitHub deixa de resolver. A segunda é a citabilidade: o
+DOI permite que os manuscritos citem o código e os dados como uma referência
+formal, com autoria e versão, e não como um endereço no corpo do texto. É esse
+DOI que será indicado nos manuscritos listados no item 7 e no Relatório
+Científico Final.
+
 
 Os dados que sustentam os resultados são os arquivos de saída das simulações,
 gerados pelos próprios scripts do repositório. Como cada cenário é semeado pelo
