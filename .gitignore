@@ -36,3 +36,11 @@ figure/
 # Rascunhos
 prueba.png
 teste*.png
+
+# Anexo gerado por 13_Anexo_Estudos1e2.R a partir de Material_Suplementar.Rmd.
+# Nao entra no repositorio: se entrasse, uma correcao no documento fonte sem
+# regerar deixaria aqui uma copia desatualizada do mesmo texto. O gerador esta
+# versionado, o que ele produz nao.
+Material_Suplementar_Estudos1e2.Rmd
+Material_Suplementar_Estudos1e2.html
+Material_Suplementar_Estudos1e2_files/
