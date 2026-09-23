@@ -70,9 +70,29 @@ REMENDOS <- list(
       "Os dois compartilham exatamente o mesmo ciclo de vida, as mesmas quatro\n",
       "curvas e os mesmos fatores ecológicos. O que muda entre eles é quais\n",
       "características são herdadas, ou seja, quais estão livres para responder à\n",
-      "seleção. Cada um isola uma peça do sistema. As duas últimas linhas da\n",
-      "tabela são as extensões que virão no relatório final, e estão aqui para\n",
-      "situar os dois primeiros no desenho completo.\n"
+      "seleção. Cada um isola uma peça do sistema.\n\n",
+      "A tabela traz os quatro, com a indicação de onde cada um é relatado: os\n",
+      "Estudos 1 e 2 neste anexo, e os dois seguintes no anexo do Relatório\n",
+      "Científico Final. Ficam aqui para situar os dois primeiros no desenho\n",
+      "completo.\n"
+    )
+  ),
+
+  # --- a tabela diz qual estudo e relatado onde ----------------------
+  # A frase acima ja o dizia, mas quem consulta a tabela nao volta ao
+  # paragrafo. A coluna do nome leva a marca.
+  list(
+    de = paste0(
+      "| 1. Controle | σp e σz | sorteado | sorteada | a estrutura que as curvas de preferência produzem sozinhas, sem resposta evolutiva |\n",
+      "| 2. Fêmeas variando | σp | herdável | re-sorteada | como a heterogeneidade de preferência afeta a evolução do traço |\n",
+      "| 3. Machos variando | σz | re-sorteado | herdável | como a variedade de machos disponíveis afeta a evolução da preferência |\n",
+      "| 4. Co-evolução | os dois, só como condição inicial | herdável | herdável | o feedback entre as duas características |\n"
+    ),
+    para = paste0(
+      "| 1. Controle *(neste anexo)* | σp e σz | sorteado | sorteada | a estrutura que as curvas de preferência produzem sozinhas, sem resposta evolutiva |\n",
+      "| 2. Fêmeas variando *(neste anexo)* | σp | herdável | re-sorteada | como a heterogeneidade de preferência afeta a evolução do traço |\n",
+      "| 3. Machos variando *(relatório final)* | σz | re-sorteado | herdável | como a variedade de machos disponíveis afeta a evolução da preferência |\n",
+      "| 4. Co-evolução *(relatório final)* | os dois, só como condição inicial | herdável | herdável | o feedback entre as duas características |\n"
     )
   ),
   list(
