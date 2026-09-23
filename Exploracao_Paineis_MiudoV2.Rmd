@@ -1279,6 +1279,18 @@ plano <- local({
   }
 })
 
+# Os limites da cor no plano dos quatro estudos, pelo mesmo motivo de
+# limites_metrica(): sem eles o ggplot reescalava a cor em cada aba, e o mesmo
+# Is saía preto com A_max = 200, onde a métrica chega a passar de 30, e claro
+# com A_max = 10, onde ela não passa de 2. Aqui as linhas do `plano` já são as
+# células da figura, de modo que basta a amplitude da coluna inteira.
+limites_plano <- function(metrica) {
+  if (is.null(plano) || !metrica %in% names(plano)) return(NULL)
+  v <- plano[[metrica]]
+  v <- v[is.finite(v)]
+  if (length(v) < 2 || diff(range(v)) == 0) NULL else range(v)
+}
+
 plot_plano <- function(metrica, kk, amax, ns) {
   if (is.null(plano)) return(NULL)
   dd <- plano %>%
@@ -1320,13 +1332,15 @@ plot_plano <- function(metrica, kk, amax, ns) {
     facet_grid(painel ~ tipo_selecao,
                labeller = labeller(tipo_selecao = labels_4,
                                    painel = label_wrap_gen(18))) +
-    scale_fill_viridis_c(option = "magma", name = METS_PLANO[[metrica]]) +
+    scale_fill_viridis_c(option = "magma", name = METS_PLANO[[metrica]],
+                         limits = limites_plano(metrica)) +
     scale_x_discrete(drop = FALSE) + scale_y_discrete(drop = FALSE) +
     labs(title = sprintf("%s · %s · A_max = %d · k = %d", METS_PLANO[[metrica]],
                          if (ns) "com seleção natural" else "sem seleção natural", amax, kk),
          x = "σz — variação do traço dos machos",
          y = "σp — variação da preferência entre fêmeas",
-         caption = sprintf(paste("Mesma escala de cor em todas as linhas: a comparação entre elas é direta.",
+         caption = sprintf(paste("Mesma escala de cor em todas as linhas e em todas as abas: a comparação é",
+                                 "direta tanto entre estudos quanto entre níveis de A_max, de k e de seleção natural.",
                                  "Células vazias são combinações que aquele estudo não visita.",
                                  "\nAfastamento máximo da média em relação a phi = 5, por curva: %s.",
                                  "\nAcima de ~1 a comparação com o Controle deixa de ser direta, porque lá os dois",
