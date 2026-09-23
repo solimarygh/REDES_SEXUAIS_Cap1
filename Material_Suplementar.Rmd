@@ -757,12 +757,11 @@ Controle cruza a grade inteira, os dois espelhos percorrem uma coluna ou uma
 linha, com o outro eixo fixado em 1.0, e a co-evolução parte do cruzamento de
 três níveis em cada eixo.
 
-O contraste entre os painéis explica a diferença de custo. O Controle mede a
-superfície inteira porque roda uma geração só; os outros três rodam cem, e por
-isso percorrem uma linha, uma coluna ou um punhado de pontos de partida.
+O Controle mede a superfície inteira porque roda uma geração só, e por isso é
+muito mais barato; os outros três rodam cem gerações e percorrem uma linha, uma
+coluna ou um punhado de pontos de partida.
 
-Esta é a única figura do documento que é um esquema. Todas as outras são saída
-da simulação.
+A figura é um esquema do desenho, e não saída da simulação.
 
 ```{r fig-desenho, fig.width=10, fig.height=8}
 figura_desenho()
@@ -1054,8 +1053,8 @@ pode ter. O número efetivo é
 `min(k, machos aceitos entre os A_max avaliados)`, porque a amostragem é sem
 reposição e ela nunca acasala com mais machos do que chegou a avaliar.
 
-A consequência é que os tratamentos nominais de poliandria não se realizam em
-todo o desenho. Com A_max = 10 e k = 20, nenhuma fêmea chega aos 20 parceiros,
+Os tratamentos nominais de poliandria não se realizam, portanto, em todo o
+desenho. Com A_max = 10 e k = 20, nenhuma fêmea chega aos 20 parceiros,
 e possivelmente nem aos 10, porque não acasala com os dez que avaliou, e sim
 com aqueles que aceitou entre esses dez. Quantos parceiros ela consegue depende
 portanto da curva de preferência e de A_max, e não apenas de k.

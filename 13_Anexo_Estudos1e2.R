@@ -174,14 +174,13 @@ REMENDOS <- list(
   ),
   list(
     de = paste0(
-      "O contraste entre os painéis explica a diferença de custo. O Controle mede a\n",
-      "superfície inteira porque roda uma geração só; os outros três rodam cem, e por\n",
-      "isso percorrem uma linha, uma coluna ou um punhado de pontos de partida.\n"
+      "O Controle mede a superfície inteira porque roda uma geração só, e por isso é\n",
+      "muito mais barato; os outros três rodam cem gerações e percorrem uma linha, uma\n",
+      "coluna ou um punhado de pontos de partida.\n"
     ),
     para = paste0(
-      "O contraste entre os painéis explica a diferença de custo. O Controle mede a\n",
-      "superfície inteira porque roda uma geração só; os outros rodam cem, e por isso\n",
-      "percorrem uma linha, uma coluna ou um punhado de pontos de partida.\n"
+      "O Controle mede a superfície inteira porque roda uma geração só, e por isso é\n",
+      "muito mais barato; o Estudo 2 roda cem gerações e percorre uma coluna do plano.\n"
     )
   ),
 

@@ -614,7 +614,7 @@ if (ok(d)) {
 }
 ```
 
-Este é o principal resultado do estudo. Uma curva de preferência
+O principal resultado do estudo é que uma curva de preferência
 estabilizadora, que a nível individual favorece machos parecidos com o pico de
 cada fêmea, produz a nível populacional manutenção e até aumento da variação
 genética, desde que as fêmeas discordem entre si sobre onde está esse pico. A
