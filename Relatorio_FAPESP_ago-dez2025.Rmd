@@ -239,10 +239,10 @@ anexo de metodologia:
 1. **Quatro curvas de preferência em vez de duas.** Além da direcional e da
    estabilizadora, o desenho passou a incluir uma curva nula, em que a fêmea
    aceita qualquer macho com a mesma probabilidade, e uma disruptiva, em que ela
-   prefere machos que diferem do seu próprio pico. A curva nula é o que torna o
-   resto interpretável: qualquer métrica medida sob ela é o valor que aquela
-   métrica assume por acaso, dado o tamanho da população e o número de
-   acasalamentos, e serve de piso contra o qual as outras três se leem.
+   prefere machos que diferem do seu próprio pico. A curva nula cumpre a função
+   de controle: qualquer métrica medida sob ela é o valor que aquela métrica
+   assume por acaso, dado o tamanho da população e o número de acasalamentos, e
+   serve de piso contra o qual as outras três se leem.
 
 2. **A regra de decisão da fêmea foi explicitada.** A fêmea avalia um número
    determinado de machos, $A_{max}$, e só então escolhe entre os que aceitou. É a
@@ -274,8 +274,8 @@ Além disso, a variância de segregação passou a seguir o modelo infinitesimal
 em que o desvio do filhote em relação à média dos pais tem variância
 proporcional à variância parental, e não um ruído de tamanho fixo arbitrado
 (Fisher 1918; Roff & Fairbairn 2014).
-Essa mudança é o que torna respondível a pergunta sobre manutenção de variação
-genética: com um ruído fixo, a variância genética convergiria sempre para o
+Sem essa mudança a pergunta sobre manutenção de variação genética não seria
+respondível: com um ruído fixo, a variância genética convergiria sempre para o
 mesmo piso em todos os cenários, e a resposta viria embutida no modelo.
 
 ### As quatro curvas de preferência
@@ -588,9 +588,9 @@ re-sorteada a cada geração da mesma distribuição e portanto não evolui; o t
 do macho é herdável e livre para responder à seleção. São cem gerações por
 réplica.
 
-Manter σp fixo durante as cem gerações é deliberado, e é o que permite atribuir
-a resposta do traço à largura dessa distribuição sem o confundimento de a
-preferência estar mudando ao mesmo tempo. A escolha da fêmea é aqui a causa da
+σp permanece fixo durante as cem gerações, o que permite atribuir a resposta do
+traço à largura dessa distribuição sem o confundimento de a preferência estar
+mudando ao mesmo tempo. A escolha da fêmea é aqui a causa da
 seleção, e o estudo mede a resposta evolutiva do traço masculino.
 
 #### Resultados principais
@@ -719,8 +719,8 @@ constarão do Relatório Científico Final.)*
 A segunda, o Estudo 4, torna as duas características herdáveis ao mesmo tempo.
 Cada indivíduo carrega os dois genótipos e expressa apenas um, e a grandeza
 central deixa de ser a média de cada característica e passa a ser a covariância
-genética entre elas, que é o que permite examinar o mecanismo de Fisher dentro
-do modelo. *(Concluído; os resultados constarão do Relatório Científico Final.)*
+genética entre elas, por meio da qual se examina o mecanismo de Fisher dentro do
+modelo. *(Concluído; os resultados constarão do Relatório Científico Final.)*
 
 O Objetivo 2, previsto para o segundo ano, trata do efeito de uma doença
 transmitida por contato sobre a formação das redes sexuais e sobre a seleção da

@@ -221,7 +221,7 @@ a chance de sobreviver. Entre os juvenis que sobrevivem, sorteiam-se ao
 acaso os 200 que formam o censo adulto de machos. As fêmeas não passam
 por viabilidade: sorteiam-se 200 ao acaso.
 
-A ordem dos dois passos é o que faz a diferença. Como a seleção age
+A ordem dos dois passos tem consequências. Como a seleção age
 antes do censo, o número de machos disponíveis para acasalar deveria ser
 sempre 200, com ou sem seleção natural e para qualquer valor de sigma_z:
 ela muda quais machos estão disponíveis, que é o efeito que nos
@@ -232,8 +232,8 @@ centralização e aninhamento. A seção "O tamanho do pool de machos não é
 constante" do registro de desenvolvimento do modelo documenta essa versão
 anterior e o que ela produzia.
 
-O número 200 admite duas leituras, e a escolha entre elas não é um detalhe de
-implementação. Pode ser um *teto*, em que cada juvenil sobrevive ou não de
+O número 200 admite duas leituras, com consequências distintas para a
+regulação populacional. Pode ser um *teto*, em que cada juvenil sobrevive ou não de
 forma independente com probabilidade V e o censo é quem sobrou, de modo que a
 viabilidade é mortalidade em termos absolutos e o tamanho da população é um
 resultado do modelo. Ou pode ser uma *cota*, em que 200 é a capacidade de
@@ -326,7 +326,7 @@ Essa escolha importa para a interpretação. Com um ruído de tamanho fixo, a
 variância genética convergiria sempre para o mesmo piso em todos os cenários, e
 a pergunta sobre manutenção de variação genética viria com a resposta embutida.
 Com segregação infinitesimal, cada combinação de curva e regime chega ao seu
-próprio equilíbrio, e é isso que torna a pergunta respondível.
+próprio equilíbrio, e a pergunta passa a ser respondível.
 
 Fica declarada uma limitação da implementação atual: o código usa a variância
 total do pool parental e não a variância génica, que sob acasalamento
@@ -638,11 +638,10 @@ indivíduos, e não descrevem arranjo nenhum:
     que de outro modo só se observam somadas: a busca, a exigência da curva de
     preferência e o teto k.
 
-A distinção entre as duas famílias não é cosmética. As métricas de estrutura
-dependem dos descritores, e nenhuma delas é comparável entre redes de tamanho ou
-densidade muito diferentes, de modo que os descritores entram nas análises como
-covariáveis e não como respostas. É também a razão metodológica da escolha da
-cota descrita acima.
+As métricas de estrutura dependem dos descritores, e nenhuma delas é comparável
+entre redes de tamanho ou densidade muito diferentes, de modo que os descritores
+entram nas análises como covariáveis e não como respostas. Essa dependência é
+também a razão metodológica da escolha da cota descrita acima.
 
 Nos estudos evolutivos registram-se além disso, geração a geração, a média e a
 variância da característica herdável, e na Co-evolução a covariância e a

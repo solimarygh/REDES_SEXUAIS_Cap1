@@ -493,10 +493,9 @@ reparte em grupos, se existe hierarquia, se o sucesso se concentra. Os
 *descritores da rede* dizem quantas arestas existem e sobre quantos
 indivíduos, e não descrevem arranjo nenhum.
 
-A distinção não é cosmética. As quatro métricas de estrutura dependem dos
-descritores, e nenhuma delas é comparável entre redes de tamanho ou densidade
-muito diferentes. Por isso os descritores entram nas análises como covariáveis,
-e não como respostas.
+As quatro métricas de estrutura dependem dos descritores, e nenhuma delas é
+comparável entre redes de tamanho ou densidade muito diferentes. Os descritores
+entram portanto nas análises como covariáveis, e não como respostas.
 
 ## As quatro métricas de estrutura
 
@@ -544,10 +543,9 @@ e não como respostas.
 
 A poliandria realizada e a conectância são as duas faces do mesmo número. Se
 cada fêmea consegue k parceiros, o total de arestas é (número de fêmeas × k), e
-a conectância se reduz a k dividido pelo censo de machos. Em outras palavras, o
-número de acasalamentos é fixado pelo lado das fêmeas, e o número de machos
-entra apenas no denominador. É por isso que, quando o censo encurta, a
-conectância sobe em vez de descer.
+a conectância se reduz a k dividido pelo censo de machos. O número de
+acasalamentos é portanto fixado pelo lado das fêmeas, e o número de machos entra
+apenas no denominador, de modo que a conectância sobe quando o censo encurta.
 
 # O modelo
 
@@ -588,9 +586,9 @@ as fêmeas quererem coisas diferentes em média.
 
 Essas cores identificam as quatro curvas em todas as figuras do documento.
 
-A curva aleatória merece ênfase, porque é o que torna o resto interpretável.
-Nela a fêmea aceita qualquer macho com a mesma probabilidade, então nenhuma
-estrutura da rede pode ser atribuída à escolha. Toda métrica medida sob a
+A curva aleatória cumpre a função de controle. Nela a fêmea aceita qualquer
+macho com a mesma probabilidade, de modo que nenhuma estrutura da rede pode ser
+atribuída à escolha. Toda métrica medida sob a
 aleatória é o valor que aquela métrica assume por acaso, dado o tamanho da
 população e o número de acasalamentos. É o piso contra o qual as outras três se
 leem.
@@ -641,11 +639,11 @@ Quanto mais o traço de um juvenil se afasta de φ, portanto, menor a sua chance
 de ocupar uma vaga. Quando a seleção natural está desligada, o sorteio é
 uniforme entre os juvenis.
 
-O ponto a reter é que a viabilidade decide *quais* machos ocupam as 200 vagas
-e nunca *quantas* vagas existem. O tamanho da população é constante por
-construção, e é essa escolha que mantém as redes comparáveis entre combinações: a
-seleção natural muda a composição do pool de machos, que é o efeito de
-interesse, e não a sua densidade, que seria um confundimento. Na terminologia
+A viabilidade decide *quais* machos ocupam as 200 vagas e nunca *quantas* vagas
+existem. O tamanho da população fica assim constante por construção, o que
+mantém as redes comparáveis entre combinações: a seleção natural muda a
+composição do pool de machos, que é o efeito de interesse, e não a sua
+densidade, que seria um confundimento. Na terminologia
 de Wallace, é seleção branda, com regulação por densidade, e não seleção dura
 com mortalidade em termos absolutos.
 
@@ -673,11 +671,11 @@ mais barato que os outros, e é o que permite cruzar σp com σz por inteiro. Os
 outros três rodam 100 gerações.
 
 Nos Estudos 2 e 3 a característica que não é herdada é re-sorteada a cada
-geração da mesma distribuição. Isso é deliberado: mantém a dispersão fixa no
-valor do tratamento durante as 100 gerações e impede que ela mude ao mesmo
-tempo que a outra, o que confundiria a interpretação. No Estudo 4 isso é
-impossível, porque re-sortear é exactamente o que impede a herança, e por isso
-ali os dois sigmas são apenas condição inicial.
+geração da mesma distribuição. O procedimento mantém a dispersão fixa no valor
+do tratamento durante as 100 gerações e impede que ela mude ao mesmo tempo que a
+outra, o que confundiria a interpretação. No Estudo 4 ele não se aplica, porque
+re-sortear é o que impede a herança, e ali os dois sigmas são apenas condição
+inicial.
 
 Todos os cenários rodaram com *20 réplicas*, ou seja, 20 repetições com
 sementes diferentes. Vinte e não uma centena porque os efeitos em questão são
@@ -1401,8 +1399,8 @@ população caminha?
 
 Cada estudo aparece então duas vezes, na geração 1 e na geração 100, sobre
 a mesma grade de 7 × 7 do Controle e com a mesma escala de cor em todas as
-linhas da figura. A escala compartilhada é o que torna a comparação
-interpretável: se a combinação de um estudo evolutivo tem a mesma cor da
+linhas da figura. A escala compartilhada permite a comparação direta: se a
+combinação de um estudo evolutivo tem a mesma cor da
 combinação do Controle em que veio a cair, a curva de preferência sozinha já
 explicava o resultado; se a cor difere, a evolução produziu algo que o Controle
 não previa.
@@ -1869,5 +1867,6 @@ seu tamanho de censo. Nas condições deste modelo, portanto, a seleção sexual
 atua como uma força demográfica transitória.
 
 Nas curvas em que a estrutura se dissolve, as métricas de rede da geração 100
-são as de uma rede formada sem escolha alguma. Isso não é uma limitação dos
-painéis: é o resultado, e é uma das questões que o projeto passa a investigar.
+são as de uma rede formada sem escolha alguma. Esse é o resultado, e não uma
+limitação dos painéis, e constitui uma das questões que o projeto passa a
+investigar.

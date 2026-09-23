@@ -885,10 +885,10 @@ if (tem(fim, c("i_traco", "h_I", "tipo_selecao"))) {
 }
 ```
 
-O eixo y tem escala livre por curva, e isso é deliberado: as
-magnitudes diferem por mais de uma ordem entre a sigmoide e as outras três, e
-com escala comum as três ficariam achatadas numa linha. O que interessa em
-cada painel é se $i$ se afasta de zero e em que direção quando $h_I$ muda.
+O eixo y tem escala livre por curva porque as magnitudes diferem por mais de uma
+ordem de grandeza entre a sigmoide e as outras três, e com escala comum as três
+ficariam achatadas numa linha. O que se lê em cada painel é se $i$ se afasta de
+zero, e em que direção, quando $h_I$ muda.
 
 Sob a curva aleatória $i$ deve ficar em zero nos três níveis, porque não há
 seleção sobre a característica. Sob a sigmoide $i$ é grande já no braço de
