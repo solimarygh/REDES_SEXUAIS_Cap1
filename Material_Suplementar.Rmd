@@ -246,6 +246,22 @@ cols_presentes <- function(df, quais) {
   if (!length(m)) NULL else m
 }
 
+# A altura da figura acompanha o número de faixas que ela de fato tem.
+#
+# Um conjunto de quatro variáveis resposta nem sempre rende quatro faixas:
+# cols_presentes() descarta as que não existem nos dados, e no lado dos machos
+# duas das quatro colunas só existem nas rodadas novas do motor. Com fig.height
+# escrito à mão, essas duas faixas apareciam esticadas na altura reservada para
+# quatro, com o dobro do espaço em branco.
+#
+# Usa-se no cabeçalho do chunk, em fig.height, onde o knitr avalia a expressão
+# no ambiente do documento.
+altura_faixas <- function(df, quais, por_faixa = 3, extra = 1) {
+  n <- length(cols_presentes(df, quais))
+  if (!n) return(3)
+  por_faixa * n + extra
+}
+
 # ---------------------------------------------------------------------
 # Limites da escala de cor de cada métrica, medidos sobre o conjunto inteiro e
 # não sobre o recorte que a figura mostra.
@@ -869,7 +885,7 @@ horizontal, σz; se na diagonal, a combinação dos dois. A segunda é se as qua
 curvas desenham a mesma superfície ou superfícies distintas, que é a pergunta
 sobre quanto a forma da preferência importa.
 
-```{r ct-superficie, results='asis', fig.width=12, fig.height=13}
+```{r ct-superficie, results='asis', fig.width=12, fig.height=altura_faixas(ct, quais_metricas)}
 if (!ok(ct)) cat("\n*Sem dados do Controle. Rode `Fase_Controle.R`.*\n") else
 render_tabs(function(kk, amax, ns)
   plot_superficie(ct, kk, amax, ns, quais_metricas,
@@ -1081,7 +1097,7 @@ entra nas análises em lugar do k nominal. Os painéis abaixo mostram o panorama
 completo, com a proporção de fêmeas que atingiu k, o número de arestas da rede
 e a proporção de fêmeas que não conseguiu acasalar.
 
-```{r ct-poliandria, results='asis', fig.width=12, fig.height=13}
+```{r ct-poliandria, results='asis', fig.width=12, fig.height=altura_faixas(ct, quais_poliandria)}
 if (!ok(ct)) cat("\n*Sem dados do Controle.*\n") else
 render_tabs(function(kk, amax, ns)
   plot_superficie(ct, kk, amax, ns, quais_poliandria,
@@ -1106,7 +1122,7 @@ com distribuições de grau bem diferentes podem ter o mesmo Is, e em particular
 ele não separa uma população em que metade dos machos ficou sem acasalar de
 outra em que todos acasalaram alguma vez.
 
-```{r ct-machos, results='asis', fig.width=12, fig.height=13}
+```{r ct-machos, results='asis', fig.width=12, fig.height=altura_faixas(ct, quais_machos)}
 if (!ok(ct)) cat("\n*Sem dados do Controle.*\n") else
 render_tabs(function(kk, amax, ns)
   plot_superficie(ct, kk, amax, ns, quais_machos,
