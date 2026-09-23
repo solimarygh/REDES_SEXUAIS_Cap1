@@ -157,12 +157,18 @@ REMENDOS <- list(
 
   # --- a contagem de cenarios passa para a prosa --------------------
   list(
-    de = "Um cenário é uma réplica de uma combinação de parâmetros. Os fatores cruzados, e\n",
+    de = paste0(
+      "Um cenário é uma réplica de uma combinação de parâmetros. Os seis fatores já\n",
+      "foram definidos acima, um a um; a tabela os reúne com os seus níveis, para\n",
+      "consulta:\n"
+    ),
     para = paste0(
       "Um cenário é uma réplica de uma combinação de parâmetros. São\n",
       "`r n_cen(ct, c(\"sigma_p\", \"sigma_z\"))` cenários no Estudo 1, de uma geração\n",
       "cada, e `r n_cen(d, \"sigma_p\")` no Estudo 2, de cem gerações cada, com as 20\n",
-      "réplicas já contadas dentro dos dois números. Os fatores cruzados, e\n"
+      "réplicas já contadas dentro dos dois números. Os seis fatores já foram\n",
+      "definidos acima, um a um; a tabela os reúne com os seus níveis, para\n",
+      "consulta:\n"
     )
   ),
 
@@ -179,41 +185,30 @@ REMENDOS <- list(
     )
   ),
 
-  # --- a figura do desenho, que mostra os quatro painéis --------------
-  # A figura fica: é onde se vê que os dois estudos deste anexo ocupam uma
-  # parte do plano e não o plano todo. O texto é que passa a dizer quais
-  # painéis pertencem a este período.
+  # --- a figura do desenho sai do anexo ------------------------------
+  # O esquema das condições iniciais tem quatro painéis, e dois deles são dos
+  # estudos que não estão aqui. Fora isso, o que ele mostra para os dois que
+  # ficam - o Controle cruza a grade inteira, o Estudo 2 percorre uma coluna -
+  # já está dito na frase acima e volta a ser dito, com dados em vez de esquema,
+  # na abertura da seção do Controle. Sai a figura e sai o parágrafo que a
+  # apresenta.
   list(
     de = paste0(
-      "A tabela diz quantos cenários existem; a figura diz sobre que parte do espaço\n",
-      "de parâmetros eles estão distribuídos. A grade é a mesma nos quatro painéis, e\n",
-      "em vermelho estão as condições iniciais que aquele estudo visita: o\n",
-      "Controle cruza a grade inteira, os dois espelhos percorrem uma coluna ou uma\n",
-      "linha, com o outro eixo fixado em 1.0, e a co-evolução parte do cruzamento de\n",
-      "três níveis em cada eixo.\n"
+      "A figura abaixo mostra sobre que parte desse espaço os cenários estão\n",
+      "distribuídos. O contraste entre os painéis segue da razão de custo já dada: só o\n",
+      "Controle, que roda uma geração, pode medir a superfície inteira. A grade é a\n",
+      "mesma nos quatro, e em vermelho estão as condições iniciais que\n",
+      "aquele estudo visita: o Controle cruza a grade inteira, os dois espelhos\n",
+      "percorrem uma coluna ou uma linha, com o outro eixo fixado em 1.0, e a\n",
+      "co-evolução parte do cruzamento de três níveis em cada eixo.\n",
+      "\n",
+      "A figura é um esquema do desenho, e não saída da simulação.\n",
+      "\n",
+      "```{r fig-desenho, fig.width=10, fig.height=8}\n",
+      "figura_desenho()\n",
+      "```\n"
     ),
-    para = paste0(
-      "A tabela diz quantos cenários existem; a figura diz sobre que parte do espaço\n",
-      "de parâmetros eles estão distribuídos. A grade é a mesma nos quatro painéis, e\n",
-      "em vermelho estão as condições iniciais que aquele estudo visita. Os dois\n",
-      "painéis de cima são os estudos deste anexo: o Controle cruza a grade inteira e\n",
-      "o Estudo 2 percorre uma coluna, com o outro eixo fixado em 1.0. Os dois de\n",
-      "baixo são as extensões do relatório final, e ficam na figura para mostrar que\n",
-      "parte do plano ainda não foi visitada no período relatado.\n"
-    )
-  ),
-  list(
-    de = paste0(
-      "O Controle mede a superfície inteira porque roda uma geração só, e cada cenário\n",
-      "exige cerca de cem vezes menos tempo de computação; os outros três rodam cem\n",
-      "gerações e por isso percorrem uma linha, uma coluna ou um punhado de pontos de\n",
-      "partida.\n"
-    ),
-    para = paste0(
-      "O Controle mede a superfície inteira porque roda uma geração só, e cada cenário\n",
-      "exige cerca de cem vezes menos tempo de computação; o Estudo 2 roda cem gerações\n",
-      "e por isso percorre uma coluna do plano.\n"
-    )
+    para = ""
   ),
 
   # --- não carregar os dados que o anexo não usa ----------------------
