@@ -278,6 +278,24 @@ Essa mudança é o que torna respondível a pergunta sobre manutenção de varia
 genética: com um ruído fixo, a variância genética convergiria sempre para o
 mesmo piso em todos os cenários, e a resposta viria embutida no modelo.
 
+### As quatro curvas de preferência
+
+A forma da função de preferência é o outro fator central do desenho. `P` é a
+probabilidade de a fêmea aceitar o macho, `z` é o traço dele, `p` é o pico de
+preferência dela e `s` a sua exigência. As quatro curvas partem do mesmo pico
+médio, de modo que as diferenças entre elas vêm da geometria da curva, e não de
+as fêmeas quererem coisas diferentes em média.
+
+| curva | função | leitura biológica |
+|---|---|---|
+| aleatória | `P = 0.5` | a fêmea não discrimina. Não há seleção sexual, e serve de controle |
+| gaussiana | `P = exp(-s (z - p)²)` | preferência por semelhança ao próprio pico: seleção estabilizadora |
+| sigmoide | `P = 1 / (1 + exp(-s (z - p)))` | quanto maior o traço, maior o aceite: seleção direcional |
+| disruptiva | `P = 1 - exp(-s (z - p)²)` | preferência por afastamento do próprio pico: seleção disruptiva |
+
+Nas figuras deste relatório as quatro levam sempre as mesmas cores: cinza a
+aleatória, amarelo a gaussiana, verde a sigmoide e roxo a disruptiva.
+
 ### Desenho experimental
 
 ```{r fig-desenho, fig.width=9, fig.height=7, fig.cap="Condições iniciais no plano σp × σz. A grade é a mesma em todos os painéis, e em vermelho estão as condições iniciais que cada estudo visita. O Controle cruza a grade inteira porque roda uma geração só; o Estudo 2 percorre uma coluna, com o outro eixo fixado em 1.0. Os dois painéis restantes correspondem às extensões previstas para o período seguinte, descritas no item 3."}
@@ -654,6 +672,21 @@ situação em que cada frente se encontra na data de entrega deste relatório.
 O Objetivo 1 tem os seus dois estudos concluídos, e o motor de simulação
 desenvolvido para eles abriu duas extensões que não estavam no plano de trabalho
 original e que respondem a perguntas decorrentes dos dois primeiros.
+
+Os quatro estudos compartilham exatamente o mesmo ciclo de vida, as mesmas
+quatro curvas de preferência e os mesmos fatores ecológicos. O que muda entre
+eles é quais características são herdadas, ou seja, quais estão livres para
+responder à seleção, e cada um isola uma peça do sistema:
+
+| estudo | o que varia | traço do macho | preferência da fêmea | o que isola |
+|---|---|---|---|---|
+| 1. Controle *(concluído)* | σp e σz | sorteado | sorteada | a estrutura que as curvas de preferência produzem sozinhas, sem resposta evolutiva |
+| 2. Fêmeas variando *(concluído)* | σp | herdável | re-sorteada | como a heterogeneidade de preferência afeta a evolução do traço |
+| 3. Machos variando *(extensão)* | σz | re-sorteado | herdável | como a variedade de machos disponíveis afeta a evolução da preferência |
+| 4. Co-evolução *(extensão)* | os dois, só como condição inicial | herdável | herdável | o feedback entre as duas características |
+
+Os Estudos 1 e 2 são as duas primeiras linhas, e foram relatados no item 2.3.
+As duas extensões são as duas últimas, descritas a seguir.
 
 A primeira, que designo Estudo 3, inverte os papéis do Estudo 2: a preferência
 feminina passa a ser herdável e a característica do macho, ambiental. A pergunta
