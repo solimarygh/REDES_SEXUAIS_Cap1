@@ -283,8 +283,7 @@ figura_cantos <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
     texto <- if (quem == "machos")
       ifelse(v == sigma_baixo, "machos parecidos entre si", "machos variados")
     else
-      ifelse(v == sigma_baixo, "picos de preferência concentrados",
-                                "picos de preferência dispersos")
+      ifelse(v == sigma_baixo, "picos concentrados", "picos dispersos")
     sprintf("%s  (%s = %.1f)", texto, letra, v)
   }
   dados <- dados %>%
@@ -421,10 +420,14 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
     # não entra no cálculo da aceitação, e sob a sigmoide ele apenas desloca um
     # limiar, de modo que todas as fêmeas ordenam os machos da mesma maneira.
     # A dispersão dos picos, essa sim, é o que o desenho fixa nos quatro casos.
-    list(sz = sigma_baixo, sp = sigma_baixo, tit = "machos parecidos, picos de preferência concentrados"),
-    list(sz = sigma_alto,  sp = sigma_baixo, tit = "machos variados, picos de preferência concentrados"),
-    list(sz = sigma_baixo, sp = sigma_alto,  tit = "machos parecidos, picos de preferência dispersos"),
-    list(sz = sigma_alto,  sp = sigma_alto,  tit = "machos variados, picos de preferência dispersos")
+    # "picos" e nao "picos de preferencia": o rotulo inteiro e desenhado numa
+    # linha so, e a versao longa passava da largura do painel e saia cortada nas
+    # duas pontas. O sigma_p vem logo a seguir, entre parenteses, e o documento
+    # ja definiu que sigma_p e a dispersao dos picos de preferencia.
+    list(sz = sigma_baixo, sp = sigma_baixo, tit = "machos parecidos, picos concentrados"),
+    list(sz = sigma_alto,  sp = sigma_baixo, tit = "machos variados, picos concentrados"),
+    list(sz = sigma_baixo, sp = sigma_alto,  tit = "machos parecidos, picos dispersos"),
+    list(sz = sigma_alto,  sp = sigma_alto,  tit = "machos variados, picos dispersos")
   )
 
   op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 6.5, 1.5), oma = c(3, 0, 4.5, 0))

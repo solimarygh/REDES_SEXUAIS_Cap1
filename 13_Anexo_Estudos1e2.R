@@ -212,6 +212,34 @@ REMENDOS <- list(
     para = ""
   ),
 
+  # --- o regime de busca sai do anexo -------------------------------
+  # Decisao de escopo, nao de conteudo: a secao fica no Material suplementar
+  # completo. Aqui sai o paragrafo que a apresenta, o cabecalho e o bloco que
+  # desenha as quatro abas.
+  list(
+    de = paste0(
+      "A figura anterior varia a composição da população. A seguinte varia o outro\n",
+      "nível do desenho, o regime de busca, que nos resultados é o que mais pesa.\n",
+      "Agora a composição da população é a mesma nos quatro painéis, e o que muda é\n",
+      "quantos machos cada fêmea avalia e quantos pode aceitar. Cada painel traz esses\n",
+      "dois números do tratamento e, ao lado, a poliandria realizada, que é quantos\n",
+      "parceiros as fêmeas de fato conseguiram: é ela, e não o k nominal, que diz o\n",
+      "quanto a escolha foi seletiva naquela combinação.\n",
+      "\n",
+      "### O regime de busca, curva por curva {.tabset}\n",
+      "\n",
+      "```{r ct-rede-busca, results='asis', fig.width=9, fig.height=9}\n",
+      "for (cv in CURVAS) {\n",
+      "  cat(\"\\n\\n#### \", labels_4[[cv]], \"\\n\\n\", sep = \"\")\n",
+      "  figura_busca(tipo = cv)\n",
+      "  cat(\"\\n\\n\")\n",
+      "}\n",
+      "```\n",
+      "\n"
+    ),
+    para = ""
+  ),
+
   # --- não carregar os dados que o anexo não usa ----------------------
   # São milhões de linhas em cada um, e sem eles o render fica muito mais leve.
   # com_derivadas() devolve NULL sem tocar em nada, de modo que a linha
