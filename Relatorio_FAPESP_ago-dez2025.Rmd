@@ -302,7 +302,10 @@ aleatória, amarelo a gaussiana, verde a sigmoide e roxo a disruptiva.
 O desenho dos Estudos 1 e 2 é bem maior do que o relatado em 2025: os fatores
 ecológicos não existiam no modelo anterior, as curvas eram duas e os dois sigmas
 percorriam menos níveis. Um cenário é uma réplica de uma combinação de
-parâmetros, e os fatores cruzados, com os níveis de cada um, são estes:
+parâmetros, e cada réplica repete a mesma combinação com outra semente, isto é,
+com outro valor inicial do gerador de números aleatórios: sementes diferentes
+produzem populações diferentes, e a mesma semente reproduz exatamente a mesma
+população. Os fatores cruzados, com os níveis de cada um, são estes:
 
 | parâmetro | o que é | níveis |
 |---|---|---|
@@ -312,7 +315,7 @@ parâmetros, e os fatores cruzados, com os níveis de cada um, são estes:
 | $A_{max}$ | quantos machos cada fêmea avalia | 200, 40, 10 |
 | k | com quantos parceiros ela pode acasalar | 5, 10, 20 |
 | seleção natural | viabilidade sobre o traço do macho | ligada, desligada |
-| réplica | repetição com outra semente, ou seja outra população | 20 por combinação |
+| réplica | repetição com outra semente | 20 por combinação |
 
 Os dois sigmas se cruzam por inteiro apenas no Estudo 1, que roda uma geração só
 e por isso exige cerca de cem vezes menos tempo de computação por cenário. No Estudo 2, σp percorre
