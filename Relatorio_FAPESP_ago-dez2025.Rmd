@@ -298,6 +298,27 @@ aleatória, amarelo a gaussiana, verde a sigmoide e roxo a disruptiva.
 
 ### Desenho experimental
 
+O desenho dos Estudos 1 e 2 é bem maior do que o relatado em 2025: os fatores
+ecológicos não existiam no modelo anterior, as curvas eram duas e os dois sigmas
+percorriam menos níveis. Um cenário é uma réplica de uma combinação de
+parâmetros, e os fatores cruzados, com os níveis de cada um, são estes:
+
+| parâmetro | o que é | níveis |
+|---|---|---|
+| curva de preferência | a forma da função de aceitação | aleatória, gaussiana, sigmoide, disruptiva |
+| σp | dispersão do pico de preferência entre as fêmeas | 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0 |
+| σz | dispersão do traço entre os machos | 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0 |
+| $A_{max}$ | quantos machos cada fêmea avalia | 200, 40, 10 |
+| k | com quantos parceiros ela pode acasalar | 5, 10, 20 |
+| seleção natural | viabilidade sobre o traço do macho | ligada, desligada |
+| réplica | repetição com outra semente | 20 por combinação |
+
+Os dois sigmas se cruzam por inteiro apenas no Estudo 1, que roda uma geração só
+e por isso é cerca de cem vezes mais barato que o outro. No Estudo 2, σp percorre
+os sete níveis e σz fica fixado em 1.0, e cada combinação roda 100 gerações. São
+`r n_cen(ct, c("sigma_p", "sigma_z"))` cenários no Estudo 1 e
+`r n_cen(d, "sigma_p")` no Estudo 2.
+
 ```{r fig-desenho, fig.width=9, fig.height=7, fig.cap="Condições iniciais no plano σp × σz. A grade é a mesma em todos os painéis, e em vermelho estão as condições iniciais que cada estudo visita. O Controle cruza a grade inteira porque roda uma geração só; o Estudo 2 percorre uma coluna, com o outro eixo fixado em 1.0. Os dois painéis restantes correspondem às extensões previstas para o período seguinte, descritas no item 3."}
 source("10_Figuras_conceituais.R")
 figura_desenho()
