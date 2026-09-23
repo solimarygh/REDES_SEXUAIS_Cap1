@@ -1120,7 +1120,7 @@ vale entendê-la uma vez:
 - **Coluna 1** é um corte na geração 100. No eixo horizontal está σp, o
   tratamento, e no vertical a variável resposta. Cada ponto é uma réplica e a
   linha é um loess. Responde: depois de cem gerações, onde a população acaba,
-  em função de quanto as fêmeas discordam entre si?
+  em função da dispersão dos picos de preferência?
 - **Colunas 2 e 3** são trajetórias. No eixo horizontal está a geração, de 1 a
   100. Cada uma mostra uma das duas pontas do gradiente, σp = 0.2 à esquerda e
   σp = 2.0 à direita, com a média das réplicas e uma sombra de um desvio.
@@ -1135,8 +1135,8 @@ preferência, com a mesma cor e o mesmo tipo de traço em todo o documento.
 
 O eixo deste estudo é simples de enunciar e difícil de visualizar. As duas
 colunas abaixo são as duas pontas do gradiente, com os *mesmos* machos nas
-duas, de modo que a única coisa que difere entre elas é o quanto as fêmeas
-discordam entre si sobre o que preferem.
+duas, de modo que a única coisa que difere entre elas é a dispersão dos picos
+de preferência.
 
 Ao contrário das figuras de rede, a população desta figura não é uma réplica
 recuperada das rodadas: é gerada com uma semente fixa, para que as duas colunas

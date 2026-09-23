@@ -923,7 +923,7 @@ que a fêmea escolhe os melhores: as métricas evoluem ao longo do tempo.
 
 O eixo deste estudo é fácil de dizer e difícil de ver. As duas colunas abaixo
 são as duas pontas do gradiente, com os *mesmos* machos nas duas, de modo que a
-única coisa que muda é o quanto as fêmeas discordam entre si.
+única coisa que muda é a dispersão dos picos de preferência.
 
 Em cima, a curva de aceite de catorze fêmeas sorteadas, com os machos
 disponíveis marcados no eixo: com σp pequeno as curvas se empilham umas sobre

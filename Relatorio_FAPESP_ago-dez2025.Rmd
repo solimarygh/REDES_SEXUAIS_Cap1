@@ -225,7 +225,8 @@ fêmea aceitar um macho depende da distância entre o traço dele e o pico dela.
 
 Duas quantidades organizam o desenho experimental, e a distinção entre elas é o
 eixo conceitual do projeto. **σp** é a dispersão dos picos de preferência entre
-as fêmeas, ou seja o quanto elas discordam entre si sobre o que preferem.
+as fêmeas, ou seja o quanto elas diferem entre si quanto ao valor de traço que
+mais apreciam.
 **σz** é a dispersão do traço entre os machos, ou seja o quanto o material
 disponível para escolher é variado. A mesma intensidade média de seleção sexual
 pode resultar de fêmeas homogêneas diante de machos variados ou do contrário, e
@@ -523,11 +524,12 @@ essa variação está.
 ##### Distribuição da divergência no plano σp × σz
 
 A divergência entre as quatro curvas, ou seja o quanto elas produzem topologias
-distintas entre si, é máxima quando as fêmeas concordam e os machos variam, e
-cai à medida que se caminha para o outro extremo do eixo da assimetria. Uma
-leitura possível, ainda não testada, é que quando todas as fêmeas querem a mesma
-coisa a geometria da curva se traduz sem ruído em quem acasala com quem, e
-quando elas discordam entre si a variação individual borra a assinatura.
+distintas entre si, é máxima quando os picos de preferência estão concentrados
+e os machos variam, e cai à medida que se caminha para o outro extremo do eixo
+da assimetria. Uma leitura possível, ainda não testada, é que quando todas as
+fêmeas têm o mesmo pico a geometria da curva se traduz sem ruído em quem acasala
+com quem, e quando os picos se dispersam a variação individual borra a
+assinatura.
 
 ##### Sensibilidade das métricas ao tamanho e à densidade da rede
 
@@ -597,7 +599,7 @@ seleção, e o estudo mede a resposta evolutiva do traço masculino.
 
 ##### Efeito da heterogeneidade de preferência sobre a variância genética
 
-```{r fig-varz, fig.width=8, fig.height=4, fig.cap="Variância genética do traço masculino na geração 100, em função da dispersão da preferência feminina. Sob a curva gaussiana, que é estabilizadora a nível individual, a variância genética da população cresce à medida que as fêmeas discordam mais entre si. A curva aleatória fica em torno do valor neutro e serve de controle de deriva. $A_{max}$ = 200, sem seleção natural, promediando os três valores de k."}
+```{r fig-varz, fig.width=8, fig.height=4, fig.cap="Variância genética do traço masculino na geração 100, em função da dispersão da preferência feminina. Sob a curva gaussiana, que é estabilizadora a nível individual, a variância genética da população cresce à medida que os picos de preferência se dispersam. A curva aleatória fica em torno do valor neutro e serve de controle de deriva. $A_{max}$ = 200, sem seleção natural, promediando os três valores de k."}
 if (ok(d)) {
   vz <- d %>%
     filter(generation == max(generation), encounters_n == 200, !selecao_natural) %>%

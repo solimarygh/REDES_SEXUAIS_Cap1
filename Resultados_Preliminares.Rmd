@@ -321,7 +321,7 @@ for (cv in CURVAS) {
 
 ## O Estudo 2: o que sigma_p faz {.tabset}
 
-O eixo do Estudo 2 é o quanto as fêmeas discordam entre si. Nas duas colunas os
+O eixo do Estudo 2 é a dispersão dos picos de preferência entre as fêmeas. Nas duas colunas os
 machos são os *mesmos*, então a única coisa que muda é a dispersão das
 preferências.
 
@@ -460,7 +460,7 @@ A divergência é máxima quando as fêmeas são homogêneas e os machos variado
 caminha para o outro lado do eixo.
 
 Uma leitura possível, que ainda não testamos: quando todas as fêmeas querem a mesma coisa, a
-geometria da curva se traduz sem ruído em quem acasala com quem, e quando elas discordam entre si
+geometria da curva se traduz sem ruído em quem acasala com quem, e quando os picos se dispersam
 a variação individual delas borra a assinatura. Mas isso é conjectura por enquanto.
 
 O que os dados dizem, sem interpretação, é que sigma_p sozinho não prediz bem a divergência:
@@ -549,7 +549,7 @@ if (ok(d)) {
 ```
 
 A heterogeneidade de preferência converte seleção estabilizadora em seleção diversificadora: com
-preferência gaussiana, a variância genética cresce à medida que as fêmeas discordam mais entre si.
+preferência gaussiana, a variância genética cresce à medida que os picos de preferência se dispersam.
 A curva aleatória fica em torno do valor neutro e serve de controle de deriva.
 
 As duas predições que o paper faz sobre o traço do macho vão em sentidos opostos nos dados.

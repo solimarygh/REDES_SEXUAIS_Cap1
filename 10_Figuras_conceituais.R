@@ -65,7 +65,7 @@ rotulo_replica <- function(r) {
 # também deve ser. O que muda entre os dois:
 #
 #   eixo = "sigma_p" (Estudo 2). Os machos são sempre os mesmos e o que varia
-#     entre as colunas é o quanto as fêmeas discordam entre si. A linha de
+#     entre as colunas é a dispersão dos picos de preferência. A linha de
 #     baixo mostra o sucesso dos MACHOS, porque é sobre eles que a seleção
 #     sexual está agindo.
 #
@@ -283,7 +283,8 @@ figura_cantos <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
     texto <- if (quem == "machos")
       ifelse(v == sigma_baixo, "machos parecidos entre si", "machos variados")
     else
-      ifelse(v == sigma_baixo, "fêmeas concordam", "fêmeas discordam")
+      ifelse(v == sigma_baixo, "picos de preferência concentrados",
+                                "picos de preferência dispersos")
     sprintf("%s  (%s = %.1f)", texto, letra, v)
   }
   dados <- dados %>%
@@ -415,10 +416,15 @@ figura_redes <- function(sigma_baixo = 0.2, sigma_alto = 2.0,
   }
 
   cantos <- list(
-    list(sz = sigma_baixo, sp = sigma_baixo, tit = "machos parecidos, fêmeas concordam"),
-    list(sz = sigma_alto,  sp = sigma_baixo, tit = "machos variados, fêmeas concordam"),
-    list(sz = sigma_baixo, sp = sigma_alto,  tit = "machos parecidos, fêmeas discordam"),
-    list(sz = sigma_alto,  sp = sigma_alto,  tit = "machos variados, fêmeas discordam")
+    # Os rótulos descrevem o parâmetro e não a sua consequência. "Fêmeas
+    # discordam" seria falso em duas das quatro curvas: sob a aleatória o pico p
+    # não entra no cálculo da aceitação, e sob a sigmoide ele apenas desloca um
+    # limiar, de modo que todas as fêmeas ordenam os machos da mesma maneira.
+    # A dispersão dos picos, essa sim, é o que o desenho fixa nos quatro casos.
+    list(sz = sigma_baixo, sp = sigma_baixo, tit = "machos parecidos, picos de preferência concentrados"),
+    list(sz = sigma_alto,  sp = sigma_baixo, tit = "machos variados, picos de preferência concentrados"),
+    list(sz = sigma_baixo, sp = sigma_alto,  tit = "machos parecidos, picos de preferência dispersos"),
+    list(sz = sigma_alto,  sp = sigma_alto,  tit = "machos variados, picos de preferência dispersos")
   )
 
   op <- par(mfrow = c(2, 2), mar = c(1.5, 1.5, 6.5, 1.5), oma = c(3, 0, 4.5, 0))
