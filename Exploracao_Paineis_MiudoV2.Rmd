@@ -190,10 +190,52 @@ cols_presentes <- function(df, quais) {
 }
 
 # ---------------------------------------------------------------------
+# Limites da escala de cor de cada métrica, medidos sobre o conjunto inteiro e
+# não sobre o recorte que a figura mostra.
+#
+# Sem isto o ggplot reescala a cor em cada figura, e o mesmo valor sai com
+# cores diferentes conforme a aba. O caso claro é "Proporção que atingiu k":
+# com k = 10 havia valores até 0.5 e o zero saía preto; com k = 20 nenhuma
+# fêmea chega ao teto, a grade inteira vale zero, a escala colapsava num ponto
+# só e esse mesmo zero saía rosa. Comparar as abas era impossível.
+#
+# Os limites vêm da amplitude observada em TODO o df — todos os k, todos os
+# A_max, com e sem seleção natural — e não de um domínio teórico como [0, 1]:
+# fixar o domínio achataria as métricas que ocupam uma fatia estreita dele.
+#
+# O cache evita refazer o agrupamento sobre o df inteiro a cada faixa de cada
+# aba. A chave inclui as dimensões do df porque os quatro estudos passam por
+# aqui com conjuntos de tamanhos diferentes.
+# ---------------------------------------------------------------------
+.limites_cache <- new.env(parent = emptyenv())
+
+limites_metrica <- function(df, m) {
+  chave <- paste(m, nrow(df), ncol(df), sep = "|")
+  if (!is.null(.limites_cache[[chave]])) return(.limites_cache[[chave]])
+
+  eixos <- intersect(c("tipo_selecao", "sigma_p", "sigma_z", "sigma_p_init",
+                       "sigma_z_init", "k_fixo", "encounters_n",
+                       "selecao_natural"), names(df))
+  v <- df %>%
+    group_by(across(all_of(eixos))) %>%
+    summarise(v = mean(.data[[m]], na.rm = TRUE), .groups = "drop") %>%
+    pull(v)
+  v <- v[is.finite(v)]
+
+  # Sem dados, ou com um valor só, devolve NULL e o ggplot volta ao
+  # comportamento padrão: uma escala de limites nulos seria um erro.
+  lim <- if (length(v) < 2 || diff(range(v)) == 0) NULL else range(v)
+  .limites_cache[[chave]] <- lim
+  lim
+}
+
+# ---------------------------------------------------------------------
 # CONTROLE — superfície σp × σz (uma geração, sem trajetória)
 # Uma faixa de heatmaps por variável resposta, com escala de cor própria,
 # porque as métricas têm ordens de grandeza diferentes e uma escala comum
-# achataria as de menor amplitude.
+# achataria as de menor amplitude. Própria de cada métrica, note-se, e não de
+# cada figura: os limites vêm de limites_metrica() e são os mesmos em todas as
+# abas, de modo que um valor tem sempre a mesma cor.
 # ---------------------------------------------------------------------
 plot_superficie <- function(df, kk, amax, ns, quais, titulo) {
   if (!ok(df)) return(NULL)
@@ -211,7 +253,8 @@ plot_superficie <- function(df, kk, amax, ns, quais, titulo) {
       geom_tile(color = "white", linewidth = 0.3) +
       facet_wrap(~ tipo_selecao, nrow = 1,
                  labeller = labeller(tipo_selecao = labels_4)) +
-      scale_fill_viridis_c(option = "magma", name = NULL) +
+      scale_fill_viridis_c(option = "magma", name = NULL,
+                           limits = limites_metrica(df, m)) +
       labs(x = NULL, y = quais[[m]]) +
       tema_painel() +
       theme(panel.grid = element_blank(),
@@ -226,7 +269,9 @@ plot_superficie <- function(df, kk, amax, ns, quais, titulo) {
       title   = titulo,
       caption = paste("Cada célula é a média das 20 réplicas de uma geração.",
                       "Eixo y = σp (variação da preferência entre fêmeas), eixo x = σz.",
-                      "A escala de cor é independente em cada faixa."),
+                      "A escala de cor é independente em cada faixa, mas fixa entre",
+                      "figuras: dentro de uma faixa, o mesmo valor tem a mesma cor em",
+                      "todos os níveis de k, de A_max e de seleção natural."),
       theme   = theme(plot.title   = element_text(face = "bold", size = 13),
                       plot.caption = element_text(hjust = 0, face = "italic", size = 8.5)))
 }
