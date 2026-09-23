@@ -35,6 +35,28 @@ editor_options:
 }
 .tocify-header > .tocify-subheader > .tocify-item { font-weight: 400; }
 
+/* As figuras cabem na altura da tela.
+
+   O knitr escreve out.width = "100%" como atributo do <img>, de modo que a
+   figura ocupa sempre a largura inteira do contêiner e a altura acompanha na
+   proporção. Diminuir a letra do navegador alarga o contêiner, e a figura
+   cresce junto: nunca se via inteira sem estreitar a janela.
+
+   Aqui a restrição passa para a altura. width: auto vence o atributo do <img>,
+   porque um atributo de apresentação tem precedência menor que qualquer regra
+   de CSS, e a largura passa a acompanhar a altura na proporção certa. Com
+   max-height em vh, a figura inteira cabe na tela em qualquer zoom.
+
+   Para voltar ao comportamento anterior, basta apagar este bloco. */
+.main-container img {
+  max-height: 88vh;
+  max-width: 100%;
+  width: auto !important;
+  height: auto;
+  display: block;
+  margin-left: auto; margin-right: auto;
+}
+
 h1 {
   border-top: 3px solid #2C3E50; padding-top: 0.7em; margin-top: 2.2em;
 }
