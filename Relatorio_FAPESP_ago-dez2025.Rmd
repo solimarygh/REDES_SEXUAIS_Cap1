@@ -142,7 +142,7 @@ n_cen <- function(x, eixos) {
   if (!ok(x)) return("-")
   cols <- intersect(c("tipo_selecao", eixos, "encounters_n", "k_fixo",
                       "selecao_natural", "replica"), names(x))
-  format(nrow(distinct(x[, cols])), big.mark = ".")
+  format(nrow(distinct(x[, cols])), big.mark = ".", decimal.mark = ",")
 }
 ```
 

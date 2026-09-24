@@ -146,11 +146,36 @@ ARQUIVO_CACHE_REDES <- "Resultados_Artigo/Figuras/redes_representativas.rds"
 }
 .cache_redes <- .ler_cache()
 
-.gravar_cache <- function() {
+# A gravação é do cache INTEIRO, porque é um objeto só. Chamá-la depois de cada
+# rede fazia o custo crescer com o quadrado: a entrada número n grava as n
+# anteriores junto. Num documento com 144 redes isso é uma hora de disco, e foi
+# o que se mediu — 91 minutos de relógio contra 32 de processador.
+#
+# Agora grava no máximo uma vez a cada GRAVAR_CADA segundos, e uma última vez ao
+# fim da sessão. O que se arrisca é perder as redes calculadas nos últimos
+# segundos se o R morrer, e recalculá-las custa o que custou calculá-las.
+GRAVAR_CADA <- 120
+.ultima_gravacao <- 0
+
+.gravar_cache <- function(forcar = FALSE) {
+  agora <- as.numeric(Sys.time())
+  if (!forcar && agora - .ultima_gravacao < GRAVAR_CADA) return(invisible(FALSE))
   dir.create(dirname(ARQUIVO_CACHE_REDES), recursive = TRUE, showWarnings = FALSE)
   saveRDS(list(motores = .impressao_motores(), entradas = .cache_redes),
           ARQUIVO_CACHE_REDES)
+  .ultima_gravacao <<- agora
+  invisible(TRUE)
 }
+
+# A gravação final. Sem isto, as redes calculadas depois da última gravação
+# periódica se perderiam, e o render seguinte as refaria.
+local({
+  marcador <- new.env(parent = emptyenv())
+  reg.finalizer(marcador,
+                function(e) try(.gravar_cache(forcar = TRUE), silent = TRUE),
+                onexit = TRUE)
+  assign(".marcador_cache_redes", marcador, envir = globalenv())
+})
 
 # ---------------------------------------------------------------------
 # Leitura dos dados de um estudo, guardada em cache: quem chama isto numa
