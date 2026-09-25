@@ -864,10 +864,14 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
   }
 
   # O que se move é diferente em cada estudo, e é isso que a figura mostra.
+  # "curvas de aceite das fêmeas", e não só "as curvas": este subtítulo é lido
+  # fora de contexto, e o documento tem dois objetos que se chamam curva - a
+  # curva de preferência, que é a forma funcional com nome, e a curva de aceite
+  # de cada fêmea, que é essa forma centrada no pico dela. É desta que se trata.
   o_que_anda <- switch(estudo,
-    "2" = "a preferência é re-sorteada a cada geração, então as curvas ficam paradas e são os MACHOS que correm",
-    "3" = "o traço é re-sorteado a cada geração, então os machos ficam no lugar e são as CURVAS que se deslocam",
-    "4" = "nada é imposto: as curvas e os machos se movem os dois")
+    "2" = "a preferência é re-sorteada a cada geração, então as curvas de aceite das fêmeas ficam paradas e são os MACHOS que correm",
+    "3" = "o traço é re-sorteado a cada geração, então os machos ficam no lugar e são as CURVAS DE ACEITE DAS FÊMEAS que se deslocam",
+    "4" = "nada é imposto: as curvas de aceite das fêmeas e os machos se movem os dois")
   nome_estudo <- switch(estudo, "2" = "Estudo 2 (Fêmeas variando)",
                         "3" = "Estudo 3 (Machos variando)", "4" = "Estudo 4 (Co-evolução)")
 

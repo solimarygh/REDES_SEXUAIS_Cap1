@@ -446,7 +446,7 @@ plot_evolucao <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo,
       caption = paste("Coluna 1: cada ponto é uma réplica na geração final, a linha é um loess.",
                       "Colunas 2-3: linha = média das réplicas, sombra = ±1 SD.",
                       "A linha vermelha tracejada marca σ = 1.0, o ponto onde os dois estudos se cruzam.",
-                      "\nOnde as curvas dão o mesmo valor as linhas se sobrepõem: é por isso que o tipo de traço difere entre elas."),
+                      "\nOnde as quatro curvas de preferência dão o mesmo valor as linhas se sobrepõem: é por isso que o tipo de traço difere entre elas."),
       theme   = theme(plot.title      = element_text(face = "bold", size = 13),
                       plot.caption    = element_text(hjust = 0, face = "italic", size = 8.5),
                       legend.position = "bottom"))
@@ -1232,8 +1232,8 @@ que a fuga do traço não se veria.
 
 Em cima está a rede de acasalamentos. Abaixo dela, a curva de aceite de catorze
 fêmeas sorteadas, com os machos disponíveis marcados no eixo: com σp pequeno as
-curvas se empilham umas sobre as outras, porque todas as fêmeas querem o mesmo
-macho. Depois, os casais que se formaram, com a diagonal marcando onde o macho é
+curvas de aceite se empilham umas sobre as outras, porque todas as fêmeas querem
+o mesmo macho. Depois, os casais que se formaram, com a diagonal marcando onde o macho é
 igual ao pico da fêmea. Embaixo, quantas parceiras cada macho teve, que é sobre
 quem a seleção sexual está agindo neste estudo.
 
