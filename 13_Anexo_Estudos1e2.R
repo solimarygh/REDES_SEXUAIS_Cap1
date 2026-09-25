@@ -219,8 +219,8 @@ REMENDOS <- list(
     de = paste0(
       "## 1.2 Cortes ao longo de σz {.tabset}\n",
       "\n",
-      "A mesma informação da seção anterior, agora em linhas em vez de cores, o que\n",
-      "facilita a leitura de valores. Cada linha corresponde a um nível de σp: as\n",
+      "Nesta seção mostramos a mesma informação da anterior, mas em linhas em vez de\n",
+      "cores, o que facilita a leitura dos valores. Cada linha corresponde a um nível de σp: as\n",
       "escuras são populações de fêmeas homogêneas, as claras de fêmeas heterogêneas.\n",
       "\n",
       "A forma do conjunto de linhas responde a uma pergunta estatística direta. Se\n",
@@ -247,8 +247,8 @@ REMENDOS <- list(
        para = "## 1.2 O acesso ao acasalamento, do lado das fêmeas {.tabset}"),
   list(de = "## 1.4 O acesso ao acasalamento, do lado dos machos {.tabset}",
        para = "## 1.3 O acesso ao acasalamento, do lado dos machos {.tabset}"),
-  list(de = "As mesmas quatro variáveis de acesso ao acasalamento da seção 1.3, agora com",
-       para = "As mesmas quatro variáveis de acesso ao acasalamento da seção 1.2, agora com"),
+  list(de = "seção 1.3, mas agora com evolução.",
+       para = "seção 1.2, mas agora com evolução."),
 
   # --- o regime de busca sai do anexo -------------------------------
   # Decisao de escopo, nao de conteudo: a secao fica no Material suplementar

@@ -951,8 +951,8 @@ render_tabs(function(kk, amax, ns)
 
 ## 1.2 Cortes ao longo de σz {.tabset}
 
-A mesma informação da seção anterior, agora em linhas em vez de cores, o que
-facilita a leitura de valores. Cada linha corresponde a um nível de σp: as
+Nesta seção mostramos a mesma informação da anterior, mas em linhas em vez de
+cores, o que facilita a leitura dos valores. Cada linha corresponde a um nível de σp: as
 escuras são populações de fêmeas homogêneas, as claras de fêmeas heterogêneas.
 
 A forma do conjunto de linhas responde a uma pergunta estatística direta. Se
@@ -1269,9 +1269,10 @@ controle: com P = 0.5 para qualquer par, σp não tem por onde produzir efeito.
 
 ## 2.1 Métricas de rede {.tabset}
 
-As quatro métricas de estrutura da rede. Na coluna 1, o valor de cada uma na
-geração 100 ao longo do gradiente de σp; nas colunas 2 e 3, a trajetória das cem
-gerações que produziu esse valor, com σp = 0.2 e com σp = 2.0.
+Neste tópico mostramos as quatro métricas de estrutura da rede. Na coluna 1 está
+o valor de cada uma na geração 100 ao longo do gradiente de σp; nas colunas 2 e
+3, a trajetória das cem gerações que produziu esse valor, com σp = 0.2 e com
+σp = 2.0.
 
 ```{r fem-metricas, results='asis', fig.width=13, fig.height=9}
 if (!ok(d)) cat("\n*Sem dados. Rode `Fase4_TodasAsCurvas.R`.*\n") else
@@ -1307,9 +1308,10 @@ render_tabs(function(kk, amax, ns)
 
 ## 2.3 Poliandria realizada {.tabset}
 
-As mesmas quatro variáveis de acesso ao acasalamento da seção 1.3, agora com
-evolução. Na coluna 1, o valor de cada uma na geração 100 ao longo do gradiente
-de σp; nas colunas 2 e 3, a trajetória em σp = 0.2 e em σp = 2.0.
+Neste tópico mostramos as mesmas quatro variáveis de acesso ao acasalamento da
+seção 1.3, mas agora com evolução. Na coluna 1 está o valor de cada uma na
+geração 100 ao longo do gradiente de σp; nas colunas 2 e 3, a trajetória em
+σp = 0.2 e em σp = 2.0.
 
 Aqui as colunas 2 e 3 dizem algo que a coluna 1 não mostra: se o acesso ao
 acasalamento se manteve estável ao longo das cem gerações ou se mudou enquanto
@@ -1367,8 +1369,9 @@ que responde.
 
 ## 3.0 O efeito de σz sobre uma população
 
-A mesma construção da seção 2.0, com a variação trocada de lado, e a mesma
-ressalva: a população é gerada com semente fixa e não recuperada das rodadas.
+Nesta seção repetimos a construção da seção 2.0, com a variação trocada de lado,
+e vale a mesma ressalva: a população é gerada com semente fixa e não recuperada
+das rodadas.
 
 Agora as fêmeas são as *mesmas* nas duas colunas, com as mesmas curvas de
 aceite, e o que difere são os machos disponíveis, marcados no eixo inferior. As
@@ -1410,9 +1413,10 @@ for (cv in CURVAS) {
 
 ## 3.1 Métricas de rede {.tabset}
 
-As mesmas quatro métricas da seção 2.1, agora contra σz. Na coluna 1, o valor de
-cada uma na geração 100 ao longo do gradiente; nas colunas 2 e 3, a trajetória
-das cem gerações que produziu esse valor, com σz = 0.2 e com σz = 2.0.
+Neste tópico mostramos as mesmas quatro métricas da seção 2.1, mas agora contra
+σz. Na coluna 1 está o valor de cada uma na geração 100 ao longo do gradiente;
+nas colunas 2 e 3, a trajetória das cem gerações que produziu esse valor, com
+σz = 0.2 e com σz = 2.0.
 
 ```{r mac-metricas, results='asis', fig.width=13, fig.height=9}
 if (!ok(esp)) cat("\n*Sem dados. Rode `Fase_Espelho.R`.*\n") else
@@ -1423,8 +1427,8 @@ render_tabs(function(kk, amax, ns)
 
 ## 3.2 A preferência da fêmea (p) {.tabset}
 
-A variável evolutiva deste estudo, medida nas fêmeas adultas, na sua média e na
-sua variância. É o equivalente exato do painel 2.2: lá a característica medida
+Neste tópico mostramos a variável evolutiva deste estudo, medida nas fêmeas
+adultas, na sua média e na sua variância. É o equivalente exato do painel 2.2: lá a característica medida
 no sexo que a expressa, aqui a característica medida no sexo que a utiliza. As
 duas figuras se leem em paralelo.
 
@@ -1825,7 +1829,8 @@ mecanismo de Fisher.
 
 ## 5.1 A mesma população na geração 1 e na geração 100 {.tabset}
 
-A mesma construção das seções 2.0 e 3.0, e o contraste entre as três é o ponto.
+Nesta seção repetimos a construção das seções 2.0 e 3.0, e o contraste entre as
+três é o que interessa.
 No Estudo 2 as curvas de aceite permaneciam paradas e os machos se
 deslocavam; no Estudo 3 era o contrário. Aqui os dois lados se movem,
 porque nada é imposto e as duas características evoluem.
