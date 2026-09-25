@@ -1243,6 +1243,13 @@ são os machos. A comparação a fazer entre os dois pares de colunas é entre a
 posição dos tracinhos no eixo, que marcam os machos existentes, e a posição das
 curvas, que não se movem.
 
+As abas percorrem a curva de preferência, o regime de seleção natural e o
+$A_{max}$. **O teto de parceiros fica em k = 5 em todas elas**, e é o único fator
+do desenho que não varia aqui: com ele nas abas seriam 72 figuras em vez de 24, e
+cada uma reconstrói duas réplicas de cem gerações. O valor de k aparece no
+subtítulo de cada figura, junto com o resto da combinação. Os três níveis de k
+estão nas seções de resultados, da 2.1 à 2.3.
+
 ### Curva por curva {.tabset}
 
 ```{r fem-rede-evolucao, results='asis', fig.width=19, fig.height=12}
