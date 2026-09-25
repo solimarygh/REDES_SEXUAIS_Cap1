@@ -783,7 +783,7 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
     # repetiria a mesma informação em todas as colunas.
     d$rotulo_col <- if (length(celulas) > 1)
       sprintf("%s = %s", bonito[[mult]],
-              format(celulas[[i]][[mult]], trim = TRUE)) else ""
+              format(celulas[[i]][[mult]], trim = TRUE, nsmall = 1)) else ""
     lados[[length(lados) + 1]] <- d
   }
 
@@ -878,7 +878,7 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
   quais <- setdiff(intersect(names(celula), names(bonito)), mult)
   sigmas_txt <- if (!length(quais)) "" else
     paste(sprintf("%s = %s", bonito[quais],
-                  format(unlist(celula[quais]), trim = TRUE)), collapse = " | ")
+                  format(unlist(celula[quais]), trim = TRUE, nsmall = 1)), collapse = " | ")
 
   blocos <- lapply(lados, bloco)
   montagem <- Reduce(function(a, b) if (deitada) a / b else a | b, blocos)
@@ -888,7 +888,7 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
   replicas_txt <- if (length(rs) == 1) rotulo_replica(rs[[1]]) else
     paste(vapply(seq_along(rs), function(i)
       sprintf("%s = %s: %s", bonito[[mult]],
-              format(celulas[[i]][[mult]], trim = TRUE),
+              format(celulas[[i]][[mult]], trim = TRUE, nsmall = 1),
               rotulo_replica(rs[[i]])), character(1)), collapse = "  |  ")
 
   linha_celula <- paste(c(sigmas_txt, sprintf("A_max = %d", A_max),
