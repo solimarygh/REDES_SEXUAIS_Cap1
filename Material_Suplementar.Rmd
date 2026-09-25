@@ -472,7 +472,11 @@ plot_evolucao <- function(df, var_col, var_lab, kk, amax, ns, quais, titulo,
 # de 2.0, ela não é parâmetro da função: filtraria juvenis, e ali não existe
 # geração anterior de onde vir. Oferecer a aba mostraria duas vezes a mesma
 # figura.
-render_tabs_curva <- function(f, com_ns = FALSE, agrupar_ns_amax = FALSE) {
+# `ks` diz que valores de k percorrer. Com um valor só, o nível de aba
+# desaparece em vez de virar uma aba sozinha, e o k fica declarado no subtítulo
+# da figura como qualquer outro fator fixo.
+render_tabs_curva <- function(f, com_ns = FALSE, agrupar_ns_amax = FALSE,
+                              ks = c(5, 10, 20)) {
   for (cv in CURVAS) {
     cat(sprintf("\n#### %s {.tabset}\n\n", labels_4[[cv]]))
     combos <- if (!com_ns) {
@@ -490,9 +494,10 @@ render_tabs_curva <- function(f, com_ns = FALSE, agrupar_ns_amax = FALSE) {
           list(ns = n, amax = a, rot = sprintf("A_max = %d", a)))), recursive = FALSE)
     }
     for (cc in combos) {
-      cat(sprintf("\n##### %s {.tabset}\n\n", cc$rot))
-      for (kk in c(5, 10, 20)) {
-        cat(sprintf("\n###### k = %d\n\n", kk))
+      cat(sprintf("\n##### %s%s\n\n", cc$rot,
+                  if (length(ks) > 1) " {.tabset}" else ""))
+      for (kk in ks) {
+        if (length(ks) > 1) cat(sprintf("\n###### k = %d\n\n", kk))
         ok_fig <- tryCatch({ f(cv, kk, cc$amax, cc$ns); TRUE },
                            error = function(e) FALSE)
         if (!ok_fig) cat("\n*Sem dados para esta combinação.*\n")
@@ -1243,7 +1248,7 @@ render_tabs_curva(function(cv, kk, amax, ns)
   print(figura_mecanismo_geracoes("2", tipo = cv, k = kk, A_max = amax,
                                   selecao_natural = ns,
                                   sigma_p = c(0.2, 2.0))),
-  com_ns = TRUE, agrupar_ns_amax = TRUE)
+  com_ns = TRUE, agrupar_ns_amax = TRUE, ks = 5)
 ```
 
 Na aba da curva aleatória as quatro colunas são equivalentes, o que confirma o
