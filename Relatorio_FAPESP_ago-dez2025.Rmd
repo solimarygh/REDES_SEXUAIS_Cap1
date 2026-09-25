@@ -612,7 +612,7 @@ seleção, e o estudo mede a resposta evolutiva do traço masculino.
 
 #### Resultados principais
 
-##### Efeito da heterogeneidade de preferência sobre a variância genética
+##### Efeito da heterogeneidade de preferência sobre a variância genética do traço masculino
 
 ```{r fig-varz, fig.width=8, fig.height=4, fig.cap="Variância genética do traço masculino na geração 100, em função da dispersão da preferência feminina. Sob a curva gaussiana, que é estabilizadora a nível individual, a variância genética da população cresce à medida que os picos de preferência se dispersam. A curva aleatória fica em torno do valor neutro e serve de controle de deriva. $A_{max}$ = 200, sem seleção natural, promediando os três valores de k."}
 if (ok(d)) {
@@ -638,7 +638,7 @@ genética, desde que as fêmeas discordem entre si sobre onde está esse pico. A
 linha pontilhada marca a variância inicial: acima dela, a população terminou as
 cem gerações com mais variação genética do que começou.
 
-##### Relação entre topologia da rede e variância genética mantida
+##### Relação entre a topologia da rede e a variância genética do traço mantida
 
 Duas predições foram formuladas sobre a relação entre topologia e trajetória do
 traço. A primeira, de que o aninhamento prediria a exageração do traço, não se
@@ -653,7 +653,7 @@ acasalamentos se reparte em grupos que acasalam preferencialmente entre si
 mantêm mais variação genética no traço, e esse é o mecanismo de resgate de
 diversidade que o projeto propunha testar.
 
-##### Bimodalidade do traço sob a curva disruptiva
+##### Bimodalidade do traço masculino sob a curva disruptiva
 
 Sob a curva disruptiva as populações não convergem para um valor intermediário
 do traço: cada réplica vai parar num dos dois extremos, e a média entre

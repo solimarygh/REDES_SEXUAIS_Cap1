@@ -165,8 +165,8 @@ quais_poliandria <- c(grau_medio_femeas        = "1. Poliandria realizada",
                       prop_femeas_atingiu_k    = "2. Proporção que atingiu k",
                       arestas                  = "3. Arestas (densidade)",
                       prop_femeas_sem_acasalar = "4. Fêmeas sem acasalar")
-quais_traco     <- c(zbar_males = "Média do traço (z)",
-                     varz_males = "Variância do traço (Var z)")
+quais_traco     <- c(zbar_males = "Média do traço do macho (z)",
+                     varz_males = "Variância do traço do macho (Var z)")
 # Duas linhas só, para o painel ficar simétrico ao do traço no estudo das
 # fêmeas. Usamos a preferência das fêmeas adultas, que é o espelho exato de
 # zbar_males lá: em cada estudo, a característica medida no sexo que a
@@ -985,7 +985,7 @@ equilíbrio.
 if (!ok(d)) cat("\n*Sem dados.*\n") else
 render_tabs(function(kk, amax, ns)
   plot_evolucao(d, "sigma_p", "σp", kk, amax, ns, quais_traco,
-                rotulo("FÊMEAS VARIANDO — traço z", ns, amax, kk),
+                rotulo("FÊMEAS VARIANDO — traço do macho (z)", ns, amax, kk),
                 cor_faixa = "#6B3A8C"))
 ```
 

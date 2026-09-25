@@ -222,8 +222,11 @@ quais_machos    <- c(grau_medio_machos_derivado = "Parceiras por macho (todos)",
                      grau_medio_machos          = "Parceiras por macho que acasalou",
                      prop_machos_sem_acasalar   = "Machos sem acasalar",
                      I_s                        = "Oportunidade de seleção sexual (Is)")
-quais_traco     <- c(zbar_males = "Média do traço (z)",
-                     varz_males = "Variância do traço (Var z)")
+# "traço do macho" e não só "traço": no Estudo 4 as fêmeas também carregam z,
+# sem expressá-lo, de modo que "variância do traço" sozinho não diz de quem. As
+# duas colunas são dos machos, que são os que o expressam.
+quais_traco     <- c(zbar_males = "Média do traço do macho (z)",
+                     varz_males = "Variância do traço do macho (Var z)")
 # Duas linhas só, para o painel ficar simétrico ao do traço no estudo das
 # fêmeas. Usamos a preferência das fêmeas adultas, que é o espelho exato de
 # zbar_males lá: em cada estudo, a característica medida no sexo que a
@@ -1298,7 +1301,7 @@ combinação de curva e regime chega ao seu próprio equilíbrio.
 if (!ok(d)) cat("\n*Sem dados.*\n") else
 render_tabs(function(kk, amax, ns)
   plot_evolucao(d, "sigma_p", "σp", kk, amax, ns, quais_traco,
-                rotulo("FÊMEAS VARIANDO — traço z", ns, amax, kk),
+                rotulo("FÊMEAS VARIANDO — traço do macho (z)", ns, amax, kk),
                 cor_faixa = "#6B3A8C"))
 ```
 
