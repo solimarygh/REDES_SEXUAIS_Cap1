@@ -823,7 +823,7 @@ níveis, para consulta:
 | seleção natural | ligada, desligada |
 | réplica | 20 por combinação |
 
-Os dois sigmas se cruzam por inteiro apenas no Controle. No Estudo 2 σp percorre
+Os dois sigmas se cruzam por inteiro apenas no Controle (Estudo 1). No Estudo 2 σp percorre
 os sete níveis e σz é condição inicial fixada em 1.0; no Estudo 3 é o espelho.
 No Estudo 4 os dois são condição inicial, com três níveis cada, 0.5, 1.0 e 2.0.
 

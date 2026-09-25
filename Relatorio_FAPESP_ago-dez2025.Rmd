@@ -294,6 +294,11 @@ as fêmeas quererem coisas diferentes em média.
 | sigmoide | `P = 1 / (1 + exp(-s (z - p)))` | quanto maior o traço, maior o aceite: seleção direcional |
 | disruptiva | `P = 1 - exp(-s (z - p)²)` | preferência por afastamento do próprio pico: seleção disruptiva |
 
+A gaussiana e a sigmoide são as duas curvas do desenho de 2025, ali chamadas
+pelo efeito que produzem: seleção estabilizadora e seleção direcional. A
+aleatória e a disruptiva foram acrescentadas neste período, como descrito no
+item 1 acima.
+
 Nas figuras deste relatório as quatro levam sempre as mesmas cores: cinza a
 aleatória, amarelo a gaussiana, verde a sigmoide e roxo a disruptiva.
 

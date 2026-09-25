@@ -176,12 +176,12 @@ REMENDOS <- list(
   # --- os níveis que cada estudo visita ------------------------------
   list(
     de = paste0(
-      "Os dois sigmas se cruzam por inteiro apenas no Controle. No Estudo 2 σp percorre\n",
+      "Os dois sigmas se cruzam por inteiro apenas no Controle (Estudo 1). No Estudo 2 σp percorre\n",
       "os sete níveis e σz é condição inicial fixada em 1.0; no Estudo 3 é o espelho.\n",
       "No Estudo 4 os dois são condição inicial, com três níveis cada, 0.5, 1.0 e 2.0.\n"
     ),
     para = paste0(
-      "Os dois sigmas se cruzam por inteiro apenas no Controle. No Estudo 2 σp percorre\n",
+      "Os dois sigmas se cruzam por inteiro apenas no Controle (Estudo 1). No Estudo 2 σp percorre\n",
       "os sete níveis e σz é condição inicial fixada em 1.0.\n"
     )
   ),
