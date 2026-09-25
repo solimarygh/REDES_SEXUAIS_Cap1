@@ -20,6 +20,7 @@
 #   - a regra de escolha da réplica (escolher_replica, rede_representativa)
 #   - o motor de acasalamento (01_metricas_e_utilitarios.R)
 #   - as fases (Fase_Controle.R, Fase_Espelho.R, Fase_Coevolucao.R)
+#   - o que é passado ao motor na reconstrução, como o regime de censo
 #
 # Na dúvida, não rode: recalcular custa tempo, desenhar a rede errada custa o
 # relatório.

@@ -49,12 +49,12 @@ ESTUDOS <- list(
       k_fixo          = c(5L, 10L, 20L),
       selecao_natural = c(TRUE, FALSE),
       replica         = 1:20),
-    rodar = function(cen, gen) simulate_controle(
+    rodar = function(cen, gen, regime = "teto") simulate_controle(
       N_machos = 200, N_femeas = 200,
       tipo_selecao = as.character(cen$tipo_selecao), sigma_p = cen$sigma_p,
       sigma_z = cen$sigma_z, encounters_n = cen$encounters_n,
       k_fixo = cen$k_fixo, selecao_natural = cen$selecao_natural,
-      return_details = TRUE)),
+      regime_censo = regime, return_details = TRUE)),
 
   "2" = list(
     nome = "Fêmeas variando", seed_base = 2026, geracoes = 100L,
@@ -66,11 +66,12 @@ ESTUDOS <- list(
       k_fixo          = c(5L, 10L, 20L),
       selecao_natural = c(TRUE, FALSE),
       replica         = 1:20),
-    rodar = function(cen, gen) simulate_evolution(
+    rodar = function(cen, gen, regime = "teto") simulate_evolution(
       generations = 100, N_machos = 200, N_femeas = 200,
       tipo_selecao = as.character(cen$tipo_selecao), sigma_p = cen$sigma_p,
       encounters_n = cen$encounters_n, k_fixo = cen$k_fixo,
-      selecao_natural = cen$selecao_natural, return_details = gen)),
+      selecao_natural = cen$selecao_natural, regime_censo = regime,
+      return_details = gen)),
 
   "3" = list(
     nome = "Machos variando", seed_base = 2028, geracoes = 100L,
@@ -82,11 +83,12 @@ ESTUDOS <- list(
       k_fixo          = c(5L, 10L, 20L),
       selecao_natural = c(TRUE, FALSE),
       replica         = 1:20),
-    rodar = function(cen, gen) simulate_espelho(
+    rodar = function(cen, gen, regime = "teto") simulate_espelho(
       generations = 100, N_machos = 200, N_femeas = 200,
       tipo_selecao = as.character(cen$tipo_selecao), sigma_z = cen$sigma_z,
       sigma_p_init = 1.0, encounters_n = cen$encounters_n, k_fixo = cen$k_fixo,
-      selecao_natural = cen$selecao_natural, return_details = gen)),
+      selecao_natural = cen$selecao_natural, regime_censo = regime,
+      return_details = gen)),
 
   # A metade SEM seleção natural, que é a que está fechada. A grade tem de ser a
   # do arquivo lido: COEVO_NS=sem gera só selecao_natural = FALSE.
@@ -102,12 +104,12 @@ ESTUDOS <- list(
       k_fixo          = c(5L, 10L, 20L),
       selecao_natural = FALSE,
       replica         = 1:20),
-    rodar = function(cen, gen) simulate_coevolucao(
+    rodar = function(cen, gen, regime = "teto") simulate_coevolucao(
       generations = 100, tipo_selecao = as.character(cen$tipo_selecao),
       sigma_p_init = cen$sigma_p_init, sigma_z_init = cen$sigma_z_init,
       encounters_n = cen$encounters_n, k_fixo = cen$k_fixo,
       selecao_natural = cen$selecao_natural, segregacao = "genica",
-      return_details = gen))
+      regime_censo = regime, return_details = gen))
 )
 
 # ---------------------------------------------------------------------
@@ -213,6 +215,15 @@ dados_do_estudo <- function(estudo) {
   cota <- juntar(todos[eh_cota])
   teto <- juntar(todos[!eh_cota])
 
+  # Cada linha leva o regime de censo sob o qual foi produzida. Sem isto, a
+  # reconstrução rodava sempre com o default do motor, que é "teto", e as
+  # réplicas da cota não se reproduziam: a métrica saía diferente da guardada,
+  # a verificação recusava a rede e a figura vinha vazia. Só se notava na metade
+  # COM seleção natural, porque sem ela os dois regimes dão o mesmo resultado -
+  # o código nem chega à parte da cota.
+  if (!is.null(cota)) cota$regime_censo <- "cota"
+  if (!is.null(teto)) teto$regime_censo <- "teto"
+
   df <- if (is.null(cota)) teto else if (is.null(teto)) cota else {
     bind_rows(cota, teto[!(teto$selecao_natural %in% unique(cota$selecao_natural)), , drop = FALSE])
   }
@@ -242,7 +253,9 @@ rede_representativa <- function(estudo, ..., metrica = "Modularity",
   chave <- paste(estudo, metrica,
                  paste(names(list(...)), unlist(list(...)), sep = "=", collapse = ","),
                  paste0("gen:", if (is.null(geracao)) "" else geracao),
-                 paste0("cap:", paste(capturar, collapse = "+")), sep = "|")
+                 paste0("cap:", paste(capturar, collapse = "+")),
+                 "v2-regime",   # entradas gravadas antes do regime_censo não servem
+                 sep = "|")
   if (!is.null(.cache_redes[[chave]])) {
     if (verboso) cat("  (do cache) ", chave, "\n", sep = "")
     return(.cache_redes[[chave]])
@@ -321,8 +334,12 @@ rede_representativa <- function(estudo, ..., metrica = "Modularity",
 
   alvos <- if (is.null(capturar)) gen else sort(unique(c(as.integer(capturar), gen)))
   semente <- e$seed_base + linha$idx_global
+  # O regime é o da réplica escolhida, e não um default: é ele que decide se os
+  # 200 machos adultos são o que sobrou da viabilidade (teto) ou um sorteio
+  # ponderado por ela (cota), e os dois dão populações diferentes.
+  regime <- if (!is.null(escolha$regime_censo)) as.character(escolha$regime_censo) else "teto"
   set.seed(semente)
-  res <- e$rodar(linha, alvos)
+  res <- e$rodar(linha, alvos, regime)
   pegar <- function(g) if (!is.null(res$rede)) res$rede else res[[paste0("gen", g)]]
   rede  <- pegar(gen)
   if (is.null(rede)) {
