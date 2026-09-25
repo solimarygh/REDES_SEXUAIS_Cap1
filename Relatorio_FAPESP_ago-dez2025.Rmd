@@ -256,7 +256,7 @@ anexo de metodologia:
 3. **Dois fatores ecológicos foram acrescentados ao desenho.** $A_{max}$ representa
    o custo de procurar parceiro, e k é o número máximo de parceiros que cada
    fêmea pode aceitar. Nenhum dos dois estava no modelo de 2025, e nos
-   resultados o regime de busca acabou sendo o nível que mais pesa.
+   resultados o regime de busca é o fator que mais pesa.
 
 4. **A regulação populacional foi declarada explicitamente.** Os 200 machos
    adultos são a capacidade de suporte do ambiente, e a viabilidade decide quais
@@ -353,24 +353,18 @@ seguir.
 
 Este estudo corresponde à primeira fase do relatório anterior, e responde à
 pergunta mais básica do conjunto: que estrutura as curvas de preferência
-produzem por si só, antes de qualquer resposta evolutiva? Nenhuma
-característica é herdada, os traços e as preferências são sorteados, a rede de
+produzem por si só, antes de qualquer resposta evolutiva? Neste estudo, nem a
+preferência da fêmea nem a característica do macho que está sob seleção sexual
+são herdáveis: os traços e as preferências são sorteados, a rede de
 acasalamentos se forma, as métricas são medidas, e o cenário termina.
 
 #### Ampliação do desenho experimental
 
 O desenho de 2025 cruzava cinco valores de dispersão da preferência com dois
 tipos de seleção, com 100 réplicas por combinação, e mantinha a dispersão do
-traço masculino implícita. O desenho atual cruza, por inteiro:
-
-| fator | níveis |
-|---|---|
-| curva de preferência | aleatória, gaussiana, sigmoide, disruptiva |
-| σp | 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0 |
-| σz | 0.2, 0.5, 0.8, 1.0, 1.2, 1.5, 2.0 |
-| $A_{max}$, machos avaliados | 200, 40, 10 |
-| k, parceiros aceitos | 5, 10, 20 |
-| seleção natural | ligada, desligada |
+traço masculino implícita. O desenho atual cruza por inteiro os seis fatores da
+tabela apresentada acima, na descrição do desenho experimental, e entre eles
+estão os dois que não existiam em 2025: o custo de busca e o teto de parceiros.
 
 ```{r n-cenarios-ct, results='asis'}
 if (ok(ct)) cat(sprintf(
@@ -378,10 +372,10 @@ if (ok(ct)) cat(sprintf(
   n_cen(ct, c("sigma_p", "sigma_z"))))
 ```
 
-O número de réplicas por combinação passou de 100 a 20, e a razão é deliberada:
-os efeitos em questão são grandes e sistemáticos, não limitados por ruído
-amostral, e o orçamento computacional rende mais ao cobrir o espaço de
-parâmetros do que ao repetir a mesma combinação. O ganho é que σp e σz passam a
+O número de réplicas por combinação passou de 100 a 20 porque os efeitos em
+questão são grandes e sistemáticos, não limitados por ruído amostral, e o
+orçamento computacional rende mais ao cobrir o espaço de parâmetros do que ao
+repetir a mesma combinação. O ganho é que σp e σz passam a
 ser cruzados por inteiro, de modo que se observam combinações extremas, como
 fêmeas muito homogêneas diante de machos muito variados, que o desenho anterior
 nunca visitava.
@@ -531,9 +525,9 @@ if (is.null(est1)) {
 }
 ```
 
-Isso reorienta a pergunta original do projeto. Não é quanta variação existe na
-preferência o que determina a estrutura da rede, e sim de que lado da interação
-essa variação está.
+O resultado reorienta a pergunta original do projeto: a estrutura da rede é
+determinada menos pela quantidade de variação na preferência do que pelo lado da
+interação em que essa variação está.
 
 ##### Distribuição da divergência no plano σp × σz
 
@@ -596,12 +590,12 @@ usado é o NODF de Almeida-Neto et al. (2008), calculado com o pacote bipartite
 al. 2008), e ela e a centralização são calculadas com o igraph (Csardi & Nepusz
 2006).
 
-> Este relatório apresenta os resultados principais do Estudo 1. Os painéis
-> completos, nas dezoito combinações de $A_{max}$, k e seleção natural, estão na
-> seção *1. Controle* do *Material suplementar*: as redes de uma combinação
-> concreta na 1.0, a superfície das quatro métricas de estrutura na 1.1, e o
-> acesso ao acasalamento visto do lado das fêmeas e do lado dos machos na 1.2 e
-> na 1.3.
+> Este relatório apresenta os resultados principais do Estudo 1. O *Material
+> suplementar*, na seção *1. Controle*, traz as redes desenhadas nos quatro
+> cantos do plano σp × σz (seção 1.0) e, percorrendo as dezoito combinações de
+> $A_{max}$, k e seleção natural, a superfície das quatro métricas de estrutura
+> (1.1) e o acesso ao acasalamento visto do lado das fêmeas e do lado dos machos
+> (1.2 e 1.3).
 
 ### Estudo 2: a evolução do traço masculino
 
@@ -669,11 +663,12 @@ que essa curva precisa ser apresentada como distribuição, e a bimodalidade
 tratada como resultado e não como variabilidade.
 
 > Como no Estudo 1, os painéis completos estão no *Material suplementar*, na
-> seção *2. Fêmeas variando*: o efeito de σp sobre uma população concreta na
-> 2.0, as métricas de rede na 2.1, a média e a variância do traço masculino na
-> 2.2 e a poliandria realizada na 2.3. Cada painel traz, além do corte na
-> geração 100, a trajetória ao longo das cem gerações nos dois extremos do
-> gradiente de σp.
+> seção *2. Fêmeas variando*. A seção 2.0 desenha as duas pontas do gradiente de
+> σp, na geração 1 e na geração 100, para ver o que cem gerações fazem com a
+> rede e com os indivíduos que a formam. As seções 2.1, 2.2 e 2.3 trazem as
+> métricas de rede, a média e a variância do traço masculino e a poliandria
+> realizada, cada uma com o corte na geração 100 ao longo do gradiente e a
+> trajetória das cem gerações nos dois extremos dele.
 
 
 # 2.4 Plano de Gestão de Dados
