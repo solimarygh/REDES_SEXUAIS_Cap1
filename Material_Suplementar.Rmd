@@ -1207,11 +1207,11 @@ vale entendê-la uma vez:
 - **Colunas 2 e 3** são trajetórias. No eixo horizontal está a geração, de 1 a
   100. Cada uma mostra um dos dois valores extremos de σp, 0.2 à esquerda e
   2.0 à direita, com a média das réplicas e uma sombra de um desvio.
-  Respondem: como a população chegou até lá, e se chegou a um valor estável ou
-  ainda estava se movendo na geração 100.
+  Respondem: que trajetória produziu esse valor, e se ele estava estável ou
+  ainda mudando na geração 100.
 
-Ou seja, a coluna 1 é o destino ao longo de todo o gradiente, e as colunas 2 e 3
-são o caminho, nos dois extremos dele. As linhas são as quatro curvas de
+Ou seja, a coluna 1 dá o valor final ao longo de todo o gradiente, e as colunas
+2 e 3 dão a trajetória que o produziu, nos dois valores extremos. As linhas são as quatro curvas de
 preferência, com a mesma cor e o mesmo tipo de traço em todo o documento.
 
 ## 2.0 O efeito de σp sobre uma população
@@ -1267,8 +1267,8 @@ controle: com P = 0.5 para qualquer par, σp não tem por onde produzir efeito.
 ## 2.1 Métricas de rede {.tabset}
 
 As quatro métricas de estrutura da rede. Na coluna 1, o valor de cada uma na
-geração 100 ao longo do gradiente de σp; nas colunas 2 e 3, como cada uma
-chegou até ali, com σp = 0.2 e com σp = 2.0.
+geração 100 ao longo do gradiente de σp; nas colunas 2 e 3, a trajetória das cem
+gerações que produziu esse valor, com σp = 0.2 e com σp = 2.0.
 
 ```{r fem-metricas, results='asis', fig.width=13, fig.height=9}
 if (!ok(d)) cat("\n*Sem dados. Rode `Fase4_TodasAsCurvas.R`.*\n") else
@@ -1281,8 +1281,8 @@ render_tabs(function(kk, amax, ns)
 
 O traço é a variável evolutiva deste estudo, e as duas linhas de painéis mostram
 a sua média e a sua variância. Na coluna 1, os valores na geração 100 ao longo
-do gradiente de σp; nas colunas 2 e 3, as cem gerações que levaram até ali, com
-σp = 0.2 e com σp = 2.0.
+do gradiente de σp; nas colunas 2 e 3, a trajetória das cem gerações que produziu
+esses valores, com σp = 0.2 e com σp = 2.0.
 
 Dois aspectos merecem atenção. Sem seleção natural, a média do traço se desloca
 bem além do ótimo ecológico, que é 5, porque nada se opõe à seleção sexual.
@@ -1408,8 +1408,8 @@ for (cv in CURVAS) {
 ## 3.1 Métricas de rede {.tabset}
 
 As mesmas quatro métricas da seção 2.1, agora contra σz. Na coluna 1, o valor de
-cada uma na geração 100 ao longo do gradiente; nas colunas 2 e 3, como cada uma
-chegou até ali, com σz = 0.2 e com σz = 2.0.
+cada uma na geração 100 ao longo do gradiente; nas colunas 2 e 3, a trajetória
+das cem gerações que produziu esse valor, com σz = 0.2 e com σz = 2.0.
 
 ```{r mac-metricas, results='asis', fig.width=13, fig.height=9}
 if (!ok(esp)) cat("\n*Sem dados. Rode `Fase_Espelho.R`.*\n") else
@@ -1426,7 +1426,8 @@ no sexo que a expressa, aqui a característica medida no sexo que a utiliza. As
 duas figuras se leem em paralelo.
 
 Na coluna 1, os valores na geração 100 ao longo do gradiente de σz; nas colunas
-2 e 3, as cem gerações que levaram até ali, com σz = 0.2 e com σz = 2.0.
+2 e 3, a trajetória das cem gerações que produziu esses valores, com σz = 0.2 e
+com σz = 2.0.
 
 ```{r mac-pref, results='asis', fig.width=13, fig.height=5.5}
 if (!ok(esp)) cat("\n*Sem dados.*\n") else
@@ -1531,8 +1532,8 @@ grade. Ou seja, para este estudo a projeção sobre a grade do Controle é a mai
 fraca das quatro, porque as populações da geração 100 já não se parecem com
 nenhuma combinação do Controle, por mais que caiam sobre a mesma posição.
 
-A seção 5.2 resolve isso por outro caminho: em vez de comparar a Co-evolução com
-o Controle, compara-a consigo mesma, traçando o caminho de cada combinação
+A seção 5.2 resolve isso de outra maneira: em vez de comparar a Co-evolução com
+o Controle, compara-a consigo mesma, traçando a trajetória de cada combinação
 inicial no plano ao longo das cem gerações. Nenhuma das duas ressalvas se aplica
 lá, e é a figura a usar para este estudo.
 
@@ -1888,8 +1889,8 @@ O que se lê aqui e não nas fotos é a direção do movimento, e se as nove
 combinações convergem para a mesma região do plano ou guardam a memória de onde
 partiram. As duas leituras têm consequências diferentes: convergência significa
 que a condição inicial não importa no longo prazo, e é o que se esperaria se
-houvesse um equilíbrio; caminhos que se mantêm separados significam que o ponto
-de partida determina o destino.
+houvesse um equilíbrio; trajetórias que se mantêm separadas significam que a
+condição inicial determina o estado final.
 
 ## 5.3 As trajetórias ao longo das cem gerações
 
