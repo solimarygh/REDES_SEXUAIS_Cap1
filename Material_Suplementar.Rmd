@@ -1205,8 +1205,8 @@ vale entendê-la uma vez:
   linha é um loess. Responde: depois de cem gerações, onde a população acaba,
   em função da dispersão dos picos de preferência?
 - **Colunas 2 e 3** são trajetórias. No eixo horizontal está a geração, de 1 a
-  100. Cada uma mostra uma das duas pontas do gradiente, σp = 0.2 à esquerda e
-  σp = 2.0 à direita, com a média das réplicas e uma sombra de um desvio.
+  100. Cada uma mostra um dos dois valores extremos de σp, 0.2 à esquerda e
+  2.0 à direita, com a média das réplicas e uma sombra de um desvio.
   Respondem: como a população chegou até lá, e se chegou a um valor estável ou
   ainda estava se movendo na geração 100.
 
@@ -1217,15 +1217,15 @@ preferência, com a mesma cor e o mesmo tipo de traço em todo o documento.
 ## 2.0 O efeito de σp sobre uma população
 
 O eixo deste estudo é simples de enunciar e difícil de visualizar. A figura
-abaixo tem quatro colunas: as duas primeiras são as duas pontas do gradiente na
-geração 1, σp = 0.2 e σp = 2.0, e as duas seguintes as mesmas duas pontas na
-geração 100, depois de o traço masculino ter evoluído. Ela se lê em duas
+abaixo tem quatro colunas: as duas primeiras são σp = 0.2 e σp = 2.0 na geração
+1, e as duas seguintes os mesmos dois valores na geração 100, depois de o traço
+masculino ter evoluído. Ela se lê em duas
 direções: dentro de cada par, o efeito de σp; de um par para o outro, o efeito
 de cem gerações de seleção.
 
 As quatro colunas vêm de réplicas reais das rodadas, e o rodapé identifica
-cada uma. As duas pontas do gradiente são rodadas distintas, de modo que os
-machos não são os mesmos indivíduos nas duas; na geração 1, porém, eles são
+cada uma. Os dois valores de σp são rodadas distintas, de modo que os machos
+não são os mesmos indivíduos nas duas; na geração 1, porém, eles são
 sorteados da mesma distribuição em ambas, com σz fixado em 1.0, e é por isso que
 a comparação entre elas isola σp. Os eixos são comuns às quatro colunas, sem o
 que a fuga do traço não se veria.
@@ -1306,7 +1306,7 @@ render_tabs(function(kk, amax, ns)
 
 As mesmas quatro variáveis de acesso ao acasalamento da seção 1.3, agora com
 evolução. Na coluna 1, o valor de cada uma na geração 100 ao longo do gradiente
-de σp; nas colunas 2 e 3, a trajetória nos dois extremos do gradiente.
+de σp; nas colunas 2 e 3, a trajetória em σp = 0.2 e em σp = 2.0.
 
 Aqui as colunas 2 e 3 dizem algo que a coluna 1 não mostra: se o acesso ao
 acasalamento se manteve estável ao longo das cem gerações ou se mudou enquanto

@@ -663,8 +663,8 @@ que essa curva precisa ser apresentada como distribuição, e a bimodalidade
 tratada como resultado e não como variabilidade.
 
 > Como no Estudo 1, os painéis completos estão no *Material suplementar*, na
-> seção *2. Fêmeas variando*. A seção 2.0 desenha as duas pontas do gradiente de
-> σp, na geração 1 e na geração 100, para ver o que cem gerações fazem com a
+> seção *2. Fêmeas variando*. A seção 2.0 desenha σp = 0.2 e σp = 2.0, na
+> geração 1 e na geração 100, para ver o que cem gerações fazem com a
 > rede e com os indivíduos que a formam. As seções 2.1, 2.2 e 2.3 trazem as
 > métricas de rede, a média e a variância do traço masculino e a poliandria
 > realizada, cada uma com o corte na geração 100 ao longo do gradiente e a

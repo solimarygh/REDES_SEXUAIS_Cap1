@@ -901,8 +901,16 @@ figura_mecanismo_geracoes <- function(estudo = c("2", "3", "4"),
       title = sprintf("%s, preferência %s: %s",
                       nome_estudo, labels_curva(tipo),
                       if (length(celulas) > 1)
-                        "as duas pontas do gradiente, na geração 1 e cem gerações depois"
-                      else "a mesma população, cem gerações depois"),
+                        # O valor, e não "as duas pontas do gradiente": num título
+                        # de figura o leitor precisa saber em que ponto está.
+                        sprintf("%s = %s, na geração 1 e na geração %d",
+                                bonito[[mult]],
+                                paste(vapply(celulas, function(cc)
+                                  format(cc[[mult]], trim = TRUE, nsmall = 1),
+                                  character(1)), collapse = " e "),
+                                as.integer(geracoes))
+                      else sprintf("a mesma população na geração 1 e na geração %d",
+                                   as.integer(geracoes))),
       subtitle = sprintf("%s\n%s\n%s", o_que_anda, linha_celula, replicas_txt),
       caption = paste0(
         "Linha 1: a rede de acasalamentos. Quadrados: machos.  Círculos: fêmeas.  Cores: comunidades do Louvain.  Cinza: sem acasalar.\n",
