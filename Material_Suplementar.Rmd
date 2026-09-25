@@ -680,6 +680,10 @@ as fêmeas quererem coisas diferentes em média.
 | [**sigmoide**]{style="color:#3BA273"} | `P = 1 / (1 + exp(-s (z - p)))` | quanto maior o traço, maior o aceite: seleção direcional |
 | [**disruptiva**]{style="color:#9932CC"} | `P = 1 - exp(-s (z - p)²)` | preferência por afastamento do próprio pico: seleção disruptiva |
 
+A gaussiana e a sigmoide já estavam no desenho anterior do projeto, ali
+designadas pelo efeito que produzem: seleção estabilizadora e seleção
+direcional. A aleatória e a disruptiva foram acrescentadas.
+
 Essas cores identificam as quatro curvas em todas as figuras do documento.
 
 A curva aleatória cumpre a função de controle. Nela a fêmea aceita qualquer
