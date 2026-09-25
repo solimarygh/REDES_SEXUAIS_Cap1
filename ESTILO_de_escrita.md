@@ -8,6 +8,12 @@ A primeira seção é para colar num pedido. A segunda tem os exemplos, para
 consultar quando a regra não estiver clara. A terceira é a varredura mecânica,
 para conferir antes de entregar.
 
+**É um arquivo vivo.** Cada correção de estilo nova entra aqui, com o exemplo
+concreto do que estava escrito e do que ficou, em vez de ser só aplicada ao
+texto. O que dá valor a este arquivo não são as regras, que são quase óbvias
+enunciadas assim, e sim os exemplos: é neles que se reconhece o defeito quando
+ele aparece outra vez com outra roupa.
+
 ---
 
 ## 1. O pedido, para colar
